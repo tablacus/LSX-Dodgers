@@ -1,0 +1,175 @@
+
+;	LSX-Dodgers DPB
+
+DEVICE:
+
+;	A:
+
+!FATLN:	DB	2
+!FATID:	DB	$FD
+!DRDC	DW	_FDRD
+!DWTC	DW	_FDWT
+!ADDCL:	DW	$2908	;H($29=512,0=1024)L=CLADD
+!MAXCL:	DW	356
+!FDMODE:DB	$FF	;$FF=2D	$FE=2HD
+!MAXDIR:DB	12
+!MAXCYL:DB	40
+!MAXSEC:DB	9	;Number of sectors
+!FATPS:	DB	1
+!FATS:	DB	2
+!DIRPS:	DB	5
+!MINSEC:DB	1	;Minimum sector
+!DEVNO:	DB	$87	;Device Number
+!UNITNO:DB	0
+	DW	0
+!GNCL:	DW	GNCL
+!SNCL:	DW	SNCL
+!SDIR:	DW	0
+!NAME:	DB	"FDD0"
+
+;	B:
+
+	DB	2
+	DB	$FD
+	DW	_FDRD
+	DW	_FDWT
+	DW	$2908	;H($29=512,0=1024)L=CLADD
+	DW	356
+	DB	$FF	;$FF=2D	$FE=2HD
+	DB	12
+	DB	40
+	DB	9
+	DB	1
+	DB	2
+	DB	5
+	DB	1
+	DB	$87	;Device Number
+	DB	1
+	DW	0
+	DW	GNCL
+	DW	SNCL
+	DW	0
+	DB	"FDD1"
+
+;	C:
+
+	DB	2
+	DB	$FD
+	DW	_FDRD
+	DW	_FDWT
+	DW	$2908	;H($29=512,0=1024)L=CLADD
+	DW	356
+	DB	$FF	;$FF=2D	$FE=2HD
+	DB	12
+	DB	40
+	DB	9
+	DB	1
+	DB	2
+	DB	5
+	DB	1
+	DB	$87	;Device Number
+	DB	2
+	DW	0
+	DW	GNCL
+	DW	SNCL
+	DW	0
+	DB	"FDD2"
+
+;	D:
+
+	DB	2
+	DB	$FD
+	DW	_FDRD
+	DW	_FDWT
+	DW	$2908	;H($29=512,0=1024)L=CLADD
+	DW	356
+	DB	$FF	;$FF=2D	$FE=2HD
+	DB	12
+	DB	40
+	DB	9
+	DB	1
+	DB	2
+	DB	5
+	DB	1
+	DB	$87	;Device Number
+	DB	3
+	DW	0
+	DW	GNCL
+	DW	SNCL
+	DW	0
+	DB	"FDD3"
+
+;	E:
+
+EMMFL:	DB	0
+	DB	$FE
+EMMRD:	DW	EDRDC
+EMMWR:	DW	EDWTC
+	DW	9
+EMMCL:	DW	0
+	DB	0
+	DB	11
+EMMBL:	DB	0
+	DB	1
+	DB	1
+	DB	1
+	DB	5
+	DB	1
+	DB	6	;Device Number
+EMMDV:	DB	0
+	DW	0
+	DW	GNCL
+	DW	SNCL
+	DW	0
+	DB	"EMM0"
+
+;	F:
+
+BANKFL:	DB	0
+	DB	$F9
+	DW	BDRDC
+	DW	BDWTC
+	DW	3
+BANKCL:	DW	0
+	DB	0
+	DB	5
+	DB	0
+	DB	1
+	DB	0
+	DB	1
+	DB	1
+	DB	1
+	DB	$0B	;Device Number
+	DB	0
+	DW	0
+	DW	GNCL
+	DW	SNCL
+	DW	0
+	DB	"BRAM"
+
+;	G:
+
+	DB	1
+	DB	$F9
+	DW	GDRDC
+	DW	GDWTC
+	DW	0
+	DW	48
+	DB	0
+	DB	2
+	DB	0
+	DB	1
+	DB	0
+	DB	1
+	DB	1
+	DB	1
+	DB	5	;Device Number
+	DB	1
+	DW	0
+	DW	GNCL
+	DW	SNCL
+	DW	0
+	DB	"GRAM"
+
+	DS	32,0
+
