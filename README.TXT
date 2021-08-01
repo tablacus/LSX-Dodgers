@@ -29,6 +29,9 @@ LSX-Dodgersは超多機能マクロアブソリュートアセンブラOHM-Z80�
 Zephyr1969さん、ありがとうございます。
 https://github.com/tablacus/LSX-Dodgers/issues/3
 
+ZASMのバージョンは、Vectorの下記から手に入る1.64です。
+https://www.vector.co.jp/soft/dos/prog/se010314.html
+
 ●ライセンス
 
 MIT License
