@@ -25,6 +25,9 @@ https://tablacus.github.io/LSX-Dodgers/
 ●アセンブラ
 LSX-Dodgersは超多機能マクロアブソリュートアセンブラOHM-Z80を使用しています。
 
+フォルダ zasm にあるソースは ZASM.COM/ZASM.EXE用にコンバートされています。
+Zephyr1969さん、ありがとうございます。
+https://github.com/tablacus/LSX-Dodgers/issues/3
 
 ●ライセンス
 
