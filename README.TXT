@@ -32,6 +32,15 @@ https://github.com/tablacus/LSX-Dodgers/issues/3
 ZASMのバージョンは、Vectorの下記から手に入る1.64です。
 https://www.vector.co.jp/soft/dos/prog/se010314.html
 
+64ビットのWindowsでアセンブルする場合はMS-DOS Player for Win32-x64などMS-DOSを実行させるソフトが必要です。
+http://takeda-toshiya.my.coocan.jp/msdos/
+
+MS-DOSや32ビットのWindowsの場合は以下のコマンドでアセンブルします。(ASM.BATを使用してもらってOKです)
+zasm LD.ASM -CLD.BIN
+
+64ビットのWindowsの場合は以下のコマンドでアセンブルします。(WIN64.BATを使用してもらってOKです)
+msdos zasm LD.ASM -CLD.BIN
+
 ●ライセンス
 
 MIT License

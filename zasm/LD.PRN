@@ -6,6 +6,15 @@
                       	
   C600                	RUN	EQU	0C600h
                       	
+                      	;	MSX BINARY HEADER
+  0000  FE            		DB	0FEh
+                      	;	MSX BINARY START ADDRESS
+  0001  00C6          		DW	RUN
+                      	;	MSX BINARY END ADDRESS
+  0003  E0ED          		DW	LDEND
+                      	;	MSX BINARY EXEC ADDRESS
+  0005  00C6          		DW	RUN
+                      	
                       	;	OFFSET	08000h-RUN	;BA00H?
   C600                		ORG	RUN		;C600H
                       	
@@ -6653,9 +6662,9 @@
   EDDA  0000          		DW	0
   EDDC  4752414D      		DB	'GRAM'
                       	
-                      	;	H:(Reserved?) (0EDE0H-0EDEFH)
+                      	;	(0EDE0H)
                       	
-  EDE0                		DS	32
+  EDE0  00            	LDEND:	DB	0
                       	
-  EE00                		END
+  EDE1                		END
 
