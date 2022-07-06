@@ -530,8 +530,7 @@ AUTODV:	DB	"A:",0
 INIMES:	DB	"¥LSX-Dodgers for X1/turbo version "
 	DB	"0"+VER/256(MOD)16,"."
 	DB	"0"+VER/16(MOD)16,"0"+VER(MOD)16
-	DB	$0D,$0A
-	DB	"¥by Gaku Nakagawa as Larn M.R.(Lovers)",$0D,$0A
+	DB	' Gaku (Lovers/Tablacus)',0DH,0AH
 	DB	0
 
 C8025H:	DB	$6B,$50,$59,$88,$1B,$01,$19,$1A

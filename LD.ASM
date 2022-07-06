@@ -1,6 +1,6 @@
 ;	LSX-Dodgers for X1/turbo/Z
 ;	Programmed by
-;	Gaku Nakagawa as Larn M.R.(Lovers)
+;	Gaku (Lovers/Tablacus)
 
 RUN	EQU	$C600
 
@@ -8,7 +8,7 @@ RUN	EQU	$C600
 	ORG	RUN
 
 MAC	EQU	$1D80		;X1
-VER	EQU	$0123
+VER	EQU	$0124
 
 	$INCLUDE	LDDEF
 	$INCLUDE	LDINIT

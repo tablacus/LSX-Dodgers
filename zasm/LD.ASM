@@ -1,7 +1,7 @@
 .Z80
 ;	LSX-Dodgers for X1/turbo/Z
 ;	Programmed by
-;	Gaku Nakagawa as Larn M.R.(Lovers)
+;	Gaku (Lovers/Tablacus)
 
 RUN	EQU	0C600h
 
@@ -18,7 +18,7 @@ RUN	EQU	0C600h
 	ORG	RUN		;C600H
 
 MAC	EQU	01D80h		;X1
-VER	EQU	00123h
+VER	EQU	00124h
 
 ;
 ;	$INCLUDE	LDDEF
@@ -603,9 +603,8 @@ INIMES:
 	DB	0A5h, 'LSX-Dodgers for X1/turbo version '
 ;	DB	'0'+VER/256(MOD)16,'.'			;‚È‚º‚©‚¤‚Ü‚­“®‚©‚È‚¢
 ;	DB	'0'+VER/16(MOD)16,'0'+VER(MOD)16	;‚È‚º‚©‚¤‚Ü‚­“®‚©‚È‚¢
-	DB	'1.23'
-	DB	0DH,0AH
-	DB	0A5h, 'by Gaku Nakagawa as Larn M.R.(Lovers)',0DH,0AH
+	DB	'1.24'
+	DB	' Gaku (Lovers/Tablacus)',0DH,0AH
 	DB	0
 
 C8025H:
@@ -2734,10 +2733,8 @@ BREAK2X:
 	RET
 
 BREAK2:
-	PUSH	BC
-	LD	BC,1A01H
-	IN	A,(C)
-	POP	BC
+	LD	A,01AH
+	IN	A,(1)
 	RRCA
 	RET	C
 	POP	BC		;PC
@@ -3298,6 +3295,8 @@ CONST:
 _SYS07:
 CONIN:
 	JP	FLGET
+CONOUT0:
+	JP	CONOUT
 CONOUT:
 	CALL	CURSOR
 	LD	E,C

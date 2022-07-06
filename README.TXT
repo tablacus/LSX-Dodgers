@@ -1,5 +1,4 @@
-﻿・LSX-Dodgers for X1/turbo version 1.23
-・by Gaku
+﻿・LSX-Dodgers for X1/turbo version 1.24 Gaku (Lovers/Tablacus)
 
 A>■
 
@@ -161,3 +160,10 @@ FCBのオープンモードを+24から+28へ移動した。
 まらなくなるバグをfix
 CP/M互換のBIOSコールのCONOUTで表示するレジスタが間違っ
 ていたのを直した。
+
+1.24    2022. 7. 6
+teというCP/M用のエディタで動くようにCONOUTをジャンプに変更
+ひろし@H.O SOFTさん、すーぱーたーぼさん情報ありがとうございました。
+
+teはFloppySoftwareのCP/M Projectsに存在します。
+http://www.floppysoftware.es/
