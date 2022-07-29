@@ -23,8 +23,10 @@ https://tablacus.github.io/LSX-Dodgers/
 
 ●アセンブラ
 LSX-Dodgersは超多機能マクロアブソリュートアセンブラOHM-Z80を使用しています。
+ASM.BAT,64ビットのWindowsの場合はWIN64.BATを使用するとZASM.COM/ZASM.EXEでアセンブルできます。
+※OHM-Z80とZASM.COM/ZASM.EXEの両方でアセンブルできるようにソースを調整しました。
 
-フォルダ zasm にあるソースは ZASM.COM/ZASM.EXE用にコンバートされています。
+また、フォルダ zasm にあるソースは ZASM.COM/ZASM.EXE用にコンバートされています。
 Zephyr1969さん、ありがとうございます。
 https://github.com/tablacus/LSX-Dodgers/issues/3
 
