@@ -146,7 +146,11 @@ NCL3:
 	LD	H,D
 	SRL	H
 	RR	L
+	RRA
 	LD	BC,(_FATBF)
+	ADD	HL,DE
+	ADD	HL,BC
+	RLA
 	RET
 
 GNCL:
@@ -156,8 +160,6 @@ GNCL:
 	PUSH	HL
 	CALL	NCL3
 	JR	C,GNC1
-	ADD	HL,DE
-	ADD	HL,BC
 	LD	E,(HL)
 	INC	HL
 	LD	A,(HL)
@@ -167,8 +169,6 @@ GNCL:
 	POP	BC
 	RET
 GNC1:
-	ADD	HL,DE
-	ADD	HL,BC
 	LD	A,(HL)
 	INC	HL
 	LD	D,(HL)
@@ -195,40 +195,31 @@ SNCL:
 	PUSH	HL
 	PUSH	HL
 	CALL	NCL3
-	JR	C,SNC1
-	ADD	HL,DE
-	ADD	HL,BC
 	POP	DE
+;CF=ODD
+	LD	A,(HL)
 	LD	(HL),E
+	JR	C,SNC1
+;EVEN
+;M[0] = E
+;M[1] = (M[1] & 0xF0) | (D & 0x0F)
 	INC	HL
+	RRD		;M={A[3:0],E[3:0]}
 	LD	A,D
-	AND	00FH
-	LD	D,A
-	LD	A,(HL)
-	AND	0F0H
-	OR	D
-	LD	(HL),A
-	JR	SNC2
+	JR	SNC11
 SNC1:
-	ADD	HL,DE
-	ADD	HL,BC
-	POP	DE
-	EX	DE,HL
-	ADD	HL,HL
-	ADD	HL,HL
-	ADD	HL,HL
-	ADD	HL,HL
-	EX	DE,HL
-	LD	A,(HL)
-	AND	00FH
-	OR	E
-	LD	(HL),A
+;ODD
+;HL[0] = (HL[0]&0x0F) | (E<<4)
+;HL[1] = DE>>4
+	RLD		;M={D[3:0],E[7:4]}
 	INC	HL
-	LD	(HL),D
-SNC2:
+	LD	(HL),D	;M={D[3:0],E[7:4]}
+SNC11:
+	RLD		;M={M[7:4],D[3:0]}
 	POP	HL
 	POP	DE
 	POP	BC
+	OR	A
 	RET
 
 RDFAT0X:
@@ -457,33 +448,48 @@ WTFATL:
 	RET	C
 	DJNZ	WTFATL
 	RET
-
+;------------------------
+;FATのセットアップ
+;out
+;	B  : FATセクタ数
+;	DE : FAT先頭セクタ番号
+;	HL : FATバッファポインタ
+;	CF : 1=ドライブ切り替えエラー
+;note
+;	FATサイズがFATバッファを超える場合は
+;	対象クラスタ領域==(_FATDRV).bit7によって
+;	FATの前半3KBと後半3KBを切り替える
+;------------------------
 FATS:
 	LD	A,(_FATDRV)
-	CALL	CHGDRVR
+	CALL	CHGDRVR		;ドライブ切り替え
 	RET	C
 FATS2:
-	LD	DE,(_FATPS)
+	LD	DE,(_FATPS)	;fat sector pos
 	LD	HL,(_FATBF)
-	LD	B,(IX+0)
-	LD	A,6
+	LD	B,(IX+0)	;DPB.FATLN
+	LD	A,(IX+7)	;$29=512 / 0=1024
+	OR	A
+	LD	A,6		;3072 / 512 FATバッファに読み込めるクラスタ数
+	JR	NZ,FATS512
+	RRA			;A=3 (3072÷1024: 1クラスタ1024バイトの場合)
+FATS512:
 	CP	B
-	RET	NC
-	LD	A,(_FATDRV)
-	ADD	A,A
+	RET	NC		;DPB.FATS x sectorSize < fatBufSize
+;targetCluster
+	LD	C,A		;C = skipCount
+	LD	A,(_FATDRV)	;bit7 = (targetCluster >= 0x800)
+	ADD	A,A		;CF=(_FATDRV).bit7
 	JR	NC,FATS3
-	LD	A,B
-	SUB	6
-	LD	B,A
-	INC	DE
-	INC	DE
-	INC	DE
-	INC	DE
-	INC	DE
-	INC	DE
+;(targerCluster>=0x800)
+FAT_SKP:
+	INC	DE		;FATPS++
+	DEC	B		;FATSIZE--
+	DEC	C		;skipCnt--
+	JR	NZ,FAT_SKP
 	RET
 FATS3:
-	LD	B,6
+	LD	B,C		;3 or 6
 	XOR	A
 	RET
 
@@ -566,9 +572,19 @@ CHGDRV0:
 
 	POP	HL
 	POP	HL
+	LD	A,H
+	OR	L
+	JR	NZ,OGNCL
+	LD	HL,GNCL
+OGNCL:
 	LD	(_GNCL+1),HL
 
 	POP	HL
+	LD	A,H
+	OR	L
+	JR	NZ,OSNCL
+	LD	HL,SNCL
+OSNCL:
 	LD	(_SNCL+1),HL
 
 SPPAT2:	LD	SP,0

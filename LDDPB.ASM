@@ -22,8 +22,8 @@ _MINSEC_:	DB	1	;Minimum sector
 _DEVNO_:	DB	087H	;Device Number
 _UNITNO_:	DB	0
 		DW	0
-_GNCL_:		DW	GNCL
-_SNCL_:		DW	SNCL
+_GNCL_:		DW	0
+_SNCL_:		DW	0
 _SDIR_:		DW	0
 _NAME_:	DB	"FDD0"
 
@@ -46,8 +46,8 @@ _NAME_:	DB	"FDD0"
 	DB	087H	;Device Number
 	DB	1
 	DW	0
-	DW	GNCL
-	DW	SNCL
+	DW	0
+	DW	0
 	DW	0
 	DB	"FDD1"
 
@@ -70,8 +70,8 @@ _NAME_:	DB	"FDD0"
 	DB	087H	;Device Number
 	DB	2
 	DW	0
-	DW	GNCL
-	DW	SNCL
+	DW	0
+	DW	0
 	DW	0
 	DB	"FDD2"
 
@@ -94,8 +94,8 @@ _NAME_:	DB	"FDD0"
 	DB	087H	;Device Number
 	DB	3
 	DW	0
-	DW	GNCL
-	DW	SNCL
+	DW	0
+	DW	0
 	DW	0
 	DB	"FDD3"
 
@@ -118,8 +118,8 @@ EMMBL:	DB	0
 	DB	6	;Device Number
 EMMDV:	DB	0
 	DW	0
-	DW	GNCL
-	DW	SNCL
+	DW	0
+	DW	0
 	DW	0
 	DB	"EMM0"
 
@@ -142,8 +142,8 @@ BANKCL:	DW	0
 	DB	00BH	;Device Number
 	DB	0
 	DW	0
-	DW	GNCL
-	DW	SNCL
+	DW	0
+	DW	0
 	DW	0
 	DB	"BRAM"
 
@@ -166,8 +166,8 @@ BANKCL:	DW	0
 	DB	5	;Device Number
 	DB	1
 	DW	0
-	DW	GNCL
-	DW	SNCL
+	DW	0
+	DW	0
 	DW	0
 	DB	"GRAM"
 

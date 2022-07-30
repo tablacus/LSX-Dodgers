@@ -70,11 +70,13 @@ SETCRT2:
 	DEC	C
 	OUT	(C),A
 	INC	C
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 	DEC	C
 	INC	A
 	OUT	(C),A
 	INC	C
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 	INC	HL
 	INC	HL

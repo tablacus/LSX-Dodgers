@@ -27,16 +27,20 @@ INISIO:
 	LD	BC,01F91H	;INIT SIO
 	LD	D,1
 	OUT	(C),D
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 	LD	C,093H
 	OUT	(C),D
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 	LD	C,099H		;INIT SIO
 	LD	D,1
 	OUT	(C),D
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 	LD	C,09BH
 	OUT	(C),D
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 
 	LD	C,080H		;INIT DMA
@@ -58,6 +62,7 @@ INIDMA:
 	DEC	BC
 	DEC	BC
 
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 	LD	A,CTC0
 	OUT	(C),A
@@ -94,6 +99,7 @@ SINIT2:
 	OUT	(C),A
 
 	LD	C,0C0H
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 
 	INC	C
@@ -101,12 +107,15 @@ SINIT2:
 	OUT	(C),A
 
 	INC	C
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 
 	INC	C
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 
 	LD	C,0C5H
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 
 TEXT:
@@ -123,9 +132,11 @@ TEXT1:
 	DEC	D
 	JR	NZ,TEXT1
 	LD	BC,01FB0H
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 
 	LD	C,0C4H
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 
 	LD	BC,01A01H
@@ -248,12 +259,16 @@ NON:
 
 	CALL	SETCRTC
 	LD	B,010H		;PALET
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 	INC	B
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 	INC	B
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 	INC	B
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 	JP	NOBANK
 
@@ -275,6 +290,7 @@ CRT1:
 	LD	BC,012F0H
 	OUT	(C),C
 	INC	B
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 
 	LD	A,01FH
@@ -469,10 +485,13 @@ EADR2:
 EADR0:
 	LD	BC,(EMMDV)
 	LD	B,00DH
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 	INC	C
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 	INC	C
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 	INC	C
 	RET
@@ -483,6 +502,7 @@ CHKCTC:
 INICTC1:
 	INC	C
 	OUT	(C),D
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 	DEC	E
 	JR	NZ,INICTC1
@@ -527,10 +547,9 @@ SETCRT1:
 AUTOD:	DB	"AUTOEXEC "
 AUTODV:	DB	"A:",0
 
-INIMES:	DB	"･LSX-Dodgers for X1/turbo version "
-;	DB	'0'+VER/256(MOD)16,'.'			;なぜかうまく動かない
-;	DB	'0'+VER/16(MOD)16,'0'+VER(MOD)16	;なぜかうまく動かない
-	DB	'1.24'
+INIMES:	DB	0A5H, "LSX-Dodgers for X1/turbo version "
+	DB	'0' + VER_1, '.'
+	DB	'0' + VER_2 ,'0'+ VER_3
 	DB	' Gaku (Lovers/Tablacus)',0DH,0AH
 	DB	0
 

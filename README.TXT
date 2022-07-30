@@ -1,4 +1,4 @@
-﻿・LSX-Dodgers for X1/turbo version 1.24 Gaku (Lovers/Tablacus)
+﻿・LSX-Dodgers for X1/turbo version 1.25 Gaku (Lovers/Tablacus)
 
 A>■
 
@@ -25,9 +25,10 @@ https://tablacus.github.io/LSX-Dodgers/
 LSX-Dodgersは超多機能マクロアブソリュートアセンブラOHM-Z80を使用しています。
 ASM.BAT,64ビットのWindowsの場合はWIN64.BATを使用するとZASM.COM/ZASM.EXEでアセンブルできます。
 ※OHM-Z80とZASM.COM/ZASM.EXEの両方でアセンブルできるようにソースを調整しました。
+make.jsを使うと zasm に ZASM.COM/ZASM.EXE用にコンバートします。
+ZASMはINCLUDEを使うとPRNがいい感じに出ないのでWSHでコンバーターを作りました。
+コンバートにZephyr1969さんの変更方法を参考にさせてもらいました。ありがとうございます。
 
-また、フォルダ zasm にあるソースは ZASM.COM/ZASM.EXE用にコンバートされています。
-Zephyr1969さん、ありがとうございます。
 https://github.com/tablacus/LSX-Dodgers/issues/3
 
 ZASMのバージョンは、Vectorの下記から手に入る1.64です。
@@ -166,6 +167,10 @@ CP/M互換のBIOSコールのCONOUTで表示するレジスタが間違っ
 1.24    2022. 7. 6
 teというCP/M用のエディタで動くようにCONOUTをジャンプに変更
 ひろし@H.O SOFTさん、すーぱーたーぼさん情報ありがとうございました。
-
 teはFloppySoftwareのCP/M Projectsに存在します。
 http://www.floppysoftware.es/
+
+1.25    2022. 7.30
+1クラスタが1024バイトの時もクラスタ番号が2048以上の際にFAT領域の切り替えがうまくいくように調整。
+すーぱーたーぼさん、今回もいろいろとありがとうございました。
+DPBの+$16と+$18のFATの読み書きルーチンを指定する部分を0にすると標準のルーチンを使用するようにした。
