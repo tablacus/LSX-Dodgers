@@ -1,9 +1,10 @@
-.Z80
 ;	LSX-Dodgers for X1/turbo/Z
 ;	Programmed by
 ;	Gaku (Lovers/Tablacus)
 
 RUN	EQU	0C600h
+
+	ORG	RUN-7
 
 ;	MSX BINARY HEADER
 	DB	0FEH
@@ -13,8 +14,6 @@ RUN	EQU	0C600h
 	DW	LDEND
 ;	MSX BINARY EXEC ADDRESS
 	DW	RUN
-
-	ORG	RUN
 
 	INCLUDE	"LDDEF.ASM"
 	INCLUDE	"LDINIT.ASM"

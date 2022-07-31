@@ -1,4 +1,4 @@
-﻿・LSX-Dodgers for X1/turbo version 1.25 Gaku (Lovers/Tablacus)
+﻿・LSX-Dodgers for X1/turbo version 1.26 Gaku (Lovers/Tablacus)
 
 A>■
 
@@ -15,37 +15,48 @@ MS-DOS互換のファイルフォーマットを持ちCP/M80やMSX-DOSと互換�
 https://tablacus.github.io/LSX-Dodgers/
 
 
-●無保証
+●ライセンス
 
- このソフトは正しく動作することを望んで制作していますが、その動作については一切
-保証されません。このソフトを使用したり、使用できなかった為に起こったいかなる損害に
-ついても作者及び配布者は責任を負いません。個人の責任において使用して下さい。
+MIT License のオープンソースです。
+
 
 ●アセンブラ
-LSX-Dodgersは超多機能マクロアブソリュートアセンブラOHM-Z80を使用しています。
-ASM.BAT,64ビットのWindowsの場合はWIN64.BATを使用するとZASM.COM/ZASM.EXEでアセンブルできます。
-※OHM-Z80とZASM.COM/ZASM.EXEの両方でアセンブルできるようにソースを調整しました。
+
+OHM-Z80とZASM.COM/ZASM.EXE/AASM/AILZ80ASMでアセンブルできます。
 make.jsを使うと zasm に ZASM.COM/ZASM.EXE用にコンバートします。
 ZASMはINCLUDEを使うとPRNがいい感じに出ないのでWSHでコンバーターを作りました。
 コンバートにZephyr1969さんの変更方法を参考にさせてもらいました。ありがとうございます。
 
 https://github.com/tablacus/LSX-Dodgers/issues/3
 
+◇OHM-Z80
+L-os AngelesでASM.BATを使用します。
+
+◇ZASM
 ZASMのバージョンは、Vectorの下記から手に入る1.64です。
 https://www.vector.co.jp/soft/dos/prog/se010314.html
 
 64ビットのWindowsでアセンブルする場合はMS-DOS Player for Win32-x64などMS-DOSを実行させるソフトが必要です。
 http://takeda-toshiya.my.coocan.jp/msdos/
 
-MS-DOSや32ビットのWindowsの場合は以下のコマンドでアセンブルします。(ASM.BATを使用してもらってOKです)
-zasm LD.ASM -CLD.BIN
+MS-DOSや32ビットのWindowsの場合は以下のバッチファイルを使用します。
+ASM_ZASM.BAT
 
-64ビットのWindowsの場合は以下のコマンドでアセンブルします。(WIN64.BATを使用してもらってOKです)
-msdos zasm LD.ASM -CLD.BIN
+64ビットのWindowsの場合は以下のバッチファイルを使用します。
+ASM_ZASM64.BAT
 
-●ライセンス
+◇AASM
+AASMは以下のアドレスから入手してください。
+https://www.vector.co.jp/soft/dos/prog/se010314.html
 
-MIT License
+以下のバッチファイルを使用します。
+ASM_AASM.BAT
+
+◇AILZ80ASM
+AILZ80ASMは以下のアドレスから入手してください。
+以下のバッチファイルを使用します。
+ASM_AILZ80ASM.BAT
+
 
 ●注意
 
@@ -164,13 +175,5 @@ FCBのオープンモードを+24から+28へ移動した。
 CP/M互換のBIOSコールのCONOUTで表示するレジスタが間違っ
 ていたのを直した。
 
-1.24    2022. 7. 6
-teというCP/M用のエディタで動くようにCONOUTをジャンプに変更
-ひろし@H.O SOFTさん、すーぱーたーぼさん情報ありがとうございました。
-teはFloppySoftwareのCP/M Projectsに存在します。
-http://www.floppysoftware.es/
-
-1.25    2022. 7.30
-1クラスタが1024バイトの時もクラスタ番号が2048以上の際にFAT領域の切り替えがうまくいくように調整。
-すーぱーたーぼさん、今回もいろいろとありがとうございました。
-DPBの+$16と+$18のFATの読み書きルーチンを指定する部分を0にすると標準のルーチンを使用するようにした。
+これ以降の更新情報は
+https://github.com/tablacus/LSX-Dodgers/releases

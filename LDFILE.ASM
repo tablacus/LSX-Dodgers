@@ -21,17 +21,17 @@ FILE:
 	INC	DE
 	LD	A,(DE)
 	DEC	DE
-	CP	":"
+	CP	':'
 	JR	NZ,DEVI1
 	LD	A,(DE)		;DRIVE
 	CALL	CAP
-	SUB	"@"
+	SUB	'@'
 	INC	DE
 	INC	DE
 	LD	(FDRV),A
 DEVI1:
 	LD	A,(DE)
-	SUB	"\"
+	SUB	05CH
 	JR	NZ,NOROOT
 	LD	HL,0
 	LD	(FDRV+26),HL
@@ -43,7 +43,7 @@ NOROOT:
 SETDIR:
 	CALL	FILED
 	LD	A,(DE)
-	CP	"\"
+	CP	05CH
 	RET	NZ
 	INC	DE
 SETDIR1:
@@ -52,7 +52,7 @@ SETDIR1:
 	PUSH	DE
 	LD	DE,FDRV
 	LD	HL,(STABLE+2*00FH)
-	CALL	[HL]
+	CALL	K_HL
 	POP	DE
 	OR	A
 	RET	NZ
@@ -74,9 +74,9 @@ FILED:
 FILE2:
 	CALL	CCHKF
 	RET	Z
-	CP	"*"
+	CP	'*'
 	JR	Z,FILE9
-	CP	"."
+	CP	'.'
 	JR	Z,FILE4
 	LD	(HL),A
 	INC	HL
@@ -85,7 +85,7 @@ FILE2:
 FILE3:
 	CALL	CCHKF
 	RET	Z
-	CP	"."
+	CP	'.'
 	JR	NZ,FILE3
 
 FILE4:
@@ -95,13 +95,13 @@ FILE4:
 FILE4L:
 	CALL	CCHKF
 	RET	Z
-	CP	"."
+	CP	'.'
 	JR	NZ,FILE12
 	LD	(FNAME),A	;Parent directory(..)
 	LD	(FNAME+1),A
 	LD	A,020H
 FILE12:
-	CP	"*"
+	CP	'*'
 	JR	Z,FILE10
 	LD	(HL),A
 	INC	HL
@@ -113,7 +113,7 @@ FILE9:
 	JR	FILE3
 
 FILE10:
-	LD	A,"?"
+	LD	A,'?'
 
 FILE7:
 	LD	(HL),A
@@ -141,19 +141,19 @@ CCHK2:
 	DEC	C
 	RET	NZ
 CCHK3:
-	CP	"+"
+	CP	'+'
 	RET	Z
-	CP	","
+	CP	','
 	RET	Z
-	CP	"/"
+	CP	'/'
 	RET	Z
-	CP	":"
+	CP	':'
 	RET	Z
-	CP	";"
+	CP	';'
 	RET	Z
-	CP	"="
+	CP	'='
 	RET	Z
-	CP	"\"
+	CP	05CH
 	RET	Z
 	CP	020H
 	RET	NC
@@ -191,7 +191,7 @@ SETDRV:
 	PUSH	DE
 	CALL	GETDRV
 	INC	A
-	LD	(IY),A
+	LD	(IY+0),A
 	DEC	A
 	CALL	_CHGDRV
 
@@ -214,7 +214,7 @@ SOPENX:
 SOPENX1:
 	LD	DE,SFILE
 	LD	A,(DE)
-	CP	(IY)
+	CP	(IY+0)
 	JR	NZ,SOPEN
 	INC	DE
 	PUSH	IY
@@ -253,7 +253,7 @@ SOPEN0:
 	JR	C,SDIRX0
 	LD	HL,(_DTBUF)
 	LD	A,(HL)
-	CP	"."
+	CP	'.'
 	JR	Z,SOPEN1
 SDIRX0:
 	XOR	A
@@ -311,7 +311,7 @@ NOPEN:
 	LD	IY,(_FCB)
 	CALL	CHKWILDX
 	JR	NC,NOTSE
-	LD	A,(IY)
+	LD	A,(IY+0)
 	DEC	A
 	LD	(_DRV),A
 	CALL	_CHGDRV
@@ -476,7 +476,7 @@ CPFILE:
 	LD	BC,00B00H
 CPSTR1:
 	LD	A,(DE)
-	CP	"?"		;Wild card
+	CP	'?'		;Wild card
 	JR	Z,CPSTR2
 	LD	A,(HL)
 	CALL	FKANC
@@ -531,9 +531,9 @@ CLPAT2:	CP	064H	;		(Self-rewriting)
 	RET
 
 CAP:
-	CP	"a"
+	CP	'a'
 	RET	C
-	CP	"z"+1
+	CP	'z'+1
 	RET	NC
 	SUB	020H
 	RET
@@ -655,10 +655,10 @@ NAME:
 	CALL	NC,CHKATT
 	RET	C
 
-	LD	A,(IY)
+	LD	A,(IY+0)
 	PUSH	IY
 NAMEP:	LD	IY,0
-	LD	(IY),A
+	LD	(IY+0),A
 	CALL	SOPENX1
 	EX	(SP),IY
 	CCF
@@ -726,7 +726,7 @@ CHKWILDX:
 	INC	HL
 CHKWILD:
 	LD	B,11
-	LD	A,"?"
+	LD	A,'?'
 CHKWIL1:
 	CP	(HL)
 	INC	HL
@@ -1010,20 +1010,20 @@ SETRBR:
 	LD	HL,128
 	RET
 
-[DE26]:
+K_DE26:
 	LD	DE,(STABLE+2*026H)
-	JR	[DE1]
-[DE27]:
+	JR	K_DE1
+K_DE27:
 	LD	DE,(STABLE+2*027H)
-[DE1]:
-	CALL	[DE]
+K_DE1:
+	CALL	K_DE
 ;	EX	DE,IY
 	PUSH	DE
 	EX	(SP),IY
 	POP	DE
 ;
 	RET
-[DE]:
+K_DE:
 ;	EX	DE,IY
 	PUSH	DE
 	EX	(SP),IY
@@ -1039,4 +1039,3 @@ HLBUF:	DS	3		;Random record buffer
 _FATPS:	DW	0
 _DIRPS:	DW	0
 _CLPS:	DW	0
-

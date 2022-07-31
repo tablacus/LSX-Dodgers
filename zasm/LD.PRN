@@ -1,34 +1,33 @@
 			  Z80 ASSEMBLER - ZASM VER 1.6
-  0000                	.Z80
                       	;	LSX-Dodgers for X1/turbo/Z
                       	;	Programmed by
                       	;	Gaku (Lovers/Tablacus)
                       	
   C600                	RUN	EQU	0C600h
                       	
+  C5F9                		ORG	RUN-7
+                      	
                       	;	MSX BINARY HEADER
-  0000  FE            		DB	0FEH
+  C5F9  FE            		DB	0FEH
                       	;	MSX BINARY START ADDRESS
-  0001  00C6          		DW	RUN
+  C5FA  00C6          		DW	RUN
                       	;	MSX BINARY END ADDRESS
-  0003  E0ED          		DW	LDEND
+  C5FC  E0ED          		DW	LDEND
                       	;	MSX BINARY EXEC ADDRESS
-  0005  00C6          		DW	RUN
+  C5FE  00C6          		DW	RUN
+                      	;LDDEF.ASM
                       	
-  C600                		ORG	RUN
-                      	
-                      		
                       	;	LSX-Dodgers DEF
                       	
   1D80                	MAC	EQU	01D80H		;X1
   0001                	VER_1   EQU 1
   0002                	VER_2   EQU 2
-  0005                	VER_3   EQU 5
-  0125                	VER	EQU	VER_1 * 256 + VER_2 * 16 + VER_3
+  0006                	VER_3   EQU 6
+  0126                	VER	EQU	VER_1 * 256 + VER_2 * 16 + VER_3
                       	
   0000                	STACK	EQU	00000H
   0005                	SYSTEM	EQU	00005H
-  000F                	[HL]	EQU	0000FH
+  000F                	K_HL	EQU	0000FH
   005C                	FCB1	EQU	0005CH
   006C                	FCB2	EQU	0006CH
   0080                	DTA1	EQU	00080H
@@ -43,12 +42,13 @@
   FFD4                	EXTSP	EQU	0FFD4H
   0018                	LINE	EQU	24
                       	
-                      		
+                      	;LDINIT.ASM
+                      	
                       	;	LSX-Dodgers INIT
                       	
   C600  C307C6        		JP	START
   C603  801D          	MACHINE:DW	MAC
-  C605  2501          	VERSION:DW	VER
+  C605  2601          	VERSION:DW	VER
                       	
   C607                	START:
   C607  F3            		DI
@@ -72,16 +72,20 @@
   C630  01911F        		LD	BC,01F91H	;INIT SIO
   C633  1601          		LD	D,1
   C635  ED51          		OUT	(C),D
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   C637  ED71          		DB	0EDH,071H
   C639  0E93          		LD	C,093H
   C63B  ED51          		OUT	(C),D
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   C63D  ED71          		DB	0EDH,071H
   C63F  0E99          		LD	C,099H		;INIT SIO
   C641  1601          		LD	D,1
   C643  ED51          		OUT	(C),D
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   C645  ED71          		DB	0EDH,071H
   C647  0E9B          		LD	C,09BH
   C649  ED51          		OUT	(C),D
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   C64B  ED71          		DB	0EDH,071H
                       	
   C64D  0E80          		LD	C,080H		;INIT DMA
@@ -103,6 +107,7 @@
   C668  0B            		DEC	BC
   C669  0B            		DEC	BC
                       	
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   C66A  ED71          		DB	0EDH,071H
   C66C  3EC0          		LD	A,CTC0
   C66E  ED79          		OUT	(C),A
@@ -139,6 +144,7 @@
   C6A5  ED79          		OUT	(C),A
                       	
   C6A7  0EC0          		LD	C,0C0H
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   C6A9  ED71          		DB	0EDH,071H
                       	
   C6AB  0C            		INC	C
@@ -146,12 +152,15 @@
   C6AE  ED79          		OUT	(C),A
                       	
   C6B0  0C            		INC	C
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   C6B1  ED71          		DB	0EDH,071H
                       	
   C6B3  0C            		INC	C
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   C6B4  ED71          		DB	0EDH,071H
                       	
   C6B6  0EC5          		LD	C,0C5H
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   C6B8  ED71          		DB	0EDH,071H
                       	
   C6BA                	TEXT:
@@ -168,9 +177,11 @@
   C6CB  15            		DEC	D
   C6CC  20F9          		JR	NZ,TEXT1
   C6CE  01B01F        		LD	BC,01FB0H
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   C6D1  ED71          		DB	0EDH,071H
                       	
   C6D3  0EC4          		LD	C,0C4H
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   C6D5  ED71          		DB	0EDH,071H
                       	
   C6D7  01011A        		LD	BC,01A01H
@@ -260,27 +271,27 @@
   C778  3D            		DEC	A		;A=0FFH
   C779  321800        		LD	(00018H),A	;BIOS-ROM
                       	
-  C77C  21FDC9        		LD	HL,@SCR1
+  C77C  21FDC9        		LD	HL,AT_SCR1
   C77F  11E2DA        		LD	DE,SCR1
-  C782  015E00        		LD	BC,@SCRE-@SCR1
+  C782  015E00        		LD	BC,AT_SCRE-AT_SCR1
   C785  EDB0          		LDIR
                       	
-  C787  215BCA        		LD	HL,@WTTRK
+  C787  215BCA        		LD	HL,AT_WTTRK
   C78A  113FEA        		LD	DE,WTTRK
-  C78D  017501        		LD	BC,@CPUE-@WTTRK
+  C78D  017501        		LD	BC,AT_CPUE-AT_WTTRK
   C790  EDB0          		LDIR
                       	
-  C792  2192EA        		LD	HL,@DRD+@R
+  C792  2192EA        		LD	HL,AT_DRD+AT_R
   C795  22ECEC        		LD	(_FDRD+1),HL
-  C798  2143EA        		LD	HL,@DWT+@R
+  C798  2143EA        		LD	HL,AT_DWT+AT_R
   C79B  22EFEC        		LD	(_FDWT+1),HL
-  C79E  212AEB        		LD	HL,@EDRDC+@R
+  C79E  212AEB        		LD	HL,AT_EDRDC+AT_R
   C7A1  2282ED        		LD	(EMMRD),HL
-  C7A4  213EEB        		LD	HL,@EDWTC+@R
+  C7A4  213EEB        		LD	HL,AT_EDWTC+AT_R
   C7A7  2284ED        		LD	(EMMWR),HL
                       	
-  C7AA  2159EA        		LD	HL,DWTPAT+@R
-  C7AD  22AFE9        		LD	(@FDCPAT+1),HL
+  C7AA  2159EA        		LD	HL,DWTPAT+AT_R
+  C7AD  22AFE9        		LD	(AT_FDCPAT+1),HL
                       	
   C7B0  210000        		LD	HL,0
   C7B3  2284DA        		LD	(X1PAT),HL
@@ -293,12 +304,16 @@
                       	
   C7C1  CD6FC9        		CALL	SETCRTC
   C7C4  0610          		LD	B,010H		;PALET
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   C7C6  ED71          		DB	0EDH,071H
   C7C8  04            		INC	B
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   C7C9  ED71          		DB	0EDH,071H
   C7CB  04            		INC	B
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   C7CC  ED71          		DB	0EDH,071H
   C7CE  04            		INC	B
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   C7CF  ED71          		DB	0EDH,071H
   C7D1  C359C8        		JP	NOBANK
                       	
@@ -307,7 +322,7 @@
   C7D6  DBF0          		IN	A,(0F0H)
   C7D8  0F            		RRCA
   C7D9  380B          		JR	C,CRT1
-  C7DB  21DAC9        		LD	HL,C8025H
+  C7DB  21DAC9        		LD	HL,_C8025H
   C7DE  11B0EC        		LD	DE,CRTCD
   C7E1  011000        		LD	BC,16
   C7E4  EDB0          		LDIR
@@ -451,7 +466,7 @@
   C8CB  FE08          		CP	8
   C8CD  301E          		JR	NC,INIT0
   C8CF  5F            		LD	E,A
-  C8D0  C641          		ADD	A,"A"
+  C8D0  C641          		ADD	A,'A'
   C8D2  3297C9        		LD	(AUTODV),A
   C8D5  0E0E          		LD	C,00EH
   C8D7  CD0500        		CALL	SYSTEM
@@ -514,10 +529,13 @@
   C938                	EADR0:
   C938  ED4B93ED      		LD	BC,(EMMDV)
   C93C  060D          		LD	B,00DH
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   C93E  ED71          		DB	0EDH,071H
   C940  0C            		INC	C
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   C941  ED71          		DB	0EDH,071H
   C943  0C            		INC	C
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   C944  ED71          		DB	0EDH,071H
   C946  0C            		INC	C
   C947  C9            		RET
@@ -528,6 +546,7 @@
   C94C                	INICTC1:
   C94C  0C            		INC	C
   C94D  ED51          		OUT	(C),D
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   C94F  ED71          		DB	0EDH,071H
   C951  1D            		DEC	E
   C952  20F8          		JR	NZ,INICTC1
@@ -572,13 +591,14 @@
   C98E  4155544F455845	AUTOD:	DB	"AUTOEXEC "
   C997  413A00        	AUTODV:	DB	"A:",0
                       	
-  C99A  A54C53582D446F	INIMES:	DB	"･LSX-Dodgers for X1/turbo version "
-  C9BC  312E          		DB	'0' + VER_1, '.'
-  C9BE  3235          		DB	'0' + VER_2 ,'0'+ VER_3
+  C99A  A54C53582D446F	INIMES:	DB	0A5H, "LSX-Dodgers for X1/turbo version "
+  C9BC  312E          		DB	030H + VER_1, '.'
+  C9BE  3236          		DB	030H + VER_2 ,030H + VER_3
   C9C0  2047616B752028		DB	' Gaku (Lovers/Tablacus)',0DH,0AH
   C9D9  00            		DB	0
                       	
-  C9DA  6B5059881B0119	C8025H:	DB	06BH,050H,059H,088H,01BH,001H,019H,01AH
+  C9DA                	_C8025H:
+  C9DA  6B5059881B0119		DB	06BH,050H,059H,088H,01BH,001H,019H,01AH
   C9E2  000F          		DB	000H,00FH
   C9E4  80F8B0FF      		DW	0-80*LINE,0-80
   C9E8  0CA3          		DB	00CH,0A3H
@@ -594,7 +614,7 @@
   C9FA  05E8          		DB	5,0E8H
   C9FC  FF            		DB	0FFH
                       	
-  C9FD                	@SCR1:
+  C9FD                	AT_SCR1:
   C9FD  D9            		EXX
   C9FE  C5            		PUSH	BC
   C9FF  015020        		LD	BC,02000H+80
@@ -604,27 +624,27 @@
                       	
   CA07  67            		LD	H,A
   CA08  B7            		OR	A
-  CA09                	@SCRUP1:
-  CA09  2815          		JR	Z,@SCRCL
+  CA09                	AT_SCRUP1:
+  CA09  2815          		JR	Z,AT_SCRCL
   CA0B  C5            		PUSH	BC
   CA0C  CBE0          		SET	4,B
   CA0E  D9            		EXX
   CA0F  C5            		PUSH	BC
   CA10  CBE0          		SET	4,B
   CA12  D9            		EXX
-  CA13  CD6DEB        		CALL	@UPSUB+@R
+  CA13  CD6DEB        		CALL	AT_UPSUB+AT_R
   CA16  D9            		EXX
   CA17  C1            		POP	BC
   CA18  D9            		EXX
   CA19  C1            		POP	BC
-  CA1A  CD6DEB        		CALL	@UPSUB+@R
+  CA1A  CD6DEB        		CALL	AT_UPSUB+AT_R
   CA1D  25            		DEC	H
-  CA1E  18E9          		JR	@SCRUP1
+  CA1E  18E9          		JR	AT_SCRUP1
                       	
-  CA20                	@SCRCL:
+  CA20                	AT_SCRCL:
   CA20  211020        		LD	HL,02000H+16
   CA23  3A96EC        		LD	A,(_COLORF)
-  CA26                	@SCRCL1:
+  CA26                	AT_SCRCL1:
   CA26  CBE0          		SET	4,B
   CA28  ED61          		OUT	(C),H
   CA2A  CBA0          		RES	4,B
@@ -651,25 +671,25 @@
   CA50  ED79          		OUT	(C),A
   CA52  03            		INC	BC
   CA53  2D            		DEC	L
-  CA54  20D0          		JR	NZ,@SCRCL1
+  CA54  20D0          		JR	NZ,AT_SCRCL1
   CA56  C1            		POP	BC
   CA57  D9            		EXX
   CA58  C1            		POP	BC
   CA59  D9            		EXX
   CA5A  C9            		RET
                       	
-  CA5B                	@SCRE:
+  CA5B                	AT_SCRE:
                       	
                       	;	FLOPPY DISK DRIVER(CPU)
                       	
-  CA5B                	@WTTRK:
+  CA5B                	AT_WTTRK:
   CA5B  3EF0          		LD	A,0F0H
-  CA5D  1802          		JR	@WTTRK1
+  CA5D  1802          		JR	AT_WTTRK1
                       	
-  CA5F                	@DWT:
+  CA5F                	AT_DWT:
   CA5F  3EA0          		LD	A,0A0H
-  CA61                	@WTTRK1:
-  CA61  325AEA        		LD	(DWTPAT+1+@R),A
+  CA61                	AT_WTTRK1:
+  CA61  325AEA        		LD	(DWTPAT+1+AT_R),A
                       	
   CA64  3E02          		LD	A,2		;Retry count
   CA66  323EEA        		LD	(RETRY),A
@@ -677,7 +697,7 @@
   CA69                	DWT0:
   CA69  D5            		PUSH	DE
   CA6A  E5            		PUSH	HL
-  CA6B  2210EB        		LD	(DHLPAT+1+@R),HL
+  CA6B  2210EB        		LD	(DHLPAT+1+AT_R),HL
   CA6E  CD48E9        		CALL	SEEK		;Write disk
   CA71  E1            		POP	HL
   CA72  3830          		JR	C,ERRDW
@@ -709,7 +729,7 @@
   CA91  13            		INC	DE
   CA92  CDE8E9        		CALL	FDMOFF
   CA95  C8            		RET	Z
-  CA96  CDDBEA        		CALL	DISKC+@R
+  CA96  CDDBEA        		CALL	DISKC+AT_R
   CA99  20CE          		JR	NZ,DWT0
   CA9B  B7            		OR	A
   CA9C  C8            		RET	Z
@@ -722,16 +742,16 @@
                       	
   CAA4                	ERRDW:
   CAA4  D1            		POP	DE
-  CAA5  CDECEA        		CALL	@DELP+@R
+  CAA5  CDECEA        		CALL	AT_DELP+AT_R
   CAA8  20BF          		JR	NZ,DWT0
   CAAA  B7            		OR	A
   CAAB  20F0          		JR	NZ,ERRW
   CAAD  C9            		RET
                       	
-  CAAE                	@DRD:
+  CAAE                	AT_DRD:
   CAAE  3E80          		LD	A,080H
-  CAB0  32ACEA        		LD	(DRDPAT+1+@R),A
-  CAB3  325AEA        		LD	(DWTPAT+1+@R),A
+  CAB0  32ACEA        		LD	(DRDPAT+1+AT_R),A
+  CAB3  325AEA        		LD	(DWTPAT+1+AT_R),A
                       	
   CAB6  3E02          		LD	A,2		;Retry count
   CAB8  323EEA        		LD	(RETRY),A
@@ -739,7 +759,7 @@
   CABB                	DRD0:
   CABB  D5            		PUSH	DE
   CABC  E5            		PUSH	HL
-  CABD  2210EB        		LD	(DHLPAT+1+@R),HL
+  CABD  2210EB        		LD	(DHLPAT+1+AT_R),HL
   CAC0  CD48E9        		CALL	SEEK		;Read disk
   CAC3  E1            		POP	HL
   CAC4  3827          		JR	C,ERRDR
@@ -766,7 +786,7 @@
   CADF  13            		INC	DE
   CAE0  CDE8E9        		CALL	FDMOFF
   CAE3  C8            		RET	Z
-  CAE4  CDDBEA        		CALL	DISKC+@R
+  CAE4  CDDBEA        		CALL	DISKC+AT_R
   CAE7  20D2          		JR	NZ,DRD0
   CAE9  B7            		OR	A
   CAEA  20B1          		JR	NZ,ERRW
@@ -774,7 +794,7 @@
                       	
   CAED                	ERRDR:
   CAED  D1            		POP	DE
-  CAEE  CDECEA        		CALL	@DELP+@R
+  CAEE  CDECEA        		CALL	AT_DELP+AT_R
   CAF1  20C8          		JR	NZ,DRD0
   CAF3  B7            		OR	A
   CAF4  20A7          		JR	NZ,ERRW
@@ -789,45 +809,45 @@
   CAFE  213EEA        		LD	HL,RETRY
   CB01  35            		DEC	(HL)
   CB02  E1            		POP	HL
-  CB03  203E          		JR	NZ,@ERR		;Retry
+  CB03  203E          		JR	NZ,AT_ERR		;Retry
   CB05  B7            		OR	A
-  CB06  283B          		JR	Z,@ERR		;Error
+  CB06  283B          		JR	Z,AT_ERR		;Error
                       	
-  CB08                	@DELP:
+  CB08                	AT_DELP:
   CB08  CD0CEA        		CALL	RNF
   CB0B  CDE8E9        		CALL	FDMOFF
   CB0E  3A85EC        		LD	A,(_SEEKSP)
   CB11  87            		ADD	A,A
-  CB12  382E          		JR	C,@ERRZ
-  CB14                	@DELP1:
+  CB12  382E          		JR	C,AT_ERRZ
+  CB14                	AT_DELP1:
   CB14  D5            		PUSH	DE
   CB15  2112EA        		LD	HL,DEMES
   CB18  CDF6D7        		CALL	MSX
   CB1B  CD73D6        		CALL	KEYBC
-  CB1E                	@DELP2:
+  CB1E                	AT_DELP2:
   CB1E  CD0EDC        		CALL	INKEY
-  CB21  28FB          		JR	Z,@DELP2
+  CB21  28FB          		JR	Z,AT_DELP2
                       	
   CB23  D1            		POP	DE
-  CB24  CD75DF        		CALL	CAP
-  CB27  FE52          		CP	"R"
-  CB29  200A          		JR	NZ,@DELP3
+  CB24  CD6FDF        		CALL	CAP
+  CB27  FE52          		CP	'R'
+  CB29  200A          		JR	NZ,AT_DELP3
   CB2B  210000        	DHLPAT:	LD	HL,0
   CB2E  3E02          		LD	A,2
   CB30  323EEA        		LD	(RETRY),A
   CB33  B7            		OR	A
   CB34  C9            		RET
-  CB35                	@DELP3:
-  CB35  FE49          		CP	"I"
-  CB37  2807          		JR	Z,@IGNORE
-  CB39  FE41          		CP	"A"
-  CB3B  20D7          		JR	NZ,@DELP1
+  CB35                	AT_DELP3:
+  CB35  FE49          		CP	'I'
+  CB37  2807          		JR	Z,AT_IGNORE
+  CB39  FE41          		CP	'A'
+  CB3B  20D7          		JR	NZ,AT_DELP1
   CB3D  C3F1D9        		JP	BOOT
-  CB40                	@IGNORE:
+  CB40                	AT_IGNORE:
   CB40  3EFF          		LD	A,0FFH
-  CB42                	@ERRZ:
+  CB42                	AT_ERRZ:
   CB42  BF            		CP	A
-  CB43                	@ERR:
+  CB43                	AT_ERR:
   CB43  3EFF          		LD	A,0FFH
   CB45  C9            		RET
                       	
@@ -835,9 +855,9 @@
                       	;	EMM DRIVER(CPU)
                       	
                       	
-  CB46                	@EDRDC:
-  CB46  CD52EB        		CALL	@EADR+@R
-  CB49                	@EDRDC1:
+  CB46                	AT_EDRDC:
+  CB46  CD52EB        		CALL	AT_EADR+AT_R
+  CB49                	AT_EDRDC1:
   CB49  EDA2          		INI
   CB4B  04            		INC	B
   CB4C  EDA2          		INI
@@ -847,13 +867,13 @@
   CB52  EDA2          		INI
   CB54  04            		INC	B
   CB55  3D            		DEC	A
-  CB56  20F1          		JR	NZ,@EDRDC1
+  CB56  20F1          		JR	NZ,AT_EDRDC1
   CB58  AF            		XOR	A
   CB59  C9            		RET
                       	
-  CB5A                	@EDWTC:
-  CB5A  CD52EB        		CALL	@EADR+@R
-  CB5D                	@EDWTC1:
+  CB5A                	AT_EDWTC:
+  CB5A  CD52EB        		CALL	AT_EADR+AT_R
+  CB5D                	AT_EDWTC1:
   CB5D  04            		INC	B
   CB5E  EDA3          		OUTI
   CB60  04            		INC	B
@@ -863,11 +883,11 @@
   CB66  04            		INC	B
   CB67  EDA3          		OUTI
   CB69  3D            		DEC	A
-  CB6A  20F1          		JR	NZ,@EDWTC1
+  CB6A  20F1          		JR	NZ,AT_EDWTC1
   CB6C  AF            		XOR	A
   CB6D  C9            		RET
                       	
-  CB6E                	@EADR:
+  CB6E                	AT_EADR:
   CB6E  D5            		PUSH	DE
   CB6F  EB            		EX	DE,HL
   CB70  29            		ADD	HL,HL
@@ -888,9 +908,9 @@
   CB87  AF            		XOR	A
   CB88  C9            		RET
                       	
-  CB89                	@UPSUB:
+  CB89                	AT_UPSUB:
   CB89  2E0A          		LD	L,10
-  CB8B                	@UPSUB1:
+  CB8B                	AT_UPSUB1:
   CB8B  D9            		EXX
   CB8C  ED78          		IN	A,(C)
   CB8E  03            		INC	BC
@@ -940,14 +960,15 @@
   CBC8  ED79          		OUT	(C),A
   CBCA  03            		INC	BC
   CBCB  2D            		DEC	L
-  CBCC  C26FEB        		JP	NZ,@UPSUB1+@R
+  CBCC  C26FEB        		JP	NZ,AT_UPSUB1+AT_R
   CBCF  C9            		RET
                       	
-  CBD0                	@CPUE:
+  CBD0                	AT_CPUE:
   CBD0                	INITE:
   CBD0                		DS	0CC06H-INITE
                       	
-                      		
+                      	;LDCCP.ASM
+                      	
                       	;	LSX-Dodgers CCP
                       	
   CC06                	BDOS:
@@ -960,7 +981,7 @@
                       	
   CC4C  4F6B24        	OK:	DB	"Ok$"
   CC4F  536B697024    	SKIP:	DB	"Skip$"
-  CC54  6B206279746573	KBFREE:	DB	"k bytes free",9,"$"
+  CC54  6B206279746573	KBFREE:	DB	"k bytes free",9,'$'
   CC62  20202020646972	DIRMES:	DB	"    dir $"
   CC6B  074572726F7221	COMERM:	DB	7,"Error!$"
                       	
@@ -1019,11 +1040,13 @@
   CCE0  0D            		DEC	C
   CCE1  ED79          		OUT	(C),A
   CCE3  0C            		INC	C
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   CCE4  ED71          		DB	0EDH,071H
   CCE6  0D            		DEC	C
   CCE7  3C            		INC	A
   CCE8  ED79          		OUT	(C),A
   CCEA  0C            		INC	C
+                      	;	OUT	(C),0		;未定義命令ニーモニック
   CCEB  ED71          		DB	0EDH,071H
   CCED  23            		INC	HL
   CCEE  23            		INC	HL
@@ -1036,10 +1059,10 @@
   CCFC  CDB7CD        		CALL	SETDTA1
   CCFF  D5            		PUSH	DE
   CD00  3A87EC        		LD	A,(_DVSW)
-  CD03  C641          		ADD	A,"A"
+  CD03  C641          		ADD	A,'A'
   CD05  5F            		LD	E,A
   CD06  CDCDEC        		CALL	_PRINT
-  CD09  1E3E          		LD	E,">"
+  CD09  1E3E          		LD	E,'>'
   CD0B  CDCDEC        		CALL	_PRINT
   CD0E  D1            		POP	DE		;DE=DTA1
   CD0F  3E50          		LD	A,80
@@ -1057,7 +1080,7 @@
   CD2B  C7            		RST	0
                       	
   CD2C                	COMANL:
-  CD2C  CD8ADC        		CALL	FILE
+  CD2C  CD84DC        		CALL	FILE
   CD2F  D5            		PUSH	DE
   CD30  11DC00        		LD	DE,FNAME
   CD33  1A            		LD	A,(DE)
@@ -1072,10 +1095,10 @@
   CD3F  2174CC        		LD	HL,COMTB
   CD42  3A73CC        		LD	A,(COMS)
   CD45  47            		LD	B,A
-  CD46  CD0EDF        		CALL	CPNAME
+  CD46  CD08DF        		CALL	CPNAME
   CD49                	COMB:
   CD49  D1            		POP	DE
-  CD4A  D20F00        		JP	NC,[HL]
+  CD4A  D20F00        		JP	NC,K_HL
   CD4D  EB            		EX	DE,HL
   CD4E  222DCE        		LD	(COMPAT+1),HL
   CD51  2287CE        		LD	(BATPAT+1),HL
@@ -1091,7 +1114,7 @@
   CD67  1A            		LD	A,(DE)
   CD68  FE20          		CP	020H
   CD6A  D8            		RET	C
-  CD6B  CD7FDC        		CALL	FILEC
+  CD6B  CD79DC        		CALL	FILEC
   CD6E  D5            		PUSH	DE
   CD6F  216D00        		LD	HL,FCB2+1	;COMMAND NAME
   CD72  11DC00        		LD	DE,FNAME
@@ -1151,7 +1174,7 @@
   CDC2  C9            		RET
                       	
   CDC3                	C_CD:
-  CDC3  CD7FDC        		CALL	FILEC
+  CDC3  CD79DC        		CALL	FILEC
   CDC6  210000        		LD	HL,0
   CDC9  11DB00        		LD	DE,FDRV
   CDCC  1803          		JR	S27
@@ -1172,7 +1195,7 @@
   CDE4  7E            		LD	A,(HL)
   CDE5  FE20          		CP	020H
   CDE7  2007          		JR	NZ,CEXE7
-  CDE9  3E3F          		LD	A,"?"
+  CDE9  3E3F          		LD	A,'?'
   CDEB  77            		LD	(HL),A
   CDEC  23            		INC	HL
   CDED  77            		LD	(HL),A
@@ -1184,16 +1207,16 @@
   CDF3  C0            		RET	NZ
   CDF4  2A5BFF        		LD	HL,(DTA+1+9)
   CDF7  7C            		LD	A,H
-  CDF8  CD75DF        		CALL	CAP
+  CDF8  CD6FDF        		CALL	CAP
   CDFB  67            		LD	H,A
   CDFC  7D            		LD	A,L
-  CDFD  CD75DF        		CALL	CAP
+  CDFD  CD6FDF        		CALL	CAP
   CE00  6F            		LD	L,A
   CE01  3A5AFF        		LD	A,(DTA+1+8)
-  CE04  CD75DF        		CALL	CAP
-  CE07  D642          		SUB	"B"
+  CE04  CD6FDF        		CALL	CAP
+  CE07  D642          		SUB	'B'
   CE09  2831          		JR	Z,C_BAT
-  CE0B  3D            		DEC	A		;"C"
+  CE0B  3D            		DEC	A		;'C'
   CE0C  2805          		JR	Z,C_EXE
   CE0E                	CEXE6:
   CE0E  CD9ECD        		CALL	OPEN2
@@ -1201,7 +1224,7 @@
                       	
   CE13                	C_EXE:
   CE13  7C            		LD	A,H
-  CE14  FE4D          		CP	"M"
+  CE14  FE4D          		CP	'M'
   CE16  20F6          		JR	NZ,CEXE6
                       	
   CE18  CDA2CD        		CALL	DEFCB
@@ -1226,7 +1249,7 @@
   CE39  C30001        		JP	00100H
                       	
   CE3C                	C_BAT:
-  CE3C  114154        		LD	DE,"A"+"T"*256
+  CE3C  114154        		LD	DE,'A'+'T'*256
   CE3F  ED52          		SBC	HL,DE
   CE41  20CB          		JR	NZ,CEXE6
                       	
@@ -1254,7 +1277,7 @@
   CE64  05            		DEC	B
   CE65  C8            		RET	Z
   CE66  7E            		LD	A,(HL)
-  CE67  FE25          		CP	"%"
+  CE67  FE25          		CP	'%'
   CE69  280C          		JR	Z,BAT2
   CE6B                	BAT1X:
   CE6B  7E            		LD	A,(HL)
@@ -1269,7 +1292,7 @@
   CE77  23            		INC	HL
   CE78  7E            		LD	A,(HL)
   CE79  2B            		DEC	HL
-  CE7A  D631          		SUB	"1"
+  CE7A  D631          		SUB	'1'
   CE7C  38ED          		JR	C,BAT1X
   CE7E  FE09          		CP	9
   CE80  30E9          		JR	NC,BAT1X
@@ -1282,7 +1305,7 @@
   CE89  1A            		LD	A,(DE)
   CE8A  B7            		OR	A
   CE8B  28D6          		JR	Z,BAT1
-  CE8D  CD64DD        		CALL	SPCUT
+  CE8D  CD5EDD        		CALL	SPCUT
   CE90  0D            		DEC	C
   CE91  2808          		JR	Z,BAT5
   CE93                	BAT4:
@@ -1330,7 +1353,7 @@
   CECA  C9            		RET
                       	
   CECB                	C_DIR:
-  CECB  CD7FDC        		CALL	FILEC
+  CECB  CD79DC        		CALL	FILEC
   CECE  21DC00        		LD	HL,FDRV+1
   CED1  CD29D2        		CALL	CWILD1
   CED4  3EF1          		LD	A,0F1H
@@ -1369,8 +1392,8 @@
   CF09  1154CC        		LD	DE,KBFREE
   CF0C  CD6ED2        		CALL	_SYS09
   CF0F  CDA3CF        		CALL	PUTDRV
-  CF12  3E5C          		LD	A,"\"
-  CF14  CDAAD6        		CALL	MSG
+  CF12  3E5C          		LD	A,05CH
+  CF14  CDAAD6        		CALL	MSG_
   CF17  2AE900        		LD	HL,(FDRV+14)
   CF1A  7C            		LD	A,H
   CF1B  B5            		OR	L
@@ -1383,23 +1406,23 @@
                       	
   CF26                	P_NAME:
   CF26  3A52FF        		LD	A,(DTA+1)
-  CF29  FE2E          		CP	"."
+  CF29  FE2E          		CP	'.'
   CF2B  C8            		RET	Z
   CF2C  3E20          		LD	A,020H
-  CF2E  CDAAD6        		CALL	MSG
-  CF31  CDAAD6        		CALL	MSG
-  CF34  3E3A          		LD	A,":"
-  CF36  CDAAD6        		CALL	MSG
+  CF2E  CDAAD6        		CALL	MSG_
+  CF31  CDAAD6        		CALL	MSG_
+  CF34  3E3A          		LD	A,':'
+  CF36  CDAAD6        		CALL	MSG_
   CF39  3A5DFF        		LD	A,(DTA+1+00BH)
   CF3C  F5            		PUSH	AF
   CF3D  0F            		RRCA
   CF3E  9F            		SBC	A,A
-  CF3F  E60A          		AND	"*"-020H
+  CF3F  E60A          		AND	'*'-020H
   CF41  C620          		ADD	A,020H
   CF43  0607          		LD	B,7
   CF45                	MZX:
   CF45  C5            		PUSH	BC
-  CF46  CDAAD6        		CALL	MSG
+  CF46  CDAAD6        		CALL	MSG_
   CF49  C1            		POP	BC
   CF4A  3E20          		LD	A,020H
   CF4C  10F7          		DJNZ	MZX
@@ -1430,7 +1453,7 @@
   CF7C  C325D7        		JP	PRINTX
                       	
   CF7F                	C_PATH:
-  CF7F  CD64DD        		CALL	SPCUT
+  CF7F  CD5EDD        		CALL	SPCUT
   CF82  210BCC        		LD	HL,PATHD
   CF85  FE21          		CP	021H
   CF87  300E          		JR	NC,CPATH0
@@ -1442,10 +1465,10 @@
   CF8D  FE20          		CP	020H
   CF8F  3F            		CCF
   CF90  30E3          		JR	NC,LTNL
-  CF92  CDAAD6        		CALL	MSG
+  CF92  CDAAD6        		CALL	MSG_
   CF95  18F4          		JR	CPATHP
   CF97                	CPATH0:
-  CF97  FE3B          		CP	";"
+  CF97  FE3B          		CP	';'
   CF99  2001          		JR	NZ,CPATH1
   CF9B  13            		INC	DE
   CF9C                	CPATH1:
@@ -1456,11 +1479,11 @@
                       	
   CFA3                	PUTDRV:
   CFA3  3ADB00        		LD	A,(FDRV)
-  CFA6  C640          		ADD	A,"A"-1
-  CFA8  CDAAD6        		CALL	MSG
-  CFAB  3E3A          		LD	A,":"
+  CFA6  C640          		ADD	A,'A'-1
+  CFA8  CDAAD6        		CALL	MSG_
+  CFAB  3E3A          		LD	A,':'
   CFAD                	MSGR:
-  CFAD  C3AAD6        		JP	MSG
+  CFAD  C3AAD6        		JP	MSG_
                       	
   CFB0                	PRDEC0:
   CFB0  AF            		XOR	A
@@ -1516,17 +1539,17 @@
   CFF8  C680          		ADD	A,0A0H-020H
   CFFA  FEA0          		CP	0A0H
   CFFC  2802          		JR	Z,FPR1
-  CFFE  3E2E          		LD	A,"."
+  CFFE  3E2E          		LD	A,'.'
   D000                	FPR1:
-  D000  CDAAD6        		CALL	MSG
+  D000  CDAAD6        		CALL	MSG_
   D003  0603          		LD	B,3
                       	
   D005                	P_N1:
   D005  C5            		PUSH	BC
   D006  E5            		PUSH	HL
   D007  7E            		LD	A,(HL)
-  D008  CD81DF        		CALL	CAP3
-  D00B  CDAAD6        		CALL	MSG
+  D008  CD7BDF        		CALL	CAP3
+  D00B  CDAAD6        		CALL	MSG_
   D00E  E1            		POP	HL
   D00F  C1            		POP	BC
   D010  23            		INC	HL
@@ -1535,7 +1558,7 @@
                       	
   D014                	PRTTMS:
   D014  3E20          		LD	A,020H
-  D016  CDAAD6        		CALL	MSG
+  D016  CDAAD6        		CALL	MSG_
                       	
   D019  2A6AFF        		LD	HL,(DTA+1+24)
   D01C  7D            		LD	A,L
@@ -1551,12 +1574,12 @@
   D028  7C            		LD	A,H
   D029  C650          		ADD	A,80
   D02B  CD70D0        		CALL	PRTA
-  D02E  3E2D          		LD	A,"-"
-  D030  CDAAD6        		CALL	MSG
+  D02E  3E2D          		LD	A,'-'
+  D030  CDAAD6        		CALL	MSG_
   D033  7A            		LD	A,D
   D034  CD70D0        		CALL	PRTA
-  D037  3E2D          		LD	A,"-"
-  D039  CDAAD6        		CALL	MSG
+  D037  3E2D          		LD	A,'-'
+  D039  CDAAD6        		CALL	MSG_
   D03C  7D            		LD	A,L
   D03D  E61F          		AND	01FH
   D03F  CD70D0        		CALL	PRTA
@@ -1564,7 +1587,7 @@
   D042  2A68FF        		LD	HL,(DTA+1+22)
                       	
   D045  3E20          		LD	A,020H
-  D047  CDAAD6        		CALL	MSG
+  D047  CDAAD6        		CALL	MSG_
   D04A  7C            		LD	A,H
   D04B  65            		LD	H,L
   D04C  1F            		RRA
@@ -1575,15 +1598,15 @@
   D053  CB1D          		RR	L
   D055  E61F          		AND	01FH
   D057  CD70D0        		CALL	PRTA
-  D05A  3E3A          		LD	A,":"
-  D05C  CDAAD6        		CALL	MSG
+  D05A  3E3A          		LD	A,':'
+  D05C  CDAAD6        		CALL	MSG_
   D05F  7D            		LD	A,L
   D060  0F            		RRCA
   D061  0F            		RRCA
   D062  E63F          		AND	03FH
   D064  CD70D0        		CALL	PRTA
-  D067  3E3A          		LD	A,":"
-  D069  CDAAD6        		CALL	MSG
+  D067  3E3A          		LD	A,':'
+  D069  CDAAD6        		CALL	MSG_
   D06C  7C            		LD	A,H
   D06D  E61F          		AND	01FH
   D06F  87            		ADD	A,A
@@ -1608,7 +1631,7 @@
   D084  C9            		RET
                       	
   D085                	SETFCB:
-  D085  CD64DD        		CALL	SPCUT
+  D085  CD5EDD        		CALL	SPCUT
   D088  1A            		LD	A,(DE)
   D089  FE20          		CP	020H
   D08B  3801          		JR	C,SETFCBA
@@ -1654,13 +1677,13 @@
   D0CA                	C_COPY:
   D0CA  CD85D0        		CALL	SETFCB
   D0CD  118100        		LD	DE,DTA1+1
-  D0D0  0E2F          		LD	C,"/"
+  D0D0  0E2F          		LD	C,'/'
   D0D2  CDA6CE        		CALL	SWITCH
-  D0D5  CD75DF        		CALL	CAP
+  D0D5  CD6FDF        		CALL	CAP
   D0D8  3260D1        		LD	(SW+1),A
                       	
   D0DB  1163DC        		LD	DE,BEEPD
-  D0DE  CD82DC        		CALL	FILEC2
+  D0DE  CD7CDC        		CALL	FILEC2
   D0E1  216C00        		LD	HL,FCB2
   D0E4  CD33D5        		CALL	S29X1
                       	
@@ -1682,7 +1705,7 @@
   D105  2824          		JR	Z,COPY1A
                       	
   D107  215D00        		LD	HL,FCB1+1
-  D10A  CD9CE0        		CALL	CHKWILD
+  D10A  CD96E0        		CALL	CHKWILD
   D10D  3817          		JR	C,COPY9
                       	
   D10F  3E20          		LD	A,020H
@@ -1710,7 +1733,7 @@
   D138                	COPY2:
   D138  F5            		PUSH	AF
   D139  7E            		LD	A,(HL)
-  D13A  FE3F          		CP	"?"
+  D13A  FE3F          		CP	'?'
   D13C  2001          		JR	NZ,COPY3
   D13E  0A            		LD	A,(BC)
   D13F                	COPY3:
@@ -1725,20 +1748,20 @@
   D14A  EDB0          		LDIR
   D14C                	PUTNAME:
   D14C  215D00        		LD	HL,FCB1+1
-  D14F  CD9CE0        		CALL	CHKWILD
+  D14F  CD96E0        		CALL	CHKWILD
   D152  300B          		JR	NC,PUTN1
   D154  21DC00        		LD	HL,FDRV+1
   D157  CDF2CF        		CALL	FPRNT
   D15A  3E20          		LD	A,020H
-  D15C  CDAAD6        		CALL	MSG
+  D15C  CDAAD6        		CALL	MSG_
   D15F                	PUTN1:
   D15F  3E00          	SW:	LD	A,000H
-  D161  FE54          		CP	"T"
+  D161  FE54          		CP	'T'
   D163  2005          		JR	NZ,CSW1
   D165  217FD1        		LD	HL,SWNE
   D168  1807          		JR	SWT1
   D16A                	CSW1:
-  D16A  FE4E          		CP	"N"
+  D16A  FE4E          		CP	'N'
   D16C  2011          		JR	NZ,SWNE
   D16E  211DD1        		LD	HL,COPYS
   D171                	SWT1:
@@ -1855,7 +1878,7 @@
   D22E  5D            		LD	E,L
   D22F  13            		INC	DE
   D230  010A00        		LD	BC,10
-  D233  363F          		LD	(HL),"?"
+  D233  363F          		LD	(HL),'?'
   D235  EDB0          		LDIR
   D237  C9            		RET
                       	
@@ -1868,7 +1891,8 @@
   D242  C9            		RET
                       	
                       	
-                      		
+                      	;LDOS.ASM
+                      	
                       	;	LSX-Dodgers OS
                       	
   D243                	BDOS0:
@@ -1896,7 +1920,7 @@
                       	
   D266                	_ERROR:
   D266  013201        		LD	BC,00132H
-  D269  112501        		LD	DE,VER
+  D269  112601        		LD	DE,VER
   D26C                	_SYS1C:
   D26C                	_SYS1E:
   D26C                	_SYS20:
@@ -1909,7 +1933,7 @@
   D26F                	_SX09:
   D26F  1A            		LD	A,(DE)
   D270  13            		INC	DE
-  D271  FE24          		CP	"$"
+  D271  FE24          		CP	'$'
   D273  282C          		JR	Z,SX0E2
   D275  D5            		PUSH	DE
   D276  5F            		LD	E,A
@@ -1948,13 +1972,13 @@
   D2A4  C9            		RET
                       	
   D2A5                	_SYS0F:
-  D2A5  CD76DD        		CALL	SETDRV
+  D2A5  CD70DD        		CALL	SETDRV
   D2A8  FD7E1C        		LD	A,(IY+28)	;Open
   D2AB  C602          		ADD	A,002H		;Write
   D2AD  2868          		JR	Z,FEND0F
-  D2AF  CD98E0        		CALL	CHKWILDX
+  D2AF  CD92E0        		CALL	CHKWILDX
                       	
-  D2B2  D498DD        		CALL	NC,SOPENX
+  D2B2  D492DD        		CALL	NC,SOPENX
   D2B5                	_S16XX:
   D2B5  3860          		JR	C,FEND0F
                       					;Directory location
@@ -2019,7 +2043,7 @@
   D317  C3BCD3        		JP	FEND
                       	
   D31A                	_SYS10:
-  D31A  CD76DD        		CALL	SETDRV
+  D31A  CD70DD        		CALL	SETDRV
   D31D  FD7E1C        		LD	A,(IY+28)	;Open
   D320  D6FE          		SUB	0FEH
   D322  37            		SCF
@@ -2030,13 +2054,13 @@
   D329  FD770F        		LD	(IY+15),A
                       	
   D32C  FD341C        		INC	(IY+28)		;0FEH->0FFH
-  D32F  CD89E1        		CALL	SETTMS
+  D32F  CD83E1        		CALL	SETTMS
                       	
   D332  FD7E1D        		LD	A,(IY+29)
   D335  32A0EC        		LD	(_DIRF),A
   D338  FD5E1E        		LD	E,(IY+30)
   D33B  FD561F        		LD	D,(IY+31)
-  D33E  CDBADE        		CALL	DC
+  D33E  CDB4DE        		CALL	DC
   D341  3879          		JR	C,FEND
                       	
   D343  FD7E19        		LD	A,(IY+25)
@@ -2051,19 +2075,19 @@
   D350  ED4B7EEC      		LD	BC,(_DTBUF)
   D354  09            		ADD	HL,BC
                       	
-  D355  CDA8E0        		CALL	SDIRENT
+  D355  CDA2E0        		CALL	SDIRENT
   D358                	FEND10:
   D358  1862          		JR	FEND
                       	
   D35A                	OPENDD:
   D35A  FD361CFD      		LD	(IY+28),0FDH
   D35E  FD360D20      		LD	(IY+13),020H
-  D362  CD8EE1        		CALL	SETTMSX
+  D362  CD88E1        		CALL	SETTMSX
   D365  1855          		JR	FEND
                       	
   D367                	_SYS11:
-  D367  CD76DD        		CALL	SETDRV
-  D36A  CD01DF        		CALL	CHKDDX
+  D367  CD70DD        		CALL	SETDRV
+  D36A  CDFBDE        		CALL	CHKDDX
   D36D  3818          		JR	C,_S11A
   D36F  FDE5          		PUSH	IY
   D371  E1            		POP	HL
@@ -2080,10 +2104,10 @@
   D384  70            		LD	(HL),B
   D385  1833          		JR	_S11B
   D387                	_S11A:
-  D387  CDCCDD        		CALL	SOPEN
+  D387  CDC6DD        		CALL	SOPEN
   D38A                	_S12X1:
   D38A  3830          		JR	C,FEND
-  D38C  CD75DE        		CALL	SOPENE2
+  D38C  CD6FDE        		CALL	SOPENE2
   D38F  ED5B8AEC      		LD	DE,(_DTA)
   D393  3A88EC        		LD	A,(_DRV)
   D396  3C            		INC	A
@@ -2094,13 +2118,13 @@
   D39D  EDB0          		LDIR
   D39F  FD6E0E        		LD	L,(IY+14)
   D3A2  FD660F        		LD	H,(IY+15)
-  D3A5  2236E2        		LD	(SCDIR),HL
+  D3A5  2230E2        		LD	(SCDIR),HL
   D3A8  2A9AEC        		LD	HL,(_FBPS)
-  D3AB  2238E2        		LD	(SFBPS),HL
+  D3AB  2232E2        		LD	(SFBPS),HL
   D3AE  2A9FEC        		LD	HL,(_FILEN)
-  D3B1  223AE2        		LD	(SFNDF),HL	;Directory position and Flags
+  D3B1  2234E2        		LD	(SFNDF),HL	;Directory position and Flags
   D3B4  E1            		POP	HL
-  D3B5  113CE2        		LD	DE,SFILE
+  D3B5  1136E2        		LD	DE,SFILE
   D3B8  0E21          		LD	C,33
   D3BA                	_S11B:
   D3BA  EDB0          		LDIR
@@ -2118,7 +2142,7 @@
   D3C4  D5            		PUSH	DE
   D3C5  C5            		PUSH	BC
   D3C6  FDE5          		PUSH	IY
-  D3C8  CD31DE        		CALL	NOPEN
+  D3C8  CD2BDE        		CALL	NOPEN
   D3CB  18BD          		JR	_S12X1
                       	
   D3CD                	_S16K:
@@ -2160,21 +2184,21 @@
   D3F6  FDE5          		PUSH	IY
   D3F8  D1            		POP	DE
   D3F9                	_SYS13:
-  D3F9  CD76DD        		CALL	SETDRV
-  D3FC  CDC4DF        		CALL	KILL
+  D3F9  CD70DD        		CALL	SETDRV
+  D3FC  CDBEDF        		CALL	KILL
   D3FF                	FEND13:
   D3FF  18BB          		JR	FEND
                       	
   D401                	_SYS14:
-  D401  CD76DD        		CALL	SETDRV
-  D404  CDBDE1        		CALL	PUSHRR
-  D407  CDFEE1        		CALL	GETSEQ
-  D40A  CD0BE2        		CALL	SETRBR
+  D401  CD70DD        		CALL	SETDRV
+  D404  CDB7E1        		CALL	PUSHRR
+  D407  CDF8E1        		CALL	GETSEQ
+  D40A  CD05E2        		CALL	SETRBR
                       	
-  D40D  CD24E2        		CALL	[DE27]
+  D40D  CD1EE2        		CALL	K_DE27
                       	
   D410  E5            		PUSH	HL
-  D411  CDD1E1        		CALL	SETSEQ
+  D411  CDCBE1        		CALL	SETSEQ
   D414                	SREAD:
   D414  E1            		POP	HL
                       	
@@ -2190,14 +2214,14 @@
   D420  189B          		JR	FENDE
                       	
   D422                	_SYS15:
-  D422  CD76DD        		CALL	SETDRV
-  D425  CDBDE1        		CALL	PUSHRR
-  D428  CDFEE1        		CALL	GETSEQ
-  D42B  CD0BE2        		CALL	SETRBR
+  D422  CD70DD        		CALL	SETDRV
+  D425  CDB7E1        		CALL	PUSHRR
+  D428  CDF8E1        		CALL	GETSEQ
+  D42B  CD05E2        		CALL	SETRBR
                       	
-  D42E  CD1EE2        		CALL	[DE26]
+  D42E  CD18E2        		CALL	K_DE26
   D431  E5            		PUSH	HL
-  D432  CDD1E1        		CALL	SETSEQ
+  D432  CDCBE1        		CALL	SETSEQ
   D435                	SWRITE:
   D435  E1            		POP	HL
                       	
@@ -2205,14 +2229,14 @@
   D438  18E2          		JR	FENDX
                       	
   D43A                	_SYS17:
-  D43A  CD76DD        		CALL	SETDRV
-  D43D  CD20E0        		CALL	NAME
+  D43A  CD70DD        		CALL	SETDRV
+  D43D  CD1AE0        		CALL	NAME
   D440  18BD          		JR	FEND13
                       	
   D442                	_SYS16:
-  D442  CD76DD        		CALL	SETDRV
+  D442  CD70DD        		CALL	SETDRV
                       	
-  D445  CD98E0        		CALL	CHKWILDX
+  D445  CD92E0        		CALL	CHKWILDX
   D448  38B5          		JR	C,FEND13
   D44A  FD7E01        		LD	A,(IY+1)
   D44D  FE05          		CP	5
@@ -2231,38 +2255,38 @@
   D45F  0D            		DEC	C
   D460  20FB          		JR	NZ,_S16X1
                       	
-  D462  CD8EE1        		CALL	SETTMSX
+  D462  CD88E1        		CALL	SETTMSX
   D465  FD360DFF      		LD	(IY+13),0FFH	;Attribute
-  D469  CD98DD        		CALL	SOPENX
+  D469  CD92DD        		CALL	SOPENX
   D46C  3F            		CCF
   D46D  CCCDD3        		CALL	Z,_S16K
-  D470  D486DE        		CALL	NC,COPEN
-  D473  D4A8E0        		CALL	NC,SDIRENT
+  D470  D480DE        		CALL	NC,COPEN
+  D473  D4A2E0        		CALL	NC,SDIRENT
   D476  C3B5D2        		JP	_S16XX
                       	
   D479                	_SYS21:
-  D479  CD76DD        		CALL	SETDRV
-  D47C  CDBDE1        		CALL	PUSHRR
+  D479  CD70DD        		CALL	SETDRV
+  D47C  CDB7E1        		CALL	PUSHRR
   D47F  FD6E21        		LD	L,(IY+33)	;Random record
   D482  FD6622        		LD	H,(IY+34)
-  D485  CD0BE2        		CALL	SETRBR
+  D485  CD05E2        		CALL	SETRBR
                       	
-  D488  CD24E2        		CALL	[DE27]
+  D488  CD1EE2        		CALL	K_DE27
   D48B  E5            		PUSH	HL
-  D48C  CDE8E1        		CALL	POPRR
+  D48C  CDE2E1        		CALL	POPRR
   D48F  1883          		JR	SREAD
                       	
   D491                	_SYS22:
   D491                	_SYS28:
-  D491  CD76DD        		CALL	SETDRV
-  D494  CDBDE1        		CALL	PUSHRR
+  D491  CD70DD        		CALL	SETDRV
+  D494  CDB7E1        		CALL	PUSHRR
   D497  FD6E21        		LD	L,(IY+33)	;Random record
   D49A  FD6622        		LD	H,(IY+34)
-  D49D  CD0BE2        		CALL	SETRBR
+  D49D  CD05E2        		CALL	SETRBR
                       	
-  D4A0  CD1EE2        		CALL	[DE26]
+  D4A0  CD18E2        		CALL	K_DE26
   D4A3  E5            		PUSH	HL
-  D4A4  CDE8E1        		CALL	POPRR
+  D4A4  CDE2E1        		CALL	POPRR
   D4A7  188C          		JR	SWRITE
                       	
   D4A9                	_SYS18:
@@ -2282,14 +2306,14 @@
                       	
   D4B9                	_SYS1B:
   D4B9  7B            		LD	A,E
-  D4BA  CD8BDD        		CALL	GETDRV
+  D4BA  CD85DD        		CALL	GETDRV
   D4BD  CDDCEC        		CALL	_GETDPB
   D4C0  D4E2EC        		CALL	NC,_RDFATX
   D4C3  210000        		LD	HL,0
-  D4C6  D46EE1        		CALL	NC,DSKF
+  D4C6  D468E1        		CALL	NC,DSKF
                       	
   D4C9  DD5E08        		LD	E,(IX+8)
-  D4CC  DD5609        		LD	D,(IX+9)	;ｿｳｸﾗｽﾀ
+  D4CC  DD5609        		LD	D,(IX+9)	;総クラスタ
   D4CF  1B            		DEC	DE
   D4D0  1B            		DEC	DE
   D4D1  FD2A7CEC      		LD	IY,(_FATBF)
@@ -2320,7 +2344,7 @@
   D4F2                	_SYS23:
   D4F2  E5            		PUSH	HL
   D4F3  2A1EEC        		LD	HL,(STABLE+2*00FH)
-  D4F6  CD0F00        		CALL	[HL]
+  D4F6  CD0F00        		CALL	K_HL
   D4F9  3814          		JR	C,FSIZE1
                       	;	EX	DE,IY
   D4FB  D5            		PUSH	DE
@@ -2328,7 +2352,7 @@
   D4FE  D1            		POP	DE
                       	;
   D4FF  D5            		PUSH	DE
-  D500  CDEEE1        		CALL	GETSIZE
+  D500  CDE8E1        		CALL	GETSIZE
   D503  FD7521        		LD	(IY+33),L	;Random record
   D506  FD7422        		LD	(IY+34),H
   D509  D1            		POP	DE
@@ -2350,7 +2374,7 @@
   D515  D1            		POP	DE
                       	;
   D516  D5            		PUSH	DE
-  D517  CDFEE1        		CALL	GETSEQ
+  D517  CDF8E1        		CALL	GETSEQ
   D51A  FD7521        		LD	(IY+33),L	;Random record
   D51D  FD7422        		LD	(IY+34),H
   D520  FD362300      		LD	(IY+35),0
@@ -2367,7 +2391,7 @@
   D52C                	_SYS29:
   D52C  C5            		PUSH	BC
   D52D  E5            		PUSH	HL
-  D52E  CD8ADC        		CALL	FILE
+  D52E  CD84DC        		CALL	FILE
   D531  E1            		POP	HL
   D532  C1            		POP	BC
   D533                	S29X1:
@@ -2418,8 +2442,8 @@
   D572  9F            		SBC	A,A
   D573  C9            		RET
                       	
+                      	;LDIO.ASM
                       	
-                      		
                       	;	LSX-Dodgers IO
                       	
                       	
@@ -2625,11 +2649,11 @@
   D683  3E1B          		LD	A,01BH
   D685  CD5BD6        		CALL	KEYBS1
   D688  7D            		LD	A,L
-  D689  C6AF          		ADD	A,020H-"q"
+  D689  C6AF          		ADD	A,020H-'q'
   D68B  CB7D          		BIT	7,L
   D68D  C8            		RET	Z
-  D68E  2E50          		LD	L,"P"
-  D690  D690          		SUB	0E1H+020H-"q"
+  D68E  2E50          		LD	L,'P'
+  D690  D690          		SUB	0E1H+020H-'q'
   D692  2810          		JR	Z,KEYBSL
   D694  2C            		INC	L
   D695  3D            		DEC	A
@@ -2637,17 +2661,17 @@
   D698  2C            		INC	L
   D699  D609          		SUB	0EBH-0E2H
   D69B  2807          		JR	Z,KEYBSL
-  D69D  2E43          		LD	L,"C"
+  D69D  2E43          		LD	L,'C'
   D69F  3D            		DEC	A
   D6A0  2802          		JR	Z,KEYBSL
-  D6A2  2E58          		LD	L,"X"
+  D6A2  2E58          		LD	L,'X'
   D6A4                	KEYBSL:
   D6A4  7D            		LD	A,L
   D6A5  18B4          		JR	KEYBS1
                       	
   D6A7                	_SYS01:
   D6A7  CDFAD9        		CALL	_SYS07
-  D6AA                	MSG:
+  D6AA                	MSG_:
   D6AA  F5            		PUSH	AF
   D6AB  D5            		PUSH	DE
   D6AC  5F            		LD	E,A
@@ -2842,10 +2866,10 @@
   D7A9  CDCCD7        		CALL	IN49SB_BCD		;YY
   D7AC  6F            		LD	L,A
   D7AD  2600          		LD	H,0
-  D7AF  116C07        		LD	DE,1900
+  D7AF  116C07        		LD	DE,1900		;0076CH
   D7B2  FE5A          		CP	90
   D7B4  3002          		JR	NC,RDDATE1
-  D7B6  1ED0          		LD	E,2000
+  D7B6  1ED0          		LD	E,0D0H		;2000?ｿｽﾌ会ｿｽ1?ｿｽo?ｿｽC?ｿｽg?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽﾖゑｿｽ?ｿｽ?ｿｽ D=007H?ｿｽﾅ変会ｿｽ?ｿｽ?ｿｽ?ｿｽﾈゑｿｽ
   D7B8                	RDDATE1:
   D7B8  19            		ADD	HL,DE
   D7B9  CD3EDA        		CALL	IN49SB		;MM
@@ -2902,37 +2926,37 @@
                       	
   D7FC                	ESC1:
   D7FC  7B            		LD	A,E
-  D7FD  FE41          		CP	"A"
+  D7FD  FE41          		CP	'A'
   D7FF  CA3DD9        		JP	Z,CTRL1E
-  D802  FE42          		CP	"B"
+  D802  FE42          		CP	'B'
   D804  CAC4DA        		JP	Z,CTRL1F
-  D807  FE43          		CP	"C"
+  D807  FE43          		CP	'C'
   D809  CA4AD9        		JP	Z,CTRL1C
-  D80C  FE44          		CP	"D"
+  D80C  FE44          		CP	'D'
   D80E  CA33D9        		JP	Z,CTRL1D
-  D811  FE45          		CP	"E"
+  D811  FE45          		CP	'E'
   D813  2802          		JR	Z,CT0CX
-  D815  FE6A          		CP	"j"
+  D815  FE6A          		CP	'j'
   D817                	CT0CX:
   D817  CA97DA        		JP	Z,CTRL0C
-  D81A  FE48          		CP	"H"
+  D81A  FE48          		CP	'H'
   D81C  CAC8D9        		JP	Z,CTRL0B
-  D81F  FE4A          		CP	"J"
+  D81F  FE4A          		CP	'J'
   D821  CA9ADA        		JP	Z,CTRL1A
-  D824  FE4B          		CP	"K"
+  D824  FE4B          		CP	'K'
   D826  CA8AD9        		JP	Z,CTRL05
-  D829  FE4C          		CP	"L"
+  D829  FE4C          		CP	'L'
   D82B  CAD9DA        		JP	Z,CTRL0E
-  D82E  FE78          		CP	"x"
+  D82E  FE78          		CP	'x'
   D830  2804          		JR	Z,ESC1X
-  D832  FE79          		CP	"y"
+  D832  FE79          		CP	'y'
   D834  2002          		JR	NZ,ESC1Y
   D836                	ESC1X:
   D836  3601          		LD	(HL),1
   D838                	ESC1Y:
-  D838  FE3D          		CP	"="
+  D838  FE3D          		CP	'='
   D83A  2804          		JR	Z,ESC1W
-  D83C  FE59          		CP	"Y"
+  D83C  FE59          		CP	'Y'
   D83E  2002          		JR	NZ,ESC1Z
   D840                	ESC1W:
   D840  3602          		LD	(HL),2
@@ -3000,6 +3024,7 @@
   D899  78            		LD	A,B
   D89A  F638          		OR	038H
   D89C  47            		LD	B,A
+                      	;	OUT	(C),0		;?ｿｽ?ｿｽ?ｿｽ?ｿｽ`?ｿｽ?ｿｽ?ｿｽﾟニ?ｿｽ[?ｿｽ?ｿｽ?ｿｽj?ｿｽb?ｿｽN
   D89D  ED71          		DB	0EDH,071H		;Kanji
   D89F  CB98          		RES	3,B
   D8A1  ED59          		OUT	(C),E		;Text
@@ -3025,7 +3050,7 @@
   D8BC  23            		INC	HL
   D8BD  66            		LD	H,(HL)
   D8BE  6F            		LD	L,A
-  D8BF  CD0F00        		CALL	[HL]
+  D8BF  CD0F00        		CALL	K_HL
   D8C2  18E2          		JR	PRINTE5
                       	
   D8C4                	KANJI2:
@@ -3171,6 +3196,7 @@
   D998  78            		LD	A,B
   D999  F638          		OR	038H
   D99B  47            		LD	B,A
+                      	;	OUT	(C),0		;?ｿｽ?ｿｽ?ｿｽ?ｿｽ`?ｿｽ?ｿｽ?ｿｽﾟニ?ｿｽ[?ｿｽ?ｿｽ?ｿｽj?ｿｽb?ｿｽN
   D99C  ED71          		DB	0EDH,071H		;kanji
   D99E  CB98          		RES	3,B
   D9A0  ED61          		OUT	(C),H		;Text
@@ -3238,7 +3264,7 @@
   D9F1  C30000        		JP	0
   D9F4                	WBOOT:
   D9F4  C3AACC        		JP	_SYS00
-  D9F7                	CONST:
+  D9F7                	CONST_:
   D9F7  C395D7        		JP	CONSTX
   D9FA                	_SYS07:
   D9FA                	CONIN:
@@ -3353,6 +3379,7 @@
   DA9E  78            		LD	A,B
   DA9F  F638          		OR	038H
   DAA1  47            		LD	B,A
+                      	;	OUT	(C),0		;?ｿｽ?ｿｽ?ｿｽ?ｿｽ`?ｿｽ?ｿｽ?ｿｽﾟニ?ｿｽ[?ｿｽ?ｿｽ?ｿｽj?ｿｽb?ｿｽN
   DAA2  ED71          		DB	0EDH,071H		;kanji
   DAA4  CB98          		RES	3,B
   DAA6  3E20          		LD	A,020H
@@ -3454,6 +3481,7 @@
   DB41  215020        		LD	HL,02000H+80
   DB44  3A96EC        		LD	A,(_COLORF)
   DB47                	SCRCL1:
+                      	;	OUT	(C),0		;?ｿｽ?ｿｽ?ｿｽ?ｿｽ`?ｿｽ?ｿｽ?ｿｽﾟニ?ｿｽ[?ｿｽ?ｿｽ?ｿｽj?ｿｽb?ｿｽN
   DB47  ED71          		DB	0EDH,071H
   DB49  CB98          		RES	3,B
   DB4B  ED61          		OUT	(C),H
@@ -3629,1927 +3657,1930 @@
                       	
   DC72  00            	REDDATA:DB	0
                       	
-  DC73                		DS	12	;菴吶ｊ縺ｮ謨ｰ蜷医ｏ縺・
+  DC73                		DS	6	;余りの数合わせ
                       	
                       	
-                      		
+                      	;LDFILE.ASM
+                      	
                       	;	LSX-Dodgers FILE
                       	
-  DC7F                	FILEC:
-  DC7F  CD8ADC        		CALL	FILE
-  DC82                	FILEC2:
-  DC82  3ADC00        		LD	A,(FDRV+1)
-  DC85  FE20          		CP	020H
-  DC87  C8            		RET	Z
-  DC88  183B          		JR	SETDIR1
+  DC79                	FILEC:
+  DC79  CD84DC        		CALL	FILE
+  DC7C                	FILEC2:
+  DC7C  3ADC00        		LD	A,(FDRV+1)
+  DC7F  FE20          		CP	020H
+  DC81  C8            		RET	Z
+  DC82  183B          		JR	SETDIR1
                       	
-  DC8A                	FILE:
-  DC8A  AF            		XOR	A
-  DC8B  32DB00        		LD	(FDRV),A
-  DC8E  67            		LD	H,A
-  DC8F  6F            		LD	L,A
-  DC90  22E900        		LD	(FDRV+14),HL
-  DC93  CD64DD        		CALL	SPCUT
-  DC96  CD49DD        		CALL	CCHK3
-  DC99  2812          		JR	Z,DEVI1
-  DC9B  13            		INC	DE
-  DC9C  1A            		LD	A,(DE)
-  DC9D  1B            		DEC	DE
-  DC9E  FE3A          		CP	":"
-  DCA0  200B          		JR	NZ,DEVI1
-  DCA2  1A            		LD	A,(DE)		;DRIVE
-  DCA3  CD75DF        		CALL	CAP
-  DCA6  D640          		SUB	"@"
-  DCA8  13            		INC	DE
-  DCA9  13            		INC	DE
-  DCAA  32DB00        		LD	(FDRV),A
-  DCAD                	DEVI1:
-  DCAD  1A            		LD	A,(DE)
-  DCAE  D65C          		SUB	"\"
-  DCB0  200B          		JR	NZ,NOROOT
-  DCB2  210000        		LD	HL,0
-  DCB5  22F500        		LD	(FDRV+26),HL
-  DCB8  2C            		INC	L
-  DCB9  22E900        		LD	(FDRV+14),HL
-  DCBC  13            		INC	DE
-  DCBD                	NOROOT:
+  DC84                	FILE:
+  DC84  AF            		XOR	A
+  DC85  32DB00        		LD	(FDRV),A
+  DC88  67            		LD	H,A
+  DC89  6F            		LD	L,A
+  DC8A  22E900        		LD	(FDRV+14),HL
+  DC8D  CD5EDD        		CALL	SPCUT
+  DC90  CD43DD        		CALL	CCHK3
+  DC93  2812          		JR	Z,DEVI1
+  DC95  13            		INC	DE
+  DC96  1A            		LD	A,(DE)
+  DC97  1B            		DEC	DE
+  DC98  FE3A          		CP	':'
+  DC9A  200B          		JR	NZ,DEVI1
+  DC9C  1A            		LD	A,(DE)		;DRIVE
+  DC9D  CD6FDF        		CALL	CAP
+  DCA0  D640          		SUB	'@'
+  DCA2  13            		INC	DE
+  DCA3  13            		INC	DE
+  DCA4  32DB00        		LD	(FDRV),A
+  DCA7                	DEVI1:
+  DCA7  1A            		LD	A,(DE)
+  DCA8  D65C          		SUB	05CH
+  DCAA  200B          		JR	NZ,NOROOT
+  DCAC  210000        		LD	HL,0
+  DCAF  22F500        		LD	(FDRV+26),HL
+  DCB2  2C            		INC	L
+  DCB3  22E900        		LD	(FDRV+14),HL
+  DCB6  13            		INC	DE
+  DCB7                	NOROOT:
                       	
-  DCBD                	SETDIR:
-  DCBD  CDE9DC        		CALL	FILED
-  DCC0  1A            		LD	A,(DE)
-  DCC1  FE5C          		CP	"\"
-  DCC3  C0            		RET	NZ
-  DCC4  13            		INC	DE
-  DCC5                	SETDIR1:
-  DCC5  3E10          		LD	A,010H		;Directory
-  DCC7  32E800        		LD	(FDRV+13),A
-  DCCA  D5            		PUSH	DE
-  DCCB  11DB00        		LD	DE,FDRV
-  DCCE  2A1EEC        		LD	HL,(STABLE+2*00FH)
-  DCD1  CD0F00        		CALL	[HL]
-  DCD4  D1            		POP	DE
-  DCD5  B7            		OR	A
-  DCD6  C0            		RET	NZ
+  DCB7                	SETDIR:
+  DCB7  CDE3DC        		CALL	FILED
+  DCBA  1A            		LD	A,(DE)
+  DCBB  FE5C          		CP	05CH
+  DCBD  C0            		RET	NZ
+  DCBE  13            		INC	DE
+  DCBF                	SETDIR1:
+  DCBF  3E10          		LD	A,010H		;Directory
+  DCC1  32E800        		LD	(FDRV+13),A
+  DCC4  D5            		PUSH	DE
+  DCC5  11DB00        		LD	DE,FDRV
+  DCC8  2A1EEC        		LD	HL,(STABLE+2*00FH)
+  DCCB  CD0F00        		CALL	K_HL
+  DCCE  D1            		POP	DE
+  DCCF  B7            		OR	A
+  DCD0  C0            		RET	NZ
                       	
-  DCD7  3AE800        		LD	A,(FDRV+13)
-  DCDA  CB67          		BIT	4,A
-  DCDC  C8            		RET	Z
+  DCD1  3AE800        		LD	A,(FDRV+13)
+  DCD4  CB67          		BIT	4,A
+  DCD6  C8            		RET	Z
                       	
-  DCDD  CD30DD        		CALL	FILEI
-  DCE0  2AF500        		LD	HL,(FDRV+26)
-  DCE3  23            		INC	HL
-  DCE4  22E900        		LD	(FDRV+14),HL
-  DCE7  18D4          		JR	SETDIR
+  DCD7  CD2ADD        		CALL	FILEI
+  DCDA  2AF500        		LD	HL,(FDRV+26)
+  DCDD  23            		INC	HL
+  DCDE  22E900        		LD	(FDRV+14),HL
+  DCE1  18D4          		JR	SETDIR
                       	
-  DCE9                	FILED:
-  DCE9  CD30DD        		CALL	FILEI
+  DCE3                	FILED:
+  DCE3  CD2ADD        		CALL	FILEI
                       	
-  DCEC  0608          		LD	B,8
-  DCEE                	FILE2:
-  DCEE  CD3EDD        		CALL	CCHKF
-  DCF1  C8            		RET	Z
-  DCF2  FE2A          		CP	"*"
-  DCF4  282E          		JR	Z,FILE9
-  DCF6  FE2E          		CP	"."
-  DCF8  280C          		JR	Z,FILE4
-  DCFA  77            		LD	(HL),A
-  DCFB  23            		INC	HL
-  DCFC  10F0          		DJNZ	FILE2
+  DCE6  0608          		LD	B,8
+  DCE8                	FILE2:
+  DCE8  CD38DD        		CALL	CCHKF
+  DCEB  C8            		RET	Z
+  DCEC  FE2A          		CP	'*'
+  DCEE  282E          		JR	Z,FILE9
+  DCF0  FE2E          		CP	'.'
+  DCF2  280C          		JR	Z,FILE4
+  DCF4  77            		LD	(HL),A
+  DCF5  23            		INC	HL
+  DCF6  10F0          		DJNZ	FILE2
                       	
-  DCFE                	FILE3:
-  DCFE  CD3EDD        		CALL	CCHKF
-  DD01  C8            		RET	Z
-  DD02  FE2E          		CP	"."
-  DD04  20F8          		JR	NZ,FILE3
+  DCF8                	FILE3:
+  DCF8  CD38DD        		CALL	CCHKF
+  DCFB  C8            		RET	Z
+  DCFC  FE2E          		CP	'.'
+  DCFE  20F8          		JR	NZ,FILE3
                       	
-  DD06                	FILE4:
-  DD06  21E400        		LD	HL,FNAME+8
-  DD09  0603          		LD	B,3
+  DD00                	FILE4:
+  DD00  21E400        		LD	HL,FNAME+8
+  DD03  0603          		LD	B,3
                       	
-  DD0B                	FILE4L:
-  DD0B  CD3EDD        		CALL	CCHKF
-  DD0E  C8            		RET	Z
-  DD0F  FE2E          		CP	"."
-  DD11  2008          		JR	NZ,FILE12
-  DD13  32DC00        		LD	(FNAME),A	;Parent directory(..)
-  DD16  32DD00        		LD	(FNAME+1),A
-  DD19  3E20          		LD	A,020H
-  DD1B                	FILE12:
-  DD1B  FE2A          		CP	"*"
-  DD1D  280A          		JR	Z,FILE10
-  DD1F  77            		LD	(HL),A
-  DD20  23            		INC	HL
-  DD21  10E8          		DJNZ	FILE4L
-  DD23  C9            		RET
+  DD05                	FILE4L:
+  DD05  CD38DD        		CALL	CCHKF
+  DD08  C8            		RET	Z
+  DD09  FE2E          		CP	'.'
+  DD0B  2008          		JR	NZ,FILE12
+  DD0D  32DC00        		LD	(FNAME),A	;Parent directory(..)
+  DD10  32DD00        		LD	(FNAME+1),A
+  DD13  3E20          		LD	A,020H
+  DD15                	FILE12:
+  DD15  FE2A          		CP	'*'
+  DD17  280A          		JR	Z,FILE10
+  DD19  77            		LD	(HL),A
+  DD1A  23            		INC	HL
+  DD1B  10E8          		DJNZ	FILE4L
+  DD1D  C9            		RET
                       	
-  DD24                	FILE9:
-  DD24  CD29DD        		CALL	FILE10
-  DD27  18D5          		JR	FILE3
+  DD1E                	FILE9:
+  DD1E  CD23DD        		CALL	FILE10
+  DD21  18D5          		JR	FILE3
                       	
-  DD29                	FILE10:
-  DD29  3E3F          		LD	A,"?"
+  DD23                	FILE10:
+  DD23  3E3F          		LD	A,'?'
                       	
-  DD2B                	FILE7:
-  DD2B  77            		LD	(HL),A
-  DD2C  23            		INC	HL
-  DD2D  10FC          		DJNZ	FILE7
-  DD2F  C9            		RET
+  DD25                	FILE7:
+  DD25  77            		LD	(HL),A
+  DD26  23            		INC	HL
+  DD27  10FC          		DJNZ	FILE7
+  DD29  C9            		RET
                       	
-  DD30                	FILEI:
-  DD30  3E20          		LD	A,020H
-  DD32  01000B        		LD	BC,11*256
-  DD35  21DC00        		LD	HL,FNAME
-  DD38  E5            		PUSH	HL
-  DD39  CD2BDD        		CALL	FILE7
-  DD3C  E1            		POP	HL
-  DD3D  C9            		RET
+  DD2A                	FILEI:
+  DD2A  3E20          		LD	A,020H
+  DD2C  01000B        		LD	BC,11*256
+  DD2F  21DC00        		LD	HL,FNAME
+  DD32  E5            		PUSH	HL
+  DD33  CD25DD        		CALL	FILE7
+  DD36  E1            		POP	HL
+  DD37  C9            		RET
                       	
-  DD3E                	CCHKF:
-  DD3E  1A            		LD	A,(DE)
-  DD3F  CD46DD        		CALL	CCHK2
-  DD42  C8            		RET	Z
-  DD43  C385E0        		JP	FKAN
+  DD38                	CCHKF:
+  DD38  1A            		LD	A,(DE)
+  DD39  CD40DD        		CALL	CCHK2
+  DD3C  C8            		RET	Z
+  DD3D  C37FE0        		JP	FKAN
                       	
-  DD46                	CCHK2:
-  DD46  0C            		INC	C
-  DD47  0D            		DEC	C
-  DD48  C0            		RET	NZ
-  DD49                	CCHK3:
-  DD49  FE2B          		CP	"+"
+  DD40                	CCHK2:
+  DD40  0C            		INC	C
+  DD41  0D            		DEC	C
+  DD42  C0            		RET	NZ
+  DD43                	CCHK3:
+  DD43  FE2B          		CP	'+'
+  DD45  C8            		RET	Z
+  DD46  FE2C          		CP	','
+  DD48  C8            		RET	Z
+  DD49  FE2F          		CP	'/'
   DD4B  C8            		RET	Z
-  DD4C  FE2C          		CP	","
+  DD4C  FE3A          		CP	':'
   DD4E  C8            		RET	Z
-  DD4F  FE2F          		CP	"/"
+  DD4F  FE3B          		CP	';'
   DD51  C8            		RET	Z
-  DD52  FE3A          		CP	":"
+  DD52  FE3D          		CP	'='
   DD54  C8            		RET	Z
-  DD55  FE3B          		CP	";"
+  DD55  FE5C          		CP	05CH
   DD57  C8            		RET	Z
-  DD58  FE3D          		CP	"="
-  DD5A  C8            		RET	Z
-  DD5B  FE5C          		CP	"\"
-  DD5D  C8            		RET	Z
-  DD5E  FE20          		CP	020H
-  DD60  D0            		RET	NC
-  DD61  BF            		CP	A		;Z=1
-  DD62  C9            		RET
+  DD58  FE20          		CP	020H
+  DD5A  D0            		RET	NC
+  DD5B  BF            		CP	A		;Z=1
+  DD5C  C9            		RET
                       	
-  DD63                	SS1:
-  DD63  13            		INC	DE
-  DD64                	SPCUT:
-  DD64  1A            		LD	A,(DE)
-  DD65  FE20          		CP	020H
-  DD67  28FA          		JR	Z,SS1
-  DD69  C9            		RET
+  DD5D                	SS1:
+  DD5D  13            		INC	DE
+  DD5E                	SPCUT:
+  DD5E  1A            		LD	A,(DE)
+  DD5F  FE20          		CP	020H
+  DD61  28FA          		JR	Z,SS1
+  DD63  C9            		RET
                       	
-  DD6A                	SETDRVF:
-  DD6A  11DB00        		LD	DE,FDRV
-  DD6D                	SETDRV0:
-  DD6D  CD76DD        		CALL	SETDRV
-  DD70  FDE1          		POP	IY
-  DD72  C1            		POP	BC
-  DD73  D1            		POP	DE
-  DD74  E1            		POP	HL
-  DD75  C9            		RET
+  DD64                	SETDRVF:
+  DD64  11DB00        		LD	DE,FDRV
+  DD67                	SETDRV0:
+  DD67  CD70DD        		CALL	SETDRV
+  DD6A  FDE1          		POP	IY
+  DD6C  C1            		POP	BC
+  DD6D  D1            		POP	DE
+  DD6E  E1            		POP	HL
+  DD6F  C9            		RET
                       	
-  DD76                	SETDRV:
-  DD76  E3            		EX	(SP),HL		;HL=RETRN ADDRESS
-  DD77  D5            		PUSH	DE		;PUSH HL/DE/BC/IY
-  DD78  C5            		PUSH	BC
-  DD79  1A            		LD	A,(DE)
+  DD70                	SETDRV:
+  DD70  E3            		EX	(SP),HL		;HL=RETRN ADDRESS
+  DD71  D5            		PUSH	DE		;PUSH HL/DE/BC/IY
+  DD72  C5            		PUSH	BC
+  DD73  1A            		LD	A,(DE)
                       	;	EX	DE,IY
-  DD7A  D5            		PUSH	DE
-  DD7B  FDE3          		EX	(SP),IY
-  DD7D  D1            		POP	DE
+  DD74  D5            		PUSH	DE
+  DD75  FDE3          		EX	(SP),IY
+  DD77  D1            		POP	DE
                       	;
-  DD7E  D5            		PUSH	DE
-  DD7F  CD8BDD        		CALL	GETDRV
-  DD82  3C            		INC	A
-  DD83  FD7700        		LD	(IY),A
-  DD86  3D            		DEC	A
-  DD87  CDD9EC        		CALL	_CHGDRV
+  DD78  D5            		PUSH	DE
+  DD79  CD85DD        		CALL	GETDRV
+  DD7C  3C            		INC	A
+  DD7D  FD7700        		LD	(IY+0),A
+  DD80  3D            		DEC	A
+  DD81  CDD9EC        		CALL	_CHGDRV
                       	
-  DD8A  E9            		JP	(HL)
+  DD84  E9            		JP	(HL)
                       	
-  DD8B                	GETDRV:
-  DD8B  E67F          		AND	07FH
-  DD8D  D601          		SUB	001H
-  DD8F  3003          		JR	NC,GETDRV1
-  DD91  3A87EC        		LD	A,(_DVSW)	;Current Drive
-  DD94                	GETDRV1:
-  DD94  3288EC        		LD	(_DRV),A
-  DD97  C9            		RET
+  DD85                	GETDRV:
+  DD85  E67F          		AND	07FH
+  DD87  D601          		SUB	001H
+  DD89  3003          		JR	NC,GETDRV1
+  DD8B  3A87EC        		LD	A,(_DVSW)	;Current Drive
+  DD8E                	GETDRV1:
+  DD8E  3288EC        		LD	(_DRV),A
+  DD91  C9            		RET
                       	
-  DD98                	SOPENX:
-  DD98  CD01DF        		CALL	CHKDDX
-  DD9B  3802          		JR	C,SOPENX1
-  DD9D  C1            		POP	BC
-  DD9E  E9            		JP	(HL)
-  DD9F                	SOPENX1:
-  DD9F  113CE2        		LD	DE,SFILE
-  DDA2  1A            		LD	A,(DE)
-  DDA3  FDBE00        		CP	(IY)
-  DDA6  2024          		JR	NZ,SOPEN
-  DDA8  13            		INC	DE
-  DDA9  FDE5          		PUSH	IY
-  DDAB  E1            		POP	HL
-  DDAC  23            		INC	HL
-  DDAD  CD31DF        		CALL	CPFILE
-  DDB0  201A          		JR	NZ,SOPEN
+  DD92                	SOPENX:
+  DD92  CDFBDE        		CALL	CHKDDX
+  DD95  3802          		JR	C,SOPENX1
+  DD97  C1            		POP	BC
+  DD98  E9            		JP	(HL)
+  DD99                	SOPENX1:
+  DD99  1136E2        		LD	DE,SFILE
+  DD9C  1A            		LD	A,(DE)
+  DD9D  FDBE00        		CP	(IY+0)
+  DDA0  2024          		JR	NZ,SOPEN
+  DDA2  13            		INC	DE
+  DDA3  FDE5          		PUSH	IY
+  DDA5  E1            		POP	HL
+  DDA6  23            		INC	HL
+  DDA7  CD2BDF        		CALL	CPFILE
+  DDAA  201A          		JR	NZ,SOPEN
                       	
-  DDB2  2A36E2        		LD	HL,(SCDIR)
-  DDB5  FD750E        		LD	(IY+14),L
-  DDB8  FD740F        		LD	(IY+15),H
+  DDAC  2A30E2        		LD	HL,(SCDIR)
+  DDAF  FD750E        		LD	(IY+14),L
+  DDB2  FD740F        		LD	(IY+15),H
                       	
-  DDBB  2A3AE2        		LD	HL,(SFNDF)	;Direcroty location and Flags
-  DDBE  229FEC        		LD	(_FILEN),HL
+  DDB5  2A34E2        		LD	HL,(SFNDF)	;Direcroty location and Flags
+  DDB8  229FEC        		LD	(_FILEN),HL
                       	
-  DDC1  ED5B38E2      		LD	DE,(SFBPS)
-  DDC5  213CE2        		LD	HL,SFILE
-  DDC8  36FF          		LD	(HL),0FFH
-  DDCA  23            		INC	HL
-  DDCB  C9            		RET
-  DDCC                	SOPEN:
-  DDCC  21C9DE        		LD	HL,FILESE
-  DDCF                	SOPENC:
-  DDCF  2209DE        		LD	(OPENPAT+1),HL
+  DDBB  ED5B32E2      		LD	DE,(SFBPS)
+  DDBF  2136E2        		LD	HL,SFILE
+  DDC2  36FF          		LD	(HL),0FFH
+  DDC4  23            		INC	HL
+  DDC5  C9            		RET
+  DDC6                	SOPEN:
+  DDC6  21C3DE        		LD	HL,FILESE
+  DDC9                	SOPENC:
+  DDC9  2203DE        		LD	(OPENPAT+1),HL
                       	
-  DDD2  CDE2EC        		CALL	_RDFATX		;Detect Media
-  DDD5  3857          		JR	C,RDDERR
+  DDCC  CDE2EC        		CALL	_RDFATX		;Detect Media
+  DDCF  3857          		JR	C,RDDERR
                       	
-  DDD7  AF            		XOR	A
-  DDD8  329FEC        		LD	(_FILEN),A
-  DDDB                	SOPEN0:
-  DDDB  CDB1DF        		CALL	LDDIRX
-  DDDE  2819          		JR	Z,SDIRX1
+  DDD1  AF            		XOR	A
+  DDD2  329FEC        		LD	(_FILEN),A
+  DDD5                	SOPEN0:
+  DDD5  CDABDF        		CALL	LDDIRX
+  DDD8  2819          		JR	Z,SDIRX1
                       	
-  DDE0  CDBADE        		CALL	DC		;Sub Directory
-  DDE3  3808          		JR	C,SDIRX0
-  DDE5  2A7EEC        		LD	HL,(_DTBUF)
-  DDE8  7E            		LD	A,(HL)
-  DDE9  FE2E          		CP	"."
-  DDEB  2810          		JR	Z,SOPEN1
-  DDED                	SDIRX0:
-  DDED  AF            		XOR	A
-  DDEE  32A0EC        		LD	(_DIRF),A
-  DDF1  FD360E01      		LD	(IY+14),1
-  DDF5  FD360F00      		LD	(IY+15),0
-  DDF9                	SDIRX1:
-  DDF9  ED5B62E2      		LD	DE,(_DIRPS)	;Root Directory
+  DDDA  CDB4DE        		CALL	DC		;Sub Directory
+  DDDD  3808          		JR	C,SDIRX0
+  DDDF  2A7EEC        		LD	HL,(_DTBUF)
+  DDE2  7E            		LD	A,(HL)
+  DDE3  FE2E          		CP	'.'
+  DDE5  2810          		JR	Z,SOPEN1
+  DDE7                	SDIRX0:
+  DDE7  AF            		XOR	A
+  DDE8  32A0EC        		LD	(_DIRF),A
+  DDEB  FD360E01      		LD	(IY+14),1
+  DDEF  FD360F00      		LD	(IY+15),0
+  DDF3                	SDIRX1:
+  DDF3  ED5B5CE2      		LD	DE,(_DIRPS)	;Root Directory
                       	
-  DDFD                	SOPEN1:
-  DDFD  0E20          	IBM1:	LD	C,32		;ooo 16
-  DDFF                	SOPEN1X:
-  DDFF  CDBADE        		CALL	DC		;FILE SEARCH
-  DE02  382A          		JR	C,RDDERR
-  DE04  2A7EEC        		LD	HL,(_DTBUF)
-  DE07                	SOPEN2:
-  DE07  D5            		PUSH	DE
-  DE08  CDC9DE        	OPENPAT:CALL	FILESE		;(Self-rewriting)
-  DE0B  D1            		POP	DE
-  DE0C  3876          		JR	C,SOPENE
-  DE0E  281B          		JR	Z,NOTSE
-  DE10                	SOPEN3:
-  DE10  3AA0EC        		LD	A,(_DIRF)
-  DE13  B7            		OR	A
-  DE14  200C          		JR	NZ,SOPEN5
+  DDF7                	SOPEN1:
+  DDF7  0E20          	IBM1:	LD	C,32		;ooo 16
+  DDF9                	SOPEN1X:
+  DDF9  CDB4DE        		CALL	DC		;FILE SEARCH
+  DDFC  382A          		JR	C,RDDERR
+  DDFE  2A7EEC        		LD	HL,(_DTBUF)
+  DE01                	SOPEN2:
+  DE01  D5            		PUSH	DE
+  DE02  CDC3DE        	OPENPAT:CALL	FILESE		;(Self-rewriting)
+  DE05  D1            		POP	DE
+  DE06  3876          		JR	C,SOPENE
+  DE08  281B          		JR	Z,NOTSE
+  DE0A                	SOPEN3:
+  DE0A  3AA0EC        		LD	A,(_DIRF)
+  DE0D  B7            		OR	A
+  DE0E  200C          		JR	NZ,SOPEN5
                       	
-  DE16  CD67DE        		CALL	ENDRDI
-  DE19  280E          		JR	Z,SOPEN6
-  DE1B  3C            		INC	A
-  DE1C  200B          		JR	NZ,SOPEN6
-  DE1E  0E10          		LD	C,16
-  DE20  18DD          		JR	SOPEN1X
-  DE22                	SOPEN5:
-  DE22  CDF7EC        		CALL	_GNCL	;END DIR
-  DE25  D8            		RET	C
-  DE26  CD6DDF        		CALL	ENDCL
-  DE29                	SOPEN6:
-  DE29  38D2          		JR	C,SOPEN1
+  DE10  CD61DE        		CALL	ENDRDI
+  DE13  280E          		JR	Z,SOPEN6
+  DE15  3C            		INC	A
+  DE16  200B          		JR	NZ,SOPEN6
+  DE18  0E10          		LD	C,16
+  DE1A  18DD          		JR	SOPEN1X
+  DE1C                	SOPEN5:
+  DE1C  CDF7EC        		CALL	_GNCL	;END DIR
+  DE1F  D8            		RET	C
+  DE20  CD67DF        		CALL	ENDCL
+  DE23                	SOPEN6:
+  DE23  38D2          		JR	C,SOPEN1
                       	
-  DE2B                	_SYS2B:
-  DE2B                	_SYS2D:
-  DE2B                	NOTSE:
-  DE2B  37            		SCF			;CF=1
-  DE2C  9F            		SBC	A,A		;A=0FFH
-  DE2D  C9            		RET
+  DE25                	_SYS2B:
+  DE25                	_SYS2D:
+  DE25                	NOTSE:
+  DE25  37            		SCF			;CF=1
+  DE26  9F            		SBC	A,A		;A=0FFH
+  DE27  C9            		RET
                       	
-  DE2E                	RDDERR:
-  DE2E  BF            		CP	A		;READ ERR CF=1 ZF=1
-  DE2F  37            		SCF
-  DE30  C9            		RET
+  DE28                	RDDERR:
+  DE28  BF            		CP	A		;READ ERR CF=1 ZF=1
+  DE29  37            		SCF
+  DE2A  C9            		RET
                       	
-  DE31                	NOPEN:
-  DE31  21C9DE        		LD	HL,FILESE
-  DE34  2209DE        		LD	(OPENPAT+1),HL
-  DE37  FD2A98EC      		LD	IY,(_FCB)
-  DE3B  CD98E0        		CALL	CHKWILDX
-  DE3E  30EB          		JR	NC,NOTSE
-  DE40  FD7E00        		LD	A,(IY)
-  DE43  3D            		DEC	A
-  DE44  3288EC        		LD	(_DRV),A
-  DE47  CDD9EC        		CALL	_CHGDRV
-  DE4A  D8            		RET	C
+  DE2B                	NOPEN:
+  DE2B  21C3DE        		LD	HL,FILESE
+  DE2E  2203DE        		LD	(OPENPAT+1),HL
+  DE31  FD2A98EC      		LD	IY,(_FCB)
+  DE35  CD92E0        		CALL	CHKWILDX
+  DE38  30EB          		JR	NC,NOTSE
+  DE3A  FD7E00        		LD	A,(IY+0)
+  DE3D  3D            		DEC	A
+  DE3E  3288EC        		LD	(_DRV),A
+  DE41  CDD9EC        		CALL	_CHGDRV
+  DE44  D8            		RET	C
                       	
-  DE4B  CDB1DF        		CALL	LDDIRX
-  DE4E  ED5B9AEC      		LD	DE,(_FBPS)
-  DE52  CDBADE        		CALL	DC
-  DE55  38D7          		JR	C,RDDERR
-  DE57  3A9EEC        		LD	A,(_FBCNT)
-  DE5A  3D            		DEC	A
-  DE5B  28B3          		JR	Z,SOPEN3
-  DE5D                	NOPEN2:
-  DE5D  2A9CEC        		LD	HL,(_FBAD)
-  DE60  012000        		LD	BC,020H
-  DE63  09            		ADD	HL,BC
-  DE64  4F            		LD	C,A
-  DE65  18A0          		JR	SOPEN2
+  DE45  CDABDF        		CALL	LDDIRX
+  DE48  ED5B9AEC      		LD	DE,(_FBPS)
+  DE4C  CDB4DE        		CALL	DC
+  DE4F  38D7          		JR	C,RDDERR
+  DE51  3A9EEC        		LD	A,(_FBCNT)
+  DE54  3D            		DEC	A
+  DE55  28B3          		JR	Z,SOPEN3
+  DE57                	NOPEN2:
+  DE57  2A9CEC        		LD	HL,(_FBAD)
+  DE5A  012000        		LD	BC,020H
+  DE5D  09            		ADD	HL,BC
+  DE5E  4F            		LD	C,A
+  DE5F  18A0          		JR	SOPEN2
                       	
-  DE67                	ENDRDI:
-  DE67  3A65DF        		LD	A,(DBLPAT)	;A=029H or 0
-  DE6A  E601          		AND	1
-  DE6C  4F            		LD	C,A
-  DE6D  3C            		INC	A
-  DE6E  83            		ADD	A,E
-  DE6F  5F            		LD	E,A
-  DE70  D60C          	RTEPAT:	SUB	12		;(Self-rewriting)
-  DE72  CB41          		BIT	0,C
-  DE74  C9            		RET
+  DE61                	ENDRDI:
+  DE61  3A5FDF        		LD	A,(DBLPAT)	;A=029H or 0
+  DE64  E601          		AND	1
+  DE66  4F            		LD	C,A
+  DE67  3C            		INC	A
+  DE68  83            		ADD	A,E
+  DE69  5F            		LD	E,A
+  DE6A  D60C          	RTEPAT:	SUB	12		;(Self-rewriting)
+  DE6C  CB41          		BIT	0,C
+  DE6E  C9            		RET
                       	
-  DE75                	SOPENE2:
-  DE75  229CEC        		LD	(_FBAD),HL
-  DE78  79            		LD	A,C
-  DE79  329EEC        		LD	(_FBCNT),A
-  DE7C  ED539AEC      		LD	(_FBPS),DE
-  DE80  FD2298EC      		LD	(_FCB),IY
-  DE84                	SOPENE:
-  DE84  AF            		XOR	A
-  DE85  C9            		RET
+  DE6F                	SOPENE2:
+  DE6F  229CEC        		LD	(_FBAD),HL
+  DE72  79            		LD	A,C
+  DE73  329EEC        		LD	(_FBCNT),A
+  DE76  ED539AEC      		LD	(_FBPS),DE
+  DE7A  FD2298EC      		LD	(_FCB),IY
+  DE7E                	SOPENE:
+  DE7E  AF            		XOR	A
+  DE7F  C9            		RET
                       	
-  DE86                	COPEN:
-  DE86  FD360D20      		LD	(IY+13),020H		;Attribute
+  DE80                	COPEN:
+  DE80  FD360D20      		LD	(IY+13),020H		;Attribute
                       	
-  DE8A  21E6DE        		LD	HL,NEXTSE
-  DE8D  CDCFDD        		CALL	SOPENC
-  DE90  D0            		RET	NC
-  DE91  C8            		RET	Z
-  DE92  3AA0EC        		LD	A,(_DIRF)
-  DE95  D601          		SUB	001H
+  DE84  21E0DE        		LD	HL,NEXTSE
+  DE87  CDC9DD        		CALL	SOPENC
+  DE8A  D0            		RET	NC
+  DE8B  C8            		RET	Z
+  DE8C  3AA0EC        		LD	A,(_DIRF)
+  DE8F  D601          		SUB	001H
+  DE91  D8            		RET	C
+  DE92  0601          		LD	B,1
+  DE94  CD04E1        		CALL	WRDF
   DE97  D8            		RET	C
-  DE98  0601          		LD	B,1
-  DE9A  CD0AE1        		CALL	WRDF
-  DE9D  D8            		RET	C
-  DE9E  ED5B64E2      		LD	DE,(_CLPS)
-  DEA2  D5            		PUSH	DE
-  DEA3  CD5ADF        		CALL	DCPAT
-  DEA6  CD33E5        		CALL	DRDNX
-  DEA9  2A7EEC        		LD	HL,(_DTBUF)
-  DEAC  5D            		LD	E,L
-  DEAD  54            		LD	D,H
-  DEAE  13            		INC	DE		;DE,DTBUF+1
-  DEAF  01FF03        		LD	BC,1023
-  DEB2  AF            		XOR	A
-  DEB3  77            		LD	(HL),A
-  DEB4  E5            		PUSH	HL
-  DEB5  EDB0          		LDIR
-  DEB7  E1            		POP	HL
-  DEB8  D1            		POP	DE
-  DEB9  C9            		RET
+  DE98  ED5B5EE2      		LD	DE,(_CLPS)
+  DE9C  D5            		PUSH	DE
+  DE9D  CD54DF        		CALL	DCPAT
+  DEA0  CD2DE5        		CALL	DRDNX
+  DEA3  2A7EEC        		LD	HL,(_DTBUF)
+  DEA6  5D            		LD	E,L
+  DEA7  54            		LD	D,H
+  DEA8  13            		INC	DE		;DE,DTBUF+1
+  DEA9  01FF03        		LD	BC,1023
+  DEAC  AF            		XOR	A
+  DEAD  77            		LD	(HL),A
+  DEAE  E5            		PUSH	HL
+  DEAF  EDB0          		LDIR
+  DEB1  E1            		POP	HL
+  DEB2  D1            		POP	DE
+  DEB3  C9            		RET
                       	
-  DEBA                	DC:
-  DEBA  ED5364E2      		LD	(_CLPS),DE
-  DEBE  C5            		PUSH	BC
-  DEBF  D5            		PUSH	DE
-  DEC0  CD5ADF        		CALL	DCPAT
-  DEC3  CD17E5        		CALL	DRDX
-  DEC6  D1            		POP	DE
-  DEC7  C1            		POP	BC
-  DEC8  C9            		RET
+  DEB4                	DC:
+  DEB4  ED535EE2      		LD	(_CLPS),DE
+  DEB8  C5            		PUSH	BC
+  DEB9  D5            		PUSH	DE
+  DEBA  CD54DF        		CALL	DCPAT
+  DEBD  CD11E5        		CALL	DRDX
+  DEC0  D1            		POP	DE
+  DEC1  C1            		POP	BC
+  DEC2  C9            		RET
                       	
-  DEC9                	FILESE:
-  DEC9  7E            		LD	A,(HL)
-  DECA  B7            		OR	A
-  DECB  C8            		RET	Z		;END:ZF=1 CF=0
-  DECC  FEE5          		CP	0E5H
-  DECE  280E          		JR	Z,FILESE1
-  DED0  FDE5          		PUSH	IY
-  DED2  D1            		POP	DE
-  DED3  13            		INC	DE
-  DED4  E5            		PUSH	HL
-  DED5  CD31DF        		CALL	CPFILE
-  DED8  CC52DF        		CALL	Z,CPFILE2
-  DEDB  E1            		POP	HL
-  DEDC  37            		SCF
-  DEDD  C8            		RET	Z		;!!!:(ZF=1) CF=1
-  DEDE                	FILESE1:
-  DEDE  CDF5DE        		CALL	FNEXT
-  DEE1  20E6          		JR	NZ,FILESE
-  DEE3                	ZFCF0:
-  DEE3  F6FF          		OR	0FFH		;ZF=0 CF=0
-  DEE5  C9            		RET
+  DEC3                	FILESE:
+  DEC3  7E            		LD	A,(HL)
+  DEC4  B7            		OR	A
+  DEC5  C8            		RET	Z		;END:ZF=1 CF=0
+  DEC6  FEE5          		CP	0E5H
+  DEC8  280E          		JR	Z,FILESE1
+  DECA  FDE5          		PUSH	IY
+  DECC  D1            		POP	DE
+  DECD  13            		INC	DE
+  DECE  E5            		PUSH	HL
+  DECF  CD2BDF        		CALL	CPFILE
+  DED2  CC4CDF        		CALL	Z,CPFILE2
+  DED5  E1            		POP	HL
+  DED6  37            		SCF
+  DED7  C8            		RET	Z		;!!!:(ZF=1) CF=1
+  DED8                	FILESE1:
+  DED8  CDEFDE        		CALL	FNEXT
+  DEDB  20E6          		JR	NZ,FILESE
+  DEDD                	ZFCF0:
+  DEDD  F6FF          		OR	0FFH		;ZF=0 CF=0
+  DEDF  C9            		RET
                       	
-  DEE6                	NEXTSE:
-  DEE6  7E            		LD	A,(HL)
-  DEE7  B7            		OR	A
-  DEE8  37            		SCF
-  DEE9  C8            		RET	Z		;!!!:ZF=1 CF=1
-  DEEA  FEE5          		CP	0E5H
-  DEEC  37            		SCF
-  DEED  C8            		RET	Z		;!!!:(ZF=1) CF=1
-  DEEE  CDF5DE        		CALL	FNEXT
-  DEF1  20F3          		JR	NZ,NEXTSE
-  DEF3  18EE          		JR	ZFCF0
+  DEE0                	NEXTSE:
+  DEE0  7E            		LD	A,(HL)
+  DEE1  B7            		OR	A
+  DEE2  37            		SCF
+  DEE3  C8            		RET	Z		;!!!:ZF=1 CF=1
+  DEE4  FEE5          		CP	0E5H
+  DEE6  37            		SCF
+  DEE7  C8            		RET	Z		;!!!:(ZF=1) CF=1
+  DEE8  CDEFDE        		CALL	FNEXT
+  DEEB  20F3          		JR	NZ,NEXTSE
+  DEED  18EE          		JR	ZFCF0
                       	
-  DEF5                	FNEXT:
-  DEF5  E5            		PUSH	HL
-  DEF6  219FEC        		LD	HL,_FILEN
-  DEF9  34            		INC	(HL)
-  DEFA  E1            		POP	HL
-  DEFB  112000        		LD	DE,020H
-  DEFE  19            		ADD	HL,DE
-  DEFF  0D            		DEC	C
-  DF00  C9            		RET
+  DEEF                	FNEXT:
+  DEEF  E5            		PUSH	HL
+  DEF0  219FEC        		LD	HL,_FILEN
+  DEF3  34            		INC	(HL)
+  DEF4  E1            		POP	HL
+  DEF5  112000        		LD	DE,020H
+  DEF8  19            		ADD	HL,DE
+  DEF9  0D            		DEC	C
+  DEFA  C9            		RET
                       	
-  DF01                	CHKDDX:
-  DF01  CD98E0        		CALL	CHKWILDX
-  DF04  D8            		RET	C
-  DF05  FDE5          		PUSH	IY
-  DF07  D1            		POP	DE
-  DF08  13            		INC	DE
-  DF09  2162EC        		LD	HL,DDTB
-  DF0C  0604          		LD	B,DDS
-  DF0E                	CPNAME:
-  DF0E  C5            		PUSH	BC
-  DF0F  D5            		PUSH	DE
-  DF10  110CE5        		LD	DE,CPBUF
-  DF13  010400        		LD	BC,4
-  DF16  EDB0          		LDIR
-  DF18  D1            		POP	DE
-  DF19  D5            		PUSH	DE
-  DF1A  E5            		PUSH	HL
-  DF1B  210CE5        		LD	HL,CPBUF
-  DF1E  CD31DF        		CALL	CPFILE
-  DF21  E1            		POP	HL
-  DF22  D1            		POP	DE
-  DF23  C1            		POP	BC
-  DF24  2005          		JR	NZ,CPNAME1
-  DF26  7E            		LD	A,(HL)
-  DF27  23            		INC	HL
-  DF28  66            		LD	H,(HL)
-  DF29  6F            		LD	L,A
+  DEFB                	CHKDDX:
+  DEFB  CD92E0        		CALL	CHKWILDX
+  DEFE  D8            		RET	C
+  DEFF  FDE5          		PUSH	IY
+  DF01  D1            		POP	DE
+  DF02  13            		INC	DE
+  DF03  2162EC        		LD	HL,DDTB
+  DF06  0604          		LD	B,DDS
+  DF08                	CPNAME:
+  DF08  C5            		PUSH	BC
+  DF09  D5            		PUSH	DE
+  DF0A  1106E5        		LD	DE,CPBUF
+  DF0D  010400        		LD	BC,4
+  DF10  EDB0          		LDIR
+  DF12  D1            		POP	DE
+  DF13  D5            		PUSH	DE
+  DF14  E5            		PUSH	HL
+  DF15  2106E5        		LD	HL,CPBUF
+  DF18  CD2BDF        		CALL	CPFILE
+  DF1B  E1            		POP	HL
+  DF1C  D1            		POP	DE
+  DF1D  C1            		POP	BC
+  DF1E  2005          		JR	NZ,CPNAME1
+  DF20  7E            		LD	A,(HL)
+  DF21  23            		INC	HL
+  DF22  66            		LD	H,(HL)
+  DF23  6F            		LD	L,A
+  DF24  C9            		RET
+  DF25                	CPNAME1:
+  DF25  23            		INC	HL
+  DF26  23            		INC	HL
+  DF27  10DF          		DJNZ	CPNAME
+  DF29  37            		SCF
   DF2A  C9            		RET
-  DF2B                	CPNAME1:
-  DF2B  23            		INC	HL
-  DF2C  23            		INC	HL
-  DF2D  10DF          		DJNZ	CPNAME
-  DF2F  37            		SCF
-  DF30  C9            		RET
                       	
-  DF31                	CPFILE:
-  DF31  C5            		PUSH	BC
-  DF32  01000B        		LD	BC,00B00H
-  DF35                	CPSTR1:
-  DF35  1A            		LD	A,(DE)
-  DF36  FE3F          		CP	"?"		;Wild card
-  DF38  2812          		JR	Z,CPSTR2
-  DF3A  7E            		LD	A,(HL)
-  DF3B  CD7EE0        		CALL	FKANC
-  DF3E  E5            		PUSH	HL
-  DF3F  67            		LD	H,A
-  DF40  1A            		LD	A,(DE)
-  DF41  CB01          		RLC	C
-  DF43  CD7EE0        		CALL	FKANC
-  DF46  CB09          		RRC	C
-  DF48  BC            		CP	H		;CP (HL),(DE)
-  DF49  E1            		POP	HL
-  DF4A  2004          		JR	NZ,CPSTR3
-  DF4C                	CPSTR2:
-  DF4C  13            		INC	DE
-  DF4D  23            		INC	HL
-  DF4E  10E5          		DJNZ	CPSTR1
-  DF50                	CPSTR3:
-  DF50  C1            		POP	BC
-  DF51  C9            		RET
+  DF2B                	CPFILE:
+  DF2B  C5            		PUSH	BC
+  DF2C  01000B        		LD	BC,00B00H
+  DF2F                	CPSTR1:
+  DF2F  1A            		LD	A,(DE)
+  DF30  FE3F          		CP	'?'		;Wild card
+  DF32  2812          		JR	Z,CPSTR2
+  DF34  7E            		LD	A,(HL)
+  DF35  CD78E0        		CALL	FKANC
+  DF38  E5            		PUSH	HL
+  DF39  67            		LD	H,A
+  DF3A  1A            		LD	A,(DE)
+  DF3B  CB01          		RLC	C
+  DF3D  CD78E0        		CALL	FKANC
+  DF40  CB09          		RRC	C
+  DF42  BC            		CP	H		;CP (HL),(DE)
+  DF43  E1            		POP	HL
+  DF44  2004          		JR	NZ,CPSTR3
+  DF46                	CPSTR2:
+  DF46  13            		INC	DE
+  DF47  23            		INC	HL
+  DF48  10E5          		DJNZ	CPSTR1
+  DF4A                	CPSTR3:
+  DF4A  C1            		POP	BC
+  DF4B  C9            		RET
                       	
-  DF52                	CPFILE2:
-  DF52  FD7E0D        		LD	A,(IY+13)
-  DF55  F6E1          		OR	0E1H
-  DF57  2F            		CPL
-  DF58  A6            		AND	(HL)
-  DF59  C9            		RET
+  DF4C                	CPFILE2:
+  DF4C  FD7E0D        		LD	A,(IY+13)
+  DF4F  F6E1          		OR	0E1H
+  DF51  2F            		CPL
+  DF52  A6            		AND	(HL)
+  DF53  C9            		RET
                       	
-  DF5A                	DCPAT:
-  DF5A  2A7EEC        		LD	HL,(_DTBUF)
-  DF5D  3AA0EC        		LD	A,(_DIRF)
-  DF60  B7            		OR	A
-  DF61  C8            		RET	Z
+  DF54                	DCPAT:
+  DF54  2A7EEC        		LD	HL,(_DTBUF)
+  DF57  3AA0EC        		LD	A,(_DIRF)
+  DF5A  B7            		OR	A
+  DF5B  C8            		RET	Z
                       	
-  DF62                	CLUST:
-  DF62  EB            		EX	DE,HL
-  DF63  3E08          	CLSPAT:	LD	A,8	;DE=DE+8 (2D)  !ADDCL (Self-rewriting)
-  DF65  29            	DBLPAT:	ADD	HL,HL	;DE=DE*2 (512) !DBLCL (Self-rewriting)
-  DF66  EB            		EX	DE,HL
-  DF67  83            		ADD	A,E
-  DF68  5F            		LD	E,A
-  DF69  8A            		ADC	A,D
-  DF6A  93            		SUB	E
-  DF6B  57            		LD	D,A
-  DF6C  C9            		RET
+  DF5C                	CLUST:
+  DF5C  EB            		EX	DE,HL
+  DF5D  3E08          	CLSPAT:	LD	A,8	;DE=DE+8 (2D)  !ADDCL (Self-rewriting)
+  DF5F  29            	DBLPAT:	ADD	HL,HL	;DE=DE*2 (512) !DBLCL (Self-rewriting)
+  DF60  EB            		EX	DE,HL
+  DF61  83            		ADD	A,E
+  DF62  5F            		LD	E,A
+  DF63  8A            		ADC	A,D
+  DF64  93            		SUB	E
+  DF65  57            		LD	D,A
+  DF66  C9            		RET
                       	
-  DF6D                	ENDCL:
-  DF6D  7A            		LD	A,D	;END CLUSTER
-  DF6E  FE01          	CLPAT1:	CP	1	;164=356	(Self-rewriting)
-  DF70  C0            		RET	NZ
-  DF71  7B            		LD	A,E
-  DF72  FE64          	CLPAT2:	CP	064H	;		(Self-rewriting)
-  DF74  C9            		RET
+  DF67                	ENDCL:
+  DF67  7A            		LD	A,D	;END CLUSTER
+  DF68  FE01          	CLPAT1:	CP	1	;164=356	(Self-rewriting)
+  DF6A  C0            		RET	NZ
+  DF6B  7B            		LD	A,E
+  DF6C  FE64          	CLPAT2:	CP	064H	;		(Self-rewriting)
+  DF6E  C9            		RET
                       	
-  DF75                	CAP:
-  DF75  FE61          		CP	"a"
-  DF77  D8            		RET	C
-  DF78  FE7B          		CP	"z"+1
-  DF7A  D0            		RET	NC
-  DF7B  D620          		SUB	020H
-  DF7D  C9            		RET
-  DF7E                	CAP2:
-  DF7E  CD75DF        		CALL	CAP
-  DF81                	CAP3:
-  DF81  CD8ADF        		CALL	CAP4
-  DF84  FE21          		CP	021H
-  DF86  D0            		RET	NC
-  DF87  3EA0          		LD	A,0A0H
+  DF6F                	CAP:
+  DF6F  FE61          		CP	'a'
+  DF71  D8            		RET	C
+  DF72  FE7B          		CP	'z'+1
+  DF74  D0            		RET	NC
+  DF75  D620          		SUB	020H
+  DF77  C9            		RET
+  DF78                	CAP2:
+  DF78  CD6FDF        		CALL	CAP
+  DF7B                	CAP3:
+  DF7B  CD84DF        		CALL	CAP4
+  DF7E  FE21          		CP	021H
+  DF80  D0            		RET	NC
+  DF81  3EA0          		LD	A,0A0H
+  DF83  C9            		RET
+  DF84                	CAP4:
+  DF84  FE05          		CP	5
+  DF86  C0            		RET	NZ
+  DF87  3EE5          		LD	A,0E5H
   DF89  C9            		RET
-  DF8A                	CAP4:
-  DF8A  FE05          		CP	5
-  DF8C  C0            		RET	NZ
-  DF8D  3EE5          		LD	A,0E5H
-  DF8F  C9            		RET
                       	
-  DF90                	CHDIR:
-  DF90  CD98E8        		CALL	GETDPBD
-  DF93  3806          		JR	C,CHDIR2
-  DF95  DD751A        		LD	(IX+01AH),L		;_SDIR_
-  DF98  DD741B        		LD	(IX+01BH),H		;_SDIR_+1
-  DF9B                	CHDIR2:
-  DF9B  DDE1          		POP	IX
-  DF9D  C9            		RET
+  DF8A                	CHDIR:
+  DF8A  CD98E8        		CALL	GETDPBD
+  DF8D  3806          		JR	C,CHDIR2
+  DF8F  DD751A        		LD	(IX+01AH),L		;_SDIR_
+  DF92  DD741B        		LD	(IX+01BH),H		;_SDIR_+1
+  DF95                	CHDIR2:
+  DF95  DDE1          		POP	IX
+  DF97  C9            		RET
                       	
-  DF9E                	LDDIR:
-  DF9E  CD98E8        		CALL	GETDPBD
-  DFA1  DD5E1A        		LD	E,(IX+01AH)		;_SDIR_
-  DFA4  DD561B        		LD	D,(IX+01BH)		;_SDIR_+1
-  DFA7  13            		INC	DE
-  DFA8  FD730E        		LD	(IY+14),E
-  DFAB  FD720F        		LD	(IY+15),D
-  DFAE  1B            		DEC	DE
-  DFAF  18EA          		JR	CHDIR2
+  DF98                	LDDIR:
+  DF98  CD98E8        		CALL	GETDPBD
+  DF9B  DD5E1A        		LD	E,(IX+01AH)		;_SDIR_
+  DF9E  DD561B        		LD	D,(IX+01BH)		;_SDIR_+1
+  DFA1  13            		INC	DE
+  DFA2  FD730E        		LD	(IY+14),E
+  DFA5  FD720F        		LD	(IY+15),D
+  DFA8  1B            		DEC	DE
+  DFA9  18EA          		JR	CHDIR2
                       	
-  DFB1                	LDDIRX:
-  DFB1  FD5E0E        		LD	E,(IY+14)
-  DFB4  FD560F        		LD	D,(IY+15)
-  DFB7  1B            		DEC	DE
-  DFB8  CD6DDF        		CALL	ENDCL
-  DFBB  D49EDF        		CALL	NC,LDDIR
-  DFBE                	LDDIRS:
-  DFBE  7A            		LD	A,D
-  DFBF  B3            		OR	E
-  DFC0  32A0EC        		LD	(_DIRF),A
-  DFC3  C9            		RET
+  DFAB                	LDDIRX:
+  DFAB  FD5E0E        		LD	E,(IY+14)
+  DFAE  FD560F        		LD	D,(IY+15)
+  DFB1  1B            		DEC	DE
+  DFB2  CD67DF        		CALL	ENDCL
+  DFB5  D498DF        		CALL	NC,LDDIR
+  DFB8                	LDDIRS:
+  DFB8  7A            		LD	A,D
+  DFB9  B3            		OR	E
+  DFBA  32A0EC        		LD	(_DIRF),A
+  DFBD  C9            		RET
                       	
-  DFC4                	KILL:
-  DFC4  CD98E0        		CALL	CHKWILDX
-  DFC7  3838          		JR	C,KILLW
-  DFC9  CD01DF        		CALL	CHKDDX
-  DFCC  3F            		CCF
-  DFCD  D49FDD        		CALL	NC,SOPENX1
-  DFD0                	KILLS:
-  DFD0  D414E0        		CALL	NC,CHKATT
-  DFD3  D8            		RET	C
-  DFD4                	KILLSX:
-  DFD4  36E5          		LD	(HL),0E5H	;DIR
-  DFD6  CD72E0        		CALL	WTDB
-  DFD9  111A00        		LD	DE,01AH
-  DFDC  19            		ADD	HL,DE
-  DFDD  5E            		LD	E,(HL)
-  DFDE  23            		INC	HL
-  DFDF  56            		LD	D,(HL)
-  DFE0  1804          		JR	KILLS2
-  DFE2                	KILLS1:
-  DFE2  ED5B64E2      		LD	DE,(_CLPS)	;FAT
-  DFE6                	KILLS2:
-  DFE6  CD6DDF        		CALL	ENDCL
-  DFE9  D0            		RET	NC		;CF=0
-  DFEA  21FEFF        		LD	HL,0-2
-  DFED  19            		ADD	HL,DE
-  DFEE  D0            		RET	NC		;DE= 0 or 1
-  DFEF  D5            		PUSH	DE
-  DFF0  CDF7EC        		CALL	_GNCL
-  DFF3  ED5364E2      		LD	(_CLPS),DE
-  DFF7  D1            		POP	DE
-  DFF8  210000        		LD	HL,0
-  DFFB  D4FAEC        		CALL	NC,_SNCL
-  DFFE  30E2          		JR	NC,KILLS1
-  E000  C9            		RET
+  DFBE                	KILL:
+  DFBE  CD92E0        		CALL	CHKWILDX
+  DFC1  3838          		JR	C,KILLW
+  DFC3  CDFBDE        		CALL	CHKDDX
+  DFC6  3F            		CCF
+  DFC7  D499DD        		CALL	NC,SOPENX1
+  DFCA                	KILLS:
+  DFCA  D40EE0        		CALL	NC,CHKATT
+  DFCD  D8            		RET	C
+  DFCE                	KILLSX:
+  DFCE  36E5          		LD	(HL),0E5H	;DIR
+  DFD0  CD6CE0        		CALL	WTDB
+  DFD3  111A00        		LD	DE,01AH
+  DFD6  19            		ADD	HL,DE
+  DFD7  5E            		LD	E,(HL)
+  DFD8  23            		INC	HL
+  DFD9  56            		LD	D,(HL)
+  DFDA  1804          		JR	KILLS2
+  DFDC                	KILLS1:
+  DFDC  ED5B5EE2      		LD	DE,(_CLPS)	;FAT
+  DFE0                	KILLS2:
+  DFE0  CD67DF        		CALL	ENDCL
+  DFE3  D0            		RET	NC		;CF=0
+  DFE4  21FEFF        		LD	HL,0-2
+  DFE7  19            		ADD	HL,DE
+  DFE8  D0            		RET	NC		;DE= 0 or 1
+  DFE9  D5            		PUSH	DE
+  DFEA  CDF7EC        		CALL	_GNCL
+  DFED  ED535EE2      		LD	(_CLPS),DE
+  DFF1  D1            		POP	DE
+  DFF2  210000        		LD	HL,0
+  DFF5  D4FAEC        		CALL	NC,_SNCL
+  DFF8  30E2          		JR	NC,KILLS1
+  DFFA  C9            		RET
                       	
-  E001                	KILLW:
-  E001  CDCCDD        		CALL	SOPEN
-  E004                	KILLW1:
-  E004  380B          		JR	C,KILLW2
-  E006  CD75DE        		CALL	SOPENE2
-  E009  CDD0DF        		CALL	KILLS
-  E00C  CD31DE        		CALL	NOPEN
-  E00F  18F3          		JR	KILLW1
-  E011                	KILLW2:
-  E011  C8            		RET	Z
-  E012  3F            		CCF
-  E013  C9            		RET
+  DFFB                	KILLW:
+  DFFB  CDC6DD        		CALL	SOPEN
+  DFFE                	KILLW1:
+  DFFE  380B          		JR	C,KILLW2
+  E000  CD6FDE        		CALL	SOPENE2
+  E003  CDCADF        		CALL	KILLS
+  E006  CD2BDE        		CALL	NOPEN
+  E009  18F3          		JR	KILLW1
+  E00B                	KILLW2:
+  E00B  C8            		RET	Z
+  E00C  3F            		CCF
+  E00D  C9            		RET
                       	
-  E014                	CHKATT:
-  E014  E5            		PUSH	HL
-  E015  110B00        		LD	DE,00BH
-  E018  19            		ADD	HL,DE
-  E019  7E            		LD	A,(HL)
-  E01A  E1            		POP	HL
-  E01B  E61F          		AND	01FH
-  E01D  C8            		RET	Z
-  E01E  37            		SCF
-  E01F  C9            		RET
+  E00E                	CHKATT:
+  E00E  E5            		PUSH	HL
+  E00F  110B00        		LD	DE,00BH
+  E012  19            		ADD	HL,DE
+  E013  7E            		LD	A,(HL)
+  E014  E1            		POP	HL
+  E015  E61F          		AND	01FH
+  E017  C8            		RET	Z
+  E018  37            		SCF
+  E019  C9            		RET
                       	
-  E020                	NAME:
-  E020  CD98E0        		CALL	CHKWILDX
-  E023  D8            		RET	C
-  E024  110400        		LD	DE,4
-  E027  19            		ADD	HL,DE
-  E028  223EE0        		LD	(NAMEP+2),HL
-  E02B  23            		INC	HL
-  E02C  CD9CE0        		CALL	CHKWILD
-  E02F  D8            		RET	C
+  E01A                	NAME:
+  E01A  CD92E0        		CALL	CHKWILDX
+  E01D  D8            		RET	C
+  E01E  110400        		LD	DE,4
+  E021  19            		ADD	HL,DE
+  E022  2238E0        		LD	(NAMEP+2),HL
+  E025  23            		INC	HL
+  E026  CD96E0        		CALL	CHKWILD
+  E029  D8            		RET	C
                       	
-  E030  CD9FDD        		CALL	SOPENX1
-  E033  D414E0        		CALL	NC,CHKATT
-  E036  D8            		RET	C
+  E02A  CD99DD        		CALL	SOPENX1
+  E02D  D40EE0        		CALL	NC,CHKATT
+  E030  D8            		RET	C
                       	
-  E037  FD7E00        		LD	A,(IY)
-  E03A  FDE5          		PUSH	IY
-  E03C  FD210000      	NAMEP:	LD	IY,0
-  E040  FD7700        		LD	(IY),A
-  E043  CD9FDD        		CALL	SOPENX1
-  E046  FDE3          		EX	(SP),IY
-  E048  3F            		CCF
-  E049  D4CCDD        		CALL	NC,SOPEN
-  E04C  EB            		EX	DE,HL
-  E04D  E1            		POP	HL
-  E04E  D8            		RET	C
+  E031  FD7E00        		LD	A,(IY+0)
+  E034  FDE5          		PUSH	IY
+  E036  FD210000      	NAMEP:	LD	IY,0
+  E03A  FD7700        		LD	(IY+0),A
+  E03D  CD99DD        		CALL	SOPENX1
+  E040  FDE3          		EX	(SP),IY
+  E042  3F            		CCF
+  E043  D4C6DD        		CALL	NC,SOPEN
+  E046  EB            		EX	DE,HL
+  E047  E1            		POP	HL
+  E048  D8            		RET	C
                       	
-  E04F                	SETNAME:
-  E04F  01000B        		LD	BC,11*256
-  E052  23            		INC	HL
-  E053  7E            		LD	A,(HL)
-  E054  FEE5          		CP	0E5H
-  E056  2004          		JR	NZ,SNAME1
-  E058  3E05          		LD	A,5
-  E05A  180E          		JR	SNAME3
-  E05C                	SNAME1:
-  E05C  7E            		LD	A,(HL)
-  E05D  0C            		INC	C
-  E05E  0D            		DEC	C
-  E05F  2009          		JR	NZ,SNAME3
-  E061  CD75DF        		CALL	CAP
-  E064  FEA0          		CP	0A0H
-  E066  2002          		JR	NZ,SNAME3
-  E068  3E20          		LD	A,020H
-  E06A                	SNAME3:
-  E06A  12            		LD	(DE),A
-  E06B  7E            		LD	A,(HL)
-  E06C  23            		INC	HL
-  E06D  CD85E0        		CALL	FKAN
-  E070  10EA          		DJNZ	SNAME1
-  E072                	WTDB:
-  E072  3EFF          		LD	A,0FFH
-  E074  323CE2        		LD	(SFILE),A
-  E077                	SWTDBF:
-  E077  3E01          		LD	A,1
-  E079  32A4EC        		LD	(_WTDBF),A
-  E07C  AF            		XOR	A
-  E07D  C9            		RET
+  E049                	SETNAME:
+  E049  01000B        		LD	BC,11*256
+  E04C  23            		INC	HL
+  E04D  7E            		LD	A,(HL)
+  E04E  FEE5          		CP	0E5H
+  E050  2004          		JR	NZ,SNAME1
+  E052  3E05          		LD	A,5
+  E054  180E          		JR	SNAME3
+  E056                	SNAME1:
+  E056  7E            		LD	A,(HL)
+  E057  0C            		INC	C
+  E058  0D            		DEC	C
+  E059  2009          		JR	NZ,SNAME3
+  E05B  CD6FDF        		CALL	CAP
+  E05E  FEA0          		CP	0A0H
+  E060  2002          		JR	NZ,SNAME3
+  E062  3E20          		LD	A,020H
+  E064                	SNAME3:
+  E064  12            		LD	(DE),A
+  E065  7E            		LD	A,(HL)
+  E066  23            		INC	HL
+  E067  CD7FE0        		CALL	FKAN
+  E06A  10EA          		DJNZ	SNAME1
+  E06C                	WTDB:
+  E06C  3EFF          		LD	A,0FFH
+  E06E  3236E2        		LD	(SFILE),A
+  E071                	SWTDBF:
+  E071  3E01          		LD	A,1
+  E073  32A4EC        		LD	(_WTDBF),A
+  E076  AF            		XOR	A
+  E077  C9            		RET
                       	
-  E07E                	FKANC:
-  E07E  CB41          		BIT	0,C
-  E080  CC7EDF        		CALL	Z,CAP2
-  E083  1801          		JR	FKANX
-  E085                	FKAN:
-  E085  13            		INC	DE
-  E086                	FKANX:
-  E086  CB41          		BIT	0,C
-  E088  CB81          		RES	0,C
-  E08A  C0            		RET	NZ
-  E08B  FE80          		CP	080H
-  E08D  D8            		RET	C
-  E08E  FEA0          		CP	0A0H
-  E090  3803          		JR	C,FKAN1
-  E092  FEE0          		CP	0E0H
-  E094  D8            		RET	C
-  E095                	FKAN1:
-  E095  0C            		INC	C
-  E096  A7            		AND	A
-  E097  C9            		RET
+  E078                	FKANC:
+  E078  CB41          		BIT	0,C
+  E07A  CC78DF        		CALL	Z,CAP2
+  E07D  1801          		JR	FKANX
+  E07F                	FKAN:
+  E07F  13            		INC	DE
+  E080                	FKANX:
+  E080  CB41          		BIT	0,C
+  E082  CB81          		RES	0,C
+  E084  C0            		RET	NZ
+  E085  FE80          		CP	080H
+  E087  D8            		RET	C
+  E088  FEA0          		CP	0A0H
+  E08A  3803          		JR	C,FKAN1
+  E08C  FEE0          		CP	0E0H
+  E08E  D8            		RET	C
+  E08F                	FKAN1:
+  E08F  0C            		INC	C
+  E090  A7            		AND	A
+  E091  C9            		RET
                       	
-  E098                	CHKWILDX:
-  E098  FDE5          		PUSH	IY
-  E09A  E1            		POP	HL
+  E092                	CHKWILDX:
+  E092  FDE5          		PUSH	IY
+  E094  E1            		POP	HL
+  E095  23            		INC	HL
+  E096                	CHKWILD:
+  E096  060B          		LD	B,11
+  E098  3E3F          		LD	A,'?'
+  E09A                	CHKWIL1:
+  E09A  BE            		CP	(HL)
   E09B  23            		INC	HL
-  E09C                	CHKWILD:
-  E09C  060B          		LD	B,11
-  E09E  3E3F          		LD	A,"?"
-  E0A0                	CHKWIL1:
-  E0A0  BE            		CP	(HL)
-  E0A1  23            		INC	HL
-  E0A2  37            		SCF
-  E0A3  C8            		RET	Z
-  E0A4  10FA          		DJNZ	CHKWIL1
-  E0A6  AF            		XOR	A
-  E0A7  C9            		RET
+  E09C  37            		SCF
+  E09D  C8            		RET	Z
+  E09E  10FA          		DJNZ	CHKWIL1
+  E0A0  AF            		XOR	A
+  E0A1  C9            		RET
                       	
-  E0A8                	SDIRENT:		;IY=FCB HL=DIR
-  E0A8  D5            		PUSH	DE
-  E0A9  E5            		PUSH	HL
-  E0AA  FDE5          		PUSH	IY
-  E0AC  D1            		POP	DE
-  E0AD  EB            		EX	DE,HL
-  E0AE  CD4FE0        		CALL	SETNAME
+  E0A2                	SDIRENT:		;IY=FCB HL=DIR
+  E0A2  D5            		PUSH	DE
+  E0A3  E5            		PUSH	HL
+  E0A4  FDE5          		PUSH	IY
+  E0A6  D1            		POP	DE
+  E0A7  EB            		EX	DE,HL
+  E0A8  CD49E0        		CALL	SETNAME
                       	;				Attribute
-  E0B1  FD7E0D        		LD	A,(IY+13)
-  E0B4  12            		LD	(DE),A
-  E0B5  13            		INC	DE
+  E0AB  FD7E0D        		LD	A,(IY+13)
+  E0AE  12            		LD	(DE),A
+  E0AF  13            		INC	DE
                       	;				Reserved
-  E0B6  AF            		XOR	A
-  E0B7  060A          		LD	B,10
-  E0B9                	SDE1:
-  E0B9  12            		LD	(DE),A
-  E0BA  13            		INC	DE
-  E0BB  10FC          		DJNZ	SDE1
+  E0B0  AF            		XOR	A
+  E0B1  060A          		LD	B,10
+  E0B3                	SDE1:
+  E0B3  12            		LD	(DE),A
+  E0B4  13            		INC	DE
+  E0B5  10FC          		DJNZ	SDE1
                       	;				TIME
-  E0BD  FD7E16        		LD	A,(IY+22)
-  E0C0  12            		LD	(DE),A
-  E0C1  13            		INC	DE
-  E0C2  FD7E17        		LD	A,(IY+23)
-  E0C5  12            		LD	(DE),A
-  E0C6  13            		INC	DE
+  E0B7  FD7E16        		LD	A,(IY+22)
+  E0BA  12            		LD	(DE),A
+  E0BB  13            		INC	DE
+  E0BC  FD7E17        		LD	A,(IY+23)
+  E0BF  12            		LD	(DE),A
+  E0C0  13            		INC	DE
                       	;				DATE
-  E0C7  FD7E14        		LD	A,(IY+20)
-  E0CA  12            		LD	(DE),A
-  E0CB  13            		INC	DE
-  E0CC  FD7E15        		LD	A,(IY+21)
-  E0CF  12            		LD	(DE),A
-  E0D0  13            		INC	DE
+  E0C1  FD7E14        		LD	A,(IY+20)
+  E0C4  12            		LD	(DE),A
+  E0C5  13            		INC	DE
+  E0C6  FD7E15        		LD	A,(IY+21)
+  E0C9  12            		LD	(DE),A
+  E0CA  13            		INC	DE
                       	;				First cluster
-  E0D1  FD7E1A        		LD	A,(IY+26)
-  E0D4  12            		LD	(DE),A
-  E0D5  13            		INC	DE
-  E0D6  FD7E1B        		LD	A,(IY+27)
-  E0D9  12            		LD	(DE),A
-  E0DA  13            		INC	DE
+  E0CB  FD7E1A        		LD	A,(IY+26)
+  E0CE  12            		LD	(DE),A
+  E0CF  13            		INC	DE
+  E0D0  FD7E1B        		LD	A,(IY+27)
+  E0D3  12            		LD	(DE),A
+  E0D4  13            		INC	DE
                       	;				SIZE
-  E0DB  FD7E10        		LD	A,(IY+16)
-  E0DE  12            		LD	(DE),A
-  E0DF  13            		INC	DE
-  E0E0  FD7E11        		LD	A,(IY+17)
-  E0E3  12            		LD	(DE),A
-  E0E4  13            		INC	DE
-  E0E5  FD7E12        		LD	A,(IY+18)
-  E0E8  12            		LD	(DE),A
-  E0E9  13            		INC	DE
-  E0EA  FD7E13        		LD	A,(IY+19)
-  E0ED  12            		LD	(DE),A
+  E0D5  FD7E10        		LD	A,(IY+16)
+  E0D8  12            		LD	(DE),A
+  E0D9  13            		INC	DE
+  E0DA  FD7E11        		LD	A,(IY+17)
+  E0DD  12            		LD	(DE),A
+  E0DE  13            		INC	DE
+  E0DF  FD7E12        		LD	A,(IY+18)
+  E0E2  12            		LD	(DE),A
+  E0E3  13            		INC	DE
+  E0E4  FD7E13        		LD	A,(IY+19)
+  E0E7  12            		LD	(DE),A
                       	
-  E0EE  AF            		XOR	A
-  E0EF  E1            		POP	HL
-  E0F0  D1            		POP	DE
-  E0F1  C9            		RET
+  E0E8  AF            		XOR	A
+  E0E9  E1            		POP	HL
+  E0EA  D1            		POP	DE
+  E0EB  C9            		RET
                       	
-  E0F2                	WOPEN:
-  E0F2  FD7E0D        		LD	A,(IY+13)
-  E0F5  E61F          		AND	01FH
-  E0F7  37            		SCF
-  E0F8  C0            		RET	NZ
-  E0F9  FD361CFE      		LD	(IY+28),0FEH	;Open
-  E0FD                	TOPEN2:
-  E0FD  AF            		XOR	A
-  E0FE                	TOPEN:
-  E0FE  FD3617FF      		LD	(IY+23),0FFH	;Initializes the time stamp
-  E102  C9            		RET
+  E0EC                	WOPEN:
+  E0EC  FD7E0D        		LD	A,(IY+13)
+  E0EF  E61F          		AND	01FH
+  E0F1  37            		SCF
+  E0F2  C0            		RET	NZ
+  E0F3  FD361CFE      		LD	(IY+28),0FEH	;Open
+  E0F7                	TOPEN2:
+  E0F7  AF            		XOR	A
+  E0F8                	TOPEN:
+  E0F8  FD3617FF      		LD	(IY+23),0FFH	;Initializes the time stamp
+  E0FC  C9            		RET
                       	
-  E103                	WRDFX:
-  E103  41            		LD	B,C
-  E104  04            		INC	B
-  E105  3E37          		LD	A,037H
-  E107  3230E5        		LD	(DRDN1),A
+  E0FD                	WRDFX:
+  E0FD  41            		LD	B,C
+  E0FE  04            		INC	B
+  E0FF  3E37          		LD	A,037H
+  E101  322AE5        		LD	(DRDN1),A
                       	
-  E10A                	WRDF:
-  E10A  110200        		LD	DE,2
-  E10D                	WRDF1:
-  E10D  C5            		PUSH	BC
-  E10E  D5            		PUSH	DE
-  E10F  CDF7EC        		CALL	_GNCL
-  E112  381C          		JR	C,WRDF3
-  E114  7A            		LD	A,D
-  E115  B3            		OR	E
-  E116  2027          		JR	NZ,WRDF4
-  E118  E1            		POP	HL
-  E119  E5            		PUSH	HL
-  E11A  ED5B64E2      		LD	DE,(_CLPS)
-  E11E  2264E2        		LD	(_CLPS),HL
-  E121  7A            		LD	A,D
-  E122  B3            		OR	E
-  E123  2008          		JR	NZ,WRDF2
-  E125  FD751A        		LD	(IY+26),L	;Start cluster
-  E128  FD741B        		LD	(IY+27),H
-  E12B  1803          		JR	WRDF3
-  E12D                	WRDF2:
-  E12D  CDFAEC        		CALL	_SNCL
-  E130                	WRDF3:
-  E130  D1            		POP	DE
-  E131  C1            		POP	BC
-  E132  D8            		RET	C
-  E133  100C          		DJNZ	WRDF5
-  E135  ED5B64E2      		LD	DE,(_CLPS)
-  E139  21FFFF        		LD	HL,0FFFFH
-  E13C  C3FAEC        		JP	_SNCL
+  E104                	WRDF:
+  E104  110200        		LD	DE,2
+  E107                	WRDF1:
+  E107  C5            		PUSH	BC
+  E108  D5            		PUSH	DE
+  E109  CDF7EC        		CALL	_GNCL
+  E10C  381C          		JR	C,WRDF3
+  E10E  7A            		LD	A,D
+  E10F  B3            		OR	E
+  E110  2027          		JR	NZ,WRDF4
+  E112  E1            		POP	HL
+  E113  E5            		PUSH	HL
+  E114  ED5B5EE2      		LD	DE,(_CLPS)
+  E118  225EE2        		LD	(_CLPS),HL
+  E11B  7A            		LD	A,D
+  E11C  B3            		OR	E
+  E11D  2008          		JR	NZ,WRDF2
+  E11F  FD751A        		LD	(IY+26),L	;Start cluster
+  E122  FD741B        		LD	(IY+27),H
+  E125  1803          		JR	WRDF3
+  E127                	WRDF2:
+  E127  CDFAEC        		CALL	_SNCL
+  E12A                	WRDF3:
+  E12A  D1            		POP	DE
+  E12B  C1            		POP	BC
+  E12C  D8            		RET	C
+  E12D  100C          		DJNZ	WRDF5
+  E12F  ED5B5EE2      		LD	DE,(_CLPS)
+  E133  21FFFF        		LD	HL,0FFFFH
+  E136  C3FAEC        		JP	_SNCL
                       	
-  E13F                	WRDF4:
-  E13F  D1            		POP	DE
-  E140  C1            		POP	BC
-  E141                	WRDF5:
-  E141  13            		INC	DE
-  E142  CD6DDF        		CALL	ENDCL
-  E145  38C6          		JR	C,WRDF1
-  E147  37            		SCF
-  E148  C9            		RET
+  E139                	WRDF4:
+  E139  D1            		POP	DE
+  E13A  C1            		POP	BC
+  E13B                	WRDF5:
+  E13B  13            		INC	DE
+  E13C  CD67DF        		CALL	ENDCL
+  E13F  38C6          		JR	C,WRDF1
+  E141  37            		SCF
+  E142  C9            		RET
                       	
-  E149                	RWXR:
-  E149  CB38          		SRL	B
-  E14B  CB19          		RR	C
-  E14D  CB38          	IBM4:	SRL	B	;ooo
-  E14F  CB19          		RR	C
+  E143                	RWXR:
+  E143  CB38          		SRL	B
+  E145  CB19          		RR	C
+  E147  CB38          	IBM4:	SRL	B	;ooo
+  E149  CB19          		RR	C
                       	
-  E151  FD5E1A        		LD	E,(IY+26)	;Cluster
-  E154  FD561B        		LD	D,(IY+27)
-  E157                	RWX1:
-  E157  ED5364E2      		LD	(_CLPS),DE
-  E15B  7A            		LD	A,D
-  E15C  B3            		OR	E
-  E15D  37            		SCF
-  E15E  C8            		RET	Z
+  E14B  FD5E1A        		LD	E,(IY+26)	;Cluster
+  E14E  FD561B        		LD	D,(IY+27)
+  E151                	RWX1:
+  E151  ED535EE2      		LD	(_CLPS),DE
+  E155  7A            		LD	A,D
+  E156  B3            		OR	E
+  E157  37            		SCF
+  E158  C8            		RET	Z
                       	
-  E15F  78            		LD	A,B
-  E160  B1            		OR	C
-  E161  C8            		RET	Z
+  E159  78            		LD	A,B
+  E15A  B1            		OR	C
+  E15B  C8            		RET	Z
                       	
-  E162  CDF7EC        		CALL	_GNCL
-  E165  D8            		RET	C
-  E166  0B            		DEC	BC
-  E167  CD6DDF        		CALL	ENDCL
-  E16A  38EB          		JR	C,RWX1
-  E16C  37            		SCF
-  E16D  C9            		RET
+  E15C  CDF7EC        		CALL	_GNCL
+  E15F  D8            		RET	C
+  E160  0B            		DEC	BC
+  E161  CD67DF        		CALL	ENDCL
+  E164  38EB          		JR	C,RWX1
+  E166  37            		SCF
+  E167  C9            		RET
                       	
-  E16E                	DSKF:
-  E16E  110000        	MAXCLP:	LD	DE,0
-  E171  210000        		LD	HL,0
-  E174                	DSKF1:
-  E174  D5            		PUSH	DE
-  E175  CDF7EC        		CALL	_GNCL
-  E178  380C          		JR	C,POPSCF
-  E17A  7A            		LD	A,D
-  E17B  B3            		OR	E
-  E17C  2001          		JR	NZ,DSKF2
-  E17E  23            		INC	HL
-  E17F                	DSKF2:
-  E17F  D1            		POP	DE
-  E180  1B            		DEC	DE
-  E181  7A            		LD	A,D
-  E182  B3            		OR	E
-  E183  20EF          		JR	NZ,DSKF1
-  E185  C9            		RET
+  E168                	DSKF:
+  E168  110000        	MAXCLP:	LD	DE,0
+  E16B  210000        		LD	HL,0
+  E16E                	DSKF1:
+  E16E  D5            		PUSH	DE
+  E16F  CDF7EC        		CALL	_GNCL
+  E172  380C          		JR	C,POPSCF
+  E174  7A            		LD	A,D
+  E175  B3            		OR	E
+  E176  2001          		JR	NZ,DSKF2
+  E178  23            		INC	HL
+  E179                	DSKF2:
+  E179  D1            		POP	DE
+  E17A  1B            		DEC	DE
+  E17B  7A            		LD	A,D
+  E17C  B3            		OR	E
+  E17D  20EF          		JR	NZ,DSKF1
+  E17F  C9            		RET
                       	
-  E186                	POPSCF:
-  E186  F1            		POP	AF
-  E187  37            		SCF
-  E188  C9            		RET
+  E180                	POPSCF:
+  E180  F1            		POP	AF
+  E181  37            		SCF
+  E182  C9            		RET
                       	
-  E189                	SETTMS:
-  E189  FD7E17        		LD	A,(IY+23)
-  E18C  3C            		INC	A
-  E18D  C0            		RET	NZ
-  E18E                	SETTMSX:
-  E18E  CDDDD7        		CALL	_SYS2C
+  E183                	SETTMS:
+  E183  FD7E17        		LD	A,(IY+23)
+  E186  3C            		INC	A
+  E187  C0            		RET	NZ
+  E188                	SETTMSX:
+  E188  CDDDD7        		CALL	_SYS2C
                       	
-  E191  CB25          		SLA	L
-  E193  CB25          		SLA	L
-  E195  29            		ADD	HL,HL
-  E196  29            		ADD	HL,HL
-  E197  29            		ADD	HL,HL
-  E198  7A            		LD	A,D
-  E199  0F            		RRCA
-  E19A  E61F          		AND	01FH
-  E19C  B5            		OR	L
-  E19D  6F            		LD	L,A
-  E19E  FD7516        		LD	(IY+22),L
-  E1A1  FD7417        		LD	(IY+23),H
+  E18B  CB25          		SLA	L
+  E18D  CB25          		SLA	L
+  E18F  29            		ADD	HL,HL
+  E190  29            		ADD	HL,HL
+  E191  29            		ADD	HL,HL
+  E192  7A            		LD	A,D
+  E193  0F            		RRCA
+  E194  E61F          		AND	01FH
+  E196  B5            		OR	L
+  E197  6F            		LD	L,A
+  E198  FD7516        		LD	(IY+22),L
+  E19B  FD7417        		LD	(IY+23),H
                       	
-  E1A4  CDA3D7        		CALL	_SYS2A
+  E19E  CDA3D7        		CALL	_SYS2A
                       	
-  E1A7  0144F8        		LD	BC,0-1980
-  E1AA  09            		ADD	HL,BC
-  E1AB  65            		LD	H,L
+  E1A1  0144F8        		LD	BC,0-1980
+  E1A4  09            		ADD	HL,BC
+  E1A5  65            		LD	H,L
                       	
-  E1AC  7A            		LD	A,D
-  E1AD  87            		ADD	A,A
-  E1AE  87            		ADD	A,A
-  E1AF  87            		ADD	A,A
-  E1B0  87            		ADD	A,A
-  E1B1  6F            		LD	L,A
-  E1B2  29            		ADD	HL,HL
-  E1B3  7D            		LD	A,L
-  E1B4  B3            		OR	E
-  E1B5  6F            		LD	L,A
-  E1B6  FD7514        		LD	(IY+20),L
-  E1B9  FD7415        		LD	(IY+21),H
+  E1A6  7A            		LD	A,D
+  E1A7  87            		ADD	A,A
+  E1A8  87            		ADD	A,A
+  E1A9  87            		ADD	A,A
+  E1AA  87            		ADD	A,A
+  E1AB  6F            		LD	L,A
+  E1AC  29            		ADD	HL,HL
+  E1AD  7D            		LD	A,L
+  E1AE  B3            		OR	E
+  E1AF  6F            		LD	L,A
+  E1B0  FD7514        		LD	(IY+20),L
+  E1B3  FD7415        		LD	(IY+21),H
+  E1B6  C9            		RET
+                      	
+  E1B7                	PUSHRR:
+  E1B7  CDBDE1        		CALL	SUBRR
+  E1BA                	POPRR1:
+  E1BA  EDB0          		LDIR
   E1BC  C9            		RET
                       	
-  E1BD                	PUSHRR:
-  E1BD  CDC3E1        		CALL	SUBRR
-  E1C0                	POPRR1:
-  E1C0  EDB0          		LDIR
-  E1C2  C9            		RET
+  E1BD                	SUBRR:
+  E1BD  FDE5          		PUSH	IY
+  E1BF  E1            		POP	HL
+  E1C0  112100        		LD	DE,33
+  E1C3  19            		ADD	HL,DE
+  E1C4  1157E2        		LD	DE,HLBUF
+  E1C7  010300        		LD	BC,3
+  E1CA  C9            		RET
                       	
-  E1C3                	SUBRR:
-  E1C3  FDE5          		PUSH	IY
-  E1C5  E1            		POP	HL
-  E1C6  112100        		LD	DE,33
-  E1C9  19            		ADD	HL,DE
-  E1CA  115DE2        		LD	DE,HLBUF
-  E1CD  010300        		LD	BC,3
-  E1D0  C9            		RET
+  E1CB                	SETSEQ:
+  E1CB  F5            		PUSH	AF
+  E1CC  FD7E21        		LD	A,(IY+33)
+  E1CF  FD6E22        		LD	L,(IY+34)
+  E1D2  FD6623        		LD	H,(IY+35)
                       	
-  E1D1                	SETSEQ:
-  E1D1  F5            		PUSH	AF
-  E1D2  FD7E21        		LD	A,(IY+33)
-  E1D5  FD6E22        		LD	L,(IY+34)
-  E1D8  FD6623        		LD	H,(IY+35)
+  E1D5  CDF1E1        		CALL	SSQ1
                       	
-  E1DB  CDF7E1        		CALL	SSQ1
+  E1D8  29            		ADD	HL,HL
+  E1D9  CB3D          		SRL	L
+  E1DB  FD7520        		LD	(IY+32),L
+  E1DE  FD740C        		LD	(IY+12),H
+  E1E1  F1            		POP	AF
                       	
-  E1DE  29            		ADD	HL,HL
-  E1DF  CB3D          		SRL	L
-  E1E1  FD7520        		LD	(IY+32),L
-  E1E4  FD740C        		LD	(IY+12),H
-  E1E7  F1            		POP	AF
+  E1E2                	POPRR:
+  E1E2  CDBDE1        		CALL	SUBRR
+  E1E5  EB            		EX	DE,HL
+  E1E6  18D2          		JR	POPRR1
                       	
-  E1E8                	POPRR:
-  E1E8  CDC3E1        		CALL	SUBRR
-  E1EB  EB            		EX	DE,HL
-  E1EC  18D2          		JR	POPRR1
+  E1E8                	GETSIZE:
+  E1E8  FD7E10        		LD	A,(IY+16)
+  E1EB  FD6E11        		LD	L,(IY+17)
+  E1EE  FD6612        		LD	H,(IY+18)
+  E1F1                	SSQ1:
+  E1F1  87            		ADD	A,A
+  E1F2  ED6A          		ADC	HL,HL
+  E1F4  B7            		OR	A
+  E1F5  C8            		RET	Z
+  E1F6  23            		INC	HL
+  E1F7  C9            		RET
                       	
-  E1EE                	GETSIZE:
-  E1EE  FD7E10        		LD	A,(IY+16)
-  E1F1  FD6E11        		LD	L,(IY+17)
-  E1F4  FD6612        		LD	H,(IY+18)
-  E1F7                	SSQ1:
-  E1F7  87            		ADD	A,A
-  E1F8  ED6A          		ADC	HL,HL
-  E1FA  B7            		OR	A
-  E1FB  C8            		RET	Z
-  E1FC  23            		INC	HL
-  E1FD  C9            		RET
+  E1F8                	GETSEQ:
+  E1F8  FD6E20        		LD	L,(IY+32)
+  E1FB  FD660C        		LD	H,(IY+12)
                       	
-  E1FE                	GETSEQ:
-  E1FE  FD6E20        		LD	L,(IY+32)
-  E201  FD660C        		LD	H,(IY+12)
+  E1FE  CB25          		SLA	L
                       	
-  E204  CB25          		SLA	L
+  E200  CB3C          		SRL	H
+  E202  CB1D          		RR	L
+  E204  C9            		RET
                       	
+  E205                	SETRBR:
+  E205  AF            		XOR	A	;HLA = HL*128
   E206  CB3C          		SRL	H
   E208  CB1D          		RR	L
-  E20A  C9            		RET
+  E20A  1F            		RRA
+  E20B  FD7721        		LD	(IY+33),A
+  E20E  FD7522        		LD	(IY+34),L
+  E211  FD7423        		LD	(IY+35),H
+  E214  218000        		LD	HL,128
+  E217  C9            		RET
                       	
-  E20B                	SETRBR:
-  E20B  AF            		XOR	A	;HLA = HL*128
-  E20C  CB3C          		SRL	H
-  E20E  CB1D          		RR	L
-  E210  1F            		RRA
-  E211  FD7721        		LD	(IY+33),A
-  E214  FD7522        		LD	(IY+34),L
-  E217  FD7423        		LD	(IY+35),H
-  E21A  218000        		LD	HL,128
-  E21D  C9            		RET
-                      	
-  E21E                	[DE26]:
-  E21E  ED5B4CEC      		LD	DE,(STABLE+2*026H)
-  E222  1804          		JR	[DE1]
-  E224                	[DE27]:
-  E224  ED5B4EEC      		LD	DE,(STABLE+2*027H)
-  E228                	[DE1]:
-  E228  CD30E2        		CALL	[DE]
+  E218                	K_DE26:
+  E218  ED5B4CEC      		LD	DE,(STABLE+2*026H)
+  E21C  1804          		JR	K_DE1
+  E21E                	K_DE27:
+  E21E  ED5B4EEC      		LD	DE,(STABLE+2*027H)
+  E222                	K_DE1:
+  E222  CD2AE2        		CALL	K_DE
                       	;	EX	DE,IY
-  E22B  D5            		PUSH	DE
-  E22C  FDE3          		EX	(SP),IY
-  E22E  D1            		POP	DE
+  E225  D5            		PUSH	DE
+  E226  FDE3          		EX	(SP),IY
+  E228  D1            		POP	DE
                       	;
-  E22F  C9            		RET
-  E230                	[DE]:
+  E229  C9            		RET
+  E22A                	K_DE:
                       	;	EX	DE,IY
-  E230  D5            		PUSH	DE
-  E231  FDE3          		EX	(SP),IY
-  E233  D1            		POP	DE
-  E234  FDE9          		JP	(IY)
+  E22A  D5            		PUSH	DE
+  E22B  FDE3          		EX	(SP),IY
+  E22D  D1            		POP	DE
+  E22E  FDE9          		JP	(IY)
                       	
-  E236                	SCDIR:	DS	2		;+14 +15
-  E238                	SFBPS:	DS	2		;FBPS
-  E23A                	SFNDF:	DS	2		;FILEN DIRF
-  E23C                	SFILE:	DS	33		;DRV FILENAME
-  E25D                	HLBUF:	DS	3		;Random record buffer
+  E230                	SCDIR:	DS	2		;+14 +15
+  E232                	SFBPS:	DS	2		;FBPS
+  E234                	SFNDF:	DS	2		;FILEN DIRF
+  E236                	SFILE:	DS	33		;DRV FILENAME
+  E257                	HLBUF:	DS	3		;Random record buffer
                       	
-  E260  0000          	_FATPS:	DW	0
-  E262  0000          	_DIRPS:	DW	0
-  E264  0000          	_CLPS:	DW	0
+  E25A  0000          	_FATPS:	DW	0
+  E25C  0000          	_DIRPS:	DW	0
+  E25E  0000          	_CLPS:	DW	0
                       	
-                      		
+                      	;LDFILE2.ASM
+                      	
                       	;	LSX-Dodgers FILE2
                       	
-  E266                	RBWDD:
-  E266  E5            		PUSH	HL
-  E267  C1            		POP	BC
-  E268  2140E3        		LD	HL,NUL
-  E26B  CD74E3        		CALL	DDX
-  E26E  2003          		JR	NZ,RBWDD2
-  E270  2A08EC        		LD	HL,(STABLE+2*4)
-  E273                	RBWDD2:
-  E273  FE43          		CP	"C"
-  E275  2003          		JR	NZ,RBWDD3
-  E277  21CFD9        		LD	HL,PRINTS
-  E27A                	RBWDD3:
-  E27A  FE50          		CP	"P"
-  E27C  2003          		JR	NZ,RBWDD4
-  E27E  2A0AEC        		LD	HL,(STABLE+2*5)
-  E281                	RBWDD4:
-  E281  228FE2        		LD	(RBWDDP+1),HL
-  E284  2A8AEC        		LD	HL,(_DTA)
-  E287                	RBWDD1:
-  E287  78            		LD	A,B
-  E288  B1            		OR	C
-  E289                	RBWDD5:
-  E289  CA3BE3        		JP	Z,RBW1
-  E28C  5E            		LD	E,(HL)
-  E28D  23            		INC	HL
-  E28E  CDB3D6        	RBWDDP:	CALL	_SYS02
-  E291  DA57E3        		JP	C,RBRERR
-  E294  3E1A          		LD	A,01AH
-  E296  BB            		CP	E
-  E297  28F0          		JR	Z,RBWDD5
-  E299  0B            		DEC	BC
-  E29A  18EB          		JR	RBWDD1
+  E260                	RBWDD:
+  E260  E5            		PUSH	HL
+  E261  C1            		POP	BC
+  E262  213AE3        		LD	HL,NUL
+  E265  CD6EE3        		CALL	DDX
+  E268  2003          		JR	NZ,RBWDD2
+  E26A  2A08EC        		LD	HL,(STABLE+2*4)
+  E26D                	RBWDD2:
+  E26D  FE43          		CP	'C'
+  E26F  2003          		JR	NZ,RBWDD3
+  E271  21CFD9        		LD	HL,PRINTS
+  E274                	RBWDD3:
+  E274  FE50          		CP	'P'
+  E276  2003          		JR	NZ,RBWDD4
+  E278  2A0AEC        		LD	HL,(STABLE+2*5)
+  E27B                	RBWDD4:
+  E27B  2289E2        		LD	(RBWDDP+1),HL
+  E27E  2A8AEC        		LD	HL,(_DTA)
+  E281                	RBWDD1:
+  E281  78            		LD	A,B
+  E282  B1            		OR	C
+  E283                	RBWDD5:
+  E283  CA35E3        		JP	Z,RBW1
+  E286  5E            		LD	E,(HL)
+  E287  23            		INC	HL
+  E288  CDB3D6        	RBWDDP:	CALL	_SYS02
+  E28B  DA51E3        		JP	C,RBRERR
+  E28E  3E1A          		LD	A,01AH
+  E290  BB            		CP	E
+  E291  28F0          		JR	Z,RBWDD5
+  E293  0B            		DEC	BC
+  E294  18EB          		JR	RBWDD1
                       	
                       					;Write random block
-  E29C                	_SYS26:
-  E29C  AF            		XOR	A
-  E29D  3230E5        		LD	(DRDN1),A
-  E2A0  22EAE4        		LD	(LEFT+1),HL	;Write record byte
-  E2A3  220CE5        		LD	(LEFTX),HL
-  E2A6  CD76DD        		CALL	SETDRV
+  E296                	_SYS26:
+  E296  AF            		XOR	A
+  E297  322AE5        		LD	(DRDN1),A
+  E29A  22E4E4        		LD	(LEFT+1),HL	;Write record byte
+  E29D  2206E5        		LD	(LEFTX),HL
+  E2A0  CD70DD        		CALL	SETDRV
                       	
-  E2A9  CD5EE4        		CALL	RBX0
-  E2AC  DA42E3        		JP	C,RBWERR
-  E2AF  28B5          		JR	Z,RBWDD
-  E2B1  CDF2E0        		CALL	WOPEN
-  E2B4  DA42E3        		JP	C,RBWERR
-  E2B7  7C            		LD	A,H
-  E2B8  B5            		OR	L
-  E2B9  CA3BE3        		JP	Z,RBW1
+  E2A3  CD58E4        		CALL	RBX0
+  E2A6  DA3CE3        		JP	C,RBWERR
+  E2A9  28B5          		JR	Z,RBWDD
+  E2AB  CDECE0        		CALL	WOPEN
+  E2AE  DA3CE3        		JP	C,RBWERR
+  E2B1  7C            		LD	A,H
+  E2B2  B5            		OR	L
+  E2B3  CA35E3        		JP	Z,RBW1
                       	
-  E2BC  2B            		DEC	HL
+  E2B6  2B            		DEC	HL
                       	
-  E2BD  CD02E5        		CALL	CDERR		;CDE=Random record
+  E2B7  CDFCE4        		CALL	CDERR		;CDE=Random record
                       	
-  E2C0  AF            		XOR	A
-  E2C1  19            		ADD	HL,DE
-  E2C2  89            		ADC	A,C
-  E2C3  47            		LD	B,A
-  E2C4  4C            		LD	C,H
-  E2C5  CD49E1        		CALL	RWXR
-  E2C8  DC03E1        		CALL	C,WRDFX
-  E2CB  DA42E3        		JP	C,RBWERR
+  E2BA  AF            		XOR	A
+  E2BB  19            		ADD	HL,DE
+  E2BC  89            		ADC	A,C
+  E2BD  47            		LD	B,A
+  E2BE  4C            		LD	C,H
+  E2BF  CD43E1        		CALL	RWXR
+  E2C2  DCFDE0        		CALL	C,WRDFX
+  E2C5  DA3CE3        		JP	C,RBWERR
                       	
-  E2CE  CD87E4        		CALL	RBX2
-  E2D1  281A          		JR	Z,RBWB
-  E2D3  CD99E4        		CALL	RBXA
-  E2D6  386A          		JR	C,RBWERR
-  E2D8  EB            		EX	DE,HL
-  E2D9  C5            		PUSH	BC
-  E2DA  EDB0          		LDIR
-  E2DC  220EE5        		LD	(DTAX),HL
+  E2C8  CD81E4        		CALL	RBX2
+  E2CB  281A          		JR	Z,RBWB
+  E2CD  CD93E4        		CALL	RBXA
+  E2D0  386A          		JR	C,RBWERR
+  E2D2  EB            		EX	DE,HL
+  E2D3  C5            		PUSH	BC
+  E2D4  EDB0          		LDIR
+  E2D6  2208E5        		LD	(DTAX),HL
                       	
-  E2DF  CD77E0        		CALL	SWTDBF
+  E2D9  CD71E0        		CALL	SWTDBF
                       	
-  E2E2  2A0CE5        		LD	HL,(LEFTX)
-  E2E5  D1            		POP	DE
-  E2E6  ED52          		SBC	HL,DE
-  E2E8  220CE5        		LD	(LEFTX),HL
-  E2EB  282E          		JR	Z,RBWEND
+  E2DC  2A06E5        		LD	HL,(LEFTX)
+  E2DF  D1            		POP	DE
+  E2E0  ED52          		SBC	HL,DE
+  E2E2  2206E5        		LD	(LEFTX),HL
+  E2E5  282E          		JR	Z,RBWEND
                       	
-  E2ED                	RBWB:
-  E2ED  CDCEE4        		CALL	RBXB
-  E2F0  2813          		JR	Z,RBWC
-  E2F2                	RBWB1:
-  E2F2  C5            		PUSH	BC
-  E2F3  D5            		PUSH	DE
-  E2F4  CD62DF        		CALL	CLUST
-  E2F7  CD3AE7        		CALL	DWTC
-  E2FA  D1            		POP	DE
-  E2FB  C1            		POP	BC
-  E2FC  3844          		JR	C,RBWERR
-  E2FE  CDF7EC        		CALL	_GNCL
-  E301  383F          		JR	C,RBWERR
-  E303  10ED          		DJNZ	RBWB1
-  E305                	RBWC:
-  E305  CDDEE4        		CALL	RBXC
-  E308  2811          		JR	Z,RBWEND
+  E2E7                	RBWB:
+  E2E7  CDC8E4        		CALL	RBXB
+  E2EA  2813          		JR	Z,RBWC
+  E2EC                	RBWB1:
+  E2EC  C5            		PUSH	BC
+  E2ED  D5            		PUSH	DE
+  E2EE  CD5CDF        		CALL	CLUST
+  E2F1  CD34E7        		CALL	DWTC
+  E2F4  D1            		POP	DE
+  E2F5  C1            		POP	BC
+  E2F6  3844          		JR	C,RBWERR
+  E2F8  CDF7EC        		CALL	_GNCL
+  E2FB  383F          		JR	C,RBWERR
+  E2FD  10ED          		DJNZ	RBWB1
+  E2FF                	RBWC:
+  E2FF  CDD8E4        		CALL	RBXC
+  E302  2811          		JR	Z,RBWEND
                       	
-  E30A  CD62DF        		CALL	CLUST
-  E30D  CD2FE5        		CALL	DRDN
-  E310  3830          		JR	C,RBWERR
-  E312  ED5B7EEC      		LD	DE,(_DTBUF)
-  E316  EDB0          		LDIR
-  E318  CD77E0        		CALL	SWTDBF
-  E31B                	RBWEND:
-  E31B  CDE9E4        		CALL	RBXEND
+  E304  CD5CDF        		CALL	CLUST
+  E307  CD29E5        		CALL	DRDN
+  E30A  3830          		JR	C,RBWERR
+  E30C  ED5B7EEC      		LD	DE,(_DTBUF)
+  E310  EDB0          		LDIR
+  E312  CD71E0        		CALL	SWTDBF
+  E315                	RBWEND:
+  E315  CDE3E4        		CALL	RBXEND
                       	
-  E31E  CD6DE4        		CALL	RBX1
-  E321  3018          		JR	NC,RBW1
-  E323  2AEAE4        		LD	HL,(LEFT+1)
-  E326  FD5E10        		LD	E,(IY+16)	;CDE=File size
-  E329  FD5611        		LD	D,(IY+17)
-  E32C  FD4E12        		LD	C,(IY+18)
-  E32F  AF            		XOR	A
-  E330  19            		ADD	HL,DE
-  E331  89            		ADC	A,C
-  E332  FD7510        		LD	(IY+16),L
-  E335  FD7411        		LD	(IY+17),H
-  E338  FD7712        		LD	(IY+18),A
-  E33B                	RBW1:
-  E33B  FDE1          		POP	IY
-  E33D  C1            		POP	BC
+  E318  CD67E4        		CALL	RBX1
+  E31B  3018          		JR	NC,RBW1
+  E31D  2AE4E4        		LD	HL,(LEFT+1)
+  E320  FD5E10        		LD	E,(IY+16)	;CDE=File size
+  E323  FD5611        		LD	D,(IY+17)
+  E326  FD4E12        		LD	C,(IY+18)
+  E329  AF            		XOR	A
+  E32A  19            		ADD	HL,DE
+  E32B  89            		ADC	A,C
+  E32C  FD7510        		LD	(IY+16),L
+  E32F  FD7411        		LD	(IY+17),H
+  E332  FD7712        		LD	(IY+18),A
+  E335                	RBW1:
+  E335  FDE1          		POP	IY
+  E337  C1            		POP	BC
+  E338  D1            		POP	DE
+  E339  E1            		POP	HL
+  E33A                	NUL:
+  E33A  AF            		XOR	A
+  E33B  C9            		RET
+                      	
+  E33C                	RBWERR:
+  E33C  FDE5          		PUSH	IY
   E33E  D1            		POP	DE
-  E33F  E1            		POP	HL
-  E340                	NUL:
-  E340  AF            		XOR	A
-  E341  C9            		RET
+  E33F  2A20EC        		LD	HL,(STABLE+2*010H)
+  E342  CD0F00        		CALL	K_HL
+  E345                	RBRERR1:
+  E345  3E01          		LD	A,001H
+  E347                	RBRERR2:
+  E347  FDE1          		POP	IY
+  E349  C1            		POP	BC
+  E34A  D1            		POP	DE
+  E34B  E1            		POP	HL
+  E34C  37            		SCF
+  E34D  210000        		LD	HL,0
+  E350  C9            		RET
                       	
-  E342                	RBWERR:
-  E342  FDE5          		PUSH	IY
-  E344  D1            		POP	DE
-  E345  2A20EC        		LD	HL,(STABLE+2*010H)
-  E348  CD0F00        		CALL	[HL]
-  E34B                	RBRERR1:
-  E34B  3E01          		LD	A,001H
-  E34D                	RBRERR2:
-  E34D  FDE1          		POP	IY
-  E34F  C1            		POP	BC
-  E350  D1            		POP	DE
-  E351  E1            		POP	HL
-  E352  37            		SCF
-  E353  210000        		LD	HL,0
-  E356  C9            		RET
+  E351                	RBRERR:
+  E351  3EFF          		LD	A,0FFH
+  E353  18F2          		JR	RBRERR2
                       	
-  E357                	RBRERR:
-  E357  3EFF          		LD	A,0FFH
-  E359  18F2          		JR	RBRERR2
+  E355                	RBRFL:
+  E355  3E00          	RBRFLP:	LD	A,000H
+  E357  FE0D          		CP	00DH
+  E359  2005          		JR	NZ,RBRFL1
+  E35B  D5            		PUSH	DE
+  E35C  1E0A          		LD	E,00AH
+  E35E  1805          		JR	RBRFL2
+  E360                	RBRFL1:
+  E360  D5            		PUSH	DE
+  E361  CDFAD9        		CALL	_SYS07
+  E364  5F            		LD	E,A
+  E365                	RBRFL2:
+  E365  CDCDEC        		CALL	_PRINT
+  E368  7B            		LD	A,E
+  E369  D1            		POP	DE
+  E36A  3256E3        		LD	(RBRFLP+1),A
+  E36D  C9            		RET
+  E36E                	DDX:
+  E36E  FD7E01        		LD	A,(IY+1)
+  E371  CD6FDF        		CALL	CAP
+  E374  FE41          		CP	'A'
+  E376  C9            		RET
                       	
-  E35B                	RBRFL:
-  E35B  3E00          	RBRFLP:	LD	A,000H
-  E35D  FE0D          		CP	00DH
-  E35F  2005          		JR	NZ,RBRFL1
-  E361  D5            		PUSH	DE
-  E362  1E0A          		LD	E,00AH
-  E364  1805          		JR	RBRFL2
-  E366                	RBRFL1:
-  E366  D5            		PUSH	DE
-  E367  CDFAD9        		CALL	_SYS07
-  E36A  5F            		LD	E,A
-  E36B                	RBRFL2:
-  E36B  CDCDEC        		CALL	_PRINT
-  E36E  7B            		LD	A,E
-  E36F  D1            		POP	DE
-  E370  325CE3        		LD	(RBRFLP+1),A
-  E373  C9            		RET
-  E374                	DDX:
-  E374  FD7E01        		LD	A,(IY+1)
-  E377  CD75DF        		CALL	CAP
-  E37A  FE41          		CP	"A"
-  E37C  C9            		RET
+  E377                	RBRDD:
+  E377  E5            		PUSH	HL
+  E378  C1            		POP	BC
+  E379  2155E3        		LD	HL,RBRFL
+  E37C  CD6EE3        		CALL	DDX
+  E37F  2005          		JR	NZ,RBRDD2
+  E381  2A06EC        		LD	HL,(STABLE+2*3)
+  E384  1804          		JR	RBRDD3
+  E386                	RBRDD2:
+  E386  FE43          		CP	'C'
+  E388  202C          		JR	NZ,RBRDERR
+  E38A                	RBRDD3:
+  E38A  229AE3        		LD	(RBRDDP+1),HL
                       	
-  E37D                	RBRDD:
-  E37D  E5            		PUSH	HL
-  E37E  C1            		POP	BC
-  E37F  215BE3        		LD	HL,RBRFL
-  E382  CD74E3        		CALL	DDX
-  E385  2005          		JR	NZ,RBRDD2
-  E387  2A06EC        		LD	HL,(STABLE+2*3)
-  E38A  1804          		JR	RBRDD3
-  E38C                	RBRDD2:
-  E38C  FE43          		CP	"C"
-  E38E  202C          		JR	NZ,RBRDERR
-  E390                	RBRDD3:
-  E390  22A0E3        		LD	(RBRDDP+1),HL
+  E38D  ED5B8AEC      		LD	DE,(_DTA)
+  E391  210000        		LD	HL,0
+  E394                	RBRDD1:
+  E394  78            		LD	A,B
+  E395  B1            		OR	C
+  E396  2818          		JR	Z,RBRDDE1
+  E398  23            		INC	HL
+  E399  CD55E3        	RBRDDP:	CALL	RBRFL
+  E39C  380D          		JR	C,RBRDDE
+  E39E  FE1A          		CP	01AH
+  E3A0  2809          		JR	Z,RBRDDE
+  E3A2  FE03          		CP	3
+  E3A4  2805          		JR	Z,RBRDDE
+  E3A6  12            		LD	(DE),A
+  E3A7  13            		INC	DE
+  E3A8  0B            		DEC	BC
+  E3A9  18E9          		JR	RBRDD1
                       	
-  E393  ED5B8AEC      		LD	DE,(_DTA)
-  E397  210000        		LD	HL,0
-  E39A                	RBRDD1:
-  E39A  78            		LD	A,B
-  E39B  B1            		OR	C
-  E39C  2818          		JR	Z,RBRDDE1
-  E39E  23            		INC	HL
-  E39F  CD5BE3        	RBRDDP:	CALL	RBRFL
-  E3A2  380D          		JR	C,RBRDDE
-  E3A4  FE1A          		CP	01AH
-  E3A6  2809          		JR	Z,RBRDDE
-  E3A8  FE03          		CP	3
-  E3AA  2805          		JR	Z,RBRDDE
-  E3AC  12            		LD	(DE),A
-  E3AD  13            		INC	DE
-  E3AE  0B            		DEC	BC
-  E3AF  18E9          		JR	RBRDD1
-                      	
-  E3B1                	RBRDDE:
-  E3B1  3E1A          		LD	A,01AH
-  E3B3  12            		LD	(DE),A
-  E3B4                	RBRDDE2:
-  E3B4  AF            		XOR	A
-  E3B5  3C            		INC	A
-  E3B6                	RBRDDE1:
-  E3B6  324AE4        		LD	(RBRAP+1),A
-  E3B9  C343E4        		JP	RBREND0
-  E3BC                	RBRDERR:
-  E3BC  210000        		LD	HL,0
-  E3BF  18F3          		JR	RBRDDE2
+  E3AB                	RBRDDE:
+  E3AB  3E1A          		LD	A,01AH
+  E3AD  12            		LD	(DE),A
+  E3AE                	RBRDDE2:
+  E3AE  AF            		XOR	A
+  E3AF  3C            		INC	A
+  E3B0                	RBRDDE1:
+  E3B0  3244E4        		LD	(RBRAP+1),A
+  E3B3  C33DE4        		JP	RBREND0
+  E3B6                	RBRDERR:
+  E3B6  210000        		LD	HL,0
+  E3B9  18F3          		JR	RBRDDE2
                       	
                       					;Read random block
-  E3C1                	_SYS27:
-  E3C1  220CE5        		LD	(LEFTX),HL
-  E3C4  CD76DD        		CALL	SETDRV
+  E3BB                	_SYS27:
+  E3BB  2206E5        		LD	(LEFTX),HL
+  E3BE  CD70DD        		CALL	SETDRV
                       	
-  E3C7  FDCB0D66      		BIT	4,(IY+13)
-  E3CB  C24CE4        		JP	NZ,RBRDIR
-  E3CE  CD5EE4        		CALL	RBX0
-  E3D1  DA57E3        		JP	C,RBRERR
-  E3D4  28A7          		JR	Z,RBRDD
-  E3D6  CD6DE4        		CALL	RBX1
-  E3D9  DA4BE3        		JP	C,RBRERR1
-  E3DC  79            		LD	A,C
-  E3DD  EB            		EX	DE,HL
-  E3DE  ED52          		SBC	HL,DE		;CP 0HL,CDE
-  E3E0  19            		ADD	HL,DE
-  E3E1  DE00          		SBC	A,000H
-  E3E3  3801          		JR	C,RBR1
-  E3E5  EB            		EX	DE,HL
-  E3E6                	RBR1:
-  E3E6  9F            		SBC	A,A
-  E3E7  E601          		AND	1
-  E3E9  324AE4        		LD	(RBRAP+1),A
+  E3C1  FDCB0D66      		BIT	4,(IY+13)
+  E3C5  C246E4        		JP	NZ,RBRDIR
+  E3C8  CD58E4        		CALL	RBX0
+  E3CB  DA51E3        		JP	C,RBRERR
+  E3CE  28A7          		JR	Z,RBRDD
+  E3D0  CD67E4        		CALL	RBX1
+  E3D3  DA45E3        		JP	C,RBRERR1
+  E3D6  79            		LD	A,C
+  E3D7  EB            		EX	DE,HL
+  E3D8  ED52          		SBC	HL,DE		;CP 0HL,CDE
+  E3DA  19            		ADD	HL,DE
+  E3DB  DE00          		SBC	A,000H
+  E3DD  3801          		JR	C,RBR1
+  E3DF  EB            		EX	DE,HL
+  E3E0                	RBR1:
+  E3E0  9F            		SBC	A,A
+  E3E1  E601          		AND	1
+  E3E3  3244E4        		LD	(RBRAP+1),A
                       	
-  E3EC  7C            		LD	A,H
-  E3ED  B5            		OR	L
-  E3EE  CA43E4        		JP	Z,RBREND0
+  E3E6  7C            		LD	A,H
+  E3E7  B5            		OR	L
+  E3E8  CA3DE4        		JP	Z,RBREND0
                       	
-  E3F1  22EAE4        		LD	(LEFT+1),HL	;Read record byte
-  E3F4  220CE5        		LD	(LEFTX),HL
+  E3EB  22E4E4        		LD	(LEFT+1),HL	;Read record byte
+  E3EE  2206E5        		LD	(LEFTX),HL
                       	
-  E3F7  CD87E4        		CALL	RBX2
-  E3FA  2819          		JR	Z,RBRB
-  E3FC  CD99E4        		CALL	RBXA
-  E3FF  DA57E3        		JP	C,RBRERR
-  E402  C5            		PUSH	BC
-  E403  EDB0          		LDIR
-  E405  ED530EE5      		LD	(DTAX),DE
-  E409  2A0CE5        		LD	HL,(LEFTX)
-  E40C  D1            		POP	DE
-  E40D  A7            		AND	A
-  E40E  ED52          		SBC	HL,DE
-  E410  220CE5        		LD	(LEFTX),HL
-  E413  282B          		JR	Z,RBREND
+  E3F1  CD81E4        		CALL	RBX2
+  E3F4  2819          		JR	Z,RBRB
+  E3F6  CD93E4        		CALL	RBXA
+  E3F9  DA51E3        		JP	C,RBRERR
+  E3FC  C5            		PUSH	BC
+  E3FD  EDB0          		LDIR
+  E3FF  ED5308E5      		LD	(DTAX),DE
+  E403  2A06E5        		LD	HL,(LEFTX)
+  E406  D1            		POP	DE
+  E407  A7            		AND	A
+  E408  ED52          		SBC	HL,DE
+  E40A  2206E5        		LD	(LEFTX),HL
+  E40D  282B          		JR	Z,RBREND
                       	
-  E415                	RBRB:
-  E415  CDCEE4        		CALL	RBXB
-  E418  2812          		JR	Z,RBRC
-  E41A                	RBRB1:
-  E41A  C5            		PUSH	BC
-  E41B  D5            		PUSH	DE
-  E41C  CD62DF        		CALL	CLUST
-  E41F  CD2EE7        		CALL	DRDC
-  E422  D1            		POP	DE
-  E423  C1            		POP	BC
-  E424  D4F7EC        		CALL	NC,_GNCL
-  E427  DA57E3        		JP	C,RBRERR
-  E42A  10EE          		DJNZ	RBRB1
-  E42C                	RBRC:
-  E42C  CDDEE4        		CALL	RBXC
-  E42F  280F          		JR	Z,RBREND
+  E40F                	RBRB:
+  E40F  CDC8E4        		CALL	RBXB
+  E412  2812          		JR	Z,RBRC
+  E414                	RBRB1:
+  E414  C5            		PUSH	BC
+  E415  D5            		PUSH	DE
+  E416  CD5CDF        		CALL	CLUST
+  E419  CD28E7        		CALL	DRDC
+  E41C  D1            		POP	DE
+  E41D  C1            		POP	BC
+  E41E  D4F7EC        		CALL	NC,_GNCL
+  E421  DA51E3        		JP	C,RBRERR
+  E424  10EE          		DJNZ	RBRB1
+  E426                	RBRC:
+  E426  CDD8E4        		CALL	RBXC
+  E429  280F          		JR	Z,RBREND
                       	
-  E431  CD62DF        		CALL	CLUST
-  E434  CD17E5        		CALL	DRDX
-  E437  DA57E3        		JP	C,RBRERR
-  E43A  EB            		EX	DE,HL
-  E43B  2A7EEC        		LD	HL,(_DTBUF)
-  E43E  EDB0          		LDIR
-  E440                	RBREND:
-  E440  CDE9E4        		CALL	RBXEND
-  E443                	RBREND0:
-  E443  FDE1          		POP	IY
-  E445  C1            		POP	BC
-  E446  D1            		POP	DE
-  E447  F1            		POP	AF	;(HL)
-  E448  AF            		XOR	A
-  E449  3E00          	RBRAP:	LD	A,000H
-  E44B  C9            		RET
+  E42B  CD5CDF        		CALL	CLUST
+  E42E  CD11E5        		CALL	DRDX
+  E431  DA51E3        		JP	C,RBRERR
+  E434  EB            		EX	DE,HL
+  E435  2A7EEC        		LD	HL,(_DTBUF)
+  E438  EDB0          		LDIR
+  E43A                	RBREND:
+  E43A  CDE3E4        		CALL	RBXEND
+  E43D                	RBREND0:
+  E43D  FDE1          		POP	IY
+  E43F  C1            		POP	BC
+  E440  D1            		POP	DE
+  E441  F1            		POP	AF	;(HL)
+  E442  AF            		XOR	A
+  E443  3E00          	RBRAP:	LD	A,000H
+  E445  C9            		RET
                       	
-  E44C                	RBRDIR:
-  E44C  FD6E1A        		LD	L,(IY+26)
-  E44F  FD661B        		LD	H,(IY+27)
-  E452  CD90DF        		CALL	CHDIR
-  E455  AF            		XOR	A
-  E456  67            		LD	H,A
-  E457  6F            		LD	L,A
-  E458  3C            		INC	A
-  E459  324AE4        		LD	(RBRAP+1),A
-  E45C  18E5          		JR	RBREND0
+  E446                	RBRDIR:
+  E446  FD6E1A        		LD	L,(IY+26)
+  E449  FD661B        		LD	H,(IY+27)
+  E44C  CD8ADF        		CALL	CHDIR
+  E44F  AF            		XOR	A
+  E450  67            		LD	H,A
+  E451  6F            		LD	L,A
+  E452  3C            		INC	A
+  E453  3244E4        		LD	(RBRAP+1),A
+  E456  18E5          		JR	RBREND0
                       	
-  E45E                	RBX0:
-  E45E  2A8AEC        		LD	HL,(_DTA)
-  E461  220EE5        		LD	(DTAX),HL
-  E464  2A0CE5        		LD	HL,(LEFTX)
-  E467  FD7E1C        		LD	A,(IY+28)	;Open
-  E46A  D6FD          		SUB	0FDH
-  E46C  C9            		RET
+  E458                	RBX0:
+  E458  2A8AEC        		LD	HL,(_DTA)
+  E45B  2208E5        		LD	(DTAX),HL
+  E45E  2A06E5        		LD	HL,(LEFTX)
+  E461  FD7E1C        		LD	A,(IY+28)	;Open
+  E464  D6FD          		SUB	0FDH
+  E466  C9            		RET
                       	
-  E46D                	RBX1:
-  E46D  E5            		PUSH	HL		;Record byte
+  E467                	RBX1:
+  E467  E5            		PUSH	HL		;Record byte
                       	
-  E46E  FD6E10        		LD	L,(IY+16)	;AHL=File size
-  E471  FD6611        		LD	H,(IY+17)
-  E474  FD7E12        		LD	A,(IY+18)
+  E468  FD6E10        		LD	L,(IY+16)	;AHL=File size
+  E46B  FD6611        		LD	H,(IY+17)
+  E46E  FD7E12        		LD	A,(IY+18)
                       	
-  E477  CD02E5        		CALL	CDERR		;CDE=Random record
+  E471  CDFCE4        		CALL	CDERR		;CDE=Random record
                       	
-  E47A  A7            		AND	A
-  E47B  ED52          		SBC	HL,DE
-  E47D  99            		SBC	A,C
-  E47E  D1            		POP	DE
+  E474  A7            		AND	A
+  E475  ED52          		SBC	HL,DE
+  E477  99            		SBC	A,C
+  E478  D1            		POP	DE
                       	
-  E47F  D8            		RET	C
-  E480  4F            		LD	C,A
-  E481  EB            		EX	DE,HL	;CDE=File byte	HL=Record byte
-  E482  B2            		OR	D
-  E483  B3            		OR	E
-  E484  C0            		RET	NZ
-  E485  37            		SCF
-  E486  C9            		RET
+  E479  D8            		RET	C
+  E47A  4F            		LD	C,A
+  E47B  EB            		EX	DE,HL	;CDE=File byte	HL=Record byte
+  E47C  B2            		OR	D
+  E47D  B3            		OR	E
+  E47E  C0            		RET	NZ
+  E47F  37            		SCF
+  E480  C9            		RET
                       	
-  E487                	RBX2:
-  E487  FD4E22        		LD	C,(IY+34)	;Cluster settings
-  E48A  FD4623        		LD	B,(IY+35)
-  E48D  CD49E1        		CALL	RWXR
-  E490  3E03          	IBM5:	LD	A,3		;ooo 1
-  E492  FDA622        		AND	(IY+34)
-  E495  FDB621        		OR	(IY+33)
-  E498  C9            		RET
+  E481                	RBX2:
+  E481  FD4E22        		LD	C,(IY+34)	;Cluster settings
+  E484  FD4623        		LD	B,(IY+35)
+  E487  CD43E1        		CALL	RWXR
+  E48A  3E03          	IBM5:	LD	A,3		;ooo 1
+  E48C  FDA622        		AND	(IY+34)
+  E48F  FDB621        		OR	(IY+33)
+  E492  C9            		RET
                       	
-  E499                	RBXA:
-  E499  D5            		PUSH	DE
-  E49A  CD62DF        		CALL	CLUST
-  E49D  CD17E5        		CALL	DRDX
-  E4A0  D1            		POP	DE
-  E4A1  D8            		RET	C
-  E4A2  CDF7EC        		CALL	_GNCL
-  E4A5  D8            		RET	C
-  E4A6  ED5364E2      		LD	(_CLPS),DE
+  E493                	RBXA:
+  E493  D5            		PUSH	DE
+  E494  CD5CDF        		CALL	CLUST
+  E497  CD11E5        		CALL	DRDX
+  E49A  D1            		POP	DE
+  E49B  D8            		RET	C
+  E49C  CDF7EC        		CALL	_GNCL
+  E49F  D8            		RET	C
+  E4A0  ED535EE2      		LD	(_CLPS),DE
                       	
-  E4AA  FD4E21        		LD	C,(IY+33)
-  E4AD  3A91E4        		LD	A,(IBM5+1)		;ooo 1
-  E4B0  FDA622        		AND	(IY+34)
-  E4B3  47            		LD	B,A
-  E4B4  210004        	IBM7:	LD	HL,1024		;ooo 512
-  E4B7  ED42          		SBC	HL,BC		;remaining cluster
+  E4A4  FD4E21        		LD	C,(IY+33)
+  E4A7  3A8BE4        		LD	A,(IBM5+1)		;ooo 1
+  E4AA  FDA622        		AND	(IY+34)
+  E4AD  47            		LD	B,A
+  E4AE  210004        	IBM7:	LD	HL,1024		;ooo 512
+  E4B1  ED42          		SBC	HL,BC		;remaining cluster
                       	
-  E4B9  ED5B0CE5      		LD	DE,(LEFTX)
-  E4BD  ED52          		SBC	HL,DE		;CP HL,DE
-  E4BF  19            		ADD	HL,DE
-  E4C0  3801          		JR	C,RBXA1
-  E4C2  EB            		EX	DE,HL
-  E4C3                	RBXA1:
-  E4C3  E5            		PUSH	HL
-  E4C4  2A7EEC        		LD	HL,(_DTBUF)
-  E4C7  09            		ADD	HL,BC
-  E4C8  ED5B0EE5      		LD	DE,(DTAX)
-  E4CC  C1            		POP	BC
-  E4CD  C9            		RET
+  E4B3  ED5B06E5      		LD	DE,(LEFTX)
+  E4B7  ED52          		SBC	HL,DE		;CP HL,DE
+  E4B9  19            		ADD	HL,DE
+  E4BA  3801          		JR	C,RBXA1
+  E4BC  EB            		EX	DE,HL
+  E4BD                	RBXA1:
+  E4BD  E5            		PUSH	HL
+  E4BE  2A7EEC        		LD	HL,(_DTBUF)
+  E4C1  09            		ADD	HL,BC
+  E4C2  ED5B08E5      		LD	DE,(DTAX)
+  E4C6  C1            		POP	BC
+  E4C7  C9            		RET
                       	
-  E4CE                	RBXB:
-  E4CE  2A0EE5        		LD	HL,(DTAX)
-  E4D1  ED5B64E2      		LD	DE,(_CLPS)
-  E4D5  3A0DE5        		LD	A,(LEFTX+1)
-  E4D8  CB3F          		SRL	A
-  E4DA  CB3F          	IBM8:	SRL	A		;ooo
-  E4DC  47            		LD	B,A
-  E4DD  C9            		RET
+  E4C8                	RBXB:
+  E4C8  2A08E5        		LD	HL,(DTAX)
+  E4CB  ED5B5EE2      		LD	DE,(_CLPS)
+  E4CF  3A07E5        		LD	A,(LEFTX+1)
+  E4D2  CB3F          		SRL	A
+  E4D4  CB3F          	IBM8:	SRL	A		;ooo
+  E4D6  47            		LD	B,A
+  E4D7  C9            		RET
                       	
-  E4DE                	RBXC:
-  E4DE  ED4B0CE5      		LD	BC,(LEFTX)
-  E4E2  3A91E4        		LD	A,(IBM5+1)
-  E4E5  A0            		AND	B
-  E4E6  47            		LD	B,A
-  E4E7  B1            		OR	C
-  E4E8  C9            		RET
+  E4D8                	RBXC:
+  E4D8  ED4B06E5      		LD	BC,(LEFTX)
+  E4DC  3A8BE4        		LD	A,(IBM5+1)
+  E4DF  A0            		AND	B
+  E4E0  47            		LD	B,A
+  E4E1  B1            		OR	C
+  E4E2  C9            		RET
                       	
-  E4E9                	RBXEND:
-  E4E9  110000        	LEFT:	LD	DE,0
-  E4EC  AF            		XOR	A
-  E4ED  FD6E21        		LD	L,(IY+33)
-  E4F0  FD6622        		LD	H,(IY+34)
-  E4F3  19            		ADD	HL,DE
-  E4F4  FD8E23        		ADC	A,(IY+35)
-  E4F7  FD7521        		LD	(IY+33),L
-  E4FA  FD7422        		LD	(IY+34),H
-  E4FD  FD7723        		LD	(IY+35),A
-  E500  EB            		EX	DE,HL		;HL=Read byte
-  E501  C9            		RET
+  E4E3                	RBXEND:
+  E4E3  110000        	LEFT:	LD	DE,0
+  E4E6  AF            		XOR	A
+  E4E7  FD6E21        		LD	L,(IY+33)
+  E4EA  FD6622        		LD	H,(IY+34)
+  E4ED  19            		ADD	HL,DE
+  E4EE  FD8E23        		ADC	A,(IY+35)
+  E4F1  FD7521        		LD	(IY+33),L
+  E4F4  FD7422        		LD	(IY+34),H
+  E4F7  FD7723        		LD	(IY+35),A
+  E4FA  EB            		EX	DE,HL		;HL=Read byte
+  E4FB  C9            		RET
                       	
-  E502                	CDERR:
-  E502  FD5E21        		LD	E,(IY+33)	;CDE=Random record
-  E505  FD5622        		LD	D,(IY+34)
-  E508  FD4E23        		LD	C,(IY+35)
-  E50B  C9            		RET
+  E4FC                	CDERR:
+  E4FC  FD5E21        		LD	E,(IY+33)	;CDE=Random record
+  E4FF  FD5622        		LD	D,(IY+34)
+  E502  FD4E23        		LD	C,(IY+35)
+  E505  C9            		RET
                       	
-  E50C                	CPBUF:
-  E50C  0000          	LEFTX:	DW	0
-  E50E  0000          	DTAX:	DW	0
-  E510  20            		DB	020H	;DS 7,20h
-  E511  20            		DB	020H
-  E512  20            		DB	020H
-  E513  20            		DB	020H
-  E514  20            		DB	020H
-  E515  20            		DB	020H
-  E516  20            		DB	020H
+  E506                	CPBUF:
+  E506  0000          	LEFTX:	DW	0
+  E508  0000          	DTAX:	DW	0
+  E50A  20            		DB	020H	;DS 7,20h
+  E50B  20            		DB	020H
+  E50C  20            		DB	020H
+  E50D  20            		DB	020H
+  E50E  20            		DB	020H
+  E50F  20            		DB	020H
+  E510  20            		DB	020H
                       	;
-                      		
+                      	;LDDIO.ASM
+                      	
                       	;	LSX-Dodgers DIO
                       	
-  E517                	DRDX:
-  E517  CD4DE5        		CALL	DRDY
-  E51A  C8            		RET	Z
-  E51B  CD37E5        		CALL	DRDX1
-  E51E  D8            		RET	C
-  E51F  E5            		PUSH	HL
-  E520  C5            		PUSH	BC
-  E521  D5            		PUSH	DE
-  E522  2A7EEC        		LD	HL,(_DTBUF)
-  E525  CD2EE7        		CALL	DRDC
-  E528  DC48E5        		CALL	C,DRDNE
-  E52B                	DRDXE1:
-  E52B  D1            		POP	DE
-  E52C  C1            		POP	BC
-  E52D                	DRDXE2:
-  E52D  E1            		POP	HL
-  E52E  C9            		RET
+  E511                	DRDX:
+  E511  CD47E5        		CALL	DRDY
+  E514  C8            		RET	Z
+  E515  CD31E5        		CALL	DRDX1
+  E518  D8            		RET	C
+  E519  E5            		PUSH	HL
+  E51A  C5            		PUSH	BC
+  E51B  D5            		PUSH	DE
+  E51C  2A7EEC        		LD	HL,(_DTBUF)
+  E51F  CD28E7        		CALL	DRDC
+  E522  DC42E5        		CALL	C,DRDNE
+  E525                	DRDXE1:
+  E525  D1            		POP	DE
+  E526  C1            		POP	BC
+  E527                	DRDXE2:
+  E527  E1            		POP	HL
+  E528  C9            		RET
                       	
-  E52F                	DRDN:
-  E52F  AF            		XOR	A
-  E530  00            	DRDN1:	NOP
-  E531  30E4          		JR	NC,DRDX
-  E533                	DRDNX:
-  E533  CD4DE5        		CALL	DRDY
-  E536  C8            		RET	Z
-  E537                	DRDX1:
-  E537  CD5EE5        		CALL	DWTX
-  E53A  ED53A6EC      		LD	(_DCLPS),DE
-  E53E  3A88EC        		LD	A,(_DRV)
-  E541  32A5EC        		LD	(_DBDRV),A
-  E544  CDD9EC        		CALL	_CHGDRV
-  E547  D0            		RET	NC
-  E548                	DRDNE:
-  E548  9F            		SBC	A,A
-  E549  32A5EC        		LD	(_DBDRV),A
-  E54C  C9            		RET
+  E529                	DRDN:
+  E529  AF            		XOR	A
+  E52A  00            	DRDN1:	NOP
+  E52B  30E4          		JR	NC,DRDX
+  E52D                	DRDNX:
+  E52D  CD47E5        		CALL	DRDY
+  E530  C8            		RET	Z
+  E531                	DRDX1:
+  E531  CD58E5        		CALL	DWTX
+  E534  ED53A6EC      		LD	(_DCLPS),DE
+  E538  3A88EC        		LD	A,(_DRV)
+  E53B  32A5EC        		LD	(_DBDRV),A
+  E53E  CDD9EC        		CALL	_CHGDRV
+  E541  D0            		RET	NC
+  E542                	DRDNE:
+  E542  9F            		SBC	A,A
+  E543  32A5EC        		LD	(_DBDRV),A
+  E546  C9            		RET
                       	
-  E54D                	DRDY:
-  E54D  E5            		PUSH	HL
-  E54E  3A88EC        		LD	A,(_DRV)
-  E551  21A5EC        		LD	HL,_DBDRV
-  E554  AE            		XOR	(HL)
-  E555  2005          		JR	NZ,DRDY1
+  E547                	DRDY:
+  E547  E5            		PUSH	HL
+  E548  3A88EC        		LD	A,(_DRV)
+  E54B  21A5EC        		LD	HL,_DBDRV
+  E54E  AE            		XOR	(HL)
+  E54F  2005          		JR	NZ,DRDY1
                       	
-  E557  2AA6EC        		LD	HL,(_DCLPS)
-  E55A  ED52          		SBC	HL,DE		;CF=0
-  E55C                	DRDY1:
-  E55C  E1            		POP	HL
-  E55D  C9            		RET
+  E551  2AA6EC        		LD	HL,(_DCLPS)
+  E554  ED52          		SBC	HL,DE		;CF=0
+  E556                	DRDY1:
+  E556  E1            		POP	HL
+  E557  C9            		RET
                       	
-  E55E                	DWTX:
-  E55E  3AA4EC        		LD	A,(_WTDBF)
-  E561  B7            		OR	A
-  E562  C8            		RET	Z
-  E563  AF            		XOR	A
-  E564  32A4EC        		LD	(_WTDBF),A
+  E558                	DWTX:
+  E558  3AA4EC        		LD	A,(_WTDBF)
+  E55B  B7            		OR	A
+  E55C  C8            		RET	Z
+  E55D  AF            		XOR	A
+  E55E  32A4EC        		LD	(_WTDBF),A
                       	
-  E567  E5            		PUSH	HL
-  E568  C5            		PUSH	BC
-  E569  D5            		PUSH	DE
-  E56A  3AA5EC        		LD	A,(_DBDRV)
-  E56D  CDD9EC        		CALL	_CHGDRV
-  E570  ED5BA6EC      		LD	DE,(_DCLPS)
-  E574  2A7EEC        		LD	HL,(_DTBUF)
-  E577  D43AE7        		CALL	NC,DWTC
-  E57A  18AF          		JR	DRDXE1
+  E561  E5            		PUSH	HL
+  E562  C5            		PUSH	BC
+  E563  D5            		PUSH	DE
+  E564  3AA5EC        		LD	A,(_DBDRV)
+  E567  CDD9EC        		CALL	_CHGDRV
+  E56A  ED5BA6EC      		LD	DE,(_DCLPS)
+  E56E  2A7EEC        		LD	HL,(_DTBUF)
+  E571  D434E7        		CALL	NC,DWTC
+  E574  18AF          		JR	DRDXE1
                       	
-  E57C                	RDFATX:
-  E57C  E5            		PUSH	HL
-  E57D  3A88EC        		LD	A,(_DRV)
-  E580  21A3EC        		LD	HL,_FATDRV
-  E583  AE            		XOR	(HL)
-  E584  E67F          		AND	07FH
-  E586  28D4          		JR	Z,DRDY1
+  E576                	RDFATX:
+  E576  E5            		PUSH	HL
+  E577  3A88EC        		LD	A,(_DRV)
+  E57A  21A3EC        		LD	HL,_FATDRV
+  E57D  AE            		XOR	(HL)
+  E57E  E67F          		AND	07FH
+  E580  28D4          		JR	Z,DRDY1
                       	
-  E588  C5            		PUSH	BC
-  E589  D5            		PUSH	DE
-  E58A  DDE5          		PUSH	IX
-  E58C  CDA4E5        		CALL	WTFATX
-  E58F  380F          		JR	C,RDFATE1
+  E582  C5            		PUSH	BC
+  E583  D5            		PUSH	DE
+  E584  DDE5          		PUSH	IX
+  E586  CD9EE5        		CALL	WTFATX
+  E589  380F          		JR	C,RDFATE1
                       	
-  E591  3A88EC        		LD	A,(_DRV)
-  E594  32A3EC        		LD	(_FATDRV),A
-  E597  CDE5EC        		CALL	_RDFAT
-  E59A                	RDFATE2:
-  E59A  3004          		JR	NC,RDFATE1
-  E59C  9F            		SBC	A,A
-  E59D  32A3EC        		LD	(_FATDRV),A
-  E5A0                	RDFATE1:
-  E5A0  DDE1          		POP	IX
-  E5A2  1887          		JR	DRDXE1
+  E58B  3A88EC        		LD	A,(_DRV)
+  E58E  32A3EC        		LD	(_FATDRV),A
+  E591  CDE5EC        		CALL	_RDFAT
+  E594                	RDFATE2:
+  E594  3004          		JR	NC,RDFATE1
+  E596  9F            		SBC	A,A
+  E597  32A3EC        		LD	(_FATDRV),A
+  E59A                	RDFATE1:
+  E59A  DDE1          		POP	IX
+  E59C  1887          		JR	DRDXE1
                       	
-  E5A4                	WTFATX:
-  E5A4  3AA2EC        		LD	A,(_WTFATF)
-  E5A7  B7            		OR	A
-  E5A8  C8            		RET	Z
-  E5A9  E5            		PUSH	HL
-  E5AA  3AA3EC        		LD	A,(_FATDRV)
-  E5AD  21A5EC        		LD	HL,_DBDRV
-  E5B0  AE            		XOR	(HL)
-  E5B1  E67F          		AND	07FH
-  E5B3  CC5EE5        		CALL	Z,DWTX
-  E5B6  38A4          		JR	C,DRDY1
-  E5B8  C5            		PUSH	BC
-  E5B9  D5            		PUSH	DE
-  E5BA  DDE5          		PUSH	IX
-  E5BC  CD8AE7        		CALL	WTFAT
-  E5BF  AF            		XOR	A
-  E5C0  32A2EC        		LD	(_WTFATF),A
-  E5C3  18DB          		JR	RDFATE1
+  E59E                	WTFATX:
+  E59E  3AA2EC        		LD	A,(_WTFATF)
+  E5A1  B7            		OR	A
+  E5A2  C8            		RET	Z
+  E5A3  E5            		PUSH	HL
+  E5A4  3AA3EC        		LD	A,(_FATDRV)
+  E5A7  21A5EC        		LD	HL,_DBDRV
+  E5AA  AE            		XOR	(HL)
+  E5AB  E67F          		AND	07FH
+  E5AD  CC58E5        		CALL	Z,DWTX
+  E5B0  38A4          		JR	C,DRDY1
+  E5B2  C5            		PUSH	BC
+  E5B3  D5            		PUSH	DE
+  E5B4  DDE5          		PUSH	IX
+  E5B6  CD84E7        		CALL	WTFAT
+  E5B9  AF            		XOR	A
+  E5BA  32A2EC        		LD	(_WTFATF),A
+  E5BD  18DB          		JR	RDFATE1
                       	
-  E5C5                	NCL1:
-  E5C5  7A            		LD	A,D
-  E5C6  B3            		OR	E
-  E5C7  37            		SCF
-  E5C8  C8            		RET	Z
+  E5BF                	NCL1:
+  E5BF  7A            		LD	A,D
+  E5C0  B3            		OR	E
+  E5C1  37            		SCF
+  E5C2  C8            		RET	Z
                       	
-  E5C9  3A88EC        		LD	A,(_DRV)
-  E5CC  CB5A          		BIT	3,D
-  E5CE  2802          		JR	Z,NCL2
-  E5D0  F680          		OR	080H
-  E5D2                	NCL2:
-  E5D2  E5            		PUSH	HL
-  E5D3  21A3EC        		LD	HL,_FATDRV
-  E5D6  BE            		CP	(HL)
-  E5D7  2883          		JR	Z,DRDY1
+  E5C3  3A88EC        		LD	A,(_DRV)
+  E5C6  CB5A          		BIT	3,D
+  E5C8  2802          		JR	Z,NCL2
+  E5CA  F680          		OR	080H
+  E5CC                	NCL2:
+  E5CC  E5            		PUSH	HL
+  E5CD  21A3EC        		LD	HL,_FATDRV
+  E5D0  BE            		CP	(HL)
+  E5D1  2883          		JR	Z,DRDY1
                       	
-  E5D9  C5            		PUSH	BC
-  E5DA  D5            		PUSH	DE
-  E5DB  DDE5          		PUSH	IX
-  E5DD  F5            		PUSH	AF
-  E5DE  CDA4E5        		CALL	WTFATX
-  E5E1  C1            		POP	BC
-  E5E2  38BC          		JR	C,RDFATE1
-  E5E4  78            		LD	A,B
-  E5E5  32A3EC        		LD	(_FATDRV),A
-  E5E8  CD79E7        		CALL	RDFATS
-  E5EB  18AD          		JR	RDFATE2
+  E5D3  C5            		PUSH	BC
+  E5D4  D5            		PUSH	DE
+  E5D5  DDE5          		PUSH	IX
+  E5D7  F5            		PUSH	AF
+  E5D8  CD9EE5        		CALL	WTFATX
+  E5DB  C1            		POP	BC
+  E5DC  38BC          		JR	C,RDFATE1
+  E5DE  78            		LD	A,B
+  E5DF  32A3EC        		LD	(_FATDRV),A
+  E5E2  CD73E7        		CALL	RDFATS
+  E5E5  18AD          		JR	RDFATE2
                       	
-  E5ED                	NCL3:
-  E5ED  CB9A          		RES	3,D
-  E5EF  6B            		LD	L,E
-  E5F0  62            		LD	H,D
-  E5F1  CB3C          		SRL	H
-  E5F3  CB1D          		RR	L
-  E5F5  1F            		RRA
-  E5F6  ED4B7CEC      		LD	BC,(_FATBF)
-  E5FA  19            		ADD	HL,DE
-  E5FB  09            		ADD	HL,BC
-  E5FC  17            		RLA
-  E5FD  C9            		RET
+  E5E7                	NCL3:
+  E5E7  CB9A          		RES	3,D
+  E5E9  6B            		LD	L,E
+  E5EA  62            		LD	H,D
+  E5EB  CB3C          		SRL	H
+  E5ED  CB1D          		RR	L
+  E5EF  1F            		RRA
+  E5F0  ED4B7CEC      		LD	BC,(_FATBF)
+  E5F4  19            		ADD	HL,DE
+  E5F5  09            		ADD	HL,BC
+  E5F6  17            		RLA
+  E5F7  C9            		RET
                       	
-  E5FE                	GNCL:
-  E5FE  CDC5E5        		CALL	NCL1		;GET NEW CLUSTER
-  E601  D8            		RET	C
-  E602  C5            		PUSH	BC
-  E603  E5            		PUSH	HL
-  E604  CDEDE5        		CALL	NCL3
-  E607  3809          		JR	C,GNC1
-  E609  5E            		LD	E,(HL)
-  E60A  23            		INC	HL
-  E60B  7E            		LD	A,(HL)
-  E60C  E60F          		AND	00FH
-  E60E  57            		LD	D,A
-  E60F  E1            		POP	HL
-  E610  C1            		POP	BC
-  E611  C9            		RET
-  E612                	GNC1:
-  E612  7E            		LD	A,(HL)
-  E613  23            		INC	HL
-  E614  56            		LD	D,(HL)
-  E615  0604          		LD	B,4
-  E617                	GNC1L:
-  E617  CB3A          		SRL	D
-  E619  1F            		RRA
-  E61A  10FB          		DJNZ	GNC1L
+  E5F8                	GNCL:
+  E5F8  CDBFE5        		CALL	NCL1		;GET NEW CLUSTER
+  E5FB  D8            		RET	C
+  E5FC  C5            		PUSH	BC
+  E5FD  E5            		PUSH	HL
+  E5FE  CDE7E5        		CALL	NCL3
+  E601  3809          		JR	C,GNC1
+  E603  5E            		LD	E,(HL)
+  E604  23            		INC	HL
+  E605  7E            		LD	A,(HL)
+  E606  E60F          		AND	00FH
+  E608  57            		LD	D,A
+  E609  E1            		POP	HL
+  E60A  C1            		POP	BC
+  E60B  C9            		RET
+  E60C                	GNC1:
+  E60C  7E            		LD	A,(HL)
+  E60D  23            		INC	HL
+  E60E  56            		LD	D,(HL)
+  E60F  0604          		LD	B,4
+  E611                	GNC1L:
+  E611  CB3A          		SRL	D
+  E613  1F            		RRA
+  E614  10FB          		DJNZ	GNC1L
                       	
-  E61C  5F            		LD	E,A
-  E61D  E1            		POP	HL
-  E61E  C1            		POP	BC
-  E61F  A7            		AND	A
-  E620  C9            		RET
+  E616  5F            		LD	E,A
+  E617  E1            		POP	HL
+  E618  C1            		POP	BC
+  E619  A7            		AND	A
+  E61A  C9            		RET
                       	
-  E621                	SNCL:
-  E621  CDC5E5        		CALL	NCL1
-  E624  D8            		RET	C
-  E625  3E01          		LD	A,1
-  E627  32A2EC        		LD	(_WTFATF),A
+  E61B                	SNCL:
+  E61B  CDBFE5        		CALL	NCL1
+  E61E  D8            		RET	C
+  E61F  3E01          		LD	A,1
+  E621  32A2EC        		LD	(_WTFATF),A
                       	;				SET NEW CLUSTER
-  E62A  C5            		PUSH	BC
-  E62B  D5            		PUSH	DE
-  E62C  E5            		PUSH	HL
-  E62D  E5            		PUSH	HL
-  E62E  CDEDE5        		CALL	NCL3
-  E631  D1            		POP	DE
+  E624  C5            		PUSH	BC
+  E625  D5            		PUSH	DE
+  E626  E5            		PUSH	HL
+  E627  E5            		PUSH	HL
+  E628  CDE7E5        		CALL	NCL3
+  E62B  D1            		POP	DE
                       	;CF=ODD
-  E632  7E            		LD	A,(HL)
-  E633  73            		LD	(HL),E
-  E634  3806          		JR	C,SNC1
+  E62C  7E            		LD	A,(HL)
+  E62D  73            		LD	(HL),E
+  E62E  3806          		JR	C,SNC1
                       	;EVEN
                       	;M[0] = E
                       	;M[1] = (M[1] & 0xF0) | (D & 0x0F)
-  E636  23            		INC	HL
-  E637  ED67          		RRD		;M={A[3:0],E[3:0]}
-  E639  7A            		LD	A,D
-  E63A  1804          		JR	SNC11
-  E63C                	SNC1:
+  E630  23            		INC	HL
+  E631  ED67          		RRD		;M={A[3:0],E[3:0]}
+  E633  7A            		LD	A,D
+  E634  1804          		JR	SNC11
+  E636                	SNC1:
                       	;ODD
                       	;HL[0] = (HL[0]&0x0F) | (E<<4)
                       	;HL[1] = DE>>4
-  E63C  ED6F          		RLD		;M={D[3:0],E[7:4]}
-  E63E  23            		INC	HL
-  E63F  72            		LD	(HL),D	;M={D[3:0],E[7:4]}
-  E640                	SNC11:
-  E640  ED6F          		RLD		;M={M[7:4],D[3:0]}
-  E642  E1            		POP	HL
-  E643  D1            		POP	DE
-  E644  C1            		POP	BC
-  E645  B7            		OR	A
-  E646  C9            		RET
+  E636  ED6F          		RLD		;M={D[3:0],E[7:4]}
+  E638  23            		INC	HL
+  E639  72            		LD	(HL),D	;M={D[3:0],E[7:4]}
+  E63A                	SNC11:
+  E63A  ED6F          		RLD		;M={M[7:4],D[3:0]}
+  E63C  E1            		POP	HL
+  E63D  D1            		POP	DE
+  E63E  C1            		POP	BC
+  E63F  B7            		OR	A
+  E640  C9            		RET
                       	
-  E647                	RDFAT0X:
-  E647  CD79E7        		CALL	RDFATS
-  E64A  D8            		RET	C
-  E64B  DDBE01        		CP	(IX+1)
-  E64E  C8            		RET	Z
-  E64F  37            		SCF
-  E650  C9            		RET
+  E641                	RDFAT0X:
+  E641  CD73E7        		CALL	RDFATS
+  E644  D8            		RET	C
+  E645  DDBE01        		CP	(IX+1)
+  E648  C8            		RET	Z
+  E649  37            		SCF
+  E64A  C9            		RET
                       	
-  E651                	RDFAT:
-  E651  3A88EC        		LD	A,(_DRV)
-  E654  CDA1E8        		CALL	CHGDRVR
-  E657  D8            		RET	C
-  E658  DD7E12        		LD	A,(IX+012H)
-  E65B  FE87          		CP	087H
-  E65D  20E8          		JR	NZ,RDFAT0X
+  E64B                	RDFAT:
+  E64B  3A88EC        		LD	A,(_DRV)
+  E64E  CDA1E8        		CALL	CHGDRVR
+  E651  D8            		RET	C
+  E652  DD7E12        		LD	A,(IX+012H)
+  E655  FE87          		CP	087H
+  E657  20E8          		JR	NZ,RDFAT0X
                       	
-  E65F  3E7F          		LD	A,07FH
-  E661  3247E9        		LD	(CHECK),A	;A=07FH
-  E664  DDCB0A46      		BIT	0,(IX+00AH)
-  E668  284D          		JR	Z,X2HX
-  E66A                	E2DX:
-  E66A  21D7E8        		LD	HL,M2D
-  E66D  CD46E7        		CALL	DRDF
-  E670  383D          		JR	C,E2HX
-  E672  FEFD          		CP	0FDH		;2D
-  E674  C8            		RET	Z
-  E675  FEF9          		CP	0F9H		;2DD9
-  E677  CA21E7        		JP	Z,E2DD9
-  E67A  FEFB          		CP	0FBH		;2DD8
-  E67C  37            		SCF
-  E67D  C0            		RET	NZ		;NOT 2DD
-  E67E  21E5E8        		LD	HL,M2DD8
-  E681                	CHGTYPE:
-  E681  D5            		PUSH	DE
-  E682  CD94E6        		CALL	CHGDV
-  E685  3A84EC        		LD	A,(_DRIVE)
-  E688  E603          		AND	3
-  E68A  F680          		OR	080H
-  E68C  6F            		LD	L,A
-  E68D  26EC          		LD	H,_CYL0/256
-  E68F  3EFF          		LD	A,0FFH
-  E691  77            		LD	(HL),A
-  E692  D1            		POP	DE
-  E693  C9            		RET
+  E659  3E7F          		LD	A,07FH
+  E65B  3247E9        		LD	(CHECK),A	;A=07FH
+  E65E  DDCB0A46      		BIT	0,(IX+00AH)
+  E662  284D          		JR	Z,X2HX
+  E664                	E2DX:
+  E664  21D7E8        		LD	HL,M2D
+  E667  CD40E7        		CALL	DRDF
+  E66A  383D          		JR	C,E2HX
+  E66C  FEFD          		CP	0FDH		;2D
+  E66E  C8            		RET	Z
+  E66F  FEF9          		CP	0F9H		;2DD9
+  E671  CA1BE7        		JP	Z,E2DD9
+  E674  FEFB          		CP	0FBH		;2DD8
+  E676  37            		SCF
+  E677  C0            		RET	NZ		;NOT 2DD
+  E678  21E5E8        		LD	HL,M2DD8
+  E67B                	CHGTYPE:
+  E67B  D5            		PUSH	DE
+  E67C  CD8EE6        		CALL	CHGDV
+  E67F  3A84EC        		LD	A,(_DRIVE)
+  E682  E603          		AND	3
+  E684  F680          		OR	080H
+  E686  6F            		LD	L,A
+  E687  26EC          		LD	H,_CYL0/256
+  E689  3EFF          		LD	A,0FFH
+  E68B  77            		LD	(HL),A
+  E68C  D1            		POP	DE
+  E68D  C9            		RET
                       	
-  E694                	CHGDV:
-  E694  DDE5          		PUSH	IX
-  E696  D1            		POP	DE
-  E697  EDA0          		LDI
-  E699  EDA0          		LDI
-  E69B  13            		INC	DE
-  E69C  13            		INC	DE
-  E69D  13            		INC	DE
-  E69E  13            		INC	DE
-  E69F  010C00        		LD	BC,12
-  E6A2  EDB0          		LDIR
-  E6A4                	CHGDV2:
-  E6A4  3EFF          		LD	A,0FFH
-  E6A6  3289EC        		LD	(_DSK),A
-  E6A9  3A88EC        		LD	A,(_DRV)
-  E6AC  C3D9EC        		JP	_CHGDRV
+  E68E                	CHGDV:
+  E68E  DDE5          		PUSH	IX
+  E690  D1            		POP	DE
+  E691  EDA0          		LDI
+  E693  EDA0          		LDI
+  E695  13            		INC	DE
+  E696  13            		INC	DE
+  E697  13            		INC	DE
+  E698  13            		INC	DE
+  E699  010C00        		LD	BC,12
+  E69C  EDB0          		LDIR
+  E69E                	CHGDV2:
+  E69E  3EFF          		LD	A,0FFH
+  E6A0  3289EC        		LD	(_DSK),A
+  E6A3  3A88EC        		LD	A,(_DRV)
+  E6A6  C3D9EC        		JP	_CHGDRV
                       	
-  E6AF                	E2HX:
-  E6AF  3C            		INC	A
-  E6B0  C8            		RET	Z
-  E6B1  2147E9        		LD	HL,CHECK
-  E6B4  CB06          		RLC	(HL)
-  E6B6  D8            		RET	C
-  E6B7                	X2HX:
-  E6B7  210FE9        		LD	HL,M2HD
-  E6BA  110000        		LD	DE,0
-  E6BD  CD4AE7        		CALL	DRDD
-  E6C0  300A          		JR	NC,X2HX1
-  E6C2  3C            		INC	A
-  E6C3  C8            		RET	Z
-  E6C4  2147E9        		LD	HL,CHECK
-  E6C7  CB06          		RLC	(HL)
-  E6C9  D8            		RET	C
-  E6CA  189E          		JR	E2DX
-  E6CC                	X2HX1:
-  E6CC  23            		INC	HL
-  E6CD  7E            		LD	A,(HL)
-  E6CE  06FE          		LD	B,0FEH
-  E6D0  FE0C          		CP	00CH
-  E6D2  2838          		JR	Z,X2HDE
-  E6D4  06F8          		LD	B,0F8H
-  E6D6  D620          		SUB	020H		;020H
-  E6D8  2832          		JR	Z,X2HDE
-  E6DA  3C            		INC	A		;01FH
-  E6DB  282F          		JR	Z,X2HDE
-  E6DD  3C            		INC	A		;01EH
-  E6DE  2078          		JR	NZ,C2HX		;2HD/2HC/2HQ
-  E6E0                	X2HS:
-  E6E0  2139E9        		LD	HL,M2HS
-  E6E3  CD12E7        		CALL	X2HSS
-  E6E6  D8            		RET	C
-  E6E7  2A7CEC        		LD	HL,(_FATBF)
-  E6EA  23            		INC	HL
-  E6EB  7E            		LD	A,(HL)		;FATBF+1
-  E6EC  FE50          		CP	80
-  E6EE  3F            		CCF
-  E6EF  D0            		RET	NC
-  E6F0  FE5A          		CP	90
-  E6F2  D0            		RET	NC
-  E6F3  DD770C        		LD	(IX+00CH),A
-  E6F6  D650          		SUB	80
-  E6F8  87            		ADD	A,A	;*2
-  E6F9  4F            		LD	C,A
-  E6FA  87            		ADD	A,A	;*4
-  E6FB  87            		ADD	A,A	;*8
-  E6FC  87            		ADD	A,A	;*16
-  E6FD  81            		ADD	A,C	;*18
-  E6FE  C698          		ADD	A,098H
-  E700  DD7708        		LD	(IX+8),A
-  E703  3E05          		LD	A,5
-  E705  CE00          		ADC	A,0
-  E707  DD7709        		LD	(IX+9),A
-  E70A  1898          		JR	CHGDV2
-  E70C                	X2HDE:
-  E70C  212BE9        		LD	HL,M2HDE
-  E70F  23            		INC	HL
-  E710  70            		LD	(HL),B
-  E711  2B            		DEC	HL
-  E712                	X2HSS:
-  E712  CD46E7        		CALL	DRDF
-  E715  D8            		RET	C
-  E716  DDBE01        		CP	(IX+1)
-  E719  37            		SCF
-  E71A  C0            		RET	NZ
-  E71B  CD2AE7        		CALL	INCDRD
-  E71E  300E          		JR	NC,DRDC
-  E720  C9            		RET
+  E6A9                	E2HX:
+  E6A9  3C            		INC	A
+  E6AA  C8            		RET	Z
+  E6AB  2147E9        		LD	HL,CHECK
+  E6AE  CB06          		RLC	(HL)
+  E6B0  D8            		RET	C
+  E6B1                	X2HX:
+  E6B1  210FE9        		LD	HL,M2HD
+  E6B4  110000        		LD	DE,0
+  E6B7  CD44E7        		CALL	DRDD
+  E6BA  300A          		JR	NC,X2HX1
+  E6BC  3C            		INC	A
+  E6BD  C8            		RET	Z
+  E6BE  2147E9        		LD	HL,CHECK
+  E6C1  CB06          		RLC	(HL)
+  E6C3  D8            		RET	C
+  E6C4  189E          		JR	E2DX
+  E6C6                	X2HX1:
+  E6C6  23            		INC	HL
+  E6C7  7E            		LD	A,(HL)
+  E6C8  06FE          		LD	B,0FEH
+  E6CA  FE0C          		CP	00CH
+  E6CC  2838          		JR	Z,X2HDE
+  E6CE  06F8          		LD	B,0F8H
+  E6D0  D620          		SUB	020H		;020H
+  E6D2  2832          		JR	Z,X2HDE
+  E6D4  3C            		INC	A		;01FH
+  E6D5  282F          		JR	Z,X2HDE
+  E6D7  3C            		INC	A		;01EH
+  E6D8  2078          		JR	NZ,C2HX		;2HD/2HC/2HQ
+  E6DA                	X2HS:
+  E6DA  2139E9        		LD	HL,M2HS
+  E6DD  CD0CE7        		CALL	X2HSS
+  E6E0  D8            		RET	C
+  E6E1  2A7CEC        		LD	HL,(_FATBF)
+  E6E4  23            		INC	HL
+  E6E5  7E            		LD	A,(HL)		;FATBF+1
+  E6E6  FE50          		CP	80
+  E6E8  3F            		CCF
+  E6E9  D0            		RET	NC
+  E6EA  FE5A          		CP	90
+  E6EC  D0            		RET	NC
+  E6ED  DD770C        		LD	(IX+00CH),A
+  E6F0  D650          		SUB	80
+  E6F2  87            		ADD	A,A	;*2
+  E6F3  4F            		LD	C,A
+  E6F4  87            		ADD	A,A	;*4
+  E6F5  87            		ADD	A,A	;*8
+  E6F6  87            		ADD	A,A	;*16
+  E6F7  81            		ADD	A,C	;*18
+  E6F8  C698          		ADD	A,098H
+  E6FA  DD7708        		LD	(IX+8),A
+  E6FD  3E05          		LD	A,5
+  E6FF  CE00          		ADC	A,0
+  E701  DD7709        		LD	(IX+9),A
+  E704  1898          		JR	CHGDV2
+  E706                	X2HDE:
+  E706  212BE9        		LD	HL,M2HDE
+  E709  23            		INC	HL
+  E70A  70            		LD	(HL),B
+  E70B  2B            		DEC	HL
+  E70C                	X2HSS:
+  E70C  CD40E7        		CALL	DRDF
+  E70F  D8            		RET	C
+  E710  DDBE01        		CP	(IX+1)
+  E713  37            		SCF
+  E714  C0            		RET	NZ
+  E715  CD24E7        		CALL	INCDRD
+  E718  300E          		JR	NC,DRDC
+  E71A  C9            		RET
                       	
-  E721                	E2DD9:
-  E721  21F3E8        		LD	HL,M2DD
-  E724  CD81E6        		CALL	CHGTYPE
-  E727  2A7CEC        		LD	HL,(_FATBF)
-  E72A                	INCDRD:
-  E72A  24            		INC	H
-  E72B  24            		INC	H
-  E72C  24            		INC	H
-  E72D  24            		INC	H
-  E72E                	DRDC:
-  E72E  CDF1EC        		CALL	_DRD
-  E731  D8            		RET	C
-  E732  3A65DF        		LD	A,(DBLPAT)
-  E735  B7            		OR	A
-  E736  C2F1EC        		JP	NZ,_DRD
-  E739  C9            		RET
+  E71B                	E2DD9:
+  E71B  21F3E8        		LD	HL,M2DD
+  E71E  CD7BE6        		CALL	CHGTYPE
+  E721  2A7CEC        		LD	HL,(_FATBF)
+  E724                	INCDRD:
+  E724  24            		INC	H
+  E725  24            		INC	H
+  E726  24            		INC	H
+  E727  24            		INC	H
+  E728                	DRDC:
+  E728  CDF1EC        		CALL	_DRD
+  E72B  D8            		RET	C
+  E72C  3A5FDF        		LD	A,(DBLPAT)
+  E72F  B7            		OR	A
+  E730  C2F1EC        		JP	NZ,_DRD
+  E733  C9            		RET
                       	
-  E73A                	DWTC:
-  E73A  CDF4EC        		CALL	_DWT
-  E73D  D8            		RET	C
-  E73E  3A65DF        		LD	A,(DBLPAT)
-  E741  B7            		OR	A
-  E742  C2F4EC        		JP	NZ,_DWT
-  E745  C9            		RET
+  E734                	DWTC:
+  E734  CDF4EC        		CALL	_DWT
+  E737  D8            		RET	C
+  E738  3A5FDF        		LD	A,(DBLPAT)
+  E73B  B7            		OR	A
+  E73C  C2F4EC        		JP	NZ,_DWT
+  E73F  C9            		RET
                       	
-  E746                	DRDF:
-  E746  ED5B60E2      		LD	DE,(_FATPS)
-  E74A                	DRDD:
-  E74A  CD81E6        		CALL	CHGTYPE
-  E74D  2A7CEC        		LD	HL,(_FATBF)
-  E750  E5            		PUSH	HL
-  E751  CD2EE7        		CALL	DRDC
-  E754  E1            		POP	HL
+  E740                	DRDF:
+  E740  ED5B5AE2      		LD	DE,(_FATPS)
+  E744                	DRDD:
+  E744  CD7BE6        		CALL	CHGTYPE
+  E747  2A7CEC        		LD	HL,(_FATBF)
+  E74A  E5            		PUSH	HL
+  E74B  CD28E7        		CALL	DRDC
+  E74E  E1            		POP	HL
+  E74F  D8            		RET	C
+  E750  7E            		LD	A,(HL)
+  E751  C9            		RET
+                      	
+  E752                	C2HX:
+  E752  CD73E7        		CALL	RDFATS
   E755  D8            		RET	C
-  E756  7E            		LD	A,(HL)
-  E757  C9            		RET
+  E756  FEFE          		CP	0FEH
+  E758  C8            		RET	Z
+  E759  FEF0          		CP	0F0H
+  E75B  2810          		JR	Z,X2HQ
+  E75D  FEF9          		CP	0F9H
+  E75F  37            		SCF
+  E760  C0            		RET	NZ
+  E761  E5            		PUSH	HL
+  E762  2101E9        		LD	HL,M2HC
+  E765                	X2HQ1:
+  E765  CD7BE6        		CALL	CHGTYPE
+  E768  E1            		POP	HL
+  E769  0604          		LD	B,4
+  E76B  180A          		JR	RDFATL
+  E76D                	X2HQ:
+  E76D  E5            		PUSH	HL
+  E76E  211DE9        		LD	HL,M2HQ
+  E771  18F2          		JR	X2HQ1
                       	
-  E758                	C2HX:
-  E758  CD79E7        		CALL	RDFATS
-  E75B  D8            		RET	C
-  E75C  FEFE          		CP	0FEH
-  E75E  C8            		RET	Z
-  E75F  FEF0          		CP	0F0H
-  E761  2810          		JR	Z,X2HQ
-  E763  FEF9          		CP	0F9H
-  E765  37            		SCF
-  E766  C0            		RET	NZ
-  E767  E5            		PUSH	HL
-  E768  2101E9        		LD	HL,M2HC
-  E76B                	X2HQ1:
-  E76B  CD81E6        		CALL	CHGTYPE
-  E76E  E1            		POP	HL
-  E76F  0604          		LD	B,4
-  E771  180A          		JR	RDFATL
-  E773                	X2HQ:
-  E773  E5            		PUSH	HL
-  E774  211DE9        		LD	HL,M2HQ
-  E777  18F2          		JR	X2HQ1
-                      	
-  E779                	RDFATS:
-  E779  CDACE7        		CALL	FATS
+  E773                	RDFATS:
+  E773  CDA6E7        		CALL	FATS
+  E776  D8            		RET	C
+  E777                	RDFATL:
+  E777  C5            		PUSH	BC
+  E778  CDF1EC        		CALL	_DRD
+  E77B  C1            		POP	BC
   E77C  D8            		RET	C
-  E77D                	RDFATL:
-  E77D  C5            		PUSH	BC
-  E77E  CDF1EC        		CALL	_DRD
-  E781  C1            		POP	BC
-  E782  D8            		RET	C
-  E783  10F8          		DJNZ	RDFATL
-  E785  2A7CEC        		LD	HL,(_FATBF)
-  E788  7E            		LD	A,(HL)
-  E789  C9            		RET
+  E77D  10F8          		DJNZ	RDFATL
+  E77F  2A7CEC        		LD	HL,(_FATBF)
+  E782  7E            		LD	A,(HL)
+  E783  C9            		RET
                       	
-  E78A                	WTFAT:
-  E78A  CDACE7        		CALL	FATS
-  E78D  D4A3E7        		CALL	NC,WTFATL
-  E790  D8            		RET	C
-  E791  DDCB0F4E      		BIT	1,(IX+00FH)
-  E795  C8            		RET	Z
-  E796  CDB3E7        		CALL	FATS2
-  E799  C5            		PUSH	BC
-  E79A  DD4E00        		LD	C,(IX+0)
-  E79D  0600          		LD	B,0
-  E79F  EB            		EX	DE,HL
-  E7A0  09            		ADD	HL,BC
-  E7A1  EB            		EX	DE,HL
-  E7A2  C1            		POP	BC
-  E7A3                	WTFATL:
-  E7A3  C5            		PUSH	BC
-  E7A4  CDF4EC        		CALL	_DWT
-  E7A7  C1            		POP	BC
-  E7A8  D8            		RET	C
-  E7A9  10F8          		DJNZ	WTFATL
-  E7AB  C9            		RET
+  E784                	WTFAT:
+  E784  CDA6E7        		CALL	FATS
+  E787  D49DE7        		CALL	NC,WTFATL
+  E78A  D8            		RET	C
+  E78B  DDCB0F4E      		BIT	1,(IX+00FH)
+  E78F  C8            		RET	Z
+  E790  CDADE7        		CALL	FATS2
+  E793  C5            		PUSH	BC
+  E794  DD4E00        		LD	C,(IX+0)
+  E797  0600          		LD	B,0
+  E799  EB            		EX	DE,HL
+  E79A  09            		ADD	HL,BC
+  E79B  EB            		EX	DE,HL
+  E79C  C1            		POP	BC
+  E79D                	WTFATL:
+  E79D  C5            		PUSH	BC
+  E79E  CDF4EC        		CALL	_DWT
+  E7A1  C1            		POP	BC
+  E7A2  D8            		RET	C
+  E7A3  10F8          		DJNZ	WTFATL
+  E7A5  C9            		RET
                       	;------------------------
                       	;FATのセットアップ
                       	;out
@@ -5562,19 +5593,21 @@
                       	;	対象クラスタ領域==(_FATDRV).bit7によって
                       	;	FATの前半3KBと後半3KBを切り替える
                       	;------------------------
-  E7AC                	FATS:
-  E7AC  3AA3EC        		LD	A,(_FATDRV)
-  E7AF  CDA1E8        		CALL	CHGDRVR		;ドライブ切り替え
-  E7B2  D8            		RET	C
-  E7B3                	FATS2:
-  E7B3  ED5B60E2      		LD	DE,(_FATPS)	;fat sector pos
-  E7B7  2A7CEC        		LD	HL,(_FATBF)
-  E7BA  DD4600        		LD	B,(IX+0)	;DPB.FATLN
-  E7BD  DD7E07        		LD	A,(IX+7)	;$29=512 / 0=1024
-  E7C0  B7            		OR	A
-  E7C1  3E06          		LD	A,6		;3072 / 512 FATバッファに読み込めるクラスタ数
+  E7A6                	FATS:
+  E7A6  3AA3EC        		LD	A,(_FATDRV)
+  E7A9  CDA1E8        		CALL	CHGDRVR		;ドライブ切り替え
+  E7AC  D8            		RET	C
+  E7AD                	FATS2:
+  E7AD  ED5B5AE2      		LD	DE,(_FATPS)	;fat sector pos
+  E7B1  2A7CEC        		LD	HL,(_FATBF)
+  E7B4  DD4600        		LD	B,(IX+0)	;DPB.FATLN
+  E7B7  DD7E07        		LD	A,(IX+7)	;$29=512 / 0=1024
+  E7BA  B7            		OR	A
+  E7BB  3E06          		LD	A,6		;3072 / 512 FATバッファに読み込めるセクタ数
+  E7BD  2007          		JR	NZ,FATS512
+  E7BF  DDCB0F7E      		BIT	7,(IX+00FH)
   E7C3  2001          		JR	NZ,FATS512
-  E7C5  1F            		RRA			;A=3 (3072÷1024: 1クラスタ1024バイトの場合)
+  E7C5  1F            		RRA			;A=3 (3072÷1024: 1セクタ1024バイトの場合)
   E7C6                	FATS512:
   E7C6  B8            		CP	B
   E7C7  D0            		RET	NC		;DPB.FATS x sectorSize < fatBufSize
@@ -5589,7 +5622,7 @@
   E7D0  05            		DEC	B		;FATSIZE--
   E7D1  0D            		DEC	C		;skipCnt--
   E7D2  20FB          		JR	NZ,FAT_SKP
-  E7D4  C9            		RET
+  E7D4  48            		LD	C,B
   E7D5                	FATS3:
   E7D5  41            		LD	B,C		;3 or 6
   E7D6  AF            		XOR	A
@@ -5631,15 +5664,15 @@
   E803  22F5EC        		LD	(_DWT+1),HL
                       	
   E806  E1            		POP	HL
-  E807  2264DF        		LD	(CLSPAT+1),HL	;ADDCL
+  E807  225EDF        		LD	(CLSPAT+1),HL	;ADDCL
                       	
   E80A  E1            		POP	HL		;MAXCL
   E80B  7D            		LD	A,L
-  E80C  3273DF        		LD	(CLPAT2+1),A
+  E80C  326DDF        		LD	(CLPAT2+1),A
   E80F  7C            		LD	A,H
-  E810  326FDF        		LD	(CLPAT1+1),A
+  E810  3269DF        		LD	(CLPAT1+1),A
   E813  2B            		DEC	HL
-  E814  226FE1        		LD	(MAXCLP+1),HL
+  E814  2269E1        		LD	(MAXCLP+1),HL
                       	
   E817  E1            		POP	HL		;H=MAXDIR L=FDMODE
   E818  7D            		LD	A,L
@@ -5649,7 +5682,7 @@
   E81F  E603          		AND	3
   E821  32A9E9        		LD	(FSPAT+1),A
   E824  7C            		LD	A,H
-  E825  3271DE        		LD	(RTEPAT+1),A
+  E825  326BDE        		LD	(RTEPAT+1),A
                       	
   E828  E1            		POP	HL
   E829  7D            		LD	A,L
@@ -5659,14 +5692,13 @@
                       	
   E831  E1            		POP	HL
   E832  2600          		LD	H,0
-  E834  2260E2        		LD	(_FATPS),HL
+  E834  225AE2        		LD	(_FATPS),HL
                       	
   E837  E1            		POP	HL
   E838  7C            		LD	A,H
   E839  325EE9        		LD	(SECPAT+1),A
-  E83C  AF            		XOR	A		;CF=0 ﾉ ﾀﾒ
-  E83D  67            		LD	H,A
-  E83E  2262E2        		LD	(_DIRPS),HL
+  E83C  2600          		LD	H,0
+  E83E  225CE2        		LD	(_DIRPS),HL
                       	
   E841  E1            		POP	HL
   E842  7C            		LD	A,H
@@ -5677,7 +5709,7 @@
   E848  7C            		LD	A,H
   E849  B5            		OR	L
   E84A  2003          		JR	NZ,OGNCL
-  E84C  21FEE5        		LD	HL,GNCL
+  E84C  21F8E5        		LD	HL,GNCL		;FAT12(default)
   E84F                	OGNCL:
   E84F  22F8EC        		LD	(_GNCL+1),HL
                       	
@@ -5685,7 +5717,7 @@
   E853  7C            		LD	A,H
   E854  B5            		OR	L
   E855  2003          		JR	NZ,OSNCL
-  E857  2121E6        		LD	HL,SNCL
+  E857  211BE6        		LD	HL,SNCL		;FAT12(default)
   E85A                	OSNCL:
   E85A  22FBEC        		LD	(_SNCL+1),HL
                       	
@@ -5706,20 +5738,20 @@
                       	
   E878  3E03          		LD	A,3
   E87A                	NEC1:
-  E87A  3291E4        		LD	(IBM5+1),A	;3 1
+  E87A  328BE4        		LD	(IBM5+1),A	;3 1
   E87D  3C            		INC	A		;4 2
-  E87E  32B6E4        		LD	(IBM7+2),A
+  E87E  32B0E4        		LD	(IBM7+2),A
   E881  87            		ADD	A,A		;8 4
   E882  87            		ADD	A,A		;010H 8
   E883  87            		ADD	A,A		;020H 010H
-  E884  32FEDD        		LD	(IBM1+1),A
+  E884  32F8DD        		LD	(IBM1+1),A
   E887  87            		ADD	A,A		;040H 020H
   E888  87            		ADD	A,A		;080H 040H
   E889  87            		ADD	A,A		;000H 080H
   E88A  2F            		CPL			;0FFH 07FH
   E88B  324AD3        		LD	(IBM2+1),A
-  E88E  ED534DE1      		LD	(IBM4),DE
-  E892  22DAE4        		LD	(IBM8),HL
+  E88E  ED5347E1      		LD	(IBM4),DE
+  E892  22D4E4        		LD	(IBM8),HL
   E895  D1            		POP	DE
   E896  AF            		XOR	A
   E897  C9            		RET
@@ -5752,18 +5784,18 @@
                       	;	LD	IXH,DEVICE/256	;OHM-Z80固有マクロ
   E8B6  DD            		DB	0DDH		;Z80未定義命令
   E8B7  26ED          		LD	H,DEVICE/256	;
-  E8B9  DD7E00        		LD	A,(IX)
+  E8B9  DD7E00        		LD	A,(IX+0)
   E8BC  FE01          		CP	001H		;A=0 THEN CF=1
   E8BE  C9            		RET
                       	
   E8BF                	FFLUSH:
   E8BF  F5            		PUSH	AF
   E8C0  3EFF          		LD	A,0FFH
-  E8C2  323CE2        		LD	(SFILE),A
-  E8C5  CD5EE5        		CALL	DWTX
+  E8C2  3236E2        		LD	(SFILE),A
+  E8C5  CD58E5        		CALL	DWTX
   E8C8  3EFF          		LD	A,0FFH
   E8CA  32A5EC        		LD	(_DBDRV),A
-  E8CD  CDA4E5        		CALL	WTFATX
+  E8CD  CD9EE5        		CALL	WTFATX
   E8D0  3EFF          		LD	A,0FFH
   E8D2  32A3EC        		LD	(_FATDRV),A
   E8D5  F1            		POP	AF
@@ -5796,7 +5828,7 @@
                       	
   E91D                	M2HQ:
   E91D  09F0          		DB	9,0F0H
-  E91F  1F001D0B      		DW	31,2845
+  E91F  1F00210B      		DW	31,2849
   E923  FE245012018213		DB	0FEH,36,80,18,1,082H,19,1
                       	
   E92B                	M2HDE:
@@ -5811,7 +5843,8 @@
                       	
   E947  00            	CHECK:	DB	0
                       	
-                      		
+                      	;LDDISK.ASM
+                      	
                       	;	LSX-Dodgers DISK
                       	
                       	
@@ -5893,7 +5926,7 @@
   E9AB                	FDCCMD:
   E9AB  CDF9E9        		CALL	COMSET
                       	
-  E9AE  3A70EA        	@FDCPAT:LD	A,(FDCPAT+1)
+  E9AE  3A70EA        	AT_FDCPAT:LD	A,(FDCPAT+1)
   E9B1  E620          		AND	020H		;Write data Write track
   E9B3  3C            		INC	A
                       	
@@ -5977,7 +6010,7 @@
   EA11  C9            		RET
                       	
   EA12  0307          	DEMES:	DB	3,7
-  EA14  A5446576696365		DB	"･Device I/O Error!",5,3
+  EA14  A5446576696365		DB	0A5H, "Device I/O Error!",5,3
   EA28  41626F72742052		DB	"Abort Retry Ignore?",5,3,0
                       	
   EA3E  02            	RETRY:	DB	2
@@ -6072,12 +6105,12 @@
   EAC0  28FB          		JR	Z,DELP2
                       	
   EAC2  D1            		POP	DE
-  EAC3  CD75DF        		CALL	CAP
-  EAC6  FE52          		CP	"R"
+  EAC3  CD6FDF        		CALL	CAP
+  EAC6  FE52          		CP	'R'
   EAC8  CA5AEA        		JP	Z,DISKR
-  EACB  FE49          		CP	"I"
+  EACB  FE49          		CP	'I'
   EACD  2807          		JR	Z,IGNORE
-  EACF  FE41          		CP	"A"
+  EACF  FE41          		CP	'A'
   EAD1  20E0          		JR	NZ,DELP1
   EAD3  C3F1D9        		JP	BOOT
   EAD6                	IGNORE:
@@ -6304,12 +6337,12 @@
   EBFE  C1            		POP	BC
   EBFF  C9            		RET
                       	
-  1FE4                	@R	EQU	WTTRK-@WTTRK
+  1FE4                	AT_R	EQU	WTTRK-AT_WTTRK
                       	
-  EC00                	PE:
+  EC00                	_PE:
                       	
+                      	;LDCALL.ASM
                       	
-                      		
                       	;	LSX-Dodgers SYSTEM CALL
                       	
   EC00                		ORG	0EC00H
@@ -6327,13 +6360,14 @@
   EC38  6CD2E9D46CD2ED		DW	_SYS1C,_SYS1D,_SYS1E,_SYS1F
                       	;2
   EC40  6CD279D491D4F2		DW	_SYS20,_SYS21,_SYS22,_SYS23
-  EC48  11D566D29CE2C1		DW	_SYS24,_ERROR,_SYS26,_SYS27
-  EC50  91D42CD5A3D72B		DW	_SYS28,_SYS29,_SYS2A,_SYS2B
-  EC58  DDD72BDE6CD24F		DW	_SYS2C,_SYS2D,_SYS2E,_SYS2F
+  EC48  11D566D296E2BB		DW	_SYS24,_ERROR,_SYS26,_SYS27
+  EC50  91D42CD5A3D725		DW	_SYS28,_SYS29,_SYS2A,_SYS2B
+  EC58  DDD725DE6CD24F		DW	_SYS2C,_SYS2D,_SYS2E,_SYS2F
                       	;3
   EC60  49D5          		DW	_SYS30
                       	
-                      		
+                      	;LDWORK.ASM
+                      	
                       	;	LSX-Dodgers WORK
                       	
   0004                	DDS	EQU	4
@@ -6407,47 +6441,48 @@
   ECD9  C3D8E7        	_CHGDRV:JP	CHGDRV
   ECDC  C3ABE8        	_GETDPB:JP	GETDPB
   ECDF  C3BFE8        	_FFLUSH:JP	FFLUSH
-  ECE2  C37CE5        	_RDFATX:JP	RDFATX
-  ECE5  C351E6        	_RDFAT:	JP	RDFAT
+  ECE2  C376E5        	_RDFATX:JP	RDFATX
+  ECE5  C34BE6        	_RDFAT:	JP	RDFAT
   ECE8  C33FEA        	_WTTRK:	JP	WTTRK
   ECEB  C34CEA        	_FDRD:	JP	FDRD
   ECEE  C342EA        	_FDWT:	JP	FDWT
   ECF1  C3EBEC        	_DRD:	JP	_FDRD	;(Self-rewriting)
   ECF4  C3EEEC        	_DWT:	JP	_FDWT	;(Self-rewriting)
-  ECF7  C3FEE5        	_GNCL:	JP	GNCL	;(Self-rewriting)
-  ECFA  C321E6        	_SNCL:	JP	SNCL	;(Self-rewriting)
+  ECF7  C3F8E5        	_GNCL:	JP	GNCL	;(Self-rewriting)
+  ECFA  C31BE6        	_SNCL:	JP	SNCL	;(Self-rewriting)
   ECFD  C32CCD        	_COMANL:JP	COMANL
                       	
   ED00                	WE:
                       	
-                      		
+                      	;LDDPB.ASM
+                      	
                       	;	LSX-Dodgers DPB
                       	
   ED00                	DEVICE:
                       	
                       	;	A:
                       	
-  ED00  02            	_FATLN_:	DB	2
-  ED01  FD            	_FATID_:	DB	0FDH
-  ED02  EBEC          	_DRDC_		DW	_FDRD
-  ED04  EEEC          	_DWTC_		DW	_FDWT
-  ED06  0829          	_ADDCL_:	DW	02908H	;H(029H=512,0=1024)L=CLADD
-  ED08  6401          	_MAXCL_:	DW	356
-  ED0A  FF            	_FDMODE_:	DB	0FFH	;0FFH=2D	0FEH=2HD
-  ED0B  0C            	_MAXDIR_:	DB	12
-  ED0C  28            	_MAXCYL_:	DB	40
-  ED0D  09            	_MAXSEC_:	DB	9	;Number of sectors
-  ED0E  01            	_FATPS_:	DB	1
-  ED0F  02            	_FATS_:		DB	2
-  ED10  05            	_DIRPS_:	DB	5
-  ED11  01            	_MINSEC_:	DB	1	;Minimum sector
-  ED12  87            	_DEVNO_:	DB	087H	;Device Number
-  ED13  00            	_UNITNO_:	DB	0
-  ED14  0000          			DW	0
-  ED16  0000          	_GNCL_:		DW	0
-  ED18  0000          	_SNCL_:		DW	0
-  ED1A  0000          	_SDIR_:		DW	0
-  ED1C  46444430      	_NAME_:	DB	"FDD0"
+  ED00  02            	DPB_00_FATLN:	DB	2
+  ED01  FD            	DPB_01_FATID:	DB	0FDH
+  ED02  EBEC          	DPB_02_DRDC:	DW	_FDRD
+  ED04  EEEC          	DPB_04_DWTC:	DW	_FDWT
+  ED06  0829          	DPB_06_ADDCL:	DW	02908H	;H(029H=512,0=1024)L=CLADD
+  ED08  6401          	DPB_08_MAXCL:	DW	356
+  ED0A  FF            	DPB_0A_FDMODE:	DB	0FFH	;0FFH=2D	0FEH=2HD
+  ED0B  0C            	DPB_0B_MAXDIR:	DB	12
+  ED0C  28            	DPB_0C_MAXCYL:	DB	40
+  ED0D  09            	DPB_0D_MAXSEC:	DB	9	;Number of sectors
+  ED0E  01            	DPB_0E_FATPS:	DB	1
+  ED0F  02            	DPB_0F_FATS:	DB	2
+  ED10  05            	DPB_10_DIRPS:	DB	5
+  ED11  01            	DPB_11_MINSEC:	DB	1	;Minimum sector
+  ED12  87            	DPB_12_DEVNO:	DB	087H	;Device Number
+  ED13  00            	DPB_13_UNITNO:	DB	0
+  ED14  0000          	DPB_14		DW	0
+  ED16  0000          	DPB_16_GNCL:	DW	0
+  ED18  0000          	DPB_18_SNCL:	DW	0
+  ED1A  0000          	DPB_1A_SDIR:	DW	0
+  ED1C  46444430      	DPB_1C_NAME:	DB	"FDD0"
                       	
                       	;	B:
                       	

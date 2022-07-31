@@ -1,1 +1,0 @@
-zasm LD.ASM -CLD.BIN

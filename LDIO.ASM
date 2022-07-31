@@ -204,11 +204,11 @@ FKEY:
 	LD	A,01BH
 	CALL	KEYBS1
 	LD	A,L
-	ADD	A,020H-"q"
+	ADD	A,020H-'q'
 	BIT	7,L
 	RET	Z
-	LD	L,"P"
-	SUB	0E1H+020H-"q"
+	LD	L,'P'
+	SUB	0E1H+020H-'q'
 	JR	Z,KEYBSL
 	INC	L
 	DEC	A
@@ -216,17 +216,17 @@ FKEY:
 	INC	L
 	SUB	0EBH-0E2H
 	JR	Z,KEYBSL
-	LD	L,"C"
+	LD	L,'C'
 	DEC	A
 	JR	Z,KEYBSL
-	LD	L,"X"
+	LD	L,'X'
 KEYBSL:
 	LD	A,L
 	JR	KEYBS1
 
 _SYS01:
 	CALL	_SYS07
-MSG:
+MSG_:
 	PUSH	AF
 	PUSH	DE
 	LD	E,A
@@ -421,10 +421,10 @@ _SYS2A:
 	CALL	IN49SB_BCD		;YY
 	LD	L,A
 	LD	H,0
-	LD	DE,1900
+	LD	DE,1900		;0076CH
 	CP	90
 	JR	NC,RDDATE1
-	LD	E,2000
+	LD	E,0D0H		;2000?ｿｽﾌ会ｿｽ1?ｿｽo?ｿｽC?ｿｽg?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽﾖゑｿｽ?ｿｽ?ｿｽ D=007H?ｿｽﾅ変会ｿｽ?ｿｽ?ｿｽ?ｿｽﾈゑｿｽ
 RDDATE1:
 	ADD	HL,DE
 	CALL	IN49SB		;MM
@@ -481,37 +481,37 @@ MSX:
 
 ESC1:
 	LD	A,E
-	CP	"A"
+	CP	'A'
 	JP	Z,CTRL1E
-	CP	"B"
+	CP	'B'
 	JP	Z,CTRL1F
-	CP	"C"
+	CP	'C'
 	JP	Z,CTRL1C
-	CP	"D"
+	CP	'D'
 	JP	Z,CTRL1D
-	CP	"E"
+	CP	'E'
 	JR	Z,CT0CX
-	CP	"j"
+	CP	'j'
 CT0CX:
 	JP	Z,CTRL0C
-	CP	"H"
+	CP	'H'
 	JP	Z,CTRL0B
-	CP	"J"
+	CP	'J'
 	JP	Z,CTRL1A
-	CP	"K"
+	CP	'K'
 	JP	Z,CTRL05
-	CP	"L"
+	CP	'L'
 	JP	Z,CTRL0E
-	CP	"x"
+	CP	'x'
 	JR	Z,ESC1X
-	CP	"y"
+	CP	'y'
 	JR	NZ,ESC1Y
 ESC1X:
 	LD	(HL),1
 ESC1Y:
-	CP	"="
+	CP	'='
 	JR	Z,ESC1W
-	CP	"Y"
+	CP	'Y'
 	JR	NZ,ESC1Z
 ESC1W:
 	LD	(HL),2
@@ -579,7 +579,7 @@ ANK:
 	LD	A,B
 	OR	038H
 	LD	B,A
-;	OUT	(C),0		;未定義命令ニーモニック
+;	OUT	(C),0		;?ｿｽ?ｿｽ?ｿｽ?ｿｽ`?ｿｽ?ｿｽ?ｿｽﾟニ?ｿｽ[?ｿｽ?ｿｽ?ｿｽj?ｿｽb?ｿｽN
 	DB	0EDH,071H		;Kanji
 	RES	3,B
 	OUT	(C),E		;Text
@@ -605,7 +605,7 @@ CTRL:
 	INC	HL
 	LD	H,(HL)
 	LD	L,A
-	CALL	[HL]
+	CALL	K_HL
 	JR	PRINTE5
 
 KANJI2:
@@ -751,7 +751,7 @@ C05X1:
 	LD	A,B
 	OR	038H
 	LD	B,A
-;	OUT	(C),0		;未定義命令ニーモニック
+;	OUT	(C),0		;?ｿｽ?ｿｽ?ｿｽ?ｿｽ`?ｿｽ?ｿｽ?ｿｽﾟニ?ｿｽ[?ｿｽ?ｿｽ?ｿｽj?ｿｽb?ｿｽN
 	DB	0EDH,071H		;kanji
 	RES	3,B
 	OUT	(C),H		;Text
@@ -819,7 +819,7 @@ BOOT:
 	JP	0
 WBOOT:
 	JP	_SYS00
-CONST:
+CONST_:
 	JP	CONSTX
 _SYS07:
 CONIN:
@@ -934,7 +934,7 @@ C1AX1:
 	LD	A,B
 	OR	038H
 	LD	B,A
-;	OUT	(C),0		;未定義命令ニーモニック
+;	OUT	(C),0		;?ｿｽ?ｿｽ?ｿｽ?ｿｽ`?ｿｽ?ｿｽ?ｿｽﾟニ?ｿｽ[?ｿｽ?ｿｽ?ｿｽj?ｿｽb?ｿｽN
 	DB	0EDH,071H		;kanji
 	RES	3,B
 	LD	A,020H
@@ -1036,7 +1036,7 @@ SCRCL:
 	LD	HL,02000H+80
 	LD	A,(_COLORF)
 SCRCL1:
-;	OUT	(C),0		;未定義命令ニーモニック
+;	OUT	(C),0		;?ｿｽ?ｿｽ?ｿｽ?ｿｽ`?ｿｽ?ｿｽ?ｿｽﾟニ?ｿｽ[?ｿｽ?ｿｽ?ｿｽj?ｿｽb?ｿｽN
 	DB	0EDH,071H
 	RES	3,B
 	OUT	(C),H
@@ -1212,6 +1212,5 @@ BEEPD:
 
 REDDATA:DB	0
 
-	DS	12	;菴吶ｊ縺ｮ謨ｰ蜷医ｏ縺?
+	DS	6	;余りの数合わせ
 
-

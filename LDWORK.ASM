@@ -84,4 +84,3 @@ _SNCL:	JP	SNCL	;(Self-rewriting)
 _COMANL:JP	COMANL
 
 WE:
-

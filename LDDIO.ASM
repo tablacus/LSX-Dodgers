@@ -470,9 +470,11 @@ FATS2:
 	LD	B,(IX+0)	;DPB.FATLN
 	LD	A,(IX+7)	;$29=512 / 0=1024
 	OR	A
-	LD	A,6		;3072 / 512 FATバッファに読み込めるクラスタ数
+	LD	A,6		;3072 / 512 FATバッファに読み込めるセクタ数
 	JR	NZ,FATS512
-	RRA			;A=3 (3072÷1024: 1クラスタ1024バイトの場合)
+	BIT	7,(IX+00FH)
+	JR	NZ,FATS512
+	RRA			;A=3 (3072÷1024: 1セクタ1024バイトの場合)
 FATS512:
 	CP	B
 	RET	NC		;DPB.FATS x sectorSize < fatBufSize
@@ -487,7 +489,7 @@ FAT_SKP:
 	DEC	B		;FATSIZE--
 	DEC	C		;skipCnt--
 	JR	NZ,FAT_SKP
-	RET
+	LD	C,B
 FATS3:
 	LD	B,C		;3 or 6
 	XOR	A
@@ -562,8 +564,7 @@ CHGDRV0:
 	POP	HL
 	LD	A,H
 	LD	(SECPAT+1),A
-	XOR	A		;CF=0 ﾉ ﾀﾒ
-	LD	H,A
+	LD	H,0
 	LD	(_DIRPS),HL
 
 	POP	HL
@@ -575,7 +576,7 @@ CHGDRV0:
 	LD	A,H
 	OR	L
 	JR	NZ,OGNCL
-	LD	HL,GNCL
+	LD	HL,GNCL		;FAT12(default)
 OGNCL:
 	LD	(_GNCL+1),HL
 
@@ -583,7 +584,7 @@ OGNCL:
 	LD	A,H
 	OR	L
 	JR	NZ,OSNCL
-	LD	HL,SNCL
+	LD	HL,SNCL		;FAT12(default)
 OSNCL:
 	LD	(_SNCL+1),HL
 
@@ -650,7 +651,7 @@ GETDPB:
 ;	LD	IXH,DEVICE/256	;OHM-Z80固有マクロ
 	DB	0DDH		;Z80未定義命令
 	LD	H,DEVICE/256	;
-	LD	A,(IX)
+	LD	A,(IX+0)
 	CP	001H		;A=0 THEN CF=1
 	RET
 
@@ -694,7 +695,7 @@ M2HD:
 
 M2HQ:
 	DB	9,0F0H
-	DW	31,2845
+	DW	31,2849
 	DB	0FEH,36,80,18,1,082H,19,1
 
 M2HDE:
@@ -708,4 +709,3 @@ M2HS:
 	DB	0FEH,10,80,9,1,1,4,10
 
 CHECK:	DB	0
-

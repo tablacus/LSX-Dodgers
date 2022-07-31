@@ -80,7 +80,7 @@ FSPAT:	AND	0FFH
 FDCCMD:
 	CALL	COMSET
 
-@FDCPAT:LD	A,(FDCPAT+1)
+AT_FDCPAT:LD	A,(FDCPAT+1)
 	AND	020H		;Write data Write track
 	INC	A
 
@@ -164,7 +164,7 @@ RNF:
 	RET
 
 DEMES:	DB	3,7
-	DB	"¥Device I/O Error!",5,3
+	DB	0A5H, "Device I/O Error!",5,3
 	DB	"Abort Retry Ignore?",5,3,0
 
 RETRY:	DB	2
@@ -260,11 +260,11 @@ DELP2:
 
 	POP	DE
 	CALL	CAP
-	CP	"R"
+	CP	'R'
 	JP	Z,DISKR
-	CP	"I"
+	CP	'I'
 	JR	Z,IGNORE
-	CP	"A"
+	CP	'A'
 	JR	NZ,DELP1
 	JP	BOOT
 IGNORE:
@@ -491,7 +491,6 @@ S1FD0:
 	POP	BC
 	RET
 
-@R	EQU	WTTRK-@WTTRK
+AT_R	EQU	WTTRK-AT_WTTRK
 
-PE:
-
+_PE:
