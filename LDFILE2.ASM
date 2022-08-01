@@ -342,7 +342,7 @@ RBX2:
 	LD	C,(IY+34)	;Cluster settings
 	LD	B,(IY+35)
 	CALL	RWXR
-IBM5:	LD	A,3		;ooo 1
+	LD	A,(IBM5+1)	;1024=3 / 512=1
 	AND	(IY+34)
 	OR	(IY+33)
 	RET
@@ -358,10 +358,10 @@ RBXA:
 	LD	(_CLPS),DE
 
 	LD	C,(IY+33)
-	LD	A,(IBM5+1)		;ooo 1
+IBM5:	LD	A,3		;自己書き換え 1024=3 / 512=1
 	AND	(IY+34)
 	LD	B,A
-IBM7:	LD	HL,1024		;ooo 512
+IBM7:	LD	HL,1024		;自己書き換え 1024=0400H / 512=0200H ここに1クラスタのサイズが格納される
 	SBC	HL,BC		;remaining cluster
 
 	LD	DE,(LEFTX)
@@ -382,13 +382,13 @@ RBXB:
 	LD	DE,(_CLPS)
 	LD	A,(LEFTX+1)
 	SRL	A
-IBM8:	SRL	A		;ooo
+IBM8:	SRL	A		;自己書き換え 1024=SRL A / 512=NOP NOP
 	LD	B,A
 	RET
 
 RBXC:
 	LD	BC,(LEFTX)
-	LD	A,(IBM5+1)
+	LD	A,(IBM5+1)	;1024=3 / 512=1
 	AND	B
 	LD	B,A
 	OR	C

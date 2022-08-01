@@ -264,7 +264,7 @@ SDIRX1:
 	LD	DE,(_DIRPS)	;Root Directory
 
 SOPEN1:
-IBM1:	LD	C,32		;ooo 16
+IBM1:	LD	C,32		;é©å»èëÇ´ä∑Ç¶ 1024=32 / 512=16
 SOPEN1X:
 	CALL	DC		;FILE SEARCH
 	JR	C,RDDERR
@@ -855,7 +855,7 @@ WRDF5:
 RWXR:
 	SRL	B
 	RR	C
-IBM4:	SRL	B	;ooo
+IBM4:	SRL	B	;é©å»èëÇ´ä∑Ç¶ 1024=SRL B / 512=JR +2(íºå„ÇÃRR CÇîÚÇŒÇ∑)
 	RR	C
 
 	LD	E,(IY+26)	;Cluster

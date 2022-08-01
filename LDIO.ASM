@@ -424,7 +424,7 @@ _SYS2A:
 	LD	DE,1900		;0076CH
 	CP	90
 	JR	NC,RDDATE1
-	LD	E,0D0H		;2000?ｿｽﾌ会ｿｽ1?ｿｽo?ｿｽC?ｿｽg?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽﾖゑｿｽ?ｿｽ?ｿｽ D=007H?ｿｽﾅ変会ｿｽ?ｿｽ?ｿｽ?ｿｽﾈゑｿｽ
+	LD	E,0D0H		;2000 & 0FFH D=007H
 RDDATE1:
 	ADD	HL,DE
 	CALL	IN49SB		;MM
@@ -579,7 +579,7 @@ ANK:
 	LD	A,B
 	OR	038H
 	LD	B,A
-;	OUT	(C),0		;?ｿｽ?ｿｽ?ｿｽ?ｿｽ`?ｿｽ?ｿｽ?ｿｽﾟニ?ｿｽ[?ｿｽ?ｿｽ?ｿｽj?ｿｽb?ｿｽN
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H		;Kanji
 	RES	3,B
 	OUT	(C),E		;Text
@@ -751,7 +751,7 @@ C05X1:
 	LD	A,B
 	OR	038H
 	LD	B,A
-;	OUT	(C),0		;?ｿｽ?ｿｽ?ｿｽ?ｿｽ`?ｿｽ?ｿｽ?ｿｽﾟニ?ｿｽ[?ｿｽ?ｿｽ?ｿｽj?ｿｽb?ｿｽN
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H		;kanji
 	RES	3,B
 	OUT	(C),H		;Text
@@ -934,7 +934,7 @@ C1AX1:
 	LD	A,B
 	OR	038H
 	LD	B,A
-;	OUT	(C),0		;?ｿｽ?ｿｽ?ｿｽ?ｿｽ`?ｿｽ?ｿｽ?ｿｽﾟニ?ｿｽ[?ｿｽ?ｿｽ?ｿｽj?ｿｽb?ｿｽN
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H		;kanji
 	RES	3,B
 	LD	A,020H
@@ -1036,7 +1036,7 @@ SCRCL:
 	LD	HL,02000H+80
 	LD	A,(_COLORF)
 SCRCL1:
-;	OUT	(C),0		;?ｿｽ?ｿｽ?ｿｽ?ｿｽ`?ｿｽ?ｿｽ?ｿｽﾟニ?ｿｽ[?ｿｽ?ｿｽ?ｿｽj?ｿｽb?ｿｽN
+;	OUT	(C),0		;未定義命令ニーモニック
 	DB	0EDH,071H
 	RES	3,B
 	OUT	(C),H
@@ -1212,5 +1212,5 @@ BEEPD:
 
 REDDATA:DB	0
 
-	DS	6	;余りの数合わせ
+	DS	1	;余りの数合わせ
 
