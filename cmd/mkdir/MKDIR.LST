@@ -1,0 +1,152 @@
+                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.0.0, LST:Full:4
+                                ;
+                                ; MKDIR Gaku
+                                ;
+                                ; ディレクトリを作成する
+                                ;
+       0005                     SYSTEM  EQU 00005H
+       000F                     JP_HL   EQU 0000FH
+       005C                     FCB1    EQU 0005CH
+       006C                     FCB2    EQU 0006CH
+       0080                     DTA1    EQU 00080H
+                                
+000000 0100                         ORG 00100H
+000000 0100 C30301          10      JP  START       ;0C3HはZ80ではJPだが、i8086ではRETなので
+       0103                     START:              ;間違えてMS-DOS環境で実行しても即終了できる
+000003 0103 115C00          10      LD  DE,FCB1
+000006 0106 0E11             7      LD  C,011H      ;SFIRST FCB ファイル検索 初回 CP/M
+000008 0108 CD0500          17      CALL    SYSTEM
+00000B 010B B7               4      OR  A
+00000C 010C CAA501          10      JP  Z,ERROR1    ;すでに存在する場合はエラー
+                                
+00000F 010F 115C00          10      LD  DE,FCB1
+000012 0112 0E16             7      LD  C,016H      ;FMAKE FCB ファイル作成 CP/M
+000014 0114 CD0500          17      CALL    SYSTEM
+000017 0117 B7               4      OR  A
+000018 0118 C2A501          10      JP  NZ,ERROR1   ;作成に失敗する場合はエラー
+                                
+00001B 011B 3A7900          13      LD  A,(FCB1+29) ;ディレクトリ・モード
+00001E 011E B7               4      OR  A
+00001F 011F 280B            12      JR  Z,ROOT
+                                
+000021 0121 2A6A00          16      LD  HL,(FCB1+14)    ;アクセスするディレクトリのクラスタ番号+1
+000024 0124 7C               4      LD  A,H
+000025 0125 B5               4      OR  L
+000026 0126 2804            12      JR  Z,ROOT
+000028 0128 2B               6      DEC HL
+000029 0129 222A02          16      LD  (PARENTCL),HL
+       012C                     ROOT:
+00002C 012C 215C00          10      LD  HL,FCB1
+00002F 012F 5E               7      LD  E,(HL)
+000030 0130 0E1B             7      LD  C,01BH      ;ALLOC ディスク情報の獲得
+000032 0132 CD0500          17      CALL    SYSTEM
+000035 0135 FEFF             7      CP  0FFH
+000037 0137 CAA501          10      JP  Z,ERROR1    ;取得できない場合はエラー
+00003A 013A 69               4      LD  L,C     ;BC←論理セクタのサイズ
+00003B 013B 60               4      LD  H,B
+00003C 013C FE01             7      CP  1       ;A←1クラスタのセクタ数
+00003E 013E 2801            12      JR  Z,SKIP1
+000040 0140 29              11      ADD HL,HL
+       0141                     SKIP1:
+000041 0141 E5              11      PUSH    HL      ;HL←1クラスタのサイズ
+000042 0142 014000          10      LD  BC, 32 * 2;
+000045 0145 37               4      SCF
+000046 0146 ED42            15      SBC HL,BC       ;. と .. のサイズ と 1 減らす
+000048 0148 4D               4      LD  C,L
+000049 0149 44               4      LD  B,H
+00004A 014A 213002          10      LD  HL,DIRENT3;
+00004D 014D 113102          10      LD  DE,DIRENT3+1;
+000050 0150 EDB0                    LDIR            ;0クリア
+                                
+000052 0152 11F001          10      LD  DE,SUBD
+000055 0155 0E1A             7      LD  C,01AH      ;SETDTA ディスク転送アドレスの設定 CP/M
+000057 0157 CD0500          17      CALL    SYSTEM
+                                
+00005A 015A 115C00          10      LD  DE,FCB1
+00005D 015D 210100          10      LD  HL,1
+000060 0160 226A00          16      LD  (FCB1+14),HL    ;レコード・サイズ
+000063 0163 E1              10      POP HL
+000064 0164 0E26             7      LD  C,026H      ;WRBLK FCB ランダムブロック書き込み
+000066 0166 CD0500          17      CALL    SYSTEM
+000069 0169 B7               4      OR  A
+00006A 016A 2039            12      JR  NZ,ERROR1
+                                
+00006C 016C 2A7600          16      LD  HL,(FCB1+26)    ;ファイルの先頭クラスタ
+00006F 016F 220A02          16      LD  (SELFCL),HL
+                                
+000072 0172 211A00          10      LD  HL,SELFCL-SUBD 
+000075 0175 227D00          16      LD  (FCB1+33),HL    ;ランダム・レコード
+                                
+000078 0178 5D               4      LD  E,L
+000079 0179 54               4      LD  D,H
+00007A 017A 0E1A             7      LD  C,01AH      ;SETDTA ディスク転送アドレスの設定 CP/Mcd 
+00007C 017C CD0500          17      CALL    SYSTEM
+                                
+00007F 017F 115C00          10      LD  DE,FCB1
+000082 0182 210200          10      LD  HL,2
+000085 0185 0E26             7      LD  C,026H      ;WRBLK FCB ランダムブロック書き込み
+000087 0187 CD0500          17      CALL    SYSTEM
+00008A 018A B7               4      OR  A
+00008B 018B 2018            12      JR  NZ,ERROR1
+                                
+00008D 018D 3E10             7      LD  A,010H      ;ディレクトリ
+00008F 018F 326900          13      LD  (FCB1+13),A ;属性(アトリビュート)
+000092 0192 210000          10      LD  HL,0
+000095 0195 226C00          16      LD  (FCB1+16),HL    ;ファイルのサイズ
+                                
+000098 0198 115C00          10      LD  DE,FCB1
+00009B 019B 0E10             7      LD  C,010H      ;FCLOSE FCB ファイルクローズ CP/M
+00009D 019D CD0500          17      CALL    SYSTEM
+                                
+0000A0 01A0 11EB01          10      LD  DE,OKMES
+0000A3 01A3 180B            12      JR  EXITMES
+                                
+       01A5                     ERROR1:
+0000A5 01A5 11B801          10      LD  DE,TITLE
+0000A8 01A8 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+0000AA 01AA CD0500          17      CALL    SYSTEM
+0000AD 01AD 11CB01          10      LD  DE,ERRMES1
+       01B0                     EXITMES:
+0000B0 01B0 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+0000B2 01B2 CD0500          17      CALL    SYSTEM
+0000B5 01B5 C30000          10      JP  0
+                                
+       01B8                     TITLE:
+0000B8 01B8 6D6B646972207631        DB  "mkdir v1.00 Gaku",00DH,00AH
+            2E30302047616B75    
+            0D0A                
+0000CA 01CA 24                      DB  '$'
+       01CB                     ERRMES1:
+0000CB 01CB 75736167653A204D        DB  "usage: MKDIR <directory name>",00DH,00AH
+            4B444952203C6469    
+            726563746F727920    
+            6E616D653E0D0A      
+0000EA 01EA 24                      DB  '$'
+       01EB                     OKMES:
+0000EB 01EB 4F6B0D0A                DB  "Ok",00DH,00AH
+0000EF 01EF 24                      DB  '$'
+                                
+       01F0                     SUBD:
+0000F0 01F0 2E20202020202020        DB  ".          "
+            202020              
+0000FB 01FB 10                      DB  010H
+0000FC 01FC 0000000000000000        DW  0,0,0,0,0
+            0000                
+000106 0206 0000                TIME1:  DW  0
+000108 0208 0000                DATE1:  DW  0
+00010A 020A 0000                SELFCL: DW  0
+00010C 020C 00000000                DW  0,0
+                                
+000110 0210 2E2E202020202020        DB  "..         "
+            202020              
+00011B 021B 10                      DB  010H
+00011C 021C 0000000000000000        DW  0,0,0,0,0
+            0000                
+000126 0226 0000                TIME2:  DW  0
+000128 0228 0000                DATE2:  DW  0
+       022A                     PARENTCL:
+00012A 022A 0000                    DW  0
+00012C 022C 00000000                DW  0,0
+       0230                     DIRENT3:
+000130 0230 00                      DB  0
+[EOF:MKDIR.ASM:SHIFT_JIS]

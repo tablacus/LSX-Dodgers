@@ -1,0 +1,141 @@
+;
+; MKDIR Gaku
+;
+; ディレクトリを作成する
+;
+SYSTEM	EQU	00005H
+JP_HL	EQU	0000FH
+FCB1	EQU	0005CH
+FCB2	EQU	0006CH
+DTA1	EQU	00080H
+
+	ORG 00100H
+	JP	START		;0C3HはZ80ではJPだが、i8086ではRETなので
+START:				;間違えてMS-DOS環境で実行しても即終了できる
+	LD	DE,FCB1
+	LD	C,011H		;SFIRST FCB ファイル検索 初回 CP/M
+	CALL	SYSTEM
+	OR	A
+	JP	Z,ERROR1	;すでに存在する場合はエラー
+
+	LD	DE,FCB1
+	LD	C,016H		;FMAKE FCB ファイル作成 CP/M
+	CALL	SYSTEM
+	OR	A
+	JP	NZ,ERROR1	;作成に失敗する場合はエラー
+
+	LD	A,(FCB1+29)	;ディレクトリ・モード
+	OR	A
+	JR	Z,ROOT
+
+	LD	HL,(FCB1+14)	;アクセスするディレクトリのクラスタ番号+1
+	LD	A,H
+	OR	L
+	JR	Z,ROOT
+	DEC	HL
+	LD	(PARENTCL),HL
+ROOT:
+	LD	HL,FCB1
+	LD	E,(HL)
+	LD	C,01BH		;ALLOC ディスク情報の獲得
+	CALL	SYSTEM
+	CP	0FFH
+	JP	Z,ERROR1	;取得できない場合はエラー
+	LD	L,C		;BC←論理セクタのサイズ
+	LD	H,B
+	CP	1		;A←1クラスタのセクタ数
+	JR	Z,SKIP1
+	ADD	HL,HL
+SKIP1:
+	PUSH	HL		;HL←1クラスタのサイズ
+	LD	BC, 32 * 2;
+	SCF
+	SBC	HL,BC		;. と .. のサイズ と 1 減らす
+	LD	C,L
+	LD	B,H
+	LD	HL,DIRENT3;
+	LD	DE,DIRENT3+1;
+	LDIR			;0クリア
+
+	LD	DE,SUBD
+	LD	C,01AH		;SETDTA ディスク転送アドレスの設定 CP/M
+	CALL	SYSTEM
+
+	LD	DE,FCB1
+	LD	HL,1
+	LD	(FCB1+14),HL	;レコード・サイズ
+	POP	HL
+	LD	C,026H		;WRBLK FCB ランダムブロック書き込み
+	CALL	SYSTEM
+	OR	A
+	JR	NZ,ERROR1
+
+	LD	HL,(FCB1+26)	;ファイルの先頭クラスタ
+	LD	(SELFCL),HL
+
+	LD	HL,SELFCL-SUBD 
+	LD	(FCB1+33),HL	;ランダム・レコード
+
+	LD	E,L
+	LD	D,H
+	LD	C,01AH		;SETDTA ディスク転送アドレスの設定 CP/Mcd 
+	CALL	SYSTEM
+
+	LD	DE,FCB1
+	LD	HL,2
+	LD	C,026H		;WRBLK FCB ランダムブロック書き込み
+	CALL	SYSTEM
+	OR	A
+	JR	NZ,ERROR1
+
+	LD	A,010H		;ディレクトリ
+	LD	(FCB1+13),A	;属性(アトリビュート)
+	LD	HL,0
+	LD	(FCB1+16),HL	;ファイルのサイズ
+
+	LD	DE,FCB1
+	LD	C,010H		;FCLOSE FCB ファイルクローズ CP/M
+	CALL	SYSTEM
+
+	LD	DE,OKMES
+	JR	EXITMES
+
+ERROR1:
+	LD	DE,TITLE
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+	LD	DE,ERRMES1
+EXITMES:
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+	JP	0
+
+TITLE:
+	DB	"mkdir v1.00 Gaku",00DH,00AH
+	DB	'$'
+ERRMES1:
+	DB	"usage: MKDIR <directory name>",00DH,00AH
+	DB	'$'
+OKMES:
+	DB	"Ok",00DH,00AH
+	DB	'$'
+
+SUBD:
+	DB	".          "
+	DB	010H
+	DW	0,0,0,0,0
+TIME1:	DW	0
+DATE1:	DW	0
+SELFCL:	DW	0
+	DW	0,0
+
+	DB	"..         "
+	DB	010H
+	DW	0,0,0,0,0
+TIME2:	DW	0
+DATE2:	DW	0
+PARENTCL:
+	DW	0
+	DW	0,0
+DIRENT3:
+	DB	0
