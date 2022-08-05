@@ -237,7 +237,7 @@ MSG_:
 
 _SYS02:
 	CALL	BREAK
-	JP	PRINTX
+	JR	PRINTX
 
 _SYS03:
 	DI
@@ -605,7 +605,7 @@ CTRL:
 	INC	HL
 	LD	H,(HL)
 	LD	L,A
-	CALL	K_HL
+	CALL	JP_HL
 	JR	PRINTE5
 
 KANJI2:
@@ -1135,6 +1135,7 @@ GETL1Y:
 	POP	AF
 GETL1V:
 	LD	E,A
+	CALL	CTRL01
 	CALL	_PRINT
 GETL1Z:
 	LD	A,E
@@ -1212,5 +1213,5 @@ BEEPD:
 
 REDDATA:DB	0
 
-	DS	1	;ó]ÇËÇÃêîçáÇÌÇπ
+	DS	2	;ó]ÇËÇÃêîçáÇÌÇπ
 

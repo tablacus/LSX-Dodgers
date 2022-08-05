@@ -607,13 +607,13 @@ NEC:
 
 	LD	A,3
 NEC1:				;1024	512
-	LD	(IBM5+1),A	;3	1
+	LD	(IBM5+1),A	;3	1	1クラスタのサイズ-1したものの上位1バイト (0x3FF - 0x1FF)
 	INC	A		;4	2
-	LD	(IBM7+2),A
+	LD	(IBM7+2),A	;1クラスタのサイズの上位1バイト 0x400 - 0x200
 	ADD	A,A		;8	4
 	ADD	A,A		;010H	8
 	ADD	A,A		;020H	010H
-	LD	(IBM1+1),A
+	LD	(IBM1+1),A	;1クラスタ辺りのディレクトリエントリ数
 	ADD	A,A		;040H	020H
 	ADD	A,A		;080H	040H
 	ADD	A,A		;000H	080H
