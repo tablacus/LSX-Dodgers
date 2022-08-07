@@ -1,4 +1,4 @@
-﻿・LSX-Dodgers  MSX-DOS  CP/M80
+・LSX-Dodgers  MSX-DOS  CP/M80
 ・システム・コール一覧
 
 
@@ -522,4 +522,3 @@ $30	論理セクタを用いた書き込み	*1
 	必要なレジスタは保存するように作る。
 
 eof
-

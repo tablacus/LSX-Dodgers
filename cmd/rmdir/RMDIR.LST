@@ -1,0 +1,144 @@
+                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.0.0, LST:Full:4
+                                ;
+                                ; RMDIR Gaku
+                                ;
+                                ; 空ディレクトリの削除
+                                ;
+       0005                     SYSTEM  EQU 00005H
+       000F                     JP_HL   EQU 0000FH
+       005C                     FCB1    EQU 0005CH
+       006C                     FCB2    EQU 0006CH
+       0080                     DTA1    EQU 00080H
+       026E                     FCBLST  EQU FCBSUB+37
+                                
+000000 0100                         ORG 00100H
+000000 0100 C30301          10      JP  START       ;0C3HはZ80ではJPだが、i8086ではRETなので
+       0103                     START:              ;間違えてMS-DOS環境で実行しても即終了できる
+000003 0103 3E10             7      LD  A,010H      ;ディレクトリ
+000005 0105 326900          13      LD  (FCB1+13),A ;属性(アトリビュート)
+000008 0108 115C00          10      LD  DE,FCB1
+00000B 010B 0E0F             7      LD  C,00FH      ;FOPEN FCB ファイルオープン CP/M
+00000D 010D CD0500          17      CALL    SYSTEM
+000010 0110 B7               4      OR  A
+000011 0111 C2A801          10      JP  NZ,SHOW_NOT_FOUND
+                                                
+000014 0114 3A6900          13      LD  A,(FCB1+13) ;属性(アトリビュート)
+000017 0117 E610             7      AND 010H        ;ディレクトリか確認
+000019 0119 CAB401          10      JP  Z,SHOW_NOT_DIR
+                                                        ;ディレクトリが空か確認
+00001C 011C 3E01             7      LD  A,1
+00001E 011E 326602          13      LD  (FCBSUB+29),A   ;ディレクトリモードをサブディレクトリに
+000021 0121 2A7600          16      LD  HL,(FCB1+26)    ;ファイルの先頭クラスタ
+000024 0124 23               6      INC HL
+000025 0125 225702          16      LD  (FCBSUB+14),HL  ;アクセスするディレクトリのクラスタ番号+1
+000028 0128 3A5C00          13      LD  A,(FCB1)    ;ドライブ番号
+00002B 012B 324902          13      LD  (FCBSUB),A  ;ドライブ番号
+                                                    
+00002E 012E 116E02          10      LD  DE,FCBLST
+000031 0131 0E1A             7      LD  C,01AH      ;SETDTA ディスク転送アドレスの設定 CP/M
+000033 0133 CD0500          17      CALL    SYSTEM
+                                                    
+000036 0136 3EFF             7      LD  A,0FFH      ;隠しファイル等も検索対象にする
+000038 0138 325602          13      LD  (FCBSUB+13),A   ;属性(アトリビュート)
+00003B 013B 114902          10      LD  DE,FCBSUB
+00003E 013E 0E11             7      LD  C,011H      ;SFIRST FCB ファイル検索 初回 CP/M
+000040 0140 CD0500          17      CALL    SYSTEM
+000043 0143 B7               4      OR  A
+000044 0144 C2B401          10      JP  NZ,SHOW_NOT_DIR
+       0147                     LOOP1:
+000047 0147 3A6F02          13      LD  A,(FCBLST+1)
+00004A 014A FE2E             7      CP  '.'
+00004C 014C C2B901          10      JP  NZ,SHOW_NOT_EMPTY
+00004F 014F 3A7002          13      LD  A,(FCBLST+2)
+000052 0152 FE20             7      CP  020H        ;.はスキップ
+000054 0154 280D            12      JR  Z,SKIP1
+000056 0156 FE2E             7      CP  '.'
+000058 0158 C2B901          10      JP  NZ,SHOW_NOT_EMPTY
+00005B 015B 3A7102          13      LD  A,(FCBLST+3)
+00005E 015E FE20             7      CP  020H        ;..はスキップ
+000060 0160 C2B901          10      JP  NZ,SHOW_NOT_EMPTY
+       0163                     SKIP1:
+000063 0163 114902          10      LD  DE,FCBSUB
+000066 0166 0E12             7      LD  C,012H      ;SNEXT FCB ファイル検索 続き CP/M
+000068 0168 CD0500          17      CALL    SYSTEM
+00006B 016B B7               4      OR  A
+00006C 016C 28D9            12      JR  Z,LOOP1
+                                                ;属性をディレクトリから通常ファイルに変更して削除する
+00006E 016E 3E20             7      LD  A,020H
+000070 0170 326900          13      LD  (FCB1+13),A ;属性(アトリビュート)
+000073 0173 3EFE             7      LD  A,0FEH      ;ライトモード
+000075 0175 327800          13      LD  (FCB1+28),A ;オープン・モード
+                                
+000078 0178 115C00          10      LD  DE,FCB1
+00007B 017B 0E10             7      LD  C,010H      ;FCLOSE FCB ファイルクローズ CP/M
+00007D 017D CD0500          17      CALL    SYSTEM
+000080 0180 B7               4      OR  A
+000081 0181 C2BE01          10      JP  NZ,SHOW_NOT_CREATE
+                                
+000084 0184 115C00          10      LD  DE,FCB1
+000087 0187 0E13             7      LD  C,013H      ;FDEL FCB ファイル削除 CP/M
+000089 0189 CD0500          17      CALL    SYSTEM
+00008C 018C B7               4      OR  A
+00008D 018D C2BE01          10      JP  NZ,SHOW_NOT_CREATE
+                                
+000090 0190 11EC01          10      LD  DE,MES_OK
+       0193                     SHOW_MESSAGE:
+000093 0193 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+000095 0195 CD0500          17      CALL    SYSTEM
+000098 0198 114602          10      LD  DE,CRLF
+00009B 019B 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+00009D 019D CD0500          17      CALL    SYSTEM
+0000A0 01A0 C30000          10      JP  0
+       01A3                     SHOW_TITLE:
+0000A3 01A3 11C301          10      LD  DE,MES_TITLE
+0000A6 01A6 18EB            12      JR  SHOW_MESSAGE
+       01A8                     SHOW_NOT_FOUND:
+0000A8 01A8 3A5D00          13      LD  A,(FCB1+1)
+0000AB 01AB FE20             7      CP  020H
+0000AD 01AD 28F4            12      JR  Z,SHOW_TITLE
+0000AF 01AF 111302          10      LD  DE,MES_NOT_FOUND
+0000B2 01B2 18DF            12      JR  SHOW_MESSAGE
+       01B4                     SHOW_NOT_DIR:
+0000B4 01B4 11EF01          10      LD  DE,MES_NOT_DIR
+0000B7 01B7 18DA            12      JR  SHOW_MESSAGE
+       01B9                     SHOW_NOT_EMPTY:
+0000B9 01B9 11FF01          10      LD  DE,MES_NOT_EMPTY
+0000BC 01BC 18D5            12      JR  SHOW_MESSAGE 
+       01BE                     SHOW_NOT_CREATE:
+0000BE 01BE 112702          10      LD  DE,MES_NOT_CREATE
+0000C1 01C1 18D0            12      JR  SHOW_MESSAGE 
+                                
+       01C3                     MES_TITLE:
+0000C3 01C3 726D646972207631        DB  "rmdir v1.00 Gaku",00DH,00AH
+            2E30302047616B75    
+            0D0A                
+0000D5 01D5 75736167653A2052        DB  "usage: RMDIR directory$",
+            4D44495220646972    
+            6563746F727924      
+       01EC                     MES_OK:
+0000EC 01EC 4F4B24                  DB  "OK$"
+       01EF                     MES_NOT_DIR:
+0000EF 01EF 4E6F742061206469        DB  "Not a directory$"
+            726563746F727924    
+       01FF                     MES_NOT_EMPTY:
+0000FF 01FF 4469726563746F72        DB  "Directory not empty$"
+            79206E6F7420656D    
+            70747924            
+       0213                     MES_NOT_FOUND:
+000113 0213 4469726563746F72        DB  "Directory not found$"
+            79206E6F7420666F    
+            756E6424            
+       0227                     MES_NOT_CREATE:
+000127 0227 43616E6E6F742063        DB  "Cannot create directory$"
+            7265617465206469    
+            726563746F727924    
+                                
+       023F                     MES_ERROR:
+00013F 023F 4572726F722124          DB  "Error!$"
+       0246                     CRLF:
+000146 0246 0D0A24                  DB  00DH,00AH,'$'
+                                
+       0249                     FCBSUB:
+000149 0249 003F3F3F3F3F3F3F        DB  0, "???????????"    ;*.*
+            3F3F3F3F            
+[EOF:RMDIR.ASM:SHIFT_JIS]

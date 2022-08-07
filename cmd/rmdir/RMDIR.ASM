@@ -1,0 +1,130 @@
+;
+; RMDIR Gaku
+;
+; 空ディレクトリの削除
+;
+SYSTEM	EQU 00005H
+JP_HL	EQU 0000FH
+FCB1	EQU 0005CH
+FCB2	EQU 0006CH
+DTA1	EQU 00080H
+FCBLST	EQU FCBSUB+37
+
+	ORG 00100H
+	JP	START		;0C3HはZ80ではJPだが、i8086ではRETなので
+START:				;間違えてMS-DOS環境で実行しても即終了できる
+	LD	A,010H		;ディレクトリ
+	LD	(FCB1+13),A	;属性(アトリビュート)
+	LD	DE,FCB1
+	LD	C,00FH		;FOPEN FCB ファイルオープン CP/M
+	CALL	SYSTEM
+	OR	A
+	JP	NZ,SHOW_NOT_FOUND
+				
+	LD	A,(FCB1+13)	;属性(アトリビュート)
+	AND	010H		;ディレクトリか確認
+	JP	Z,SHOW_NOT_DIR
+						;ディレクトリが空か確認
+	LD	A,1
+	LD	(FCBSUB+29),A	;ディレクトリモードをサブディレクトリに
+	LD	HL,(FCB1+26)	;ファイルの先頭クラスタ
+	INC HL
+	LD	(FCBSUB+14),HL	;アクセスするディレクトリのクラスタ番号+1
+	LD	A,(FCB1)	;ドライブ番号
+	LD	(FCBSUB),A	;ドライブ番号
+					
+	LD	DE,FCBLST
+	LD	C,01AH		;SETDTA ディスク転送アドレスの設定 CP/M
+	CALL	SYSTEM
+					
+	LD	A,0FFH		;隠しファイル等も検索対象にする
+	LD	(FCBSUB+13),A	;属性(アトリビュート)
+	LD	DE,FCBSUB
+	LD	C,011H		;SFIRST FCB ファイル検索 初回 CP/M
+	CALL	SYSTEM
+	OR	A
+	JP	NZ,SHOW_NOT_DIR
+LOOP1:
+	LD	A,(FCBLST+1)
+	CP	'.'
+	JP	NZ,SHOW_NOT_EMPTY
+	LD	A,(FCBLST+2)
+	CP	020H		;.はスキップ
+	JR	Z,SKIP1
+	CP	'.'
+	JP	NZ,SHOW_NOT_EMPTY
+	LD	A,(FCBLST+3)
+	CP	020H		;..はスキップ
+	JP	NZ,SHOW_NOT_EMPTY
+SKIP1:
+	LD	DE,FCBSUB
+	LD	C,012H		;SNEXT FCB ファイル検索 続き CP/M
+	CALL	SYSTEM
+	OR	A
+	JR	Z,LOOP1
+				;属性をディレクトリから通常ファイルに変更して削除する
+	LD	A,020H
+	LD	(FCB1+13),A	;属性(アトリビュート)
+	LD	A,0FEH		;ライトモード
+	LD	(FCB1+28),A	;オープン・モード
+
+	LD	DE,FCB1
+	LD	C,010H		;FCLOSE FCB ファイルクローズ CP/M
+	CALL	SYSTEM
+	OR	A
+	JP	NZ,SHOW_NOT_CREATE
+
+	LD	DE,FCB1
+	LD	C,013H		;FDEL FCB ファイル削除 CP/M
+	CALL	SYSTEM
+	OR	A
+	JP	NZ,SHOW_NOT_CREATE
+
+	LD	DE,MES_OK
+SHOW_MESSAGE:
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+	LD	DE,CRLF
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+	JP	0
+SHOW_TITLE:
+	LD	DE,MES_TITLE
+	JR	SHOW_MESSAGE
+SHOW_NOT_FOUND:
+	LD	A,(FCB1+1)
+	CP	020H
+	JR	Z,SHOW_TITLE
+	LD	DE,MES_NOT_FOUND
+	JR	SHOW_MESSAGE
+SHOW_NOT_DIR:
+	LD	DE,MES_NOT_DIR
+	JR	SHOW_MESSAGE
+SHOW_NOT_EMPTY:
+	LD	DE,MES_NOT_EMPTY
+	JR	SHOW_MESSAGE 
+SHOW_NOT_CREATE:
+	LD	DE,MES_NOT_CREATE
+	JR	SHOW_MESSAGE 
+
+MES_TITLE:
+	DB	"rmdir v1.00 Gaku",00DH,00AH
+	DB	"usage: RMDIR directory$",
+MES_OK:
+	DB	"OK$"
+MES_NOT_DIR:
+	DB	"Not a directory$"
+MES_NOT_EMPTY:
+	DB	"Directory not empty$"
+MES_NOT_FOUND:
+	DB	"Directory not found$"
+MES_NOT_CREATE:
+	DB	"Cannot create directory$"
+
+MES_ERROR:
+	DB	"Error!$"
+CRLF:
+	DB	00DH,00AH,'$'
+
+FCBSUB:
+	DB	0, "???????????"	;*.*
