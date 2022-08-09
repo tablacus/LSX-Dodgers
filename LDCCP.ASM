@@ -1,15 +1,11 @@
 
 ;	LSX-Dodgers CCP
 
-BDOS:
-	JP	BDOS0
-
-	DB	020H,020H
 PATHX	EQU	64
 PATHD:	DS	PATHX
 PATHE:	DB	0
 
-OK:	DB	"Ok$"
+OK:	DB	"OK$"
 SKIP:	DB	"Skip$"
 KBFREE:	DB	"k bytes free",9,'$'
 DIRMES:	DB	"    dir $"
@@ -36,7 +32,7 @@ COMTB:
 	DB	"REM "	;9
 	DW	C_REM
 
-_SYS00:
+WBOOT1:
 	DI
 	LD	SP,STACK
 
@@ -197,7 +193,7 @@ SETDTA1:
 	JR	SETDTA
 
 SYSC0F:
-	LD	C,00FH
+	LD	C,00FH		;(BDOS)ファイルのオープン
 SYSTEM0:
 	CALL	SYSTEM
 	OR	A
@@ -212,7 +208,7 @@ C_CD:
 S27DTA:
 	LD	DE,DTA
 S27:
-	LD	C,027H
+	LD	C,027H		;(BDOS)ランダム・ブロック・リード
 	JR	SYSTEM0
 
 CEXE4:
@@ -273,10 +269,11 @@ COMPAT:	LD	DE,0
 	CALL	SETFCB
 	XOR	A
 	LD	H,A
-	LD	L,A
-	LD	SP,STACK
+	LD	L,A	;HL=0x0000
+	LD	SP,HL	;STACK=0
 	PUSH	HL
-	JP	00100H
+	INC	H	;HL=0x0100
+	JP	(HL)
 
 C_BAT:
 	LD	DE,'A'+'T'*256

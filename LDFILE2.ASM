@@ -35,7 +35,7 @@ RBWDDP:	CALL	_SYS02
 	JR	RBWDD1
 
 				;Write random block
-_SYS26:
+_SYS26:		;(BDOS)ランダム・ブロック・ライト
 	XOR	A
 	LD	(DRDN1),A
 	LD	(LEFT+1),HL	;Write record byte
@@ -218,7 +218,7 @@ RBRDERR:
 	JR	RBRDDE2
 
 				;Read random block
-_SYS27:
+_SYS27:		;(BDOS)ランダム・ブロック・リード	
 	LD	(LEFTX),HL
 	CALL	SETDRV
 

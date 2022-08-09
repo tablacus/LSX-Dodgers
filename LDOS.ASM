@@ -2,39 +2,44 @@
 ;	LSX-Dodgers OS
 
 BDOS0:
+	LD	(BDSP2),SP
+	LD	A,(BDSP2+1)
+	INC	A		;EXTSP = 0FFD4H
+	JR	Z,BDOS1
+	LD	(BDSP+1),SP
+	LD	SP,EXTSP
+	CALL	BDOS1
+BDSP:	LD	SP,0
+	RET
+BDSP2:	DW	0
+BDOS1:
 	LD	A,C
 	CP	031H
 	JR	NC,_ERROR
-	LD	(BDSP+1),SP
-	LD	SP,EXTSP
+	LD	(BDBC+1),BC
 	PUSH	HL
-	PUSH	BC
-	SLA	C
-	LD	B,STABLE/256
-	LD	A,(BC)
+	ADD	A,A
 	LD	L,A
-	INC	BC
-	LD	A,(BC)
-	LD	H,A
-	LD	(BDOS1+1),HL
-	POP	BC
+	LD	H,STABLE/256
+	LD	C,(HL)
+	INC	HL
+	LD	B,(HL)
 	POP	HL
-BDOS1:	CALL	0
-
-BDSP:	LD	SP,0
+	PUSH	BC	;ジャンプアドレス
+BDBC:	LD	BC,0
 	RET
 
 _ERROR:
 	LD	BC,00132H
 	LD	DE,VER
-_SYS1C:
-_SYS1E:
-_SYS20:
-_SYS2E:
+_SYS1C:		;(BDOS)ディスクの書き込み禁止化
+_SYS1E:		;(BDOS)ファイル属性の設定
+_SYS20:		;(BDOS)利用者番号の設定と読み出し
+_SYS2E:		;(BDOS)ベリファイ・フラグの設定
 	XOR	A
 	RET
 
-_SYS09:
+_SYS09:		;文字列出力
 	PUSH	DE
 _SX09:
 	LD	A,(DE)
@@ -47,13 +52,13 @@ _SX09:
 	POP	DE
 	JR	_SX09
 
-_SYS0C:
+_SYS0C:		;(BDOS)バージョン番号の獲得
 	LD	HL,00022H
 	XOR	A
 	LD	A,L
 	RET
 
-_SYS0D:
+_SYS0D:		;(BDOS)ディスク・リセット
 	CALL	_FFLUSH
 	PUSH	HL
 	LD	HL,00080H
@@ -63,7 +68,7 @@ _SYS0D:
 	LD	E,0
 	DB	03EH
 
-_SYS0E:
+_SYS0E:		;(BDOS)カレント・ドライブの設定
 	PUSH	DE
 	LD	A,E
 	PUSH	IX
@@ -77,9 +82,9 @@ SX0E2:
 	POP	DE
 	RET
 
-_SYS0F:
+_SYS0F:		;(BDOS)ファイルのオープン
 	CALL	SETDRV
-	LD	A,(IY+28)	;Open
+	LD	A,(IY+28)	;(FCB)オープン・モード
 	ADD	A,002H		;Write
 	JR	Z,FEND0F
 	CALL	CHKWILDX
@@ -89,15 +94,15 @@ _S16XX:
 	JR	C,FEND0F
 				;Directory location
 	LD	A,(_FILEN)
-	LD	(IY+25),A
+	LD	(IY+25),A	;(FCB)ディレクトリ・ロケーション
 ;				_DIRF
 	LD	A,(_DIRF)
-	LD	(IY+29),A
+	LD	(IY+29),A	;(FCB)ディレクトリ・モード
 ;				_FBPS
-	LD	(IY+30),E
+	LD	(IY+30),E	;(FCB)ディレクトリ・ポジション
 	LD	(IY+31),D
 ;				Open(Read)
-	LD	(IY+28),0FFH
+	LD	(IY+28),0FFH	;(FCB)オープン・モード
 ;				FILENAME
 	PUSH	IY
 	POP	DE
@@ -106,34 +111,34 @@ _S16XX:
 	LDIR
 ;				Attribute
 	LD	A,(HL)
-	LD	(IY+13),A
+	LD	(IY+13),A	;(FCB)属性(アトリビュート)
 ;				TIME
 	LD	DE,11
 	ADD	HL,DE
 	LD	A,(HL)
 	INC	HL
-	LD	(IY+22),A
+	LD	(IY+22),A	;(FCB)ファイルを最後に変更した時刻
 	LD	A,(HL)
 	INC	HL
 	LD	(IY+23),A
 ;				DATE
 	LD	A,(HL)
 	INC	HL
-	LD	(IY+20),A
+	LD	(IY+20),A	;(FCB)ファイルを最後に変更した日付
 	LD	A,(HL)
 	INC	HL
 	LD	(IY+21),A
 ;				First cluster
 	LD	A,(HL)
 	INC	HL
-	LD	(IY+26),A
+	LD	(IY+26),A	;(FCB)ファイルの先頭クラスタ
 	LD	A,(HL)
 	INC	HL
 	LD	(IY+27),A
 ;				SIZE
 	LD	A,(HL)
 	INC	HL
-	LD	(IY+16),A
+	LD	(IY+16),A	;(FCB)ファイルのサイズ
 	LD	A,(HL)
 	INC	HL
 	LD	(IY+17),A
@@ -143,33 +148,33 @@ _S16XX:
 	LD	A,(HL)
 	LD	(IY+19),A
 	XOR	A
-	LD	(IY+12),A
+	LD	(IY+12),A	;(FCB)カレント・ブロック
 	LD	(OFCB+1),IY
 FEND0F:
 	JP	FEND
 
-_SYS10:
+_SYS10:		;(BDOS)ファイルのクローズ
 	CALL	SETDRV
-	LD	A,(IY+28)	;Open
+	LD	A,(IY+28)	;(FCB)オープン・モード
 	SUB	0FEH
 	SCF
 	CCF
 	JR	NZ,FEND10
 _S10A:				;Write
-	LD	(IY+14),A
+	LD	(IY+14),A	;(FCB)レコード・サイズ/アクセスするディレクトリのクラスタ番号+1
 	LD	(IY+15),A
 
-	INC	(IY+28)		;0FEH->0FFH
+	INC	(IY+28)		;0FEH->0FFH ;オープン・モード
 	CALL	SETTMS
 
-	LD	A,(IY+29)
+	LD	A,(IY+29)	;(FCB)ディレクトリ・モード
 	LD	(_DIRF),A
-	LD	E,(IY+30)
+	LD	E,(IY+30)	;(FCB)ディレクトリ・ポジション
 	LD	D,(IY+31)
 	CALL	DC
 	JR	C,FEND
 
-	LD	A,(IY+25)
+	LD	A,(IY+25)	;(FCB)ディレクトリ・ロケーション
 	ADD	A,A
 	ADD	A,A
 	ADD	A,A
@@ -186,12 +191,12 @@ FEND10:
 	JR	FEND
 
 OPENDD:
-	LD	(IY+28),0FDH
-	LD	(IY+13),020H
+	LD	(IY+28),0FDH	;(FCB)オープン・モード
+	LD	(IY+13),020H	;(FCB)属性(アトリビュート)
 	CALL	SETTMSX
 	JR	FEND
 
-_SYS11:
+_SYS11:		;(BDOS)最初のファイルの検索
 	CALL	SETDRV
 	CALL	CHKDDX
 	JR	C,_S11A
@@ -222,7 +227,7 @@ _S12X1:
 	INC	DE
 	LD	BC,32
 	LDIR
-	LD	L,(IY+14)
+	LD	L,(IY+14)	;(FCB)レコード・サイズ/アクセスするディレクトリのクラスタ番号+1
 	LD	H,(IY+15)
 	LD	(SCDIR),HL
 	LD	HL,(_FBPS)
@@ -243,7 +248,7 @@ FENDE:
 	POP	HL
 	RET
 
-_SYS12:
+_SYS12:		;(BDOS)次のファイルの検索
 	PUSH	HL
 	PUSH	DE
 	PUSH	BC
@@ -252,8 +257,8 @@ _SYS12:
 	JR	_S12X1
 
 _S16K:
-	LD	A,(IY+28)	;Device
-	CP	0FDH
+	LD	A,(IY+28)	;(FCB)オープン・モード
+	CP	0FDH		;Device(0FDH)
 	SCF
 	RET	Z
 
@@ -289,20 +294,18 @@ S16K2:
 	POP	HL
 	PUSH	IY
 	POP	DE
-_SYS13:
+_SYS13:		;(BDOS)ファイルの削除
 	CALL	SETDRV
 	CALL	KILL
 FEND13:
 	JR	FEND
 
-_SYS14:
+_SYS14:		;(BDOS)シーケンシャルな読み出し
 	CALL	SETDRV
 	CALL	PUSHRR
 	CALL	GETSEQ
-	CALL	SETRBR
 
-	CALL	K_DE27
-
+	CALL	RB_READ
 	PUSH	HL
 	CALL	SETSEQ
 SREAD:
@@ -319,13 +322,12 @@ FENDX:
 	RRA
 	JR	FENDE
 
-_SYS15:
+_SYS15:		;(BDOS)シーケンシャルな書き込み
 	CALL	SETDRV
 	CALL	PUSHRR
 	CALL	GETSEQ
-	CALL	SETRBR
 
-	CALL	K_DE26
+	CALL	RB_WRITE
 	PUSH	HL
 	CALL	SETSEQ
 SWRITE:
@@ -334,17 +336,17 @@ SWRITE:
 	ADD	A,0FFH
 	JR	FENDX
 
-_SYS17:
+_SYS17:		;(BDOS)ファイル名の変更
 	CALL	SETDRV
 	CALL	NAME
 	JR	FEND13
 
-_SYS16:
+_SYS16:		;(BDOS)ファイルの作成
 	CALL	SETDRV
 
 	CALL	CHKWILDX
 	JR	C,FEND13
-	LD	A,(IY+1)
+	LD	A,(IY+1)	;(FCB)主ファイル名
 	CP	5
 	JR	Z,_S16X2
 	CP	021H
@@ -362,7 +364,7 @@ _S16X1:
 	JR	NZ,_S16X1
 
 	CALL	SETTMSX
-	LD	(IY+13),0FFH	;Attribute
+	LD	(IY+13),0FFH	;(FCB)Attribute
 	CALL	SOPENX
 	CCF
 	CALL	Z,_S16K
@@ -370,47 +372,46 @@ _S16X1:
 	CALL	NC,SDIRENT
 	JP	_S16XX
 
-_SYS21:
+_SYS21:		;(BDOS)ランダムな読み出し
+
 	CALL	SETDRV
 	CALL	PUSHRR
-	LD	L,(IY+33)	;Random record
+	LD	L,(IY+33)	;(FCB)Random record
 	LD	H,(IY+34)
-	CALL	SETRBR
 
-	CALL	K_DE27
+	CALL	RB_READ
 	PUSH	HL
 	CALL	POPRR
 	JR	SREAD
 
-_SYS22:
-_SYS28:
+_SYS22:		;(BDOS)ランダムな書き込み
+_SYS28:		;(BDOS)ランダムな書き込み・その2
 	CALL	SETDRV
 	CALL	PUSHRR
-	LD	L,(IY+33)	;Random record
+	LD	L,(IY+33)	;(FCB)Random record
 	LD	H,(IY+34)
-	CALL	SETRBR
 
-	CALL	K_DE26
+	CALL	RB_WRITE
 	PUSH	HL
 	CALL	POPRR
 	JR	SWRITE
 
-_SYS18:
+_SYS18:		;(BDOS)ログイン・ベクトルの獲得
 	LD	HL,000FFH
 	XOR	A
 	RET
 
-_SYS19:
+_SYS19:		;(BDOS)カレント・ドライブ番号の獲得
 	LD	A,(_DVSW)
 	AND	A
 	RET
 
-_SYS1A:
+_SYS1A:		;(BDOS)DTAの設定
 	LD	(_DTA),DE
 	XOR	A
 	RET
 
-_SYS1B:
+_SYS1B:		;(BDOS)ディスク情報の獲得
 	LD	A,E
 	CALL	GETDRV
 	CALL	_GETDPB
@@ -418,14 +419,12 @@ _SYS1B:
 	LD	HL,0
 	CALL	NC,DSKF
 
-	LD	E,(IX+8)	;DPB_08_MAXCL_LOW
-	LD	D,(IX+9)	;DPB_08_MAXCL_HIGH
-	DEC	DE
+	LD	DE,(MAXCLP+1)	;DPB_08_MAXCL-1
 	DEC	DE
 	LD	IY,(_FATBF)
 	SBC	A,A
 	RET	C
-	LD	A,(IX+7)	;DPB_07_DBLCL
+	LD	A,(DBLPAT)	;DPB_07_DBLCL
 	OR	A
 	LD	BC,00200H
 	LD	A,B		;A=2
@@ -436,65 +435,52 @@ _SYS1B:
 	LD	B,004H
 	RET
 
-_SYS1D:
+_SYS1D:		;(BDOS)書き込みが禁止されているディスクの調査
 	XOR	A
 	LD	H,A
 	LD	L,A
 	RET
 
-_SYS1F:
+_SYS1F:		;(BDOS)ディスク装置のパラメータの読み出し
 	LD	HL,DEVICE
-	LD	A,(_DSK)
-	JP	_GETDPB
-
-_SYS23:
-	PUSH	HL
-	LD	HL,(STABLE+2*00FH)
-	CALL	JP_HL
-	JR	C,FSIZE1
-;	EX	DE,IY
-	PUSH	DE
-	EX	(SP),IY
-	POP	DE
-;
-	PUSH	DE
-	CALL	GETSIZE
-	LD	(IY+33),L	;Random record
-	LD	(IY+34),H
-	POP	DE
-;	EX	DE,IY
-	PUSH	DE
-	EX	(SP),IY
-	POP	DE
-;
 	XOR	A
-FSIZE1:
+	RET
+
+_SYS23:		;(BDOS)ファイル・サイズの獲得
+	PUSH	HL
+	LD	HL,(STABLE+2*00FH)	;ファイルのオープン
+	CALL	JP_HL
+	JR	C,_S23X1
+
+	PUSH	DE		;EX DE,IY
+	EX	(SP),IY		;
+;	POP	DE		;
+;	PUSH	DE		;DEを破壊しないように注意vv
+	CALL	GETSIZE
+_S24X1:
+	LD	(IY+33),L	;(FCB)Random record
+	LD	(IY+34),H
+	LD	(IY+35),0
+;	POP	DE		;^^^^^^^^^^^^^^^^^^^^^^^^
+;	PUSH	DE		;EX DE,IY
+	EX	(SP),IY		;
+	POP	DE		;
+
+	XOR	A
+_S23X1:
 	POP	HL
 	RET
 
-_SYS24:
-	PUSH	BC
-;	EX	DE,IY
-	PUSH	DE
-	EX	(SP),IY
-	POP	DE
-;
-	PUSH	DE
+_SYS24:		;(BDOS)ランダム・レコード・フィールドの設定
+	PUSH	HL
+	PUSH	DE		;EX DE,IY
+	EX	(SP),IY		;
+;	POP	DE		;
+;	PUSH	DE		;DEを破壊しないように注意vv
 	CALL	GETSEQ
-	LD	(IY+33),L	;Random record
-	LD	(IY+34),H
-	LD	(IY+35),0
-	POP	DE
-;	EX	DE,IY
-	PUSH	DE
-	EX	(SP),IY
-	POP	DE
-;
-	POP	BC
-	XOR	A
-	RET
+	JR	_S24X1		;^^^^^^^^^^^^^^^^^^^^^^^^
 
-_SYS29:
+_SYS29:		;(BDOS)ファイル名の解析
 	PUSH	BC
 	PUSH	HL
 	CALL	FILE
@@ -517,13 +503,13 @@ S29X1:
 	XOR	A
 	RET
 
-_SYS30:
+_SYS30:		;(BDOS)論理セクタを用いた書き込み
 	PUSH	BC
-	LD	BC,_DWT
+	LD	BC,DWT_DPB
 	JR	S2FX
 _SYS2F:
 	PUSH	BC
-	LD	BC,_DRD
+	LD	BC,DRD_DPB
 S2FX:
 	LD	(S2FPAT+1),BC
 	CALL	FFLUSH
@@ -537,7 +523,7 @@ S2FX:
 	LD	HL,(_DTA)
 S30X:
 	PUSH	BC
-S2FPAT:	CALL	_DRD
+S2FPAT:	CALL	DRD_DPB
 	POP	BC
 	JR	C,S30X2
 	DJNZ	S30X
