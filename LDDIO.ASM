@@ -10,7 +10,7 @@ DRDX:
 	PUSH	BC
 	PUSH	DE
 	LD	HL,(_DTBUF)
-	CALL	DRDC
+	CALL	DRD_DPB
 	CALL	C,DRDNE
 POP_DE_BC_HL_RET:
 	POP	DE
@@ -20,7 +20,7 @@ POP_DE_BC_HL_RET:
 
 DRDN:
 	XOR	A
-DRDN1:	NOP
+DRDN1:	NOP			;自己書き換え NOP / SCF
 	JR	NC,DRDX
 DRDNX:
 	CALL	DRDY
@@ -64,7 +64,7 @@ DWTX:
 	CALL	_CHGDRV
 	LD	DE,(_DCLPS)
 	LD	HL,(_DTBUF)
-	CALL	NC,DWTC
+	CALL	NC,DWT_DPB
 	JR	POP_DE_BC_HL_RET
 
 RDFATX:
@@ -143,9 +143,9 @@ NCL3:
 	RES	3,D
 	LD	L,E
 	LD	H,D
-	SRL	H
-	RR	L
-	RRA
+	SRL	H	;
+	RR	L	;HLA=HLA/2
+	RRA		;
 	LD	BC,(_FATBF)
 	ADD	HL,DE
 	ADD	HL,BC
@@ -173,8 +173,8 @@ GNC1:
 	LD	D,(HL)
 	LD	B,4
 GNC1L:
-	SRL	D
-	RRA
+	SRL	D	;DA=DA/2
+	RRA		;
 	DJNZ	GNC1L
 
 	LD	E,A
@@ -220,6 +220,70 @@ SNC11:
 	POP	BC
 	POP	HL
 	RET
+
+
+;------------------------
+;次のセクタを探す際に「1クラスタの論理セクタ数」を掛けてまとめて扱う
+;in
+;	DE : セクタ番号
+;out
+;	DE : まとめた値
+;note
+;	「FAT12」最大12ビット + 「1クラスタの論理セクタ数」4ビットで計16ビットとして扱う
+;------------------------
+GNCLX:
+	LD	A,E
+	INC	A
+NCPAT:	AND	0	;自己書き換え　1クラスタの論理セクタ数-1
+	JR	Z,GNCLX1
+	INC	DE	;クラスタを跨がない場合は単純に+1する
+	RET
+GNCLX1:
+	CALL	DIVSPC	;クラスタを跨ぐ場合は
+	CALL	_GNCL	;次のクラスタを探す
+
+;------------------------
+;クラスタと「1クラスタの論理セクタ数」を掛ける
+;in
+;	DE : セクタ番号
+;out
+;	DE : 掛けられた値
+;note
+;	DE以外のレジスタとフラグは保持する
+;------------------------
+MULSPC:
+	PUSH	AF
+	EX	DE,HL
+SPCPAT:	LD	A,1		;自己書き換え（1クラスタの論理セクタ数）
+CLDBL:
+	RRCA			;->CF
+	JR	C,CLDBL_RET
+	ADD	HL,HL		;*2
+	JR	CLDBL
+CLDBL_RET:
+	EX	DE,HL
+POP_AF_RET
+	POP	AF
+	RET
+
+;------------------------
+;「1クラスタの論理セクタ数」を割って論理セクタだけに戻す
+;in
+;	DE : 掛けられた値
+;out
+;	DE : セクタ番号
+;note
+;	DE以外のレジスタとフラグは保持する
+;------------------------
+DIVSPC:
+	PUSH	AF
+	LD	A,(SPCPAT+1)	;1クラスタの論理セクタ
+CLDIV1:
+	RRCA			;->CF
+	JR	C,POP_AF_RET
+	SRL	D		;DE=DE/2
+	RR	E		; 
+	JR	CLDIV1
 
 RDFAT0X:
 	CALL	RDFATS
@@ -351,7 +415,7 @@ X2HSS:
 	SCF
 	RET	NZ
 	CALL	INCDRD
-	JR	NC,DRDC
+	JR	NC,DRD_DPB
 	RET
 
 E2DD9:
@@ -363,11 +427,6 @@ INCDRD:
 	INC	H
 	INC	H
 	INC	H
-DRDC:
-	LD	A,(DBLPAT)
-	OR	A
-	CALL	NZ, DRD_DPB
-	RET	C
 DRD_DPB:
 	PUSH	IX
 	LD	IX,(_DPB)
@@ -381,7 +440,7 @@ DRDD:
 	CALL	CHGTYPE
 	LD	HL,(_FATBF)
 	PUSH	HL
-	CALL	DRDC
+	CALL	DRD_DPB
 	POP	HL
 	RET	C
 	LD	A,(HL)
@@ -402,11 +461,7 @@ C2HX:
 X2HQ:
 	CALL	CHGTYPE
 	CALL	FATS2
-	INC	H	;前2クラスタはすでに読み込まれているのでスキップ
-	INC	H
-	DEC	B
-	INC	DE
-	INC	H	;
+	INC	H	;先頭の1セクタはすでに読み込まれているのでスキップ
 	INC	H
 	DEC	B
 	INC	DE
@@ -424,12 +479,7 @@ RDFATL:
 	LD	A,(HL)
 	RET
 
-DWTC:
-	LD	A,(DBLPAT)
-	OR	A
-	CALL	NZ,DWT_DPB
-	RET	C
-DWT_DPB
+DWT_DPB:
 	PUSH	IX
 	LD	IX,(_DPB)
 DWTPAT:	CALL	FDWT		;自己書き換え（ディスク書き込み）
@@ -440,8 +490,8 @@ WTFAT:
 	CALL	FATS
 	CALL	NC,WTFATL
 	RET	C
-	BIT	1,(IX+00FH)	;DPB_0F_FATS
-	RET	Z
+	BIT	7,(IX+00FH)	;DPB_0F_BPS
+	RET	Z		;予備FATが無い
 	CALL	FATS2
 	LD	A,(IX+0)	;DPB_00_FATLN
 WTFAT2:
@@ -475,16 +525,13 @@ FATS2:
 	LD	DE,(_FATPS)	;fat sector pos
 	LD	HL,(_FATBF)
 	LD	B,(IX+0)	;DPB_00_FATLN
-	LD	A,(IX+7)	;DPB_07_DBLCL $29=512 / 0=1024
-	OR	A
 	LD	A,6		;3072 / 512 FATバッファに読み込めるセクタ数
-	JR	NZ,FATS512
-	BIT	7,(IX+00FH)	;DPB_0F_FATS
-	JR	NZ,FATS512
+	BIT	2,(IX+00FH)	;DPB_0F_BPS
+	JR	Z,FATS512
 	RRA			;A=3 (3072÷1024: 1セクタ1024バイトの場合)
 FATS512:
 	CP	B
-	RET	NC		;DPB_0F_FATS x sectorSize < fatBufSize
+	RET	NC		;DPB_00_FATLN x sectorSize < fatBufSize
 ;targetCluster
 	LD	C,A		;C = skipCount
 	LD	A,(_FATDRV)	;bit7 = (targetCluster >= 0x800)
@@ -532,14 +579,19 @@ CHGDRV0:
 	LD	SP,IX
 
 	POP	HL		;L=DPB_00_FATLN H=DPB_01_FATID
-	POP	HL		;DPB_02_DRDC
+	POP	HL		;DPB_02_DRD
 	LD	(DRDPAT+1),HL
 
 	POP	HL
-	LD	(DWTPAT+1),HL	;DPB_04_DWTC
+	LD	(DWTPAT+1),HL	;DPB_04_DWT
 
-	POP	HL		;L=DPB_06_ADDCL H=DPB_07_DBLCL
-	LD	(CLSPAT+1),HL	;ADDCL & CLSPAT
+	POP	HL		;L=DPB_06_ADDCL H=DPB_07_SECPCL
+	LD	A,L
+	LD	(CLSPAT+1),A
+	LD	A,H
+	LD	(SPCPAT+1),A	;1クラスタの論理セクタ数
+	DEC	A
+	LD	(NCPAT+1),A
 
 	POP	HL		;DPB_08_MAXCL
 	LD	A,L
@@ -557,7 +609,7 @@ CHGDRV0:
 	AND	3
 	LD	(FSPAT+1),A
 	LD	A,H
-	LD	(RTEPAT+1),A
+	LD	(RTEPAT+1),A	;DPB_0B_MAXDIR
 
 	POP	HL		;L=DPB_0C_MAXCYL H=DPB_0D_MAXSEC
 	LD	A,L
@@ -565,7 +617,7 @@ CHGDRV0:
 	LD	A,H
 	LD	(MAXSEC+1),A
 
-	POP	HL		;L=DPB_0E_FATPS H=DPB_0F_FATS
+	POP	HL		;L=DPB_0E_FATPS H=DPB_0F_BPS
 	LD	H,0
 	LD	(_FATPS),HL
 
@@ -599,16 +651,16 @@ OSNCL:
 SPPAT2:	LD	SP,0		;元のSPを復元
 	EI
 	PUSH	DE
-	BIT	7,(IX+00FH)	;DPB_0F_FATS
-	JR	Z,NEC
-				;1クラスタ512 2HC/2HQ(2HD1.44MB)等
+	BIT	2,(IX+00FH)	;DPB_0F_BPS
+	JR	NZ,NEC1024
+				;1セクタ512 2D/2DD/2HC/2HQ(2HD1.44MB)等
 	LD	DE,00218H	;JR +2(直後のRR Cを飛ばす)
 	LD	HL,0
 
 	LD	A,1
 	JR	NEC1
-NEC:
-				;1クラスタ1024 2D/2DD/2HD/EMM/BRAM/GRAM等
+NEC1024:
+				;1セクタ1024 2HD/EMM/BRAM/GRAM等
 	DB	011H		;LD DE,SRL B
 	SRL B			;
 	DB	021H		;LD HL,SRL A
@@ -616,13 +668,13 @@ NEC:
 
 	LD	A,3
 NEC1:				;1024	512
-	LD	(IBM5+1),A	;3	1	1クラスタのサイズ-1したものの上位1バイト (0x3FF - 0x1FF)
+	LD	(SECSZM1+2),A	;3	1	1セクタのサイズ-1したものの上位1バイト (0x3FF - 0x1FF)
 	INC	A		;4	2
-	LD	(IBM7+2),A	;1クラスタのサイズの上位1バイト 0x400 - 0x200
+	LD	(SECSZ+2),A	;1セクタのサイズの上位1バイト 0x400 - 0x200
 	ADD	A,A		;8	4
 	ADD	A,A		;010H	8
 	ADD	A,A		;020H	010H
-	LD	(IBM1+1),A	;1クラスタ辺りのディレクトリエントリ数
+	LD	(IBM1+1),A	;1セクタ辺りのディレクトリエントリ数
 	ADD	A,A		;040H	020H
 	ADD	A,A		;080H	040H
 	ADD	A,A		;000H	080H
@@ -678,46 +730,4 @@ FFLUSH:
 	LD	(_FATDRV),A
 	POP	AF
 	RET
-
-M2D:
-	DB	2,0FDH,8,029H
-	DW	356
-	DB	0FFH,12,40,9,1,2,5,1
-
-M2DD8:
-	DB	2,0FBH,8,029H
-	DW	636
-	DB	0FFH,12,80,8,1,2,5,1
-
-M2DD:
-	DB	3,0F9H,0AH,029H
-	DW	715
-	DB	0FFH,14,80,9,1,2,7,1
-
-M2HC:
-	DB	7,0F9H,27,0
-	DW	2373
-	DB	0FEH,29,80,15,1,082H,15,1
-
-M2HD:
-	DB	2,0FEH,9,0
-	DW	1223
-	DB	0FEH,11,77,8,1,2,5,1
-
-M2HQ:
-	DB	9,0F0H,31,0
-	DW	2849
-	DB	0FEH,33,80,18,1,082H,19,1
-
-M2HDE:
-	DB	3,0FEH,11,0
-	DW	1429
-	DB	0FEH,13,80,9,1,2,7,1
-
-M2HS:
-	DB	3,0FBH,8,0
-	DW	1432
-	DB	0FEH,10,80,9,1,1,4,10
-
-CHECK:	DB	0
 

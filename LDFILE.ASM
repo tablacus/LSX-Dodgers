@@ -188,7 +188,7 @@ SETDRV:
 
 	CALL	GETDRV
 	INC	A
-	LD	(IY+0),A
+	LD	(IY+0),A	;(FCB)ドライブ番号
 	DEC	A
 	CALL	_CHGDRV
 
@@ -211,7 +211,7 @@ SOPENX:
 SOPENX1:
 	LD	DE,SFILE
 	LD	A,(DE)
-	CP	(IY+0)
+	CP	(IY+0)		;(FCB)ドライブ番号
 	JR	NZ,SOPEN
 	INC	DE
 	PUSH	IY
@@ -221,7 +221,7 @@ SOPENX1:
 	JR	NZ,SOPEN
 
 	LD	HL,(SCDIR)
-	LD	(IY+14),L
+	LD	(IY+14),L	;(FCB)アクセスするディレクトリのクラスタ番号+1
 	LD	(IY+15),H
 
 	LD	HL,(SFNDF)	;Direcroty location and Flags
@@ -246,6 +246,7 @@ SOPEN0:
 	CALL	LDDIRX
 	JR	Z,SDIRX1
 
+	CALL	MULSPC
 	CALL	DC		;Sub Directory
 	JR	C,SDIRX0
 	LD	HL,(_DTBUF)
@@ -255,13 +256,13 @@ SOPEN0:
 SDIRX0:
 	XOR	A
 	LD	(_DIRF),A
-	LD	(IY+14),1
+	LD	(IY+14),1	;(FCB)レコード・サイズ
 	LD	(IY+15),0
 SDIRX1:
 	LD	DE,(_DIRPS)	;Root Directory
 
 SOPEN1:
-IBM1:	LD	C,32		;自己書き換え 1クラスタ辺りのディレクトリエントリ数  1024=32 / 512=16
+IBM1:	LD	C,32		;自己書き換え 1セクタ辺りのディレクトリエントリ数  1024=32 / 512=16
 SOPEN1X:
 	CALL	DC		;FILE SEARCH
 	JR	C,RDDERR
@@ -276,22 +277,20 @@ SOPEN3:
 	LD	A,(_DIRF)
 	OR	A
 	JR	NZ,SOPEN5
-
-	CALL	ENDRDI
-	JR	Z,SOPEN6
-	INC	A
-	JR	NZ,SOPEN6
-	LD	C,16
-	JR	SOPEN1X
+	INC	E		;ルートディレクトリ
+	LD	A,E
+RTEPAT:	SUB	12		;(Self-rewriting)DPB_0B_MAXDIR
+	JR	NZ,SOPEN1
+	JR	SOPEN6
 SOPEN5:
-	CALL	_GNCL	;END DIR
+	CALL	GNCLX	;END DIR
 	RET	C
 	CALL	ENDCL
 SOPEN6:
 	JR	C,SOPEN1
 
-_SYS2B:
-_SYS2D:
+_SYS2B:		;(BDOS)日付の設定
+_SYS2D:		;(BDOS)時刻の設定
 NOTSE:
 	SCF			;CF=1
 	SBC	A,A		;A=0FFH
@@ -308,7 +307,7 @@ NOPEN:
 	LD	IY,(_FCB)
 	CALL	CHKWILDX
 	JR	NC,NOTSE
-	LD	A,(IY+0)
+	LD	A,(IY+0)	;(FCB)ドライブ番号
 	DEC	A
 	LD	(_DRV),A
 	CALL	_CHGDRV
@@ -328,17 +327,6 @@ NOPEN2:
 	LD	C,A
 	JR	SOPEN2
 
-ENDRDI:
-	LD	A,(DBLPAT)	;A=029H or 0
-	AND	1
-	LD	C,A
-	INC	A
-	ADD	A,E
-	LD	E,A
-RTEPAT:	SUB	12		;(Self-rewriting)
-	BIT	0,C
-	RET
-
 SOPENE2:
 	LD	(_FBAD),HL
 	LD	A,C
@@ -350,7 +338,7 @@ SOPENE:
 	RET
 
 COPEN:
-	LD	(IY+13),020H		;Attribute
+	LD	(IY+13),020H	;(FCB)属性(アトリビュート)
 
 	LD	HL,NEXTSE
 	CALL	SOPENC
@@ -366,16 +354,35 @@ COPEN:
 	PUSH	DE
 	CALL	DCPAT
 	CALL	DRDNX
-	LD	HL,(_DTBUF)
+	LD	HL,(_DTBUF)	;ディレクトリエントリを0クリア
 	LD	E,L
 	LD	D,H
 	INC	DE		;DE,DTBUF+1
-	LD	BC,1023
-	XOR	A
+SECSZM1:LD	BC,003FFH	;自己書き換え セクタサイズ-1(0x3FF:1023 or 0x1FF:511)
+	XOR	A		;データバッファをセクタサイズ分ゼロクリア
 	LD	(HL),A
-	PUSH	HL
 	LDIR
-	POP	HL
+
+	LD	A,(_DIRF)
+	OR	A
+	JR	Z,COPENE	;ルートディレクトリ
+
+	POP	DE		;DE=(_CLPS)
+	PUSH	DE
+	LD	A,(SPCPAT+1)	;1クラスタの論理セクタ数
+COPEN1:
+	DEC	A
+	JR	Z,COPENE	;1セクタ辺りのセクタ数が2以上の場合
+	PUSH	AF		;データバッファに入らないセクタもゼロクリア
+	INC	DE
+	PUSH	DE
+	CALL	DCPAT
+	CALL	DWT_DPB
+	POP	DE
+	POP	AF
+	JR	COPEN1
+COPENE:
+	LD	HL,(_DTBUF)
 	POP	DE
 	RET
 
@@ -495,7 +502,7 @@ CPSTR3:
 	RET
 
 CPFILE2:
-	LD	A,(IY+13)
+	LD	A,(IY+13)	;(FCB)属性(アトリビュート)
 	OR	0E1H
 	CPL
 	AND	(HL)
@@ -508,11 +515,9 @@ DCPAT:
 	RET	Z
 
 CLUST:
-	EX	DE,HL
-CLSPAT:	LD	A,8	;DE=DE+8 (2D)  !ADDCL (Self-rewriting)
-DBLPAT:	ADD	HL,HL	;DE=DE*2 (512) !DBLCL (Self-rewriting)
-	EX	DE,HL
-	ADD	A,E
+CLSPAT:	LD	A,8	;+8 (2D)  !ADDCL (Self-rewriting)
+ADD_DE_A:
+	ADD	A,E	;DE=DE+A
 	LD	E,A
 	ADC	A,D
 	SUB	E
@@ -562,13 +567,13 @@ LDDIR:
 	LD	E,(IX+01AH)		;_SDIR_
 	LD	D,(IX+01BH)		;_SDIR_+1
 	INC	DE
-	LD	(IY+14),E
+	LD	(IY+14),E	;(FCB)アクセスするディレクトリのクラスタ番号+1
 	LD	(IY+15),D
 	DEC	DE
 	JR	CHDIR2
 
 LDDIRX:
-	LD	E,(IY+14)
+	LD	E,(IY+14)	;(FCB)アクセスするディレクトリのクラスタ番号+1
 	LD	D,(IY+15)
 	DEC	DE
 	CALL	ENDCL
@@ -742,7 +747,7 @@ SDIRENT:		;IY=FCB HL=DIR
 	EX	DE,HL
 	CALL	SETNAME
 ;				Attribute
-	LD	A,(IY+13)
+	LD	A,(IY+13)	;(FCB)属性(アトリビュート)
 	LD	(DE),A
 	INC	DE
 ;				Reserved
@@ -752,39 +757,17 @@ SDE1:
 	LD	(DE),A
 	INC	DE
 	DJNZ	SDE1
-;				TIME
-	LD	A,(IY+22)
+					;(FCB)ファイルを最後に変更した時刻
+	LD	HL,SDDATA		;(FCB)ファイルを最後に変更した日付
+	LD	B,SDDATAE-SDDATA	;(FCB)ファイルの先頭クラスタ
+SDLOOP:					;(FCB)ファイルのサイズ(バイト単位)
+	LD	A,(HL)
+	INC	HL
+	LD	(SDPAT+2),A
+SDPAT:	LD	A,(IY+0)	;LD A,(IY+A)
 	LD	(DE),A
 	INC	DE
-	LD	A,(IY+23)
-	LD	(DE),A
-	INC	DE
-;				DATE
-	LD	A,(IY+20)
-	LD	(DE),A
-	INC	DE
-	LD	A,(IY+21)
-	LD	(DE),A
-	INC	DE
-;				First cluster
-	LD	A,(IY+26)
-	LD	(DE),A
-	INC	DE
-	LD	A,(IY+27)
-	LD	(DE),A
-	INC	DE
-;				SIZE
-	LD	A,(IY+16)
-	LD	(DE),A
-	INC	DE
-	LD	A,(IY+17)
-	LD	(DE),A
-	INC	DE
-	LD	A,(IY+18)
-	LD	(DE),A
-	INC	DE
-	LD	A,(IY+19)
-	LD	(DE),A
+	DJNZ	SDLOOP
 
 	XOR	A
 	POP	HL
@@ -792,83 +775,103 @@ SDE1:
 	RET
 
 WOPEN:
-	LD	A,(IY+13)
+	LD	A,(IY+13)	;(FCB)属性(アトリビュート)
 	AND	01FH
 	SCF
 	RET	NZ
-	LD	(IY+28),0FEH	;Open
+	LD	(IY+28),0FEH	;(FCB)オープン・モード
 TOPEN2:
 	XOR	A
-TOPEN:
-	LD	(IY+23),0FFH	;Initializes the time stamp
+TOPEN:				;Initializes the time stamp
+	LD	(IY+23),0FFH	;(FCB)ファイルを最後に変更した時刻
 	RET
 
 WRDFX:
 	LD	B,C
 	INC	B
-	LD	A,037H
+	LD	A,037H		;SCF
 	LD	(DRDN1),A
 
-WRDF:
+WRDF:				;Bクラスタ分確保する
 	LD	DE,2
+	CALL	MULSPC
 WRDF1:
 	PUSH	BC
 	PUSH	DE
+	CALL	DIVSPC
 	CALL	_GNCL
 	JR	C,WRDF3
-	LD	A,D
+	LD	A,D		;空いているかチェック
 	OR	E
+	CALL	MULSPC
 	JR	NZ,WRDF4
-	POP	HL
+	POP	HL		;HL=空いているクラスタ
 	PUSH	HL
-	LD	DE,(_CLPS)
+	LD	DE,(_CLPS)	;DE=元の(_CLPS)
 	LD	(_CLPS),HL
-	LD	A,D
+	LD	A,D		;元の(_CLPS)が 0 か?
 	OR	E
+	EX	DE,HL		;
+	CALL	DIVSPC		;ここでフラグは変化しない
+	EX	DE,HL		;
 	JR	NZ,WRDF2
-	LD	(IY+26),L	;Start cluster
-	LD	(IY+27),H
+	LD	(IY+26),L	;(FCB)ファイルの先頭クラスタ
+	LD	(IY+27),H	;元が空の場合はFCBにクラスタをセットする
 	JR	WRDF3
 WRDF2:
+	CALL	DIVSPC
 	CALL	_SNCL
 WRDF3:
 	POP	DE
 	POP	BC
 	RET	C
-	DJNZ	WRDF5
+	DJNZ	WRDF5		;ここでループカウンタチェック
 	LD	DE,(_CLPS)
-	LD	HL,0FFFFH
+	CALL	DIVSPC
+	LD	HL,0FFFFH	;FATエントリ終了(EOCマーク)
 	JP	_SNCL
 
-WRDF4:
+WRDF4:				;DEクラスタが空じゃないので次に移動する
 	POP	DE
 	POP	BC
 WRDF5:
+	CALL	DIVSPC
 	INC	DE
 	CALL	ENDCL
+	CALL	MULSPC
 	JR	C,WRDF1
 	SCF
 	RET
 
-RWXR:
-	SRL	B
-	RR	C
+RWXR:			;in BC0(24ビット) にサイズ
+	SRL	B	;BC=BC/2
+	RR	C	;
 IBM4:	SRL	B	;自己書き換え 1024=SRL B / 512=JR +2(直後のRR Cを飛ばす)
-	RR	C
+	RR	C	;BC=BC/2
 
-	LD	E,(IY+26)	;Cluster
+	LD	A,(SPCPAT+1)	;1クラスタの論理セクタ数
+CLDBL4:
+	RRCA
+	JR	C,CLDBL5
+	SRL	B	;BC=BC/2
+	RR	C	;
+	JR	CLDBL4
+CLDBL5:
+	LD	E,(IY+26)	;(FCB)ファイルの先頭クラスタ
 	LD	D,(IY+27)
 RWX1:
+	CALL	MULSPC
 	LD	(_CLPS),DE
 	LD	A,D
 	OR	E
 	SCF
-	RET	Z
+	RET	Z	;RET DE==0
 
 	LD	A,B
 	OR	C
-	RET	Z
+	RET	Z	;RET BC==0
 
+	CALL	DIVSPC
 	CALL	_GNCL
 	RET	C
 	DEC	BC
@@ -902,42 +905,40 @@ POPSCF:
 	RET
 
 SETTMS:
-	LD	A,(IY+23)
+	LD	A,(IY+23)	;(FCB)ファイルを最後に変更した時刻
 	INC	A
-	RET	NZ
-SETTMSX:
-	CALL	_SYS2C
-
-	SLA	L
-	SLA	L
-	ADD	HL,HL
-	ADD	HL,HL
-	ADD	HL,HL
+	RET	NZ		;ファイルが更新されていない
+SETTMSX:			;FCBに日付時刻をセットする
+	CALL	_SYS2C		;(BDOS)時刻の獲得
+				;H←時  L←分  D←秒
+	SLA	L		;L=L/2
+	SLA	L		;L=L/2
+	ADD	HL,HL		;*2
+	ADD	HL,HL		;*4
+	ADD	HL,HL		;*8
 	LD	A,D
-	RRCA
+	RRCA			;bit.0->7->->->0->C
 	AND	01FH
 	OR	L
-	LD	L,A
-	LD	(IY+22),L
+	LD	(IY+22),A	;(FCB)ファイルを最後に変更した時刻
 	LD	(IY+23),H
 
-	CALL	_SYS2A
-
+	CALL	_SYS2A		;(BDOS)日付の獲得
+				;HL←年  D←月  E←日
 	LD	BC,0-1980
 	ADD	HL,BC
 	LD	H,L
 
 	LD	A,D
-	ADD	A,A
-	ADD	A,A
-	ADD	A,A
-	ADD	A,A
+	ADD	A,A		;*2
+	ADD	A,A		;*4
+	ADD	A,A		;*8
+	ADD	A,A		;*16
 	LD	L,A
-	ADD	HL,HL
+	ADD	HL,HL		;*32
 	LD	A,L
 	OR	E
-	LD	L,A
-	LD	(IY+20),L
+	LD	(IY+20),A	;(FCB)ファイルを最後に変更した日付
 	LD	(IY+21),H
 	RET
 
@@ -957,17 +958,17 @@ SUBRR:
 	RET
 
 SETSEQ:
-	PUSH	AF
-	LD	A,(IY+33)
+	PUSH	AF		;AHL=Random record
+	LD	A,(IY+33)	;(FCB)ランダム・レコード
 	LD	L,(IY+34)
 	LD	H,(IY+35)
 
 	CALL	SSQ1
 
 	ADD	HL,HL
-	SRL	L
-	LD	(IY+32),L
-	LD	(IY+12),H
+	SRL	L		;L=L/2
+	LD	(IY+32),L	;(FCB)カレント・レコード
+	LD	(IY+12),H	;(FCB)カレント・ブロック
 	POP	AF
 
 POPRR:
@@ -976,11 +977,11 @@ POPRR:
 	JR	POPRR1
 
 GETSIZE:
-	LD	A,(IY+16)
+	LD	A,(IY+16)	;(FCB)ファイルのサイズ(バイト単位)
 	LD	L,(IY+17)
 	LD	H,(IY+18)
-SSQ1:
-	ADD	A,A
+SSQ1:				;バイト単位からCP/Mのレコード単位を求める（1レコード=128バイト）
+	ADD	A,A		;in HLA => out HL
 	ADC	HL,HL
 	OR	A
 	RET	Z
@@ -988,28 +989,28 @@ SSQ1:
 	RET
 
 GETSEQ:
-	LD	L,(IY+32)
-	LD	H,(IY+12)
+	LD	L,(IY+32)	;(FCB)カレント・レコード
+	LD	H,(IY+12)	;(FCB)カレント・ブロック
 
-	SLA	L
+	SLA	L	;L=L*2
 
-	SRL	H
-	RR	L
+	SRL	H	;HL=HL/2
+	RR	L	;
 	RET
 
 RB_WRITE:
 	PUSH	BC
-	LD	BC,(STABLE+2*026H)
+	LD	BC,(STABLE+2*026H)	;(BDOS)ランダム・ブロック・ライト
 	JR	RBRW
 RB_READ:
 	PUSH	BC
-	LD	BC,(STABLE+2*027H)
+	LD	BC,(STABLE+2*027H)	;(BDOS)ランダム・ブロック・リード
 RBRW:
 	XOR	A	;HLA = HL*128
-	SRL	H
-	RR	L
-	RRA
-	LD	(IY+33),A
+	SRL	H	;HL=HL/2
+	RR	L	;
+	RRA			;HLA
+	LD	(IY+33),A	;(FCB)ランダム・レコード
 	LD	(IY+34),L
 	LD	(IY+35),H
 	LD	HL,128
@@ -1025,12 +1026,5 @@ JP_BC:
 	PUSH	BC
 	RET
 
-SCDIR:	DS	2		;+14 +15
-SFBPS:	DS	2		;FBPS
-SFNDF:	DS	2		;FILEN DIRF
 SFILE:	DS	33		;DRV FILENAME
 HLBUF:	DS	3		;Random record buffer
-
-_FATPS:	DW	0
-_DIRPS:	DW	0
-_CLPS:	DW	0

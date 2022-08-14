@@ -37,8 +37,8 @@ RBWDDP:	CALL	_SYS02
 				;Write random block
 _SYS26:		;(BDOS)ランダム・ブロック・ライト
 	XOR	A
-	LD	(DRDN1),A
-	LD	(LEFT+1),HL	;Write record byte
+	LD	(DRDN1),A	;NOP
+	LD	(LEFT+1),HL	;HL←書き込むレコード数
 	LD	(LEFTX),HL
 	CALL	SETDRV
 
@@ -53,17 +53,19 @@ _SYS26:		;(BDOS)ランダム・ブロック・ライト
 
 	DEC	HL
 
-	CALL	CDERR		;CDE=Random record
+	CALL	GET_RR_CDE	;CDE=Random record
 
-	XOR	A
+	XOR	A	;AHL=HL+CDE
 	ADD	HL,DE
 	ADC	A,C
+
 	LD	B,A
 	LD	C,H
+
 	CALL	RWXR
 	CALL	C,WRDFX
 	JP	C,RBWERR
-
+	
 	CALL	RBX2
 	JR	Z,RBWB
 	CALL	RBXA
@@ -88,13 +90,15 @@ RBWB1:
 	PUSH	BC
 	PUSH	DE
 	CALL	CLUST
-	CALL	DWTC
+	CALL	DWT_DPB
 	POP	DE
 	POP	BC
 	JR	C,RBWERR
-	CALL	_GNCL
-	JR	C,RBWERR
-	DJNZ	RBWB1
+	DEC	B
+	JR	Z,RBWC
+	CALL	GNCLX
+	JR	NC,RBWB1
+	JR	RBWERR
 RBWC:
 	CALL	RBXC
 	JR	Z,RBWEND
@@ -111,13 +115,13 @@ RBWEND:
 	CALL	RBX1
 	JR	NC,RBW1
 	LD	HL,(LEFT+1)
-	LD	E,(IY+16)	;CDE=File size
-	LD	D,(IY+17)
+	LD	E,(IY+16)	;(FCB)ファイルのサイズ(バイト単位)
+	LD	D,(IY+17)	;CDE=File size
 	LD	C,(IY+18)
 	XOR	A
 	ADD	HL,DE
 	ADC	A,C
-	LD	(IY+16),L
+	LD	(IY+16),L	;(FCB)ファイルのサイズ(バイト単位)
 	LD	(IY+17),H
 	LD	(IY+18),A
 RBW1:
@@ -167,7 +171,7 @@ RBRFL2:
 	LD	(RBRFLP+1),A
 	RET
 DDX:
-	LD	A,(IY+1)
+	LD	A,(IY+1)	;(FCB)主ファイル名
 	CALL	CAP
 	CP	'A'
 	RET
@@ -218,12 +222,12 @@ RBRDERR:
 	JR	RBRDDE2
 
 				;Read random block
-_SYS27:		;(BDOS)ランダム・ブロック・リード	
+_SYS27:		;(BDOS)ランダム・ブロック・リード
 	LD	(LEFTX),HL
 	CALL	SETDRV
 
-	BIT	4,(IY+13)
-	JP	NZ,RBRDIR
+	BIT	4,(IY+13)	;(FCB)属性(アトリビュート)
+	JP	NZ,RBRDIR	;ディレクトリ
 	CALL	RBX0
 	JP	C,RBRERR
 	JR	Z,RBRDD
@@ -269,10 +273,10 @@ RBRB1:
 	PUSH	BC
 	PUSH	DE
 	CALL	CLUST
-	CALL	DRDC
+	CALL	DRD_DPB
 	POP	DE
 	POP	BC
-	CALL	NC,_GNCL
+	CALL	NC,GNCLX
 	JP	C,RBRERR
 	DJNZ	RBRB1
 RBRC:
@@ -297,7 +301,7 @@ RBRAP:	LD	A,000H
 	RET
 
 RBRDIR:
-	LD	L,(IY+26)
+	LD	L,(IY+26)	;(FCB)ファイルの先頭クラスタ
 	LD	H,(IY+27)
 	CALL	CHDIR
 	XOR	A
@@ -311,18 +315,18 @@ RBX0:
 	LD	HL,(_DTA)
 	LD	(DTAX),HL
 	LD	HL,(LEFTX)
-	LD	A,(IY+28)	;Open
+	LD	A,(IY+28)	;(FCB)オープン・モード
 	SUB	0FDH
 	RET
 
 RBX1:
 	PUSH	HL		;Record byte
-
-	LD	L,(IY+16)	;AHL=File size
+				;AHL=File size
+	LD	L,(IY+16)	;ファイルのサイズ(バイト単位)
 	LD	H,(IY+17)
 	LD	A,(IY+18)
 
-	CALL	CDERR		;CDE=Random record
+	CALL	GET_RR_CDE	;CDE=Random record
 
 	AND	A
 	SBC	HL,DE
@@ -338,11 +342,11 @@ RBX1:
 	SCF
 	RET
 
-RBX2:
-	LD	C,(IY+34)	;Cluster settings
+RBX2:				;Cluster settings
+	LD	C,(IY+34)	;(+33)(FCB)ランダム・レコード
 	LD	B,(IY+35)
 	CALL	RWXR
-	LD	A,(IBM5+1)	;1024=3 / 512=1
+	LD	A,(SECSZM1+2)	;1024=3 / 512=1
 	AND	(IY+34)
 	OR	(IY+33)
 	RET
@@ -353,20 +357,20 @@ RBXA:
 	CALL	DRDX
 	POP	DE
 	RET	C
-	CALL	_GNCL
+	CALL	GNCLX
 	RET	C
 	LD	(_CLPS),DE
 
-	LD	C,(IY+33)
-IBM5:	LD	A,3		;自己書き換え 1024=3 / 512=1
+	LD	C,(IY+33)	;(FCB)ランダム・レコード
+	LD	A,(SECSZM1+2)	;1024=3 / 512=1
 	AND	(IY+34)
 	LD	B,A
-IBM7:	LD	HL,1024		;自己書き換え 1024=0400H / 512=0200H ここに1クラスタのサイズが格納される
+SECSZ:	LD	HL,0400H	;自己書き換え 1024=0400H / 512=0200H ここに1セクタのサイズが格納される
 	SBC	HL,BC		;remaining cluster
 
 	LD	DE,(LEFTX)
 	SBC	HL,DE		;CP HL,DE
-	ADD	HL,DE
+	ADD	HL,DE		;
 	JR	C,RBXA1
 	EX	DE,HL
 RBXA1:
@@ -381,14 +385,14 @@ RBXB:
 	LD	HL,(DTAX)
 	LD	DE,(_CLPS)
 	LD	A,(LEFTX+1)
-	SRL	A
+	SRL	A		;A=A/2
 IBM8:	SRL	A		;自己書き換え 1024=SRL A / 512=NOP NOP
 	LD	B,A
 	RET
 
 RBXC:
 	LD	BC,(LEFTX)
-	LD	A,(IBM5+1)	;1024=3 / 512=1
+	LD	A,(SECSZM1+2)	;1024=3 / 512=1
 	AND	B
 	LD	B,A
 	OR	C
@@ -397,18 +401,18 @@ RBXC:
 RBXEND:
 LEFT:	LD	DE,0
 	XOR	A
-	LD	L,(IY+33)
+	LD	L,(IY+33)	;(FCB)ランダム・レコード
 	LD	H,(IY+34)
 	ADD	HL,DE
 	ADC	A,(IY+35)
-	LD	(IY+33),L
+	LD	(IY+33),L	;(FCB)ランダム・レコード
 	LD	(IY+34),H
 	LD	(IY+35),A
 	EX	DE,HL		;HL=Read byte
 	RET
 
-CDERR:
-	LD	E,(IY+33)	;CDE=Random record
+GET_RR_CDE:			;CDE=Random record
+	LD	E,(IY+33)	;(FCB)ランダム・レコード
 	LD	D,(IY+34)
 	LD	C,(IY+35)
 	RET

@@ -1,0 +1,77 @@
+
+;	LSX-Dodgers IO2
+
+_SYS03:		;(BDOS)外部入力
+	DI
+	PUSH	BC
+SIOAD:	LD	BC,01F91H
+	LD	A,5
+	OUT	(C),A
+	LD	A,0EAH		;RTS ON
+	OUT	(C),A
+REC1:
+	CALL	BREAK2
+	IN	A,(C)
+	RRCA			;Arrival
+	JR	NC,REC1
+BREAK2X:
+	CCF
+	LD	A,5
+	OUT	(C),A
+	LD	A,0E8H		;RTS OFF
+	OUT	(C),A
+
+	DEC	C
+	IN	A,(C)		;Read data
+	POP	BC
+	EI
+	RET
+
+BREAK2:
+	LD	A,01AH
+	IN	A,(1)
+	RRCA
+	RET	C
+	POP	BC		;PC
+SIOAD0:	LD	BC,01F91H
+	JR	BREAK2X
+
+_SYS04:		;(BDOS)外部出力
+	PUSH	BC
+SIOAD1:	LD	BC,01F91H
+XMIT1:
+	CALL	BREAK2
+	LD	A,010H		;Reset status
+	OUT	(C),A
+	IN	A,(C)
+	CPL
+	AND	024H		;CTS Send Empty
+	JR	NZ,XMIT1
+	DEC	C
+	OUT	(C),E
+	POP	BC
+	RET
+
+_SYS05:		;(BDOS)プリンタ出力
+	PUSH	BC
+	LD	BC,01A01H
+_S05X1:
+	CALL	BREAK2
+	IN	A,(C)
+	AND	8
+	JR	NZ,_S05X1
+	DI
+	DEC	C
+	OUT	(C),E
+	LD	C,3
+	LD	A,00EH
+	OUT	(C),A
+	INC	A
+	INC	BC
+	DEC	BC
+	OUT	(C),A
+	EI
+	POP	BC
+	XOR	A
+	RET
+

@@ -79,7 +79,7 @@ FSPAT:	AND	0FFH
 
 FDCCMD:
 	CALL	COMSET
-	
+
 FDCPAT:	LD	A,080H		;FDC COMMAND(Self-rewriting)
 	AND	020H		;Write data Write track
 	INC	A
@@ -112,7 +112,7 @@ READY2:
 	IN	A,(C)
 WAITA:	AND	081H		;NOT READY,BUSY
 	JR	Z,READYE
-	EX	(SP),HL		;wait
+	EX	(SP),HL		;wait 19clock
 	EX	(SP),HL		; //
 	DEC	HL
 	LD	A,H
@@ -163,10 +163,6 @@ RNF:
 	LD	(HL),0FFH
 	RET
 
-DEMES:	DB	3,7
-	DB	"Device I/O Error",5,3
-	DB	"Abort Retry Ignore?",5,3,0
-
 RETRY:	DB	2
 
 
@@ -201,7 +197,7 @@ DISK2:
 	JR	C,ERRF
 	DI
 
-DMAPAT:	LD	A,14		;é©å»èëÇ´ä∑Ç¶
+DMAPAT:	LD	A,14		;ÔøΩÔøΩÔøΩ»èÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ
 	LD	HL,DMAD
 	CALL	SETDMA
 	OUT	(C),C		;OUT 01F87H,087H
@@ -258,11 +254,11 @@ DELP2:
 
 	POP	DE
 	CALL	CAP
-	CP	'R'
+	CP	'R'		;Retry
 	JP	Z,DISKR
-	CP	'I'
+	CP	'I'		;Ignore
 	JR	Z,IGNORE
-	CP	'A'
+	CP	'A'		;Abort
 	JR	NZ,DELP1
 	JP	BOOT
 IGNORE:
@@ -283,8 +279,7 @@ SDMA:
 
 DMAD:	DB	0C3H,07DH,0FBH,00FH,0FFH,0FFH,02CH,010H		;X1turbo
 	DB	080H,092H,08DH,000H,000H,0CFH,001H,0CFH		;DISK DMA
+
 DMAE:
 
 AT_R	EQU	WTTRK-AT_WTTRK
-
-_PE:

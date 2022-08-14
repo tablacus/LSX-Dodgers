@@ -1,15 +1,28 @@
-[*.{asm,asz}]
+root = true
+
+[*.ASM]
 indent_style = tab
 end_of_line = crlf
 charset = shift_jis
 trim_trailing_whitespace = true
 insert_final_newline = true
 indent_size = 8
+tab_width = 8
 
-[*.{html,css,xml}]
+[*.ASZ]
+indent_style = tab
+end_of_line = crlf
+charset = shift_jis
+trim_trailing_whitespace = true
+insert_final_newline = true
+indent_size = 8
+tab_width = 8
+
+[*.{html,css,xml,TXT}]
 indent_style = space
 end_of_line = crlf
 charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 indent_size = 2
+

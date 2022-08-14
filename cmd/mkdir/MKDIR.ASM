@@ -16,13 +16,17 @@ START:				;間違えてMS-DOS環境で実行しても即終了できる
 	LD	C,011H		;SFIRST FCB ファイル検索 初回 CP/M
 	CALL	SYSTEM
 	OR	A
-	JP	Z,ERROR1	;すでに存在する場合はエラー
+	JP	Z,SHOW_EXISTS	;すでに存在する場合はエラー
 
 	LD	DE,FCB1
+	LD	A,(FCB1+1)
+	CP	020H
+	JP	Z,SHOW_TITLE
+
 	LD	C,016H		;FMAKE FCB ファイル作成 CP/M
 	CALL	SYSTEM
 	OR	A
-	JP	NZ,ERROR1	;作成に失敗する場合はエラー
+	JP	NZ,SHOW_NOT_CREATE	;作成に失敗する場合はエラー
 
 	LD	A,(FCB1+29)	;ディレクトリ・モード
 	OR	A
@@ -40,15 +44,20 @@ ROOT:
 	LD	C,01BH		;ALLOC ディスク情報の獲得
 	CALL	SYSTEM
 	CP	0FFH
-	JP	Z,ERROR1	;取得できない場合はエラー
+	JP	Z,SHOW_NOT_CREATE	;取得できない場合はエラー
 	LD	L,C		;BC←論理セクタのサイズ
 	LD	H,B
-	CP	1		;A←1クラスタのセクタ数
-	JR	Z,SKIP1
+	CP	32
+	JP	NC,SHOW_NOT_CREATE	;セクタ数が多すぎる場合はエラー
+				;A←1クラスタのセクタ数(1,2,4,8,16)
+LOOP1:				;HL=論理セクタのサイズ * 1クラスタのセクタ数
+	RRA			;->CF
+	JR	C,SKIP1
 	ADD	HL,HL
+	JR	LOOP1
 SKIP1:
 	PUSH	HL		;HL←1クラスタのサイズ
-	LD	BC, 32 * 2;
+	LD	BC, 32 * 2	;ディレクトリエントリ * 2
 	SCF
 	SBC	HL,BC		;. と .. のサイズ と 1 減らす
 	LD	C,L
@@ -68,17 +77,19 @@ SKIP1:
 	LD	C,026H		;WRBLK FCB ランダムブロック書き込み
 	CALL	SYSTEM
 	OR	A
-	JR	NZ,ERROR1
+	JR	NZ,SHOW_NOT_CREATE
 
 	LD	HL,(FCB1+26)	;ファイルの先頭クラスタ
 	LD	(SELFCL),HL
 
+	LD	HL,0 
+	LD	(FCB1+35),HL	;ランダム・レコード
 	LD	HL,SELFCL-SUBD 
 	LD	(FCB1+33),HL	;ランダム・レコード
 
 	LD	E,L
 	LD	D,H
-	LD	C,01AH		;SETDTA ディスク転送アドレスの設定 CP/Mcd 
+	LD	C,01AH		;SETDTA ディスク転送アドレスの設定 CP/M
 	CALL	SYSTEM
 
 	LD	DE,FCB1
@@ -86,7 +97,7 @@ SKIP1:
 	LD	C,026H		;WRBLK FCB ランダムブロック書き込み
 	CALL	SYSTEM
 	OR	A
-	JR	NZ,ERROR1
+	JR	NZ,SHOW_NOT_CREATE
 
 	LD	A,010H		;ディレクトリ
 	LD	(FCB1+13),A	;属性(アトリビュート)
@@ -100,8 +111,8 @@ SKIP1:
 	LD	DE,OKMES
 	JR	EXITMES
 
-ERROR1:
-	LD	DE,TITLE
+SHOW_TITLE:
+	LD	DE,MES_TITLE
 	LD	C,9		;STROUT 文字列出力 CP/M
 	CALL	SYSTEM
 	LD	DE,ERRMES1
@@ -109,16 +120,34 @@ EXITMES:
 	LD	C,9		;STROUT 文字列出力 CP/M
 	CALL	SYSTEM
 	JP	0
+SHOW_MESSAGE:
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+	LD	DE,CRLF
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+	JP	0
+SHOW_NOT_CREATE:
+	LD	DE,MES_NOT_CREATE
+	JR	SHOW_MESSAGE 
+SHOW_EXISTS:
+	LD	DE,MES_EXISTS
+	JR	SHOW_MESSAGE 
 
-TITLE:
-	DB	"mkdir v1.00 Gaku",00DH,00AH
+MES_TITLE:
+	DB	"mkdir v1.01 Gaku",00DH,00AH
 	DB	'$'
 ERRMES1:
-	DB	"usage: MKDIR <directory name>",00DH,00AH
+	DB	"usage: MKDIR directory",00DH,00AH
 	DB	'$'
 OKMES:
-	DB	"Ok",00DH,00AH
+	DB	"OK"
+CRLF:	DB	00DH,00AH
 	DB	'$'
+MES_EXISTS:
+	DB	"File exists$"
+MES_NOT_CREATE:
+	DB	"Cannot create directory$"
 
 SUBD:
 	DB	".          "

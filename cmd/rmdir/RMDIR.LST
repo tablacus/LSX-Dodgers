@@ -73,13 +73,13 @@
 00007B 017B 0E10             7      LD  C,010H      ;FCLOSE FCB ファイルクローズ CP/M
 00007D 017D CD0500          17      CALL    SYSTEM
 000080 0180 B7               4      OR  A
-000081 0181 C2BE01          10      JP  NZ,SHOW_NOT_CREATE
+000081 0181 C2BE01          10      JP  NZ,SHOW_NOT_REMOVE
                                 
 000084 0184 115C00          10      LD  DE,FCB1
 000087 0187 0E13             7      LD  C,013H      ;FDEL FCB ファイル削除 CP/M
 000089 0189 CD0500          17      CALL    SYSTEM
 00008C 018C B7               4      OR  A
-00008D 018D C2BE01          10      JP  NZ,SHOW_NOT_CREATE
+00008D 018D C2BE01          10      JP  NZ,SHOW_NOT_REMOVE
                                 
 000090 0190 11EC01          10      LD  DE,MES_OK
        0193                     SHOW_MESSAGE:
@@ -104,13 +104,13 @@
        01B9                     SHOW_NOT_EMPTY:
 0000B9 01B9 11FF01          10      LD  DE,MES_NOT_EMPTY
 0000BC 01BC 18D5            12      JR  SHOW_MESSAGE 
-       01BE                     SHOW_NOT_CREATE:
-0000BE 01BE 112702          10      LD  DE,MES_NOT_CREATE
+       01BE                     SHOW_NOT_REMOVE:
+0000BE 01BE 112702          10      LD  DE,MES_NOT_REMOVE
 0000C1 01C1 18D0            12      JR  SHOW_MESSAGE 
                                 
        01C3                     MES_TITLE:
-0000C3 01C3 726D646972207631        DB  "rmdir v1.00 Gaku",00DH,00AH
-            2E30302047616B75    
+0000C3 01C3 726D646972207631        DB  "rmdir v1.01 Gaku",00DH,00AH
+            2E30312047616B75    
             0D0A                
 0000D5 01D5 75736167653A2052        DB  "usage: RMDIR directory$",
             4D44495220646972    
@@ -128,9 +128,9 @@
 000113 0213 4469726563746F72        DB  "Directory not found$"
             79206E6F7420666F    
             756E6424            
-       0227                     MES_NOT_CREATE:
-000127 0227 43616E6E6F742063        DB  "Cannot create directory$"
-            7265617465206469    
+       0227                     MES_NOT_REMOVE:
+000127 0227 43616E6E6F742072        DB  "Cannot remove directory$"
+            656D6F7665206469    
             726563746F727924    
                                 
        023F                     MES_ERROR:

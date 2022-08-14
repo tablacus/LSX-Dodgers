@@ -1,32 +1,45 @@
 
 ;	LSX-Dodgers OS
 
+BOOT:
+	JP	0
+_SYS00:		;(BDOS)プログラム終了
+WBOOT:
+	JP	WBOOT1
+CONST_:
+	JP	CONSTX
+_SYS07:		;(BDOS)コンソール直接入力
+CONIN:
+	JP	FLGET
+CONOUT:
+	JP	CONOUT1
+
 BDOS0:
-	LD	(BDSP2),SP
-	LD	A,(BDSP2+1)
-	INC	A		;EXTSP = 0FFD4H
-	JR	Z,BDOS1
+	PUSH	HL
+	LD	HL,00100H
+	ADD	HL,SP
+	JR	C,BDOS1X	;EXTSP = 0FFD4H
+BDOS2:
+	POP	HL
 	LD	(BDSP+1),SP
 	LD	SP,EXTSP
 	CALL	BDOS1
 BDSP:	LD	SP,0
 	RET
-BDSP2:	DW	0
 BDOS1:
+	PUSH	HL
+BDOS1X:
 	LD	A,C
 	CP	031H
 	JR	NC,_ERROR
-	LD	(BDBC+1),BC
-	PUSH	HL
 	ADD	A,A
 	LD	L,A
 	LD	H,STABLE/256
-	LD	C,(HL)
-	INC	HL
-	LD	B,(HL)
-	POP	HL
-	PUSH	BC	;ジャンプアドレス
-BDBC:	LD	BC,0
+	LD	A,(HL)
+	INC	L
+	LD	H,(HL)
+	LD	L,A
+	EX	(SP),HL
 	RET
 
 _ERROR:
@@ -112,41 +125,20 @@ _S16XX:
 ;				Attribute
 	LD	A,(HL)
 	LD	(IY+13),A	;(FCB)属性(アトリビュート)
-;				TIME
-	LD	DE,11
+	LD	DE,11		;Reserved
 	ADD	HL,DE
+					;(FCB)ファイルを最後に変更した時刻
+	LD	DE,SDDATA		;(FCB)ファイルを最後に変更した日付
+	LD	B,SDDATAE-SDDATA	;(FCB)ファイルの先頭クラスタ
+S16LOOP:				;(FCB)ファイルのサイズ(バイト単位)
+	LD	A,(DE)
+	INC	DE
+	LD	(S16PAT+2),A
 	LD	A,(HL)
 	INC	HL
-	LD	(IY+22),A	;(FCB)ファイルを最後に変更した時刻
-	LD	A,(HL)
-	INC	HL
-	LD	(IY+23),A
-;				DATE
-	LD	A,(HL)
-	INC	HL
-	LD	(IY+20),A	;(FCB)ファイルを最後に変更した日付
-	LD	A,(HL)
-	INC	HL
-	LD	(IY+21),A
-;				First cluster
-	LD	A,(HL)
-	INC	HL
-	LD	(IY+26),A	;(FCB)ファイルの先頭クラスタ
-	LD	A,(HL)
-	INC	HL
-	LD	(IY+27),A
-;				SIZE
-	LD	A,(HL)
-	INC	HL
-	LD	(IY+16),A	;(FCB)ファイルのサイズ
-	LD	A,(HL)
-	INC	HL
-	LD	(IY+17),A
-	LD	A,(HL)
-	INC	HL
-	LD	(IY+18),A
-	LD	A,(HL)
-	LD	(IY+19),A
+S16PAT:	LD	(IY+0),A
+	DJNZ	S16LOOP
+
 	XOR	A
 	LD	(IY+12),A	;(FCB)カレント・ブロック
 	LD	(OFCB+1),IY
@@ -175,14 +167,14 @@ _S10A:				;Write
 	JR	C,FEND
 
 	LD	A,(IY+25)	;(FCB)ディレクトリ・ロケーション
-	ADD	A,A
-	ADD	A,A
-	ADD	A,A
+	ADD	A,A		;*2
+	ADD	A,A		;*4
+	ADD	A,A		;*8
 IBM2:	AND	0FFH		;自己書き換え 1024=0FFH / 512=07FH
 	LD	L,A
 	LD	H,0
-	ADD	HL,HL
-	ADD	HL,HL
+	ADD	HL,HL		;*16
+	ADD	HL,HL		;*32
 	LD	BC,(_DTBUF)
 	ADD	HL,BC
 
@@ -358,7 +350,7 @@ _S16X2:
 	LD	BC,16
 	ADD	HL,BC
 _S16X1:
-	LD	(HL),B
+	LD	(HL),B		;B=0
 	INC	HL
 	DEC	C
 	JR	NZ,_S16X1
@@ -420,19 +412,14 @@ _SYS1B:		;(BDOS)ディスク情報の獲得
 	CALL	NC,DSKF
 
 	LD	DE,(MAXCLP+1)	;DPB_08_MAXCL-1
-	DEC	DE
-	LD	IY,(_FATBF)
+	DEC	DE		;DE←クラスタの総数
+	LD	IY,(_FATBF)	;IY←メモリ上のFATの先頭アドレス
 	SBC	A,A
 	RET	C
-	LD	A,(DBLPAT)	;DPB_07_DBLCL
-	OR	A
-	LD	BC,00200H
-	LD	A,B		;A=2
-	RET	NZ
-	DEC	A		;A=1
-	BIT	7,(IX+00FH)	;DPB_0F_FATS
-	RET	NZ
-	LD	B,004H
+	LD	C,A		;C=0
+	LD	B,(IX+00FH)	;DPB_0F_BPS
+	RES	7,B
+	LD	A,(IX+7)	;DPB_07_SECPCL
 	RET
 
 _SYS1D:		;(BDOS)書き込みが禁止されているディスクの調査
@@ -443,8 +430,8 @@ _SYS1D:		;(BDOS)書き込みが禁止されているディスクの調査
 
 _SYS1F:		;(BDOS)ディスク装置のパラメータの読み出し
 	LD	HL,DEVICE
-	XOR	A
-	RET
+	LD	A,E
+	JP	_GETDPB
 
 _SYS23:		;(BDOS)ファイル・サイズの獲得
 	PUSH	HL
@@ -512,7 +499,7 @@ _SYS2F:
 	LD	BC,DRD_DPB
 S2FX:
 	LD	(S2FPAT+1),BC
-	CALL	FFLUSH
+	CALL	_FFLUSH
 
 	PUSH	DE
 	PUSH	HL

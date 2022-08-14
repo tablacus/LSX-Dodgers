@@ -1,0 +1,663 @@
+;
+;	FORMAT by Gaku
+;
+OSFLG	EQU	$0003
+SYSTEM	EQU	$0005
+BASE	EQU	$000B
+JP_HL	EQU	$000F
+BIOS	EQU	$0018
+FCB1	EQU	$005C
+DTA	EQU	$0080
+
+	ORG	$0100
+	JP	START
+START:
+	LD	DE,TITLE
+	LD	C,9		;文字列出力
+	CALL	SYSTEM
+	LD	A,(BASE)
+	LD	(WTTRKP+2),A
+	LD	A,(FCB1)
+	OR	A
+	JR	NZ,MAIN
+USAGE:
+	LD	DE,MUSAGE
+	LD	C,9		;文字列出力
+	CALL	SYSTEM
+	JP	0
+MAIN:
+	LD	SP,(SYSTEM+1)
+
+	DEC	A
+	LD	HL,(BASE-1)
+	LD	L,$DC		;GETDPB
+	CALL	JP_HL
+	JR	C,USAGE
+	CALL	SWITCH
+	CP	$20
+	JR	C,MAIN1
+	CP	"O"
+	JR	NZ,SW1
+	LD	A,(DE)
+	SUB	"0"
+	JR	C,USAGE
+	CP	10
+	JR	NC,USAGE
+	LD	(OVER+1),A
+	JR	MAIN1
+SW1:
+	SUB	"C"
+	JR	NZ,USAGE
+	LD	(LOGSW+1),A
+MAIN1:
+	LD	DE,FORMES	;format
+	LD	C,9		;文字列出力
+	CALL	SYSTEM
+
+	LD	BC,$0406
+	PUSH	IX
+PRNAME:
+	LD	E,(IX+$1C)	;デバイスの名前
+	LD	C,6		;コンソール直接入出力
+	PUSH	BC
+	CALL	SYSTEM
+	POP	BC
+	INC	IX
+	DJNZ	PRNAME
+	POP	IX
+	CALL	LTNL
+
+	LD	A,(IX+$12)	;デバイス番号
+	CP	$87
+	JP	NZ,LOGIC
+LOGSW:	LD	A,1
+	OR	A
+	JP	Z,LOGICY
+
+	LD	A,(BIOS)
+	INC	A
+	JR	Z,NONT
+
+OVER:	LD	A,$00
+	OR	A
+	JR	NZ,TYPEO
+NONT:
+	LD	DE,FOTMES	;format type
+	LD	C,9		;文字列出力
+	CALL	SYSTEM
+TYPE:
+	LD	C,8		;エコーなしコンソール入力
+	CALL	SYSTEM
+	CALL	CAP
+	CP	"0"
+	JR	Z,TYPE0
+	CP	"1"
+	JR	Z,TYPE1
+	LD	B,A
+	LD	A,(BIOS)
+	INC	A
+	JR	Z,TYPE
+	LD	A,B
+	CP	"2"
+	JR	Z,TYPE2
+	CP	"S"
+	JR	Z,TYPES
+	JR	TYPE
+TYPE0:
+	LD	HL,M2D
+TYPE1X:
+	LD	BC,LGAP1
+	LD	DE,LSEC
+	JR	TYPEX
+TYPE1:
+	LD	HL,M2DD
+	JR	TYPE1X
+TYPE2:
+	LD	BC,HGAP1
+	LD	DE,HSEC
+	LD	HL,M2HD
+	JR	TYPEX
+TYPEO:
+	PUSH	AF
+	LD	DE,OVERMES
+	LD	C,9		;文字列出力
+	CALL	SYSTEM
+	POP	AF
+	ADD	A,"0"
+	LD	E,A
+	LD	C,2		;コンソール出力
+	CALL	SYSTEM
+	XOR	A
+TYPES:
+	LD	BC,HGAP1
+	LD	DE,SSEC
+	LD	HL,M2HS
+TYPEX:
+	LD	(GAP1+1),BC
+	LD	(SEC+1),DE
+
+	LD	E,A
+	LD	C,2		;コンソール出力
+	CALL	SYSTEM
+	CALL	LTNL
+
+	PUSH	IX
+	POP	DE
+	LDI
+	LDI
+	INC	DE
+	INC	DE
+	INC	DE
+	INC	DE
+	LD	BC,12
+	LDIR
+
+	LD	A,(OVER+1)
+	OR	A
+	JR	Z,OTFE
+
+	ADD	A,80
+	LD	(IX+$0C),A	;フロッピーディスクのシリンダ数
+	SUB	80
+	ADD	A,A	;*2
+	LD	C,A
+	ADD	A,A	;*4
+	ADD	A,A	;*8
+	ADD	A,A	;*16
+	ADD	A,C	;*18
+	ADD	A,$98
+	LD	(IX+8),A
+	LD	A,5
+	ADC	A,0
+	LD	(IX+9),A
+OTFE:
+	LD	HL,(BASE-1)
+	LD	L,$89
+	LD	(HL),$FF
+
+	LD	A,(FCB1)
+	DEC	A
+	PUSH	HL
+	LD	L,$D9		;CHGDRV
+	CALL	JP_HL
+	POP	HL
+	LD	A,(IX+$13)	;デバイスドライバ内におけるユニット番号
+	AND	3
+	OR	$80
+	LD	L,A
+	LD	(HL),$FF
+	CALL	SURE
+
+	LD	DE,PHYMES
+	LD	C,9		;文字列出力
+	CALL	SYSTEM
+
+	CALL	PHYSIC
+	CALL	LTNL
+	JP	C,ERROR
+	CALL	VERIFY
+	CALL	LTNL
+	JP	C,ERROR
+
+	LD	HL,FDATA
+	LD	DE,FDATA+1
+	LD	(HL),0
+	LD	BC,$400
+	LDIR
+	LD	A,(IX+1)	;メディアバイト
+	CP	$FD
+	LD	HL,LIPL
+	JR	Z,IPL
+	CP	$F9
+	LD	HL,DIPL
+	JR	Z,IPL
+	CP	$FB
+	LD	HL,SIPL
+	JR	Z,IPL
+	LD	HL,HIPL
+IPL:
+	LD	DE,FDATA
+	LD	C,$22
+	LDIR
+	LD	HL,IPLPRG
+	LD	C,IPLPEND-IPLPRG
+	LDIR
+	LD	HL,FDATA+$1E0
+	LD	B,$10
+LOW1:
+	LD	(HL),$22
+	INC	HL
+	LD	(HL),$FE
+	INC	HL
+	DJNZ	LOW1
+
+	LD	DE,0
+	LD	HL,FDATA
+	CALL	DWT
+
+	JR	LOGICX
+
+LOGICY:
+	LD	A,(FCB1)
+	LD	E,A
+	LD	C,$1B		;ディスク情報の獲得
+	CALL	SYSTEM
+	INC	A
+	JP	Z,ERROR
+LOGIC:
+	CALL	SURE
+LOGICX:
+	LD	DE,LOGMES
+	LD	C,9		;文字列出力
+	CALL	SYSTEM
+
+	LD	HL,FDATA
+	LD	E,L
+	LD	D,H
+	INC	DE
+	XOR	A
+	LD	(HL),A
+	LD	BC,$03FF
+	LDIR
+;
+	LD	HL,FDATA
+	LD	A,(IX+$01)	;メディアバイト
+	LD	(HL),A		;FATID
+	INC	HL
+	DEC	(HL)		;LD (HL),$FF
+	LD	A,(IX+$0C)	;フロッピーディスクのシリンダ数
+	CP	80+1
+	JR	C,OTFL1
+	LD	(HL),A
+OTFL1:
+	INC	HL
+	DEC	(HL)
+	LD	E,(IX+$0E)	;FAT領域の先頭論理セクタ番号
+	LD	D,0
+	LD	B,(IX+$00)	;FAT領域のセクタ単位でのサイズ
+LOGIC1:
+	PUSH	BC
+	LD	HL,FDATA
+	CALL	DWT
+	POP	BC
+
+	LD	HL,FDATA
+	XOR	A
+	LD	(HL),A
+	INC	HL
+	LD	(HL),A
+	INC	HL
+	LD	(HL),A
+	DJNZ	LOGIC1
+
+LOGIC2:
+	LD	L,(IX+$10)	;ルートディレクトリ領域の先頭論理セクタ番号
+	LD	H,0
+
+	LD	HL,FDATA
+	CALL	DWT
+
+	LD	A,E
+	CP	(IX+$0B)	;ルートディレクトリ領域の終了の論理セクタ番号+1
+	JR	C,LOGIC2
+
+	LD	A,(IX+$0A)	;フロッピーディスクのモード(FDMODE)
+	OR	A
+	JP	Z,0
+
+	LD	DE,COMMES
+	LD	C,9		;文字列出力
+	CALL	SYSTEM
+LOGICL:
+	JP	0
+SURE:
+	LD	DE,HITMES
+	LD	C,9		;文字列出力
+	CALL	SYSTEM
+SURE1:
+	LD	C,8		;エコーなしコンソール入力
+	CALL	SYSTEM
+	CP	$0D
+	JR	NZ,SURE1
+LTNL:
+	PUSH	AF
+	LD	E,$0D
+	LD	C,6		;コンソール直接入出力
+	CALL	SYSTEM
+	LD	E,$0A
+	LD	C,6		;コンソール直接入出力
+	CALL	SYSTEM
+	POP	AF
+	RET
+
+PHYSIC:
+	CALL	GUIDE
+	LD	DE,0
+	EXX
+	LD	L,0		;CYLINDER
+PH1:
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	LD	E,"w"
+	LD	C,2		;コンソール出力
+	CALL	SYSTEM
+	POP	HL
+	POP	DE
+	POP	BC
+PH2:
+	EXX
+	CALL	MAKE
+	RET	C
+	EXX
+	INC	L
+	LD	A,L
+	CP	(IX+$0C)	;フロッピーディスクのシリンダ数
+	JR	C,PH1
+	RET
+
+MAKE:
+	LD	IY,FDATA
+	EXX
+	LD	C,0		;SIDE0
+	CALL	MKDATA
+	LD	(GDATA+1),IY
+	EXX
+	LD	C,1		;SIDE1
+	CALL	MKDATA
+
+	LD	HL,FDATA
+	CALL	WTTRK
+	RET	C
+GDATA:	LD	HL,FDATA
+WTTRK:
+	PUSH	DE
+WTTRKP:	CALL	$00E8		;#WTTRK
+	POP	DE
+;
+	LD	L,(IX+$0D)	;フロッピーディスクの1トラックのセクタ数
+	LD	H,0
+	ADD	HL,DE
+	EX	DE,HL
+	AND	A
+	RET
+;
+MKDATA:
+	LD	H,0
+	EXX
+GAP1:	LD	HL,HGAP1
+	CALL	SETD
+MAKE1:
+SEC:	LD	HL,HSEC
+	CALL	SETD
+	EXX
+	LD	(IY+0),L		;CYLINDER
+	INC	IY
+	LD	(IY+0),C		;SIDE
+	INC	IY
+	LD	A,L
+	OR	C
+	OR	H
+	LD	A,1
+	JR	Z,MAKES1
+	LD	A,H
+	ADD	A,(IX+$11)
+MAKES1:
+	INC	H
+	LD	(IY+0),A		;SECTOR
+	PUSH	HL
+	INC	IY
+	LD	A,(IX+$07)	;1クラスタの論理セクタ数
+	CP	1
+	JR	Z,SIZE1024	;1
+	JR	C,SIZE1024	;0(v1.29まで)
+SIZE512:			;2 or $29(v1.29まで)
+	LD	A,2
+	JR	SIZE
+SIZE1024:
+	LD	A,3
+SIZE:
+	LD	(IY+0),A	;SIZE
+	INC	IY
+	EXX
+	CALL	SETD
+	POP	AF		;AF=HL
+	CP	(IX+$0D)	;MAXSEC
+	JR	C,MAKE1
+
+	LD	HL,HGAP4
+SETD:
+	LD	A,(HL)
+	INC	HL
+	LD	B,A
+	INC	A
+	RET	Z
+	LD	A,(HL)
+	INC	HL
+SETD1:
+	LD	(IY+0),A
+	INC	IY
+	DJNZ	SETD1
+	JR	SETD
+
+VERIFY:
+	CALL	GUIDE
+	LD	A,(IX+$0D)	;フロッピーディスクの1トラックのセクタ数
+	ADD	A,A
+	LD	C,A
+
+	EXX
+	LD	DE,0
+	EXX
+	LD	L,(IX+$0C)	;フロッピーディスクのシリンダ数
+VE2:
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	LD	E,"v"
+	LD	C,2		;コンソール出力
+	CALL	SYSTEM
+	POP	HL
+	POP	DE
+	POP	BC
+	PUSH	BC
+	EXX
+	PUSH	DE
+	LD	DE,FDATA
+	LD	C,$1A		;DTAの設定
+	CALL	SYSTEM
+	POP	DE
+	POP	HL
+	PUSH	HL
+	PUSH	DE
+	LD	H,L
+	LD	A,(FCB1)
+	DEC	A
+	LD	L,A
+	LD	C,$2F		;論理セクタを用いた読み出し
+	CALL	SYSTEM
+	POP	DE
+	POP	HL
+	LD	H,0
+	ADD	HL,DE
+	EX	DE,HL
+	EXX
+;
+	DEC	L
+	JR	NZ,VE2
+VERE:
+	RET
+
+DWT:
+	LD	B,1
+DWTX:
+	PUSH	BC
+	PUSH	DE
+	EX	DE,HL
+	LD	C,$1A		;DTAの設定
+	CALL	SYSTEM
+	POP	DE
+	POP	HL
+	PUSH	HL
+	PUSH	DE
+	LD	A,(FCB1)
+	DEC	A
+	LD	L,A
+	LD	C,$30		;論理セクタを用いた書き込み
+	CALL	SYSTEM
+	POP	DE
+	POP	HL
+	LD	L,H
+	LD	H,0
+	ADD	HL,DE
+	EX	DE,HL
+	RET
+
+SWITCH:
+	LD	DE,DTA+1
+SWITCH1:
+	LD	A,(DE)
+	CP	$20
+	RET	C
+	INC	DE
+	CP	"/"
+	JR	NZ,SWITCH1
+	LD	A,(DE)
+	INC	DE
+CAP:
+	CP	"a"
+	RET	C
+	CP	"z"+1
+	RET	NC
+	SUB	$20
+	RET
+
+GUIDE:
+	LD	B,(IX+$0C)	;フロッピーディスクのシリンダ数
+	LD	C,2
+	LD	E,"."
+	CALL	GUIDE1
+	LD	B,(IX+$0C)	;フロッピーディスクのシリンダ数
+	LD	E,8		;コンソール直接入出力
+GUIDE1:
+	PUSH	BC
+	PUSH	DE
+	CALL	SYSTEM
+	POP	DE
+	POP	BC
+	DJNZ	GUIDE1
+	RET
+
+ERROR:
+	LD	DE,ERRMES
+	LD	C,9		;文字列出力
+	CALL	SYSTEM
+	JP	0
+
+TITLE:
+	DB	"X1 format v1.10 Gaku",$0D,$0A
+	DB	"$"
+MUSAGE:
+	DB	"usage: FORMAT ﾄﾞﾗｲﾌﾞ:[ｽｲｯﾁ]",$0D,$0A
+	DB	9,"/C  FAT･ﾃﾞｨﾚｸﾄﾘ ｼｮｷｶ",$0D,$0A
+	DB	9,"/On ｵｰﾊﾞｰﾄﾗｯｸ(n:1-9)",$0D,$0A
+	DB	"$"
+FORMES:
+	DB	"format $"
+FOTMES:
+	DB	"format type (2D=0,2DD=1,2HD=2,2HS=S)? $"
+PHYMES:
+	DB	"physical format",$0D,$0A,"$"
+LOGMES:
+	DB	"logical  format",$0D,$0A,"$"
+COMMES:
+	DB	"completed !",$0D,$0A,"$"
+HITMES:
+	DB	"hit [CR] to start$"
+OVERMES:
+	DB	"over track:$"
+ERRMES:
+	DB	7,"Error!",$0D,$0A,"$"
+;
+;	DPB Data
+;
+M2D:	DB	2,$FD,8,2
+	DW	356
+	DB	$FF,12,40,9,1,$82,5,1
+
+M2DD:	DB	3,$F9,10,2
+	DW	715
+	DB	$FF,14,80,9,1,$82,7,1
+
+M2HD:	DB	2,$FE,9,1
+	DW	1223
+	DB	$FE,11,77,8,1,$84,5,1
+
+M2HS:	DB	3,$FB,8,1
+	DW	1432
+	DB	$FE,10,80,9,1,4,4,10
+;
+;	Format Data 2D/2DD
+;
+LGAP1:	DB	32,$4E,255
+;
+LSEC:	DB	12,$00,3,$F5,1,$FE,255
+;
+	DB	1,$F7,22,$4E,12,$00,3,$F5,1,$FB
+	DB	0,$E5,0,$E5
+	DB	1,$F7,84,$4E,255
+;
+;	Format Data 2HD
+;
+HGAP1:	DB	80,$4E,12,$00,3,$F6,1,$FC,50,$4E,255
+;
+HSEC:	DB	12,$00,3,$F5,1,$FE,255
+;
+	DB	1,$F7,22,$4E,12,$00,3,$F5,1,$FB
+	DB	0,$E5,0,$E5,0,$E5,0,$E5
+	DB	1,$F7,116,$4E,255
+;
+HGAP4:	DB	0,$4E,0,$4E,0,$4E,255
+;
+;	Format Data 2HS
+;
+SSEC:	DB	12,$00,3,$F5,1,$FE,255
+;
+	DB	1,$F7,22,$4E,12,$00,3,$F5,1,$FB
+	DB	0,$E5,0,$E5,0,$E5,0,$E5
+	DB	1,$F7,53,$4E,255
+;
+;	BOOT-DATA
+;
+LIPL:	DB	$EB,$FE,$90,$20,"L","O","V","E"
+	DB	"R","S",$20,$00,$02,$02,$01,$00
+	DB	$02,$70,$00,$D0,$02,$FD,$02,$00
+	DB	$09,$00,$02,$00,$00,$00,$18,$FE
+	DB	$00,$00
+
+DIPL:	DB	$EB,$FE,$90,$20,"L","O","V","E"
+	DB	"R","S",$20,$00,$02,$02,$01,$00
+	DB	$02,$70,$00,$D0,$02,$F9,$03,$00
+	DB	$09,$00,$02,$00,$00,$00,$18,$FE
+	DB	$00,$00
+
+HIPL:	DB	$EB,$FE,$90,$20,"L","O","V","E"
+	DB	"R","S",$20,$00,$04,$01,$01,$00
+	DB	$02,$C0,$00,$D0,$04,$FE,$02,$00
+	DB	$08,$00,$02,$00,$00,$00,$18,$FE
+	DB	$00,$00
+
+SIPL:	DB	$EB,$1E,$90,$20,"L","O","V","E"
+	DB	"R","S",$20,"2","H","S",$20,$20
+	DB	$20,$20,$04,$00,$01,$03,$00,$01
+	DB	$00,$C0,$05,$A0,$FB,$01,$18,$FE
+	DB	$EB,$FE
+
+IPLPRG:
+	LD	BC,$FFC
+	DB	$ED,$71
+	LD	A,7
+	LD	($FF86),A
+	JP	$F5
+IPLPEND:
+FDATA:
