@@ -167,12 +167,12 @@ _S10A:				;Write
 	JR	C,FEND
 
 	LD	A,(IY+25)	;(FCB)ディレクトリ・ロケーション
-	ADD	A,A		;*2
-	ADD	A,A		;*4
-	ADD	A,A		;*8
-IBM2:	AND	0FFH		;自己書き換え 1024=0FFH / 512=07FH
+SDECM1:	AND	01FH		;自己書き換え(1セクタ辺りのディレクトリエントリ数-1) 1024=01FH / 512=00FH / 256=7
 	LD	L,A
 	LD	H,0
+	ADD	HL,HL		;*2
+	ADD	HL,HL		;*4
+	ADD	HL,HL		;*8
 	ADD	HL,HL		;*16
 	ADD	HL,HL		;*32
 	LD	BC,(_DTBUF)

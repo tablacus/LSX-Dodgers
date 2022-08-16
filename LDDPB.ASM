@@ -22,9 +22,9 @@ DPB_10_DIRPS:	DB	5
 DPB_11_MINSEC:	DB	1	;Minimum sector
 DPB_12_DEVNO:	DB	087H	;Device Number
 DPB_13_UNITNO:	DB	0
-DPB_14		DW	0
-DPB_16_GNCL:	DW	0
-DPB_18_SNCL:	DW	0
+DPB_14_EXTEND:	DW	0
+DPB_16:		DW	0
+DPB_18:		DW	0
 DPB_1A_SDIR:	DW	0
 DPB_1C_NAME:	DB	"FDD0"
 
@@ -157,21 +157,18 @@ BANKCL:	DW	0
 
 	DB	1
 	DB	0F9H
-;	DB	0F2H	;テスト
-	DW	GDRDC
-	DW	GDWTC
-	DB	0
-;	DB	4	;テスト
-;	DW	12	;テスト
-	DB	1
-	DW	48
-	DB	0
-	DB	2
-	DB	0
-	DB	1
+	DW	GDRD
+	DW	GDWT
 	DB	0
 	DB	4
+	DW	48
+	DB	0
+	DB	8
+	DB	0
 	DB	1
+	DB	0
+	DB	1
+	DB	4
 	DB	1
 	DB	5	;Device Number
 	DB	1

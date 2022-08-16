@@ -4,7 +4,7 @@
 DRDX:
 	CALL	DRDY
 	RET	Z
-	CALL	DRDX1
+	CALL	DRDX1		;データバッファの情報を保存
 	RET	C
 	PUSH	HL
 	PUSH	BC
@@ -25,9 +25,9 @@ DRDN1:	NOP			;自己書き換え NOP / SCF
 DRDNX:
 	CALL	DRDY
 	RET	Z
-DRDX1:
+DRDX1:				;データバッファの情報を保存
 	CALL	DWTX
-	LD	(_DCLPS),DE
+	LD	(_DBSEC),DE
 	LD	A,(_DRV)
 	LD	(_DBDRV),A
 	CALL	_CHGDRV
@@ -44,7 +44,7 @@ DRDY:
 	XOR	(HL)
 	JR	NZ,POP_HL_RET
 
-	LD	HL,(_DCLPS)
+	LD	HL,(_DBSEC)
 	SBC	HL,DE		;CF=0
 POP_HL_RET:
 	POP	HL
@@ -62,7 +62,7 @@ DWTX:
 	PUSH	DE
 	LD	A,(_DBDRV)
 	CALL	_CHGDRV
-	LD	DE,(_DCLPS)
+	LD	DE,(_DBSEC)
 	LD	HL,(_DTBUF)
 	CALL	NC,DWT_DPB
 	JR	POP_DE_BC_HL_RET
@@ -72,23 +72,24 @@ RDFATX:
 	LD	A,(_DRV)
 	LD	HL,_FATDRV
 	XOR	(HL)
-	AND	07FH
 	JR	Z,POP_HL_RET
 
 	PUSH	BC
 	PUSH	DE
 	PUSH	IX
 	CALL	WTFATX
-	JR	C,RDFATE1
+	JR	C,POP_IX_DE_BC_HL_RET
 
+	XOR	A
+	LD	(_FATIX),A
 	LD	A,(_DRV)
 	LD	(_FATDRV),A
 	CALL	_RDFAT
 RDFATE2:
-	JR	NC,RDFATE1
-	SBC	A,A
+	JR	NC,POP_IX_DE_BC_HL_RET
+	SBC	A,A		;A=0xFF
 	LD	(_FATDRV),A
-RDFATE1:
+POP_IX_DE_BC_HL_RET:
 	POP	IX
 	JR	POP_DE_BC_HL_RET
 
@@ -100,7 +101,6 @@ WTFATX:
 	LD	A,(_FATDRV)
 	LD	HL,_DBDRV
 	XOR	(HL)
-	AND	07FH
 	CALL	Z,DWTX
 	JR	C,POP_HL_RET
 	PUSH	BC
@@ -109,7 +109,7 @@ WTFATX:
 	CALL	WTFAT
 	XOR	A
 	LD	(_WTFATF),A
-	JR	RDFATE1
+	JR	POP_IX_DE_BC_HL_RET
 
 NCL1:
 	LD	A,D
@@ -117,25 +117,27 @@ NCL1:
 	SCF
 	RET	Z
 
-	LD	A,(_DRV)
-	BIT	3,D
-	JR	Z,NCL2
-	OR	080H
-NCL2:
 	PUSH	HL
-	LD	HL,_FATDRV
-	CP	(HL)
-	JR	Z,POP_HL_RET
-
+	LD	A,D
+	AND	8		;DE(targetCluster >= 0x800)
+	LD	(NCLPAT+2),A
+	LD	HL,(_FATDRV)	;L=_FATDRV H=FATIX
+	CP	H
+	LD	A,(_DRV)	;この間でフラグは変化しない
+	LD	(NCLPAT+1),A	;
+	JR	NZ,NCL2		;FATIXが違う
+	CP	L
+	JR	NZ,NCL2		;ドライブが違う
+	POP	HL
+	RET
+NCL2:
 	PUSH	BC
 	PUSH	DE
 	PUSH	IX
-	PUSH	AF
 	CALL	WTFATX
-	POP	BC
-	JR	C,RDFATE1
-	LD	A,B
-	LD	(_FATDRV),A
+	JR	C,POP_IX_DE_BC_HL_RET
+NCLPAT:	LD	BC,0
+	LD	(_FATDRV),BC
 	CALL	RDFATS
 	JR	RDFATE2
 
@@ -153,7 +155,7 @@ NCL3:
 	RET
 
 GNCL:
-	CALL	NCL1		;GET NEW CLUSTER
+	CALL	NCL1		;GET NEXT CLUSTER
 	RET	C
 	PUSH	BC
 	PUSH	HL
@@ -188,7 +190,7 @@ SNCL:
 	RET	C
 	LD	A,1
 	LD	(_WTFATF),A
-;				SET NEW CLUSTER
+;				SET NEXT CLUSTER
 	PUSH	HL
 	PUSH	BC
 	PUSH	DE
@@ -282,7 +284,7 @@ CLDIV1:
 	RRCA			;->CF
 	JR	C,POP_AF_RET
 	SRL	D		;DE=DE/2
-	RR	E		; 
+	RR	E		;
 	JR	CLDIV1
 
 RDFAT0X:
@@ -431,6 +433,7 @@ DRD_DPB:
 	PUSH	IX
 	LD	IX,(_DPB)
 DRDPAT:	CALL	FDRD		;自己書き換え（ディスク読み込み）
+POP_IX_RET:
 	POP	IX
 	RET
 
@@ -483,8 +486,13 @@ DWT_DPB:
 	PUSH	IX
 	LD	IX,(_DPB)
 DWTPAT:	CALL	FDWT		;自己書き換え（ディスク書き込み）
-	POP	IX
-	RET
+	JR	POP_IX_RET
+
+_GNCL:
+GNCPAT:	JP	GNCL		;自己書き換え
+
+_SNCL:
+SNCPAT:	JP	SNCL		;自己書き換え
 
 WTFAT:
 	CALL	FATS
@@ -514,7 +522,7 @@ WTFATL:
 ;	CF : 1=ドライブ切り替えエラー
 ;note
 ;	FATサイズがFATバッファを超える場合は
-;	対象クラスタ領域==(_FATDRV).bit7によって
+;	対象クラスタ領域==(_FATIX)によって
 ;	FATの前半3KBと後半3KBを切り替える
 ;------------------------
 FATS:
@@ -524,19 +532,25 @@ FATS:
 FATS2:
 	LD	DE,(_FATPS)	;fat sector pos
 	LD	HL,(_FATBF)
+FATSX:	JP	FATS_FAT12	;自己書き換え
+
+FATS_FAT12:
+	LD	B,(IX+00FH)	;DPB_0F_BPS
+	LD	A,12		;3072 / 256 FATバッファに読み込めるセクタ数
+L_FATS2:
+	RR	B		;->CF
+	JR	C,E_FATS2
+	RRA			;CF=0 なので A=A/2
+	JR	L_FATS2
+E_FATS2:
 	LD	B,(IX+0)	;DPB_00_FATLN
-	LD	A,6		;3072 / 512 FATバッファに読み込めるセクタ数
-	BIT	2,(IX+00FH)	;DPB_0F_BPS
-	JR	Z,FATS512
-	RRA			;A=3 (3072÷1024: 1セクタ1024バイトの場合)
-FATS512:
 	CP	B
 	RET	NC		;DPB_00_FATLN x sectorSize < fatBufSize
 ;targetCluster
 	LD	C,A		;C = skipCount
-	LD	A,(_FATDRV)	;bit7 = (targetCluster >= 0x800)
-	ADD	A,A		;CF=(_FATDRV).bit7
-	JR	NC,FATS3
+	LD	A,(_FATIX)	;(targetCluster >= 0x800)
+	OR	A
+	JR	Z,FATS3
 ;(targerCluster>=0x800)
 FAT_SKP:
 	INC	DE		;FATPS++
@@ -545,7 +559,7 @@ FAT_SKP:
 	JR	NZ,FAT_SKP
 	LD	C,B
 FATS3:
-	LD	B,C		;3 or 6
+	LD	B,C		;3 or 6 or 12
 	XOR	A
 	RET
 
@@ -618,6 +632,22 @@ CHGDRV0:
 	LD	(MAXSEC+1),A
 
 	POP	HL		;L=DPB_0E_FATPS H=DPB_0F_BPS
+	LD	A,H		;DPB_0F_BPS
+	AND	7
+	LD	(SECSZ+2),A	;1セクタのサイズの上位1バイト 0x400 - 0x200 - 0x100
+	DEC	A		;1セクタ512 2D/2DD/2HC/2HQ(2HD1.44MB)等
+				;1セクタ1024 2HD/EMM/BRAM
+				;1セクタ256 GRAM等
+				;1024	512	256
+	LD	(SECSZM1+2),A	;3	1	0	1セクタのサイズ-1したものの上位1バイト (0x3FF - 0x1FF - 0xFF)
+	INC	A		;4	2	1
+	ADD	A,A		;8	4	2
+	ADD	A,A		;010H	8	4
+	ADD	A,A		;020H	010H	8
+	LD	(SDECPAT+1),A	;1セクタ辺りのディレクトリエントリ数
+	DEC	A		;01FH	00FH	7
+	LD	(SDECM1+1),A	;1セクタ辺りのディレクトリエントリ数-1
+
 	LD	H,0
 	LD	(_FATPS),HL
 
@@ -631,58 +661,30 @@ CHGDRV0:
 	LD	A,H
 	LD	(_DRIVE),A
 
-	POP	HL		;DPB_14
-	POP	HL		;DPB_16_GNCL
+	POP	HL		;DPB_14_EXTRA
 	LD	A,H
 	OR	L
-	JR	NZ,OGNCL
+	JR	NZ,EXTRA
 	LD	HL,GNCL		;FAT12(default)
-OGNCL:
-	LD	(_GNCL+1),HL
-
-	POP	HL		;DPB_18_SNCL
-	LD	A,H
-	OR	L
-	JR	NZ,OSNCL
-	LD	HL,SNCL		;FAT12(default)
-OSNCL:
-	LD	(_SNCL+1),HL
+	LD	(GNCPAT+1),HL
+	LD	HL,SNCL
+	LD	(SNCPAT+1),HL
+	LD	HL,FATS_FAT12
+	JR	EXTRA1
+EXTRA:
+	LD	(GNCPAT+1),HL
+	INC	HL
+	INC	HL
+	INC	HL
+	LD	(SNCPAT+1),HL
+	INC	HL
+	INC	HL
+	INC	HL
+EXTRA1:
+	LD	(FATSX+1),HL
 
 SPPAT2:	LD	SP,0		;元のSPを復元
 	EI
-	PUSH	DE
-	BIT	2,(IX+00FH)	;DPB_0F_BPS
-	JR	NZ,NEC1024
-				;1セクタ512 2D/2DD/2HC/2HQ(2HD1.44MB)等
-	LD	DE,00218H	;JR +2(直後のRR Cを飛ばす)
-	LD	HL,0
-
-	LD	A,1
-	JR	NEC1
-NEC1024:
-				;1セクタ1024 2HD/EMM/BRAM/GRAM等
-	DB	011H		;LD DE,SRL B
-	SRL B			;
-	DB	021H		;LD HL,SRL A
-	SRL A			;
-
-	LD	A,3
-NEC1:				;1024	512
-	LD	(SECSZM1+2),A	;3	1	1セクタのサイズ-1したものの上位1バイト (0x3FF - 0x1FF)
-	INC	A		;4	2
-	LD	(SECSZ+2),A	;1セクタのサイズの上位1バイト 0x400 - 0x200
-	ADD	A,A		;8	4
-	ADD	A,A		;010H	8
-	ADD	A,A		;020H	010H
-	LD	(IBM1+1),A	;1セクタ辺りのディレクトリエントリ数
-	ADD	A,A		;040H	020H
-	ADD	A,A		;080H	040H
-	ADD	A,A		;000H	080H
-	CPL			;0FFH	07FH
-	LD	(IBM2+1),A
-	LD	(IBM4),DE
-	LD	(IBM8),HL
-	POP	DE
 	XOR	A
 	RET
 
@@ -726,7 +728,9 @@ FFLUSH:
 	LD	A,0FFH
 	LD	(_DBDRV),A
 	CALL	WTFATX
-	LD	A,0FFH
+	XOR	A
+	LD	(_FATIX),A
+	CPL
 	LD	(_FATDRV),A
 	POP	AF
 	RET

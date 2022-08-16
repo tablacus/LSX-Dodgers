@@ -44,7 +44,7 @@ _SYS26:		;(BDOS)ランダム・ブロック・ライト
 
 	CALL	RBX0
 	JP	C,RBWERR
-	JR	Z,RBWDD
+	JR	Z,RBWDD		;デバイスデスクプリタ
 	CALL	WOPEN
 	JP	C,RBWERR
 	LD	A,H
@@ -67,15 +67,15 @@ _SYS26:		;(BDOS)ランダム・ブロック・ライト
 	JP	C,RBWERR
 	
 	CALL	RBX2
-	JR	Z,RBWB
-	CALL	RBXA
+	JR	Z,RBWB		;NZ=セクタ以下の端数がある
+	CALL	RBXA		
 	JR	C,RBWERR
 	EX	DE,HL
 	PUSH	BC
 	LDIR
 	LD	(DTAX),HL
 
-	CALL	SWTDBF
+	CALL	SWTDBF		;バッファデータは更新された
 
 	LD	HL,(LEFTX)
 	POP	DE
@@ -94,11 +94,9 @@ RBWB1:
 	POP	DE
 	POP	BC
 	JR	C,RBWERR
-	DEC	B
-	JR	Z,RBWC
 	CALL	GNCLX
-	JR	NC,RBWB1
-	JR	RBWERR
+	JR	C,RBWERR
+	DJNZ	RBWB1
 RBWC:
 	CALL	RBXC
 	JR	Z,RBWEND
@@ -108,7 +106,7 @@ RBWC:
 	JR	C,RBWERR
 	LD	DE,(_DTBUF)
 	LDIR
-	CALL	SWTDBF
+	CALL	SWTDBF		;バッファデータは更新された
 RBWEND:
 	CALL	RBXEND
 
@@ -346,7 +344,7 @@ RBX2:				;Cluster settings
 	LD	C,(IY+34)	;(+33)(FCB)ランダム・レコード
 	LD	B,(IY+35)
 	CALL	RWXR
-	LD	A,(SECSZM1+2)	;1024=3 / 512=1
+	LD	A,(SECSZM1+2)	;1024=3 / 512=1 / 256=0
 	AND	(IY+34)
 	OR	(IY+33)
 	RET
@@ -362,16 +360,17 @@ RBXA:
 	LD	(_CLPS),DE
 
 	LD	C,(IY+33)	;(FCB)ランダム・レコード
-	LD	A,(SECSZM1+2)	;1024=3 / 512=1
-	AND	(IY+34)
-	LD	B,A
 SECSZ:	LD	HL,0400H	;自己書き換え 1024=0400H / 512=0200H ここに1セクタのサイズが格納される
-	SBC	HL,BC		;remaining cluster
+	LD	A,H
+	DEC	A		;1024=3 / 512=1
+	AND	(IY+34)		;(FCB)ランダム・レコード
+	LD	B,A		;BCに1セクタ以下の端数が入る
+	SBC	HL,BC		;残りを計算
 
 	LD	DE,(LEFTX)
 	SBC	HL,DE		;CP HL,DE
 	ADD	HL,DE		;
-	JR	C,RBXA1
+	JR	C,RBXA1		;DEとHLを比較して大きい方をHLに
 	EX	DE,HL
 RBXA1:
 	PUSH	HL
@@ -385,16 +384,23 @@ RBXB:
 	LD	HL,(DTAX)
 	LD	DE,(_CLPS)
 	LD	A,(LEFTX+1)
-	SRL	A		;A=A/2
-IBM8:	SRL	A		;自己書き換え 1024=SRL A / 512=NOP NOP
 	LD	B,A
+	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
+RBXB1:
+	RRA		;->CF
+	JR	C,RBXB2
+	SRL	B	;B=B/2
+	JR	RBXB1
+RBXB2:
+	LD	A,B
+	OR	A
 	RET
 
 RBXC:
 	LD	BC,(LEFTX)
-	LD	A,(SECSZM1+2)	;1024=3 / 512=1
+	LD	A,(SECSZM1+2)	;1024=3 / 512=1 / 256=0
 	AND	B
-	LD	B,A
+	LD	B,A		;1セクタ以下の端数がない場合はZ
 	OR	C
 	RET
 

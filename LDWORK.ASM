@@ -42,14 +42,16 @@ _FBCNT:	DB	0	;    //
 _FILEN:	DB	0
 _DIRF:	DB	0
 _MAXCYL:DB	0
-_WTFATF:DB	0
-_FATDRV:DB	0FFH
-_WTDBF:	DB	0
-_DBDRV:	DB	0FFH
-_DCLPS:	DW	0
+_WTFATF:DB	0	;FATバッファの更新フラグ
+		DS	1
+_WTDBF:	DB	0	;データバッファの更新フラグ
+_DBDRV:	DB	0FFH	;データバッファにあるデータを読み込んだドライブ
+_DBSEC:	DW	0	;データバッファにあるデータを読み込んだセクタ番号
 _DPB:	DW	0
+_FATDRV:DB	0FFH	;FATバッファに読み込んでいるドライブ
+_FATIX:	DB	0	;FATバッファに読み込んでいるインデックス
 
-	DS	6
+	DS	4
 
 CRTCD:	DB	06FH,050H,059H,038H,01FH,002H,019H,01CH
 	DB	000H,007H
@@ -80,8 +82,8 @@ _FDRD:	JP	FDRD
 _FDWT:	JP	FDWT
 _DRD:	JP	DRD_DPB
 _DWT:	JP	DWT_DPB
-_GNCL:	JP	GNCL	;(Self-rewriting)
-_SNCL:	JP	SNCL	;(Self-rewriting)
+_WTFATX:JP	WTFATX
+	DS	3
 _COMANL:JP	COMANL
 
 WE:

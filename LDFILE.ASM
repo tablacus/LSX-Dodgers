@@ -262,7 +262,7 @@ SDIRX1:
 	LD	DE,(_DIRPS)	;Root Directory
 
 SOPEN1:
-IBM1:	LD	C,32		;自己書き換え 1セクタ辺りのディレクトリエントリ数  1024=32 / 512=16
+SDECPAT:LD	C,32		;自己書き換え 1セクタ辺りのディレクトリエントリ数  1024=32 / 512=16
 SOPEN1X:
 	CALL	DC		;FILE SEARCH
 	JR	C,RDDERR
@@ -285,7 +285,7 @@ RTEPAT:	SUB	12		;(Self-rewriting)DPB_0B_MAXDIR
 SOPEN5:
 	CALL	GNCLX	;END DIR
 	RET	C
-	CALL	ENDCL
+	CALL	ENDCLX
 SOPEN6:
 	JR	C,SOPEN1
 
@@ -358,7 +358,7 @@ COPEN:
 	LD	E,L
 	LD	D,H
 	INC	DE		;DE,DTBUF+1
-SECSZM1:LD	BC,003FFH	;自己書き換え セクタサイズ-1(0x3FF:1023 or 0x1FF:511)
+SECSZM1:LD	BC,003FFH	;自己書き換え セクタサイズ-1(0x3FF:1023 or 0x1FF:511 or 0xFF:255)
 	XOR	A		;データバッファをセクタサイズ分ゼロクリア
 	LD	(HL),A
 	LDIR
@@ -532,6 +532,12 @@ CLPAT1:	CP	1	;164=356	(Self-rewriting)
 CLPAT2:	CP	064H	;		(Self-rewriting)
 	RET
 
+ENDCLX:
+	PUSH	DE
+	CALL	DIVSPC
+	CALL	ENDCL
+	POP	DE
+	RET
 CAP:
 	CP	'a'
 	RET	C
@@ -787,12 +793,19 @@ TOPEN:				;Initializes the time stamp
 	RET
 
 WRDFX:
+	LD	A,(SPCPAT+1)	;1クラスタの論理セクタ
+L_WRFX:
+	RRA		;->CF
+	JR	C,E_WRFX
+	SRL	C	;C=C/2
+	JR	L_WRFX
+E_WRFX:
 	LD	B,C
 	INC	B
 	LD	A,037H		;SCF
 	LD	(DRDN1),A
 
-WRDF:				;Bクラスタ分確保する
+WRDF:				;Bクラスタ分FATを確保する
 	LD	DE,2
 	CALL	MULSPC
 WRDF1:
@@ -803,7 +816,6 @@ WRDF1:
 	JR	C,WRDF3
 	LD	A,D		;空いているかチェック
 	OR	E
-	CALL	MULSPC
 	JR	NZ,WRDF4
 	POP	HL		;HL=空いているクラスタ
 	PUSH	HL
@@ -843,24 +855,19 @@ WRDF5:
 	SCF
 	RET
 
-RWXR:			;in BC0(24ビット) にサイズ
+RWXR:
+	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
+L_RWX:
+	RRA		;->CF
+	JR	C,E_RWX
 	SRL	B	;BC=BC/2
 	RR	C	;
-IBM4:	SRL	B	;自己書き換え 1024=SRL B / 512=JR +2(直後のRR Cを飛ばす)
-	RR	C	;BC=BC/2
-
-	LD	A,(SPCPAT+1)	;1クラスタの論理セクタ数
-CLDBL4:
-	RRCA
-	JR	C,CLDBL5
-	SRL	B	;BC=BC/2
-	RR	C	;
-	JR	CLDBL4
-CLDBL5:
+	JR	L_RWX
+E_RWX:
 	LD	E,(IY+26)	;(FCB)ファイルの先頭クラスタ
 	LD	D,(IY+27)
-RWX1:
 	CALL	MULSPC
+RWX1:
 	LD	(_CLPS),DE
 	LD	A,D
 	OR	E
@@ -871,11 +878,11 @@ RWX1:
 	OR	C
 	RET	Z	;RET BC==0
 
-	CALL	DIVSPC
-	CALL	_GNCL
+	CALL	GNCLX
 	RET	C
 	DEC	BC
-	CALL	ENDCL
+
+	CALL	ENDCLX
 	JR	C,RWX1
 	SCF
 	RET
