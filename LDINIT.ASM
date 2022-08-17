@@ -888,4 +888,4 @@ INITE:
 
 BDOS:
 	JP	BDOS0
-	DS	17	;Reserved
+	DS	10	;Reserved

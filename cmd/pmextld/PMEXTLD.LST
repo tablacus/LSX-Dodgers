@@ -1,0 +1,123 @@
+﻿                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.0.0, LST:Full:4
+                                ; pmextld
+                                ;
+                                ; PMEXT.COM にLSX-Dodgers用のタイムスタンプパッチをあてる
+                                
+       0003                     OSFLG   EQU 0003H
+       0005                     SYSTEM  EQU 0005H
+       000B                     BASE    EQU 000BH
+       000F                     JP_HL   EQU 000FH
+       0018                     BIOS    EQU 0018H
+       005C                     FCB1    EQU 005CH
+       0080                     DTA EQU 0080H
+                                
+000000 0100                         ORG 0100H
+                                
+000000 0100 ED7B0600        20      LD  SP,(SYSTEM+1)
+000004 0104 11DC01          10      LD  DE,TITLE
+000007 0107 0E09             7      LD  C,09H
+000009 0109 CD0500          17      CALL    SYSTEM
+00000C 010C 117E01          10      LD  DE,FCB
+00000F 010F 0E0F             7      LD  C,0FH
+000011 0111 CD0500          17      CALL    SYSTEM
+000014 0114 B7               4      OR  A
+000015 0115 2054            12      JR  NZ,SHOW_NOTFOUND
+000017 0117 118000          10      LD  DE,DTA
+00001A 011A 0E1A             7      LD  C,1AH
+00001C 011C CD0500          17      CALL    SYSTEM
+00001F 011F 117E01          10      LD  DE,FCB
+000022 0122 0E21             7      LD  C,21H
+000024 0124 CD0500          17      CALL    SYSTEM
+000027 0127 B7               4      OR  A
+000028 0128 203C            12      JR  NZ,SHOW_ERROR
+00002A 012A 21A301          10      LD  HL,PATCH_START
+00002D 012D 119000          10      LD  DE,DTA+10H
+000030 0130 012E00          10      LD  BC,PATCH_END-PATCH_START
+000033 0133 EDB0                    LDIR
+000035 0135 117E01          10      LD  DE,FCB
+000038 0138 0E22             7      LD  C,22H
+00003A 013A CD0500          17      CALL    SYSTEM
+00003D 013D B7               4      OR  A
+00003E 013E 2026            12      JR  NZ,SHOW_ERROR
+000040 0140 3E01             7      LD  A,01H
+000042 0142 329F01          13      LD  (RANDOM_RECORD),A
+000045 0145 117E01          10      LD  DE,FCB
+000048 0148 0E21             7      LD  C,21H
+00004A 014A CD0500          17      CALL    SYSTEM
+00004D 014D B7               4      OR  A
+00004E 014E 2016            12      JR  NZ,SHOW_ERROR
+000050 0150 21D101          10      LD  HL,OSNAME
+000053 0153 118200          10      LD  DE,DTA+2
+000056 0156 010B00          10      LD  BC,OSNAME_END-OSNAME
+000059 0159 EDB0                    LDIR
+00005B 015B 117E01          10      LD  DE,FCB
+00005E 015E 0E22             7      LD  C,22H
+000060 0160 CD0500          17      CALL    SYSTEM
+000063 0163 B7               4      OR  A
+000064 0164 280D            12      JR  Z,FINISH
+       0166                     SHOW_ERROR:
+000066 0166 110902          10      LD  DE,MSG_ERROR
+000069 0169 1803            12      JR  SHOW_MESSAGE
+       016B                     SHOW_NOTFOUND:
+00006B 016B 11F301          10      LD  DE,MSG_NOT_FOUND
+       016E                     SHOW_MESSAGE:
+00006E 016E 0E09             7      LD  C,09H
+000070 0170 CD0500          17      CALL    SYSTEM
+       0173                     FINISH:
+000073 0173 117E01          10      LD  DE,FCB
+000076 0176 0E10             7      LD  C,10H
+000078 0178 CD0500          17      CALL    SYSTEM
+00007B 017B C30000          10      JP  0
+       017E                     FCB:                ;PMEXT.COMのFCB
+00007E 017E 00504D4558542020        DB  0,"PMEXT   COM",0
+            20434F4D00          
+00008B 018B 00 LEN:20               DW  0,0,0,0,0,0,0,0,0,0
+       019F                     RANDOM_RECORD:
+00009F 019F 00000000                DW  0,0
+       01A3                     PATCH_START:            ;パッチ
+0000A3 01A3 D5              11      PUSH    DE
+0000A4 01A4 DDE3            23      EX  (SP),IX
+0000A6 01A6 D1              10      POP DE
+0000A7 01A7 7E               7      LD  A,(HL)
+0000A8 01A8 23               6      INC HL
+0000A9 01A9 DD7716          19      LD  (IX+22),A   ;(FCB)ファイルを最後に変更した時刻 2バイト
+0000AC 01AC 7E               7      LD  A,(HL)
+0000AD 01AD 23               6      INC HL
+0000AE 01AE DD7717          19      LD  (IX+23),A
+0000B1 01B1 7E               7      LD  A,(HL)
+0000B2 01B2 23               6      INC HL
+0000B3 01B3 DD7714          19      LD  (IX+20),A   ;(FCB)ファイルを最後に変更した日付 2バイト
+0000B6 01B6 7E               7      LD  A,(HL)
+0000B7 01B7 DD7715          19      LD  (IX+21),A
+0000BA 01BA 2A0905          16      LD  HL,(0509H)
+0000BD 01BD DD7510          19      LD  (IX+16),L   ;(FCB)ファイルサイズ 4バイト
+0000C0 01C0 DD7411          19      LD  (IX+17),H
+0000C3 01C3 2A0B05          16      LD  HL,(050BH)
+0000C6 01C6 DD7512          19      LD  (IX+18),L
+0000C9 01C9 DD7413          19      LD  (IX+19),H
+0000CC 01CC D5              11      PUSH    DE
+0000CD 01CD DDE3            23      EX  (SP),IX
+0000CF 01CF D1              10      POP DE
+0000D0 01D0 C9              10      RET
+       01D1                     PATCH_END:
+       01D1                     OSNAME:
+0000D1 01D1 4C53582D446F6467        DB  "LSX-Dodgers"
+            657273              
+       01DC                     OSNAME_END:
+       01DC                     TITLE:
+0000DC 01DC 504D4558544C4420        DB  "PMEXTLD v1.00 Lovers"
+            76312E3030204C6F    
+            76657273            
+0000F0 01F0 0D0A                    DB  0DH,0AH
+0000F2 01F2 24                      DB  '$'
+       01F3                     MSG_NOT_FOUND:
+0000F3 01F3 4E6F7420666F756E        DB  "Not found PMEXT.COM"
+            6420504D4558542E    
+            434F4D              
+000106 0206 0D0A                    DB  0DH,0AH
+000108 0208 24                      DB  '$'
+       0209                     MSG_ERROR:
+000109 0209 4572726F7221            DB  "Error!"
+00010F 020F 0D0A                    DB  0DH,0AH
+000111 0211 24                      DB  '$'
+[EOF:PMEXTLD.ASM:UTF_8]

@@ -277,9 +277,11 @@ SOPEN3:
 	LD	A,(_DIRF)
 	OR	A
 	JR	NZ,SOPEN5
-	INC	E		;ルートディレクトリ
-	LD	A,E
-RTEPAT:	SUB	12		;(Self-rewriting)DPB_0B_MAXDIR
+	INC	DE		;ルートディレクトリ
+	PUSH	HL
+RTEPAT:	LD	HL,12		;(Self-rewriting)DPB_0B_MAXDIR
+	SBC	HL,DE		;CF=0 なので SUB HL,DE
+	POP	HL
 	JR	NZ,SOPEN1
 	JR	SOPEN6
 SOPEN5:
@@ -288,9 +290,6 @@ SOPEN5:
 	CALL	ENDCLX
 SOPEN6:
 	JR	C,SOPEN1
-
-_SYS2B:		;(BDOS)日付の設定
-_SYS2D:		;(BDOS)時刻の設定
 NOTSE:
 	SCF			;CF=1
 	SBC	A,A		;A=0FFH

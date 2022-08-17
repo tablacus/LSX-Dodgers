@@ -31,7 +31,7 @@ BDOS1:
 BDOS1X:
 	LD	A,C
 	CP	031H
-	JR	NC,_ERROR
+	JR	NC,OVERFN
 	ADD	A,A
 	LD	L,A
 	LD	H,STABLE/256
@@ -41,10 +41,14 @@ BDOS1X:
 	LD	L,A
 	EX	(SP),HL
 	RET
-
+OVERFN
+	POP	HL
 _ERROR:
-	LD	BC,00132H
-	LD	DE,VER
+_SYS2B:		;(BDOS)日付の設定
+_SYS2D:		;(BDOS)時刻の設定
+	SCF			;CF=1
+	SBC	A,A		;A=0FFH
+	RET
 _SYS1C:		;(BDOS)ディスクの書き込み禁止化
 _SYS1E:		;(BDOS)ファイル属性の設定
 _SYS20:		;(BDOS)利用者番号の設定と読み出し
@@ -277,7 +281,7 @@ S16K1:
 	LD	A,(DE)		;Drive
 	CP	(HL)
 	JR	NZ,S16K2
-
+				;ここはCFが必ず0
 	SBC	HL,DE		;CP HL,DE
 	SCF
 	RET	NZ

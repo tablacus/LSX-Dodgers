@@ -1,0 +1,386 @@
+;
+; BPBINFO Gaku
+;
+; BPBの情報を表示する
+; LSX-Dodgers/MSX-DOS/MSX-DOS2
+;
+SYSTEM	EQU	00005H
+JP_HL	EQU	0000FH
+FCB1	EQU	0005CH
+FCB2	EQU	0006CH
+DTA1	EQU	00080H
+
+	ORG 00100H
+	JP	START		;0C3HはZ80ではJPだが、i8086ではRETなので
+START:				;間違えてMS-DOS環境で実行しても即終了できる
+	LD	DE,MSG_TITLE
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	DE,BPB
+	LD	C,01AH		;SETDTA ディスク転送アドレスの設定 CP/M
+	CALL	SYSTEM
+
+	LD	DE,0
+	LD	A,(FCB1)
+	OR	A
+	JR	NZ,DRVOK
+	LD	DE,MSG_USAGE
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+	JP	0
+DRVOK:
+	LD	L,A
+	DEC	L
+	LD	H,1
+	PUSH	HL
+	LD	C,02FH		;RDABS 論理セクタの読み出し
+	CALL	SYSTEM
+	POP	HL
+	OR	A
+	JR	Z,READOK
+	LD	A,L
+	LD	B,1
+	LD	HL,0
+	LD	DE,0
+	LD	C,73H		;RDDRV セクタ直接読み出し(MSX-DOS2)
+	CALL	SYSTEM
+	OR	A
+	JR	Z,READOK
+	LD	DE,MSG_ERROR
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+	JP	0
+READOK:
+	LD	DE,BS_JmpBoot
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	HL,BPB		;BS_JmpBoot
+	LD	B,3
+	CALL	PRHEXS
+
+	LD	DE,CRLF
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	DE,BS_OEMName
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	HL,BPB+3
+	LD	B,8+1
+	CALL	MSX
+
+	LD	DE,CRLF
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	DE,BPB_BytsPerSec
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	HL,(BPB+11)
+	CALL	PRDEC0
+
+	LD	DE,CRLF
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	DE,BPB_SecPerClus
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	HL,(BPB+13)
+	LD	H,0
+	CALL	PRDEC0
+
+	LD	DE,CRLF
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	DE,BPB_RsvdSecCnt
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	HL,(BPB+14)
+	CALL	PRDEC0
+
+	LD	DE,CRLF
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	DE,BPB_NumFATs
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	HL,(BPB+16)
+	LD	H,0
+	CALL	PRDEC0
+
+	LD	DE,CRLF
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	DE,BPB_RootEntCnt
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	HL,(BPB+17)
+	CALL	PRDEC0
+
+	LD	DE,CRLF
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	DE,BPB_TotSec16
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	HL,(BPB+19)
+	CALL	PRDEC0
+
+	LD	DE,CRLF
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	DE,BPB_Media
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	A,(BPB+21)
+	CALL	PRHEX
+
+	LD	DE,CRLF
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	DE,BPB_FATSz16
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	HL,(BPB+22)
+	CALL	PRDEC0
+
+	LD	DE,CRLF
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	DE,BPB_SecPerTrk
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	HL,(BPB+24)
+	CALL	PRDEC0
+
+	LD	DE,CRLF
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	DE,BPB_NumHeads
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	HL,(BPB+26)
+	CALL	PRDEC0
+
+	LD	DE,CRLF
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	DE,BS_VolID
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	HL,BPB+39
+	LD	B,4
+	CALL	PRHEXS
+
+	LD	DE,CRLF
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	DE,BS_VolLab
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	HL,BPB+43
+	LD	B,11+1
+	CALL	MSX
+
+	LD	DE,CRLF
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	DE,BS_FilSysType
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	HL,BPB+54
+	LD	B,8+1
+	CALL	MSX
+
+	JP	0
+
+;文字列を表示
+;in
+;HL : 文字列の先頭アドレス
+MSX1:				
+	CALL	CONOUT_A
+MSX:
+	LD	A,(HL)
+	INC	HL
+	CP	20H
+	RET	C
+	DJNZ	MSX1
+	RET
+
+;16進数を表示
+;in
+;HL :表示する値のアドレス
+;B  :表示バイト
+PRHEXS:
+	LD	A,(HL)
+	INC	HL
+	PUSH	BC
+	PUSH	HL
+	CALL	PRHEX
+	POP	HL
+	POP	BC
+	DJNZ	PRHEXS
+	RET
+;16進数を表示
+;in
+;A : 表示する値
+PRHEX:
+	LD	B,2
+	LD	(DECBF),A
+	LD	HL,DECBF
+PRHEX1:
+	XOR	A
+	RLD
+	CP	10
+	JR	C,PRHEX2
+	ADD	A,'A'-'0'-10
+PRHEX2:
+	ADD	A,'0'
+	CALL	CONOUT_A
+	DJNZ	PRHEX1
+	RET
+
+;10進数を表示
+;in
+;HL : 表示する値
+PRDEC0:
+	XOR	A
+;10進数を表示(24ビット)
+;in
+;A  : 表示する値の上位8ビット
+;HL : 表示する値の下位16ビット
+PRDEC:
+	LD	E,A
+	LD	BC,0
+	LD	(DECBF),BC
+	LD	(DECBF+2),BC
+
+	LD	C,24
+DEC1:
+	ADD	HL,HL
+	LD	A,E
+	ADC	A,A
+	LD	E,A
+	PUSH	HL
+	LD	HL,DECBF+3
+	LD	B,4
+DEC2:
+	LD	A,(HL)
+	ADC	A,A
+	DAA
+	LD	(HL),A
+	DEC	HL
+	DJNZ	DEC2
+	POP	HL
+	DEC	C
+	JR	NZ,DEC1
+
+	LD	HL,DECBF
+	LD	A,020H
+	LD	B,3
+DEC3:
+	CALL	DEC4
+	CALL	DEC4
+	INC	HL
+	DJNZ	DEC3
+DECX:
+	CALL	DEC4
+	XOR	A
+DEC4:
+	RLD
+	CP	020H
+	JR	Z,DEC5
+	OR	030H
+DEC5:
+;コンソール出力
+;in
+;A :表示する文字
+CONOUT_A:
+	PUSH	AF
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	LD	E,A
+	LD	C,2		;CONOUT コンソール出力 CP/M
+	CALL	SYSTEM
+	POP	HL
+	POP	DE
+	POP	BC
+	POP	AF
+	RET
+
+MSG_TITLE:
+	DB	"bpbinfo v1.00",00DH,00AH
+	DB	'$'
+CRLF:
+	DB	00DH,00AH
+	DB	'$'
+MSG_USAGE:
+	DB	"usage: BPBINFO drive",00DH,00AH
+	DB	'$'
+MSG_ERROR:
+	DB	"Error!",00DH,00AH
+	DB	'$'
+
+BS_JmpBoot:
+	DB	"BS_JmpBoot    :  $"
+BS_OEMName:
+	DB	"BS_OEMName    :$"
+BPB_BytsPerSec:
+	DB	"BPB_BytsPerSec:$"
+BPB_SecPerClus:
+	DB	"BPB_SecPerClus:$"
+BPB_RsvdSecCnt:
+	DB	"BPB_RsvdSecCnt:$"
+BPB_NumFATs:
+	DB	"BPB_NumFATs   :$"
+BPB_RootEntCnt:
+	DB	"BPB_RootEntCnt:$"
+BPB_TotSec16:
+	DB	"BPB_TotSec16  :$"
+BPB_Media:
+	DB	"BPB_Media     :      $"
+BPB_FATSz16:
+	DB	"BPB_FATSz16   :$"
+BPB_SecPerTrk:
+	DB	"BPB_SecPerTrk :$"
+BPB_NumHeads:
+	DB	"BPB_NumHeads  :$"
+BS_VolID:
+	DB	"BS_VolID      :$"
+BS_VolLab:
+	DB	"BS_VolLab     :$"
+BS_FilSysType:
+	DB	"BS_FilSysType :$"
+
+DECBF	DS	5
+
+BPB:
