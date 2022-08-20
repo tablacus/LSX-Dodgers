@@ -166,7 +166,7 @@ TYPEX:
 	ADD	A,A	;*16
 	ADD	A,C	;*18
 	ADD	A,$98
-	LD	(IX+8),A
+	LD	(IX+8),A	;ëçÉNÉâÉXÉ^êî
 	LD	A,5
 	ADC	A,0
 	LD	(IX+9),A

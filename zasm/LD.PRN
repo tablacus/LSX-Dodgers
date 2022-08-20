@@ -22,8 +22,8 @@
   1D80                	MAC	EQU	01D80H		;X1
   0001                	VER_1   EQU	1
   0003                	VER_2   EQU	3
-  0002                	VER_3   EQU	2
-  0132                	VER	EQU	VER_1 * 256 + VER_2 * 16 + VER_3
+  0003                	VER_3   EQU	3
+  0133                	VER	EQU	VER_1 * 256 + VER_2 * 16 + VER_3
                       	
   0000                	STACK	EQU	00000H
   0005                	SYSTEM	EQU	00005H
@@ -48,7 +48,7 @@
                       	
   C600  C307C6        		JP	START
   C603  801D          	MACHINE:DW	MAC
-  C605  3201          	VERSION:DW	VER
+  C605  3301          	VERSION:DW	VER
                       	
   C607                	START:
   C607  F3            		DI
@@ -610,7 +610,7 @@
                       	
   C9BF  4C53582D446F64	INIMES:	DB	"LSX-Dodgers for X1/turbo version "
   C9E0  312E          		DB	030H + VER_1, '.'
-  C9E2  3332          		DB	030H + VER_2 ,030H + VER_3
+  C9E2  3333          		DB	030H + VER_2 ,030H + VER_3
   C9E4  2047616B752028		DB	' Gaku (Lovers/Tablacus)',0DH,0AH
   C9FD  00            		DB	0
                       	
@@ -2690,8 +2690,8 @@
   D6BF  C5            		PUSH	BC
   D6C0  210001        		LD	HL,00100H
   D6C3  39            		ADD	HL,SP
-  D6C4  3807          		JR	C,INTP1
-  D6C6  ED73F8D6      		LD	(INTSP+1),SP
+  D6C4  ED73F8D6      		LD	(INTSP+1),SP
+  D6C8  3803          		JR	C,INTP1
   D6CA  31D4FF        		LD	SP,EXTSP
   D6CD                	INTP1:
   D6CD  CDE9DA        		CALL	IN49SB
