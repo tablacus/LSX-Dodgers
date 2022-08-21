@@ -21,7 +21,6 @@ START:				;間違えてMS-DOS環境で実行しても即終了できる
 	LD	C,01AH		;SETDTA ディスク転送アドレスの設定 CP/M
 	CALL	SYSTEM
 
-	LD	DE,0
 	LD	A,(FCB1)
 	OR	A
 	JR	NZ,DRVOK
@@ -30,8 +29,13 @@ START:				;間違えてMS-DOS環境で実行しても即終了できる
 	CALL	SYSTEM
 	JP	0
 DRVOK:
-	LD	L,A
-	DEC	L
+	LD	E,A
+	DEC	E
+	PUSH	DE
+	LD	C,01BH		;ALLOC ディスク情報の獲得
+	CALL	SYSTEM
+	POP	HL
+	LD	DE,0
 	LD	H,1
 	PUSH	HL
 	LD	C,02FH		;RDABS 論理セクタの読み出し
@@ -140,6 +144,30 @@ READOK:
 	LD	HL,(BPB+19)
 	CALL	PRDEC0
 
+	LD	DE,CRLF
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	DE,BPB_TotSec32
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	A,(BPB+35)
+	OR	A
+	JR	Z,TOTSECDEC
+	CALL	PRHEX	
+	LD	A,(BPB+34)
+	CALL	PRHEX	
+	LD	A,(BPB+33)
+	CALL	PRHEX	
+	LD	A,(BPB+32)
+	CALL	PRHEX	
+	JR	TOTSECCRLF
+TOTSECDEC:
+	LD	HL,(BPB+32)
+	LD	A,(BPB+34)
+	CALL	PRDEC
+TOTSECCRLF:
 	LD	DE,CRLF
 	LD	C,9		;STROUT 文字列出力 CP/M
 	CALL	SYSTEM
@@ -338,7 +366,7 @@ CONOUT_A:
 	RET
 
 MSG_TITLE:
-	DB	"bpbinfo v1.00",00DH,00AH
+	DB	"bpbinfo v1.01",00DH,00AH
 	DB	'$'
 CRLF:
 	DB	00DH,00AH
@@ -366,6 +394,8 @@ BPB_RootEntCnt:
 	DB	"BPB_RootEntCnt:$"
 BPB_TotSec16:
 	DB	"BPB_TotSec16  :$"
+BPB_TotSec32:
+	DB	"BPB_TotSec32  :$"
 BPB_Media:
 	DB	"BPB_Media     :      $"
 BPB_FATSz16:

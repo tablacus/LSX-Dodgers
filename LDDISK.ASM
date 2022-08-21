@@ -22,7 +22,7 @@ DIV1:
 DIV2:
 	DJNZ	DIV1
 
-SECPAT:	ADD	A,001H		;(Self-rewriting)
+	INC	A	;ç≈è¨ÇÃÉZÉNÉ^ÇÕÇPå≈íË
 	LD	D,L	;Quotient(TRACK)
 DIV3:
 	LD	E,A	;Remainder

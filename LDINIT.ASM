@@ -35,21 +35,17 @@ INISIO:
 	LD	BC,01F91H	;INIT SIO
 	LD	D,1
 	OUT	(C),D
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 	LD	C,093H
 	OUT	(C),D
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 	LD	C,099H		;INIT SIO
 	LD	D,1
-	OUT	(C),D
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 	LD	C,09BH
 	OUT	(C),D
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 
 	LD	C,080H		;INIT DMA
 	LD	HL,0C306H
@@ -70,8 +66,7 @@ INIDMA:
 	DEC	BC
 	DEC	BC
 
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 	LD	A,CTC0
 	OUT	(C),A
 
@@ -107,24 +102,20 @@ SINIT2:
 	OUT	(C),A
 
 	LD	C,0C0H
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 
 	INC	C
 	LD	A,40
 	OUT	(C),A
 
 	INC	C
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 
 	INC	C
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 
 	LD	C,0C5H
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 
 TEXT:
 	LD	C,0B0H
@@ -140,12 +131,10 @@ TEXT1:
 	DEC	D
 	JR	NZ,TEXT1
 	LD	BC,01FB0H
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 
 	LD	C,0C4H
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 
 	LD	BC,01A01H
 	IN	A,(C)
@@ -172,7 +161,8 @@ PRN:
 	LD	(00001H),HL	;IPL
 
 	LD	HL,(MACHINE)	;3 bit7  DPB Original(1)
-	LD	(00003H),HL	;  bit6-0 Machine X1(0)
+				;  bit6-4 DPB_LEVEL
+	LD	(00003H),HL	;  bit3-0 Machine X1(0)
 ;				;4 LSX-Dodgers(01DH)
 	LD	HL,BDOS
 	LD	(00005H),A
@@ -261,6 +251,12 @@ NON:
 	LD	HL,AT_EDWTC+AT_RE
 	LD	(EMMWR),HL
 
+	LD	A,027H			;ノンターボはMFM切り替えを行わない
+	LD	(DEVICE+012H),A		;Aドライブ
+	LD	(DEVICE+012H+32),A	;Bドライブ
+	LD	(DEVICE+012H+32*2),A	;Cドライブ
+	LD	(DEVICE+012H+32*3),A	;Dドライブ
+
 	LD	HL,0
 	LD	(X1PAT),HL
 
@@ -272,17 +268,13 @@ NON:
 
 	CALL	SETCRTC
 	LD	B,010H		;PALET
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 	INC	B
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 	INC	B
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 	INC	B
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 	JP	NOBANK
 
 TURBO:
@@ -319,29 +311,20 @@ CRT1:
 	INC	B
 	DB	0EDH,071H
 
-	LD	A,01FH
+	LD	A,01FH		;スタートポート
 	IN	A,(0F0H)
 	BIT	2,A
 	JR	Z,BANK
 
 	XOR	A
-TZ1:
+TZ1:				;前面スイッチが2HDの場合はMFMモードを2HDにしておく
 	PUSH	AF
 	CALL	_GETDPB
-	LD	A,(IX+012H)
-	CP	087H
+	LD	A,(IX+012H)	;DPB_12_DEVICE
+	AND	08FH
+	CP	087H		;フロッピーでMEM切り替えがON
 	JR	NZ,TZ2
-	PUSH	IX
-	POP	DE
-	LD	HL,M2HD
-	LDI
-	LDI
-	INC	DE
-	INC	DE
-	INC	DE
-	INC	DE
-	LD	BC,12
-	LDIR
+	RES	0,(IX+0AH)	;(DPB_0A_FDMODE)
 TZ2:
 	POP	AF
 	INC	A
@@ -501,14 +484,11 @@ EADR2:
 EADR0:
 	LD	BC,(EMMDV)
 	LD	B,00DH
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 	INC	C
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 	INC	C
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 	INC	C
 	RET
 
@@ -518,8 +498,7 @@ CHKCTC:
 INICTC1:
 	INC	C
 	OUT	(C),D
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 	DEC	E
 	JR	NZ,INICTC1
 	POP	BC
@@ -888,4 +867,4 @@ INITE:
 
 BDOS:
 	JP	BDOS0
-	DS	10	;Reserved
+	DS	37	;Reserved

@@ -52,26 +52,3 @@ XMIT1:
 	POP	BC
 	RET
 
-_SYS05:		;(BDOS)ÉvÉäÉìÉ^èoóÕ
-	PUSH	BC
-	LD	BC,01A01H
-_S05X1:
-	CALL	BREAK2
-	IN	A,(C)
-	AND	8
-	JR	NZ,_S05X1
-	DI
-	DEC	C
-	OUT	(C),E
-	LD	C,3
-	LD	A,00EH
-	OUT	(C),A
-	INC	A
-	INC	BC
-	DEC	BC
-	OUT	(C),A
-	EI
-	POP	BC
-	XOR	A
-	RET
-
