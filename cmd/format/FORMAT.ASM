@@ -43,9 +43,6 @@ MAIN:
 	CALL	JP_HL
 	JR	C,USAGE
 
-	BIT	6,(IX+0FH)	;FAT情報と論理セクタのサイズ(DPB_0F_BPS)
-	RET	NZ		;FAT16
-
 	CALL	SWITCH
 	CP	$20
 	JR	C,MAIN1
@@ -251,6 +248,8 @@ LOW1:
 	LD	DE,0
 	LD	HL,FDATA
 	CALL	DWT
+	OR	A
+	JP	NZ,ERROR
 
 	JR	LOGICX
 
@@ -274,7 +273,7 @@ LOGICX:
 	INC	DE
 	XOR	A
 	LD	(HL),A
-	LD	BC,$03FF
+	LD	BC,$03FF+4
 	LDIR
 ;
 	LD	HL,FDATA
@@ -282,40 +281,48 @@ LOGICX:
 	LD	(HL),A		;FATID
 	INC	HL
 	DEC	(HL)		;LD (HL),$FF
-	LD	A,(MAXCYL+1)
-	CP	80+1
-	JR	C,OTFL1
-	LD	(HL),A
-OTFL1:
 	INC	HL
-	DEC	(HL)
+	DEC	(HL)		;LD (HL),$FF
+	BIT	6,(IX+$0F)	;FAT情報と論理セクタのサイズ(DPB_0F_BPS)
+	JR	Z,FAT12
+	INC	HL		;FAT16の場合
+	DEC	(HL)		;LD (HL),$FF
+FAT12:
 	LD	E,(IX+$0E)	;FAT領域の先頭論理セクタ番号(DPB_0E_FATPS)
 	LD	D,0
-	LD	B,(IX+0)	;FAT領域のセクタ単位でのサイズ(DPB_00_FATLN)
+
+	LD	A,(IX+$0F)	;FAT情報と論理セクタのサイズ(DPB_0F_BPS)
+	AND	$80		;bit7:予備FAT
+LOGIC0:
+	PUSH	AF
+	LD	C,(IX+0)	;FAT領域のセクタ単位でのサイズ(DPB_00_FATLN)
+	LD	B,(IX+1)
+	LD	HL,FDATA
 LOGIC1:
-	PUSH	BC
-	LD	HL,FDATA
 	CALL	DWT
-	POP	BC
+	OR	A
+	JP	NZ,ERROR
+	LD	HL,FDATA+4
+	DEC	BC
+	LD	A,B
+	OR	C
+	JR	NZ,LOGIC1
 
-	LD	HL,FDATA
-	XOR	A
-	LD	(HL),A
-	INC	HL
-	LD	(HL),A
-	INC	HL
-	LD	(HL),A
-	DJNZ	LOGIC1
-
-LOGIC2:
+	POP	AF
+	ADD	A,A		;bit7:予備FAT
+	JR	C,LOGIC0
+LOGIC2:				;ディレクトリエントリ
 	LD	E,(IX+$10)	;ルートディレクトリ領域の先頭論理セクタ番号(DPB_10_DIRPS)
 	LD	D,(IX+$11)
 
 	LD	B,(IX+$0B)	;ルートディレクトリ領域の論理セクタ数(DPB_0B_DIRSCNT)
-	LD	HL,FDATA
-	CALL	DWTX
+LOGIC3:
+	LD	HL,FDATA+4
+	CALL	DWT
 	OR	A
-	JP	NZ,0
+	JP	NZ,ERROR
+	DJNZ	LOGIC3
+
 	LD	DE,COMMES
 	LD	C,9		;文字列出力
 	CALL	SYSTEM
@@ -501,28 +508,24 @@ VERE:
 	RET
 
 DWT:
-	LD	B,1
-DWTX:
+	PUSH	HL
 	PUSH	BC
 	PUSH	DE
 	EX	DE,HL
 	LD	C,$1A		;DTAの設定
 	CALL	SYSTEM
 	POP	DE
-	POP	HL
-	PUSH	HL
 	PUSH	DE
 	LD	A,(FCB1)
 	DEC	A
 	LD	L,A
+	LD	H,1
 	LD	C,$30		;論理セクタを用いた書き込み
 	CALL	SYSTEM
 	POP	DE
+	INC	DE
+	POP	BC
 	POP	HL
-	LD	L,H
-	LD	H,0
-	ADD	HL,DE
-	EX	DE,HL
 	RET
 
 SWITCH:
@@ -569,7 +572,7 @@ ERROR:
 	JP	0
 
 TITLE:
-	DB	"X1 format v1.11",$0D,$0A
+	DB	"X1 format v1.12",$0D,$0A
 	DB	"$"
 MUSAGE:
 	DB	"usage: FORMAT ﾄﾞﾗｲﾌﾞ:[ｽｲｯﾁ]",$0D,$0A
