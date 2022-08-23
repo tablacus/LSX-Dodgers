@@ -30,12 +30,12 @@ START:				;間違えてMS-DOS環境で実行しても即終了できる
 	JP	0
 DRVOK:
 	LD	E,A
-	DEC	E
 	PUSH	DE
 	LD	C,01BH		;ALLOC ディスク情報の獲得
 	CALL	SYSTEM
 	POP	HL
 	LD	DE,0
+	DEC	L
 	LD	H,1
 	PUSH	HL
 	LD	C,02FH		;RDABS 論理セクタの読み出し
@@ -366,7 +366,7 @@ CONOUT_A:
 	RET
 
 MSG_TITLE:
-	DB	"bpbinfo v1.01",00DH,00AH
+	DB	"bpbinfo v1.02",00DH,00AH
 	DB	'$'
 CRLF:
 	DB	00DH,00AH

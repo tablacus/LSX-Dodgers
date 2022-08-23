@@ -31,12 +31,12 @@
 000021 0121 C30000          10      JP  0
        0124                     DRVOK:
 000024 0124 5F               4      LD  E,A
-000025 0125 1D               4      DEC E
-000026 0126 D5              11      PUSH    DE
-000027 0127 0E1B             7      LD  C,01BH      ;ALLOC ディスク情報の獲得
-000029 0129 CD0500          17      CALL    SYSTEM
-00002C 012C E1              10      POP HL
-00002D 012D 110000          10      LD  DE,0
+000025 0125 D5              11      PUSH    DE
+000026 0126 0E1B             7      LD  C,01BH      ;ALLOC ディスク情報の獲得
+000028 0128 CD0500          17      CALL    SYSTEM
+00002B 012B E1              10      POP HL
+00002C 012C 110000          10      LD  DE,0
+00002F 012F 2D               4      DEC L
 000030 0130 2601             7      LD  H,1
 000032 0132 E5              11      PUSH    HL
 000033 0133 0E2F             7      LD  C,02FH      ;RDABS 論理セクタの読み出し
@@ -367,8 +367,8 @@
 00025F 035F C9              10      RET
                                 
        0360                     MSG_TITLE:
-000260 0360 627062696E666F20        DB  "bpbinfo v1.01",00DH,00AH
-            76312E30310D0A      
+000260 0360 627062696E666F20        DB  "bpbinfo v1.02",00DH,00AH
+            76312E30320D0A      
 00026F 036F 24                      DB  '$'
        0370                     CRLF:
 000270 0370 0D0A                    DB  00DH,00AH
