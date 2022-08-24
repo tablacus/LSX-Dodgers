@@ -41,7 +41,7 @@ _FBPS:	DW	0	;SEARCH FILES
 _FBAD:	DW	0	;    //
 _FBCNT:	DB	0	;    //
 _FILEN:	DB	0
-_DIRF:	DB	0
+_DIRF:	DB	0	;bit7:ディレクトリ bit0-6:セクタインデックス 
 _MAXCYL:DB	0
 _WTFATF:DB	0	;FATバッファの更新フラグ
 		DS	1
@@ -51,8 +51,9 @@ _DBSEC:	DW	0	;データバッファにあるデータを読み込んだセクタ番号
 _DPB:	DW	0
 _FATDRV:DB	0FFH	;FATバッファに読み込んでいるドライブ
 _FATIX:	DB	0	;FATバッファに読み込んでいるインデックス
+_FAKEFREE:	DW	0	;偽の残量（FATサイズが大きくなると重くなるのでその対策）
 
-	DS	4
+	DS	2
 
 CRTCD:	DB	06FH,050H,059H,038H,01FH,002H,019H,01CH
 	DB	000H,007H

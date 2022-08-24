@@ -1,5 +1,6 @@
 
 ;	LSX-Dodgers IO2
+;	ƒƒ‚ƒŠ‚ª‹ó‚¢‚½‚ç–ß‚·
 
 _SYS03:		;(BDOS)ŠO•”“ü—Í
 	DI

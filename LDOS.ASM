@@ -43,18 +43,24 @@ BDOS1X:
 	RET
 OVERFN
 	POP	HL
+	CP	06FH		;DOSVER MSX-DOS のバージョン番号の獲得
+	JR	NZ,_ERROR
+	LD	BC,011DH
+	LD	DE,VER
 _ERROR:
-_SYS2B:		;(BDOS)日付の設定
-_SYS2D:		;(BDOS)時刻の設定
+_SYS04:		;(BDOS)外部出力
 _SYS05:		;(BDOS)プリンタ出力
-	SCF			;CF=1
-	SBC	A,A		;A=0FFH
-	RET
 _SYS1C:		;(BDOS)ディスクの書き込み禁止化
 _SYS1E:		;(BDOS)ファイル属性の設定
 _SYS20:		;(BDOS)利用者番号の設定と読み出し
 _SYS2E:		;(BDOS)ベリファイ・フラグの設定
 	XOR	A
+	RET
+_SYS03:		;(BDOS)外部入力
+_SYS2B:		;(BDOS)日付の設定
+_SYS2D:		;(BDOS)時刻の設定
+	SCF			;CF=1
+	SBC	A,A		;A=0FFH
 	RET
 
 _SYS09:		;文字列出力
@@ -160,15 +166,18 @@ _SYS10:		;(BDOS)ファイルのクローズ
 _S10A:				;Write
 	LD	(IY+14),A	;(FCB)レコード・サイズ/アクセスするディレクトリのクラスタ番号+1
 	LD	(IY+15),A
+	LD	(IY+12),A	;(FCB)レコード・サイズ/アクセスするディレクトリのセクタインデックス
 
 	INC	(IY+28)		;0FEH->0FFH ;オープン・モード
 	CALL	SETTMS
 
 	LD	A,(IY+29)	;(FCB)ディレクトリ・モード
 	LD	(_DIRF),A
+	AND	07FH
+	LD	(_SECPS+1),A
 	LD	E,(IY+30)	;(FCB)ディレクトリ・ポジション
 	LD	D,(IY+31)
-	CALL	DC
+	CALL	READ_DIR
 	JR	C,FEND
 
 	LD	A,(IY+25)	;(FCB)ディレクトリ・ロケーション
@@ -227,6 +236,9 @@ _S12X1:
 	LD	L,(IY+14)	;(FCB)レコード・サイズ/アクセスするディレクトリのクラスタ番号+1
 	LD	H,(IY+15)
 	LD	(SCDIR),HL
+	LD	A,(IY+12)	;(FCB)レコード・サイズ/アクセスするディレクトリのセクタインデックス
+	LD	(_SECPS+1),A
+
 	LD	HL,(_FBPS)
 	LD	(SFBPS),HL
 	LD	HL,(_FILEN)

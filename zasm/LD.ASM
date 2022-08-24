@@ -21,7 +21,7 @@ RUN	EQU	0C600h
 MAC	EQU	01D90H		;X1
 VER_1   EQU	1
 VER_2   EQU	3
-VER_3   EQU	4
+VER_3   EQU	5
 VER	EQU	VER_1 * 256 + VER_2 * 16 + VER_3
 
 STACK	EQU	00000H
@@ -123,9 +123,9 @@ INIDMA:
 	LD	A,C
 	SUB	010H
 	LD	C,A
-	LD	(SIOAD+1),BC
-	LD	(SIOAD0+1),BC
-	LD	(SIOAD1+1),BC
+;	LD	(SIOAD+1),BC
+;	LD	(SIOAD0+1),BC
+;	LD	(SIOAD1+1),BC
 
 	LD	HL,SIODATA
 SINIT1:
@@ -911,298 +911,11 @@ INITE:
 
 BDOS:
 	JP	BDOS0
-	DS	37	;Reserved
-
-;LDIO2.ASM
-
-;	LSX-Dodgers IO2
-
-_SYS03:		;(BDOS)外部入力
-	DI
-	PUSH	BC
-SIOAD:	LD	BC,01F91H
-	LD	A,5
-	OUT	(C),A
-	LD	A,0EAH		;RTS ON
-	OUT	(C),A
-REC1:
-	CALL	BREAK2
-	IN	A,(C)
-	RRCA			;Arrival
-	JR	NC,REC1
-BREAK2X:
-	CCF
-	LD	A,5
-	OUT	(C),A
-	LD	A,0E8H		;RTS OFF
-	OUT	(C),A
-
-	DEC	C
-	IN	A,(C)		;Read data
-	POP	BC
-	EI
-	RET
-
-BREAK2:
-	LD	A,01AH
-	IN	A,(1)
-	RRCA
-	RET	C
-	POP	BC		;PC
-SIOAD0:	LD	BC,01F91H
-	JR	BREAK2X
-
-_SYS04:		;(BDOS)外部出力
-	PUSH	BC
-SIOAD1:	LD	BC,01F91H
-XMIT1:
-	CALL	BREAK2
-	LD	A,010H		;Reset status
-	OUT	(C),A
-	IN	A,(C)
-	CPL
-	AND	024H		;CTS Send Empty
-	JR	NZ,XMIT1
-	DEC	C
-	OUT	(C),E
-	POP	BC
-	RET
-
-
-;LDDISK2.ASM
-
-;	LSX-Dodgers DISK2
-
-
-;	GRAPHIC RAM DISK DRIVER
-
-
-GDRD:
-	CALL	GADR
-GDRDC1:
-	INI
-	INC	B
-	INC	C
-	JR	NZ,GDRDC1
-	JR	S1FD0
-
-GDWT:
-	CALL	GADR
-GDWTC1:
-	INC	B
-	OUTI
-	INC	C
-	JR	NZ,GDWTC1
-	JR	S1FD0
-
-GADR:
-	LD	C,0
-	LD	A,E
-	ADD	A,040H
-	LD	B,A
-	INC	DE
-	LD	A,(WK1FD0)
-	OR	010H		;BANK1
-S1FD0:
-	PUSH	BC
-	LD	(WK1FD0),A
-	LD	BC,01FD0H
-	OUT	(C),A
-	POP	BC
-	AND	0EFH		;BANK0
-	RET
-
-
-;	BANK RAM DISK DRIVER
-
-
-BDRDC:
-	LD	(BANKSP+1),SP
-	LD	A,(BANKSP+2)
-	ADD	A,A
-	JR	C,BDRDC1
-	LD	SP,EXTSP
-BDRDC1:
-	PUSH	DE
-	EXX
-	 PUSH	 BC
-	 PUSH	 DE
-	 CALL	 BADR
-	CALL	BTFR
-	EXX
-BDWTCE:
-	 POP	 DE
-	 POP	 BC
-	 EXX
-	POP	DE
-	INC	DE
-	EI
-BANKSP:	LD	SP,0
-	XOR	A
-	RET
-
-BDWTC:
-	LD	(BANKSP+1),SP
-	LD	A,(BANKSP+2)
-	ADD	A,A
-	JR	C,BDWTC1
-	LD	SP,EXTSP
-BDWTC1:
-	PUSH	DE
-	EXX
-	 PUSH	 BC
-	 PUSH	 DE
-	 CALL	 BADR
-	EXX
-	 LD	D,E
-	 LD	E,A
-	 EXX
-	EX	DE,HL
-	CALL	BTFR
-	EX	DE,HL
-	EXX
-	 OUT	 (C),D	 ;MAIN
-	 JR	 BDWTCE
-
-BADR:
-	 EXX
-	LD	A,E
-	ADD	A,A
-	RL	D
-	ADD	A,A
-	RL	D
-	PUSH	AF
-	ADD	A,A
-	LD	A,D
-	ADC	A,A
-	AND	00FH
-	EXX
-	 LD	 BC,00B00H
-	 LD	 D,A	  ;BANK
-	 LD	 E,010H	  ;MAIN
-	 EXX
-	POP	DE
-	LD	B,0
-	LD	E,B
-	RES	7,D
-	RET
-
-BTFR:
-	PUSH	DE
-	DI
-
-BTFR1:
-	EXX
-	 OUT	 (C),D	 ;BANK(MAIN)
-	 EXX
-	EX	(SP),HL
-	LD	A,(HL)
-	INC	HL
-	LD	C,(HL)
-	INC	HL
-	LD	D,(HL)
-	INC	HL
-	LD	E,(HL)
-	INC	HL
-	EX	(SP),HL
-	EXX
-	 OUT	 (C),E	 ;MAIN(BANK)
-	 EXX
-	LD	(HL),A
-	INC	HL
-	LD	(HL),C
-	INC	HL
-	LD	(HL),D
-	INC	HL
-	LD	(HL),E
-	INC	HL
-	DJNZ	BTFR1
-	POP	DE
-	RET
-
-
-;	EMM DRIVER(DMA)
-
-
-EDWTC:
-	LD	A,17
-	DB	1
-EDRDC:
-	LD	A,15
-EDWTC1:
-	PUSH	DE
-	LD	(EDMAD+12),HL
-	EX	DE,HL
-	ADD	HL,HL
-	ADD	HL,HL
-	LD	BC,(_MAXCYL-1)
-	LD	C,0
-	ADD	HL,BC
-	LD	BC,(_DRIVE)
-	LD	B,00DH
-	OUT	(C),C
-	INC	C
-	OUT	(C),L
-	INC	C
-	OUT	(C),H
-
-	LD	HL,EDMAD
-	CALL	SETDMA
-	LD	A,0B3H
-	OUT	(C),A
-	OUT	(C),C		;OUT 01F87H,087H
-	EX	DE,HL
-	INC	H
-	INC	H
-	INC	H
-	INC	H
-	POP	DE
-	INC	DE
-	XOR	A
-	RET
-
-EDMAD:	DB	0C3H,07DH,003H,00DH,0FFH,003H,02CH,050H,002H
-	DB	080H,09AH,0ADH,000H,000H,0CFH,001H,0CFH
-
-EMME:
-
-AT_RE	EQU	EDWTC-AT_EDWTC
-
+	DS	53	;Reserved
 
 ;LDCCP.ASM
 
 ;	LSX-Dodgers CCP
-
-PATHX	EQU	64
-PATHD:	DS	PATHX
-PATHE:	DB	0
-
-OK:	DB	"OK$"
-SKIP:	DB	"Skip$"
-KBFREE:	DB	"k bytes free",9,'$'
-DIRMES:	DB	"    dir $"
-COMERM:	DB	7,"Error!$"
-
-COMS	EQU	9
-COMTB:
-	DB	"D   "	;1
-	DW	C_DIR
-	DB	"DIR "	;2
-	DW	C_DIR
-	DB	"COPY"	;3
-	DW	C_COPY
-	DB	"CD  "	;4
-	DW	C_CD
-	DB	"DEL "	;5
-	DW	C_DEL
-	DB	"PATH"	;6
-	DW	C_PATH
-	DB	"REN "	;7
-	DW	C_REN
-	DB	"TYPE"	;8
-	DW	C_TYPE
-	DB	"REM "	;9
-	DW	C_REM
 
 WBOOT1:
 	DI
@@ -1972,7 +1685,7 @@ SWNE:
 	LD	H,A		;A=0
 	LD	L,A
 	LD	(FDRV+33),HL
-	LD	(FDRV+35),HL
+	LD	(FDRV+35),A
 COPY6:
 	CALL	BUFSIZ
 	CALL	S27DTA
@@ -2082,6 +1795,236 @@ BUFSIZ:
 	LD	L,0
 	RET
 
+PATHX	EQU	64
+PATHD:	DS	PATHX
+PATHE:	DB	0
+
+COMS	EQU	9
+COMTB:
+	DB	"D   "	;1
+	DW	C_DIR
+	DB	"DIR "	;2
+	DW	C_DIR
+	DB	"COPY"	;3
+	DW	C_COPY
+	DB	"CD  "	;4
+	DW	C_CD
+	DB	"DEL "	;5
+	DW	C_DEL
+	DB	"PATH"	;6
+	DW	C_PATH
+	DB	"REN "	;7
+	DW	C_REN
+	DB	"TYPE"	;8
+	DW	C_TYPE
+	DB	"REM "	;9
+	DW	C_REM
+
+KBFREE:	DB	"k bytes free",9,'$'
+DIRMES:	DB	"    dir $"
+OK:	DB	"OK$"
+SKIP:	DB	"Skip$"
+COMERM:	DB	"Error!$"
+
+;LDDISK2.ASM
+
+;	LSX-Dodgers DISK2
+
+
+;	GRAPHIC RAM DISK DRIVER
+
+
+GDRD:
+	CALL	GADR
+GDRDC1:
+	INI
+	INC	B
+	INC	C
+	JR	NZ,GDRDC1
+	JR	S1FD0
+
+GDWT:
+	CALL	GADR
+GDWTC1:
+	INC	B
+	OUTI
+	INC	C
+	JR	NZ,GDWTC1
+	JR	S1FD0
+
+GADR:
+	LD	C,0
+	LD	A,E
+	ADD	A,040H
+	LD	B,A
+	INC	DE
+	LD	A,(WK1FD0)
+	OR	010H		;BANK1
+S1FD0:
+	PUSH	BC
+	LD	(WK1FD0),A
+	LD	BC,01FD0H
+	OUT	(C),A
+	POP	BC
+	AND	0EFH		;BANK0
+	RET
+
+
+;	BANK RAM DISK DRIVER
+
+
+BDRDC:
+	LD	(BANKSP+1),SP
+	LD	A,(BANKSP+2)
+	ADD	A,A
+	JR	C,BDRDC1
+	LD	SP,EXTSP
+BDRDC1:
+	PUSH	DE
+	EXX
+	 PUSH	 BC
+	 PUSH	 DE
+	 CALL	 BADR
+	CALL	BTFR
+	EXX
+BDWTCE:
+	 POP	 DE
+	 POP	 BC
+	 EXX
+	POP	DE
+	INC	DE
+	XOR	A
+BANKSP:	LD	SP,0
+	EI
+	RET
+
+BDWTC:
+	LD	(BANKSP+1),SP
+	LD	A,(BANKSP+2)
+	ADD	A,A
+	JR	C,BDWTC1
+	LD	SP,EXTSP
+BDWTC1:
+	PUSH	DE
+	EXX
+	 PUSH	 BC
+	 PUSH	 DE
+	 CALL	 BADR
+	EXX
+	 LD	D,E
+	 LD	E,A
+	 EXX
+	EX	DE,HL
+	CALL	BTFR
+	EX	DE,HL
+	EXX
+	 OUT	 (C),D	 ;MAIN
+	 JR	 BDWTCE
+
+BADR:
+	 EXX
+	LD	A,E
+	ADD	A,A
+	RL	D
+	ADD	A,A
+	RL	D
+	PUSH	AF
+	ADD	A,A
+	LD	A,D
+	ADC	A,A
+	AND	00FH
+	EXX
+	 LD	 BC,00B00H
+	 LD	 D,A	  ;BANK
+	 LD	 E,010H	  ;MAIN
+	 EXX
+	POP	DE
+	LD	B,0
+	LD	E,B
+	RES	7,D
+	RET
+
+BTFR:
+	PUSH	DE
+	DI
+
+BTFR1:
+	EXX
+	 OUT	 (C),D	 ;BANK(MAIN)
+	 EXX
+	EX	(SP),HL
+	LD	A,(HL)
+	INC	HL
+	LD	C,(HL)
+	INC	HL
+	LD	D,(HL)
+	INC	HL
+	LD	E,(HL)
+	INC	HL
+	EX	(SP),HL
+	EXX
+	 OUT	 (C),E	 ;MAIN(BANK)
+	 EXX
+	LD	(HL),A
+	INC	HL
+	LD	(HL),C
+	INC	HL
+	LD	(HL),D
+	INC	HL
+	LD	(HL),E
+	INC	HL
+	DJNZ	BTFR1
+	POP	DE
+	RET
+
+
+;	EMM DRIVER(DMA)
+
+
+EDWTC:
+	LD	A,17
+	DB	1
+EDRDC:
+	LD	A,15
+EDWTC1:
+	PUSH	DE
+	LD	(EDMAD+12),HL
+	EX	DE,HL
+	ADD	HL,HL
+	ADD	HL,HL
+	LD	BC,(_MAXCYL-1)
+	LD	C,0
+	ADD	HL,BC
+	LD	BC,(_DRIVE)
+	LD	B,00DH
+	OUT	(C),C
+	INC	C
+	OUT	(C),L
+	INC	C
+	OUT	(C),H
+
+	LD	HL,EDMAD
+	CALL	SETDMA
+	LD	A,0B3H
+	OUT	(C),A
+	OUT	(C),C		;OUT 01F87H,087H
+	EX	DE,HL
+	INC	H
+	INC	H
+	INC	H
+	INC	H
+	POP	DE
+	INC	DE
+	XOR	A
+	RET
+
+EDMAD:	DB	0C3H,07DH,003H,00DH,0FFH,003H,02CH,050H,002H
+	DB	080H,09AH,0ADH,000H,000H,0CFH,001H,0CFH
+
+EMME:
+
+AT_RE	EQU	EDWTC-AT_EDWTC
+
 
 ;LDOS.ASM
 
@@ -2129,18 +2072,24 @@ BDOS1X:
 	RET
 OVERFN
 	POP	HL
+	CP	06FH		;DOSVER MSX-DOS のバージョン番号の獲得
+	JR	NZ,_ERROR
+	LD	BC,011DH
+	LD	DE,VER
 _ERROR:
-_SYS2B:		;(BDOS)日付の設定
-_SYS2D:		;(BDOS)時刻の設定
+_SYS04:		;(BDOS)外部出力
 _SYS05:		;(BDOS)プリンタ出力
-	SCF			;CF=1
-	SBC	A,A		;A=0FFH
-	RET
 _SYS1C:		;(BDOS)ディスクの書き込み禁止化
 _SYS1E:		;(BDOS)ファイル属性の設定
 _SYS20:		;(BDOS)利用者番号の設定と読み出し
 _SYS2E:		;(BDOS)ベリファイ・フラグの設定
 	XOR	A
+	RET
+_SYS03:		;(BDOS)外部入力
+_SYS2B:		;(BDOS)日付の設定
+_SYS2D:		;(BDOS)時刻の設定
+	SCF			;CF=1
+	SBC	A,A		;A=0FFH
 	RET
 
 _SYS09:		;文字列出力
@@ -2246,15 +2195,18 @@ _SYS10:		;(BDOS)ファイルのクローズ
 _S10A:				;Write
 	LD	(IY+14),A	;(FCB)レコード・サイズ/アクセスするディレクトリのクラスタ番号+1
 	LD	(IY+15),A
+	LD	(IY+12),A	;(FCB)レコード・サイズ/アクセスするディレクトリのセクタインデックス
 
 	INC	(IY+28)		;0FEH->0FFH ;オープン・モード
 	CALL	SETTMS
 
 	LD	A,(IY+29)	;(FCB)ディレクトリ・モード
 	LD	(_DIRF),A
+	AND	07FH
+	LD	(_SECPS+1),A
 	LD	E,(IY+30)	;(FCB)ディレクトリ・ポジション
 	LD	D,(IY+31)
-	CALL	DC
+	CALL	READ_DIR
 	JR	C,FEND
 
 	LD	A,(IY+25)	;(FCB)ディレクトリ・ロケーション
@@ -2313,6 +2265,9 @@ _S12X1:
 	LD	L,(IY+14)	;(FCB)レコード・サイズ/アクセスするディレクトリのクラスタ番号+1
 	LD	H,(IY+15)
 	LD	(SCDIR),HL
+	LD	A,(IY+12)	;(FCB)レコード・サイズ/アクセスするディレクトリのセクタインデックス
+	LD	(_SECPS+1),A
+
 	LD	HL,(_FBPS)
 	LD	(SFBPS),HL
 	LD	HL,(_FILEN)
@@ -2668,52 +2623,22 @@ INTP1:
 	CALL	IN49SB
 	LD	L,A
 
-	BIT	4,H		;[GRAPH]
+	CP	8		;DELキー
 	JR	NZ,SCEXE
-	LD	A,L
-	XOR	9
-	JR	Z,DIAN
 	LD	A,H
-	RRCA			;[CTRL]
-	JR	NC,SCL
-	RRCA			;[SHIFT]
-	JR	C,SCEXE
-	LD	A,080H
-	JR	SCG1
+	AND	011H		;CTRLキー + GRAPHキー
+	JR	Z,RESET
 SCEXE:
 	LD	(_KEYD),HL
 	CALL	KEYSET1
 
 	POP	BC
 	RET
-SCL:
-	LD	A,L
-	CP	008H
-	JR	Z,RESET
-
-	LD	A,002H
-SCG1:
-	PUSH	HL
-	LD	HL,WK1FD0
-	XOR	(HL)
-	CALL	S1FD0
-	POP	HL
-	JR	SCEXE
 
 RESET:
 	LD	A,01DH
 	OUT	(0),A
 	RST	0
-
-DIAN:
-	LD	L,A
-	PUSH	BC
-	LD	BC,01FB0H
-	IN	A,(C)
-	XOR	080H
-	OUT	(C),A
-	POP	BC
-	JR	SCEXE
 
 INTCTC2:
 	PUSH	AF
@@ -3956,6 +3881,8 @@ SOPENX1:
 	LD	HL,(SCDIR)
 	LD	(IY+14),L	;(FCB)アクセスするディレクトリのクラスタ番号+1
 	LD	(IY+15),H
+	LD	A,(_SECPS+1)
+	LD	(IY+12),A	;(FCB)アクセスするディレクトリのセクタインデックス
 
 	LD	HL,(SFNDF)	;Direcroty location and Flags
 	LD	(_FILEN),HL
@@ -3975,12 +3902,10 @@ SOPENC:
 
 	XOR	A
 	LD	(_FILEN),A
-SOPEN0:
-	CALL	LDDIRX
+	CALL	LDDIRX1		;A=0で呼び出す
 	JR	Z,SDIRX1
 
-	CALL	MULSPC
-	CALL	DC		;Sub Directory
+	CALL	READ_DIR	;Sub Directory
 	JR	C,SDIRX0
 	LD	HL,(_DTBUF)
 	LD	A,(HL)
@@ -3989,15 +3914,15 @@ SOPEN0:
 SDIRX0:
 	XOR	A
 	LD	(_DIRF),A
+	LD	(IY+12),A	;(FCB)カレント・ブロック
 	LD	(IY+14),1	;(FCB)レコード・サイズ
-	LD	(IY+15),0
+	LD	(IY+15),A
 SDIRX1:
 	LD	DE,(_DIRPS)	;Root Directory
-
 SOPEN1:
 SDECPAT:LD	C,32		;自己書き換え 1セクタ辺りのディレクトリエントリ数  1024=32 / 512=16
 SOPEN1X:
-	CALL	DC		;FILE SEARCH
+	CALL	READ_DIR	;FILE SEARCH
 	JR	C,RDDERR
 	LD	HL,(_DTBUF)
 SOPEN2:
@@ -4007,9 +3932,9 @@ OPENPAT:CALL	FILESE		;(Self-rewriting)
 	JR	C,SOPENE
 	JR	Z,NOTSE
 SOPEN3:
-	LD	A,(_DIRF)
-	OR	A
-	JR	NZ,SOPEN5
+	LD	A,(_DIRF)	;bit7:ディレクトリか判別
+	ADD	A,A
+	JR	C,SOPEN5
 	INC	DE		;ルートディレクトリ
 	PUSH	HL
 MD_PAT:	LD	HL,12		;(Self-rewriting)MAXDIR
@@ -4018,9 +3943,11 @@ MD_PAT:	LD	HL,12		;(Self-rewriting)MAXDIR
 	JR	NZ,SOPEN1
 	JR	SOPEN6
 SOPEN5:
-	CALL	GNCLX	;END DIR
+	CALL	GNCLX		;END DIR
 	RET	C
-	CALL	ENDCLX
+	CALL	ENDCL
+	LD	A,(_SECPS+1)
+	LD	(IY+12),A	;(FCB)アクセスするディレクトリのセクタインデックス
 SOPEN6:
 	JR	C,SOPEN1
 NOTSE:
@@ -4047,7 +3974,7 @@ NOPEN:
 
 	CALL	LDDIRX
 	LD	DE,(_FBPS)
-	CALL	DC
+	CALL	READ_DIR
 	JR	C,RDDERR
 	LD	A,(_FBCNT)
 	DEC	A
@@ -4076,9 +4003,10 @@ COPEN:
 	CALL	SOPENC
 	RET	NC
 	RET	Z
-	LD	A,(_DIRF)
-	SUB	001H
-	RET	C
+	LD	A,(_DIRF)	;bit7:ディレクトリか判別
+	ADD	A,A
+	CCF
+	RET	C		;ルートディレクトリ
 	LD	B,1
 	CALL	WRDF
 	RET	C
@@ -4096,31 +4024,32 @@ SECSZM1:LD	BC,003FFH	;自己書き換え セクタサイズ-1(0x3FF:1023 or 0x1FF:511 or 0xF
 	LDIR
 
 	LD	A,(_DIRF)
-	OR	A
-	JR	Z,COPENE	;ルートディレクトリ
+	ADD	A,A
+	JR	NC,COPENE	;ルートディレクトリ
 
 	POP	DE		;DE=(_CLPS)
 	PUSH	DE
 	LD	A,(SPCPAT+1)	;1クラスタの論理セクタ数
-COPEN1:
 	DEC	A
-	JR	Z,COPENE	;1セクタ辺りのセクタ数が2以上の場合
-	PUSH	AF		;データバッファに入らないセクタもゼロクリア
-	INC	DE
-	PUSH	DE
+	JR	Z,COPENE
+	LD	A,1		;1セクタ辺りのセクタ数が2以上の場合
+	LD	(_SECPS+1),A
+COPEN1:
+	PUSH	DE		;データバッファに入らないセクタもゼロクリア
 	PUSH	BC
-	CALL	DCPAT
-	CALL	DWT16
+	LD	HL,(_DTBUF)
+	CALL	CLUSTX
+	CALL	DWT24
 	POP	BC
 	POP	DE
-	POP	AF
-	JR	COPEN1
+	CALL	NEXTX
+	JR	NZ,COPEN1
 COPENE:
 	LD	HL,(_DTBUF)
 	POP	DE
 	RET
 
-DC:
+READ_DIR:
 	LD	(_CLPS),DE
 	PUSH	BC
 	PUSH	DE
@@ -4243,25 +4172,38 @@ CPFILE2:
 	RET
 
 DCPAT:
+	LD	C,0
 	LD	HL,(_DTBUF)
-	LD	A,(_DIRF)
-	OR	A
-	RET	Z
-
-CLUST:
+	LD	A,(_DIRF)	;bit7:ディレクトリか判別
+	ADD	A,A
+	RET	NC		;ルートディレクトリの場合はCレジスタを0にしておく(CDEがセクタ番号)
+	LD	A,(_SECPS+1)
+	OR	080H
+	LD	(_DIRF),A	;bit0-6:セクタインデックス
+CLUSTX:
 	PUSH	HL
-CLSPAT:	LD	HL,8	;+8 (2D)  !ADDCL (Self-rewriting)
-	ADD	HL,DE
+	EX	DE,HL
+	XOR	A
+SPCPAT:	LD	C,1		;自己書き換え（1クラスタの論理セクタ数）
+L_CLDBL:
+	RR	C		;->CF
+	JR	C,E_CLDBL
+	ADD	HL,HL		;*2
+	ADC	A,A
+	JR	L_CLDBL
+E_CLDBL
+	LD	C,A
+	LD	A,(_SECPS+1)
+	OR	L
+	LD	L,A
+CLSPAT:	LD	DE,8	;+8 (2D)  !ADDCL (Self-rewriting)
+	XOR	A
+	ADD	HL,DE	;データ格納領域の先頭論理セクタ番号
+	ADC	A,C
+	LD	C,A
 	EX	DE,HL
 	POP	HL
 	RET
-;ADD_DE_A:
-;	ADD	A,E	;DE=DE+A
-;	LD	E,A
-;	ADC	A,D
-;	SUB	E
-;	LD	D,A
-;	RET
 
 ENDCL:
 	LD	A,D	;END CLUSTER
@@ -4271,12 +4213,6 @@ CLPAT1:	CP	1	;164=356	(Self-rewriting)
 CLPAT2:	CP	064H	;		(Self-rewriting)
 	RET
 
-ENDCLX:
-	PUSH	DE
-	CALL	DIVSPC
-	CALL	ENDCL
-	POP	DE
-	RET
 CAP:
 	CP	'a'
 	RET	C
@@ -4315,9 +4251,15 @@ LDDIR:
 	LD	(IY+14),E	;(FCB)アクセスするディレクトリのクラスタ番号+1
 	LD	(IY+15),D
 	DEC	DE
-	JR	CHDIR2
+	XOR	A
+	LD	(IY+12),A	;(FCB)アクセスするディレクトリのセクタインデックス
+	LD	(_SECPS+1),A
+	JR	CHDIR2		;POP_IX_RET
 
 LDDIRX:
+	LD	A,(IY+12)	;(FCB)アクセスするディレクトリのセクタインデックス
+LDDIRX1:
+	LD	(_SECPS+1),A
 	LD	E,(IY+14)	;(FCB)アクセスするディレクトリのクラスタ番号+1
 	LD	D,(IY+15)
 	DEC	DE
@@ -4326,7 +4268,9 @@ LDDIRX:
 LDDIRS:
 	LD	A,D
 	OR	E
-	LD	(_DIRF),A
+	ADD	A,0FFH
+	SBC	A,A
+	LD	(_DIRF),A	;bit7:ディレクトリか判別
 	RET
 
 KILL:
@@ -4546,11 +4490,11 @@ E_WRFX:
 
 WRDF:				;Bクラスタ分FATを確保する
 	LD	DE,2
-	CALL	MULSPC
+	XOR	A
+	LD	(_SECPS+1),A
 WRDF1:
 	PUSH	BC
 	PUSH	DE
-	CALL	DIVSPC
 	CALL	_GNCL
 	JR	C,WRDF3
 	LD	A,D		;空いているかチェック
@@ -4562,15 +4506,11 @@ WRDF1:
 	LD	(_CLPS),HL
 	LD	A,D		;元の(_CLPS)が 0 か?
 	OR	E
-	EX	DE,HL		;
-	CALL	DIVSPC		;ここでフラグは変化しない
-	EX	DE,HL		;
 	JR	NZ,WRDF2
 	LD	(IY+26),L	;(FCB)ファイルの先頭クラスタ
 	LD	(IY+27),H	;元が空の場合はFCBにクラスタをセットする
 	JR	WRDF3
 WRDF2:
-	CALL	DIVSPC
 	CALL	_SNCL
 WRDF3:
 	POP	DE
@@ -4578,7 +4518,6 @@ WRDF3:
 	RET	C
 	DJNZ	WRDF5		;ここでループカウンタチェック
 	LD	DE,(_CLPS)
-	CALL	DIVSPC
 	LD	HL,0FFFFH	;FATエントリ終了(EOCマーク)
 	JP	_SNCL
 
@@ -4586,10 +4525,8 @@ WRDF4:				;DEクラスタが空じゃないので次に移動する
 	POP	DE
 	POP	BC
 WRDF5:
-	CALL	DIVSPC
 	INC	DE
 	CALL	ENDCL
-	CALL	MULSPC
 	JR	C,WRDF1
 	SCF
 	RET
@@ -4605,30 +4542,35 @@ L_RWX:
 E_RWX:
 	LD	E,(IY+26)	;(FCB)ファイルの先頭クラスタ
 	LD	D,(IY+27)
-	CALL	MULSPC
+	XOR	A
+	LD	(_SECPS+1),A
 RWX1:
 	LD	(_CLPS),DE
 	LD	A,D
 	OR	E
-	SCF
-	RET	Z	;RET DE==0
+	JR	Z,SCF_RET	;RET DE==0 => CF=1
 
 	LD	A,B
 	OR	C
-	RET	Z	;RET BC==0
+	RET	Z		;RET BC==0 => CF=0
 
 	CALL	GNCLX
 	RET	C
 	DEC	BC
 
-	CALL	ENDCLX
+	CALL	ENDCL
 	JR	C,RWX1
+SCF_RET:
 	SCF
 	RET
 
 DSKF:
 MAXCLP:	LD	DE,0
-	LD	HL,0
+	LD	HL,(_FAKEFREE)
+	LD	A,H
+	OR	L
+	JR	Z,DSKF1
+	LD	DE,1
 DSKF1:
 	PUSH	DE
 	CALL	_GNCL
@@ -4867,8 +4809,8 @@ RBWB:
 RBWB1:
 	PUSH	BC
 	PUSH	DE
-	CALL	CLUST
-	CALL	DWT16
+	CALL	CLUSTX
+	CALL	DWT24
 	POP	DE
 	POP	BC
 	JR	C,RBWERR
@@ -4878,9 +4820,10 @@ RBWB1:
 RBWC:
 	CALL	RBXC
 	JR	Z,RBWEND
-
-	CALL	CLUST
+	PUSH	BC
+	CALL	CLUSTX
 	CALL	DRDN
+	POP	BC
 	JR	C,RBWERR
 	LD	DE,(_DTBUF)
 	LDIR
@@ -5048,8 +4991,8 @@ RBRB:
 RBRB1:
 	PUSH	BC
 	PUSH	DE
-	CALL	CLUST
-	CALL	DRD16
+	CALL	CLUSTX
+	CALL	DRD24
 	POP	DE
 	POP	BC
 	CALL	NC,GNCLX
@@ -5058,9 +5001,10 @@ RBRB1:
 RBRC:
 	CALL	RBXC
 	JR	Z,RBREND
-
-	CALL	CLUST
+	PUSH	BC
+	CALL	CLUSTX
 	CALL	DRDX
+	POP	BC
 	JP	C,RBRERR
 	EX	DE,HL
 	LD	HL,(_DTBUF)
@@ -5128,10 +5072,12 @@ RBX2:				;Cluster settings
 	RET
 
 RBXA:
+	PUSH	BC
 	PUSH	DE
-	CALL	CLUST
+	CALL	CLUSTX
 	CALL	DRDX
 	POP	DE
+	POP	BC
 	RET	C
 	CALL	GNCLX
 	RET	C
@@ -5204,7 +5150,7 @@ GET_RR_CDE:			;CDE=Random record
 CPBUF:
 LEFTX:	DW	0
 DTAX:	DW	0
-	DB	020H	;DS 7,20h
+	DB	020H	;CPBUFで使う
 	DB	020H
 	DB	020H
 	DB	020H
@@ -5226,7 +5172,9 @@ DRDX:
 	PUSH	BC
 	PUSH	DE
 	LD	HL,(_DTBUF)
-	CALL	DRD16
+	LD	A,(_DBS24+1)
+	LD	C,A
+	CALL	DRD24
 	CALL	C,DRDNE
 POP_DE_BC_HL_RET:
 	POP	DE
@@ -5234,6 +5182,7 @@ POP_DE_BC_HL_RET:
 	POP	HL
 	RET
 
+;	CDE:セクタ番号
 DRDN:
 	XOR	A
 DRDN1:	NOP			;自己書き換え NOP / SCF
@@ -5241,9 +5190,13 @@ DRDN1:	NOP			;自己書き換え NOP / SCF
 DRDNX:
 	CALL	DRDY
 	RET	Z
-DRDX1:				;データバッファの情報を保存
+DRDX1:
 	CALL	DWTX
+				;データバッファの読み込んだドライブ・セクタ情報を保存
 	LD	(_DBSEC),DE
+	LD	A,C
+	LD	(_DBS24+1),A
+
 	LD	A,(_DRV)
 	LD	(_DBDRV),A
 	CALL	_CHGDRV
@@ -5253,7 +5206,12 @@ DRDNE:
 	LD	(_DBDRV),A
 	RET
 
+;	CDE:セクタ番号
 DRDY:
+	LD	A,(_DBS24+1)
+	CP	C
+	RET	NZ
+
 	PUSH	HL
 	LD	A,(_DRV)
 	LD	HL,_DBDRV
@@ -5278,9 +5236,11 @@ DWTX:
 	PUSH	DE
 	LD	A,(_DBDRV)
 	CALL	_CHGDRV
+_DBS24:	LD	C,0
 	LD	DE,(_DBSEC)
 	LD	HL,(_DTBUF)
-	CALL	NC,DWT16
+	CALL	NC,DWT24
+POP_DE_BC_HL_RET2:
 	JR	POP_DE_BC_HL_RET
 
 RDFATX:
@@ -5307,7 +5267,7 @@ RDFATE2:
 	LD	(_FATDRV),A
 POP_IX_DE_BC_HL_RET:
 	POP	IX
-	JR	POP_DE_BC_HL_RET
+	JR	POP_DE_BC_HL_RET2
 
 WTFATX:
 	LD	A,(_WTFATF)
@@ -5491,67 +5451,25 @@ SNCL16:
 	JR	FAT_CHANGED
 
 ;------------------------
-;次のセクタを探す際に「1クラスタの論理セクタ数」を掛けてまとめて扱う
+;次のセクタを探す際に_SECPSの値をチェック
 ;in
-;	DE : セクタ番号×1クラスタの論理セクタ数＋α
+;	DE : セクタ番号
 ;out
-;	DE : 次のセクタ番号×1クラスタの論理セクタ数＋α
+;	DE : 次のセクタ番号
 ;note
-;	「FAT12」最大12ビット + 「1クラスタの論理セクタ数」4ビットで計16ビットとして扱う
+;
 ;------------------------
-GNCLX:
-	LD	A,E
+NEXTX:
+_SECPS:	LD	A,0
 	INC	A
 NCPAT:	AND	0	;自己書き換え　1クラスタの論理セクタ数-1
-	JR	Z,GNCLX1
-	INC	DE	;クラスタを跨がない場合は単純に+1する
-	RET
-GNCLX1:
-	CALL	DIVSPC	;クラスタを跨ぐ場合は
-	CALL	_GNCL	;次のクラスタを探す
-
-;------------------------
-;クラスタと「1クラスタの論理セクタ数」を掛ける
-;in
-;	DE : セクタ番号
-;out
-;	DE : 掛けられた値
-;note
-;	DE以外のレジスタとフラグは保持する
-;------------------------
-MULSPC:
-	PUSH	AF
-	EX	DE,HL
-SPCPAT:	LD	A,1		;自己書き換え（1クラスタの論理セクタ数）
-CLDBL:
-	RRCA			;->CF
-	JR	C,CLDBL_RET
-	ADD	HL,HL		;*2
-	JR	CLDBL
-CLDBL_RET:
-	EX	DE,HL
-POP_AF_RET
-	POP	AF
+	LD	(_SECPS+1),A
 	RET
 
-;------------------------
-;「1クラスタの論理セクタ数」を割って論理セクタだけに戻す
-;in
-;	DE : 掛けられた値
-;out
-;	DE : セクタ番号
-;note
-;	DE以外のレジスタとフラグは保持する
-;------------------------
-DIVSPC:
-	PUSH	AF
-	LD	A,(SPCPAT+1)	;1クラスタの論理セクタ
-CLDIV1:
-	RRCA			;->CF
-	JR	C,POP_AF_RET
-	SRL	D		;DE=DE/2
-	RR	E		;
-	JR	CLDIV1
+GNCLX:
+	CALL	NEXTX
+	RET	NZ	;1クラスタのセクタ未満の場合は戻る
+	JP	_GNCL	;次のクラスタを探す
 
 RDFAT:
 	LD	A,080H
@@ -5656,28 +5574,41 @@ BPBDE1:
 	ADD	HL,DE		;MAXDIR
 	PUSH	HL
 	LD	C,(IY+13)	;BPB_SecPerClus
-	SLA	C
+	SLA	C		;*2
 	XOR	A
 	LD	B,A
 	SBC	HL,BC
 	LD	(IX+014H),L	;DPB_14_ADDCL16
 	LD	(IX+015H),H
 
+	POP	DE		;DE=DPB_0B_MAXDIR
 	LD	L,(IY+19)	;BPB_TotSec16
 	LD	H,(IY+20)
-	POP	DE		;DE=DPB_0B_MAXDIR
 	LD	A,H
-	OR	L
-	JR	Z,NOT_BPB	;セクタ数が16ビットを超えるものは危険なので扱わない
-	SBC	HL,DE
+	OR	L		;ここでCF=0
+	LD	A,0		;LDでフラグは変化しない。BPB_TotSec16を AHL で扱う為、Aに0を入れる
+	JR	NZ,BPB16BIT
+	LD	A,(IY+35)	;BPB_TotSec16が「0」の場合はBPB_TotSec32で計算
+	OR	A
+NOT_BPB1:
+	JP	NZ,NOT_BPB	;念のため(総セクタ数が24ビットを超える場合)
+	LD	L,(IY+32)	;BPB_TotSec32 は AHL の24ビットで扱う
+	LD	H,(IY+33)	;1クラスタの論理セクタ数(DPB_07_SECPCL)が最大128なので
+	LD	A,(IY+34)	;24ビットを超えると必ずクラスタ数が16ビットを超えてしまうのでこれで十分
+BPB16BIT:
+	SBC	HL,DE		;CF=0のはず
+	SBC	A,0
 	LD	B,(IY+13)	;BPB_SecPerClus
-BPBTC1:				;総クラスタ数 = 総セクタ数 / セクタサイズ
-	RR	B
+BPBTC1:				;総クラスタ数(AHL) = 総セクタ数(AHL) / セクタサイズ(B)
+	RR	B		;->CY
 	JR	C,BPBTC2
-	SRL	H
+	SRL	A
+	RR	H		;AHL=AHL/2
 	RR	L
 	JR	BPBTC1
 BPBTC2:
+	OR	A
+	JR	NZ,NOT_BPB1	;念のため(クラスタ数が16ビットを超える場合)
 	INC	HL
 	INC	HL
 	LD	(IX+8),L	;DPB_08_MAXCL
@@ -5688,14 +5619,14 @@ BPBTC2:
 
 	BIT	7,(IX+00AH)	;DPB_0A_FDMODE
 	JR	Z,NOT_FD
-	LD	L,40		;MAXCYLの設定（要検討）
+	LD	L,40		;MAXCYLの設定（要検討）ここから下はフロッピーのみ書き換える
 	CP	0FDH	;2D
 	JR	Z,SETCYL
 	LD	L,77
 	CP	0FEH	;2HD
 	JR	Z,SETCYL
 	LD	L,80	;その他2DD等
-SETCYL:
+SETCYL:	
 	LD	(IX+00CH),L	;DPB_0C_MAXCYL
 	LD	A,(IY+24)	;BPB_SecPerTr
 	LD	(IX+00DH),A	;DPB_0D_MAXSEC
@@ -5713,6 +5644,7 @@ RDFAT0X:
 DRD16:
 	LD	C,0
 DRD24:
+	LD	B,1
 	PUSH	IX
 	LD	IX,(_DPB)
 DRDPAT:	CALL	FDRD		;自己書き換え（ディスク読み込み）
@@ -5736,6 +5668,7 @@ RDFATL:
 DWT16:
 	LD	C,0
 DWT24:
+	LD	B,1
 	PUSH	IX
 	LD	IX,(_DPB)
 DWTPAT:	CALL	FDWT		;自己書き換え（ディスク書き込み）
@@ -5748,11 +5681,12 @@ WTFAT:
 	BIT	7,(IX+00FH)	;DPB_0F_BPS
 	RET	Z		;予備FATが無い
 	CALL	FATS2
-	LD	A,(IX+0)	;DPB_00_FATLN
-WTFAT2:
-	INC	DE
-	DEC	A
-	JR	NZ,WTFAT2
+	PUSH	HL		;予備FAT
+	LD	L,(IX+0)	;DPB_00_FATLN
+	LD	H,(IX+1)
+	ADD	HL,DE
+	EX	DE,HL
+	POP	HL
 WTFATL:
 	PUSH	BC
 	CALL	DWT16
@@ -5875,7 +5809,7 @@ CHGDRV2:
 
 	LD	SP,IX
 
-	POP	HL		;L=DPB_00_FATLN
+	POP	HL		;DPB_00_FATLN
 	POP	HL		;DPB_02_DRD
 	LD	(DRDPAT+1),HL
 
@@ -6415,7 +6349,7 @@ _FBPS:	DW	0	;SEARCH FILES
 _FBAD:	DW	0	;    //
 _FBCNT:	DB	0	;    //
 _FILEN:	DB	0
-_DIRF:	DB	0
+_DIRF:	DB	0	;bit7:ディレクトリ bit0-6:セクタインデックス 
 _MAXCYL:DB	0
 _WTFATF:DB	0	;FATバッファの更新フラグ
 		DS	1
@@ -6425,8 +6359,9 @@ _DBSEC:	DW	0	;データバッファにあるデータを読み込んだセクタ番号
 _DPB:	DW	0
 _FATDRV:DB	0FFH	;FATバッファに読み込んでいるドライブ
 _FATIX:	DB	0	;FATバッファに読み込んでいるインデックス
+_FAKEFREE:	DW	0	;偽の残量（FATサイズが大きくなると重くなるのでその対策）
 
-	DS	4
+	DS	2
 
 CRTCD:	DB	06FH,050H,059H,038H,01FH,002H,019H,01CH
 	DB	000H,007H

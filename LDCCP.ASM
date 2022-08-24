@@ -1,37 +1,6 @@
 
 ;	LSX-Dodgers CCP
 
-PATHX	EQU	64
-PATHD:	DS	PATHX
-PATHE:	DB	0
-
-OK:	DB	"OK$"
-SKIP:	DB	"Skip$"
-KBFREE:	DB	"k bytes free",9,'$'
-DIRMES:	DB	"    dir $"
-COMERM:	DB	7,"Error!$"
-
-COMS	EQU	9
-COMTB:
-	DB	"D   "	;1
-	DW	C_DIR
-	DB	"DIR "	;2
-	DW	C_DIR
-	DB	"COPY"	;3
-	DW	C_COPY
-	DB	"CD  "	;4
-	DW	C_CD
-	DB	"DEL "	;5
-	DW	C_DEL
-	DB	"PATH"	;6
-	DW	C_PATH
-	DB	"REN "	;7
-	DW	C_REN
-	DB	"TYPE"	;8
-	DW	C_TYPE
-	DB	"REM "	;9
-	DW	C_REM
-
 WBOOT1:
 	DI
 	LD	SP,STACK
@@ -800,7 +769,7 @@ SWNE:
 	LD	H,A		;A=0
 	LD	L,A
 	LD	(FDRV+33),HL
-	LD	(FDRV+35),HL
+	LD	(FDRV+35),A
 COPY6:
 	CALL	BUFSIZ
 	CALL	S27DTA
@@ -910,3 +879,33 @@ BUFSIZ:
 	LD	L,0
 	RET
 
+PATHX	EQU	64
+PATHD:	DS	PATHX
+PATHE:	DB	0
+
+COMS	EQU	9
+COMTB:
+	DB	"D   "	;1
+	DW	C_DIR
+	DB	"DIR "	;2
+	DW	C_DIR
+	DB	"COPY"	;3
+	DW	C_COPY
+	DB	"CD  "	;4
+	DW	C_CD
+	DB	"DEL "	;5
+	DW	C_DEL
+	DB	"PATH"	;6
+	DW	C_PATH
+	DB	"REN "	;7
+	DW	C_REN
+	DB	"TYPE"	;8
+	DW	C_TYPE
+	DB	"REM "	;9
+	DW	C_REM
+
+KBFREE:	DB	"k bytes free",9,'$'
+DIRMES:	DB	"    dir $"
+OK:	DB	"OK$"
+SKIP:	DB	"Skip$"
+COMERM:	DB	"Error!$"

@@ -1,0 +1,99 @@
+                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.0.0, LST:Full:4
+                                ;
+                                ; FAKEFREE Gaku
+                                ;
+                                ; 偽の残量（FATサイズが大きくなると重くなるのでその対策）
+                                ; LSX-Dodgers
+                                ;
+       0005                     SYSTEM  EQU 00005H
+       000B                     BASE    EQU 0000BH
+       000F                     JP_HL   EQU 0000FH
+       005C                     FCB1    EQU 0005CH
+       006C                     FCB2    EQU 0006CH
+       0080                     DTA1    EQU 00080H
+       00AC                     _FAKEFREE   EQU 0ACH
+                                
+000000 0100                         ORG 00100H
+000000 0100 C30301          10      JP  START       ;0C3HはZ80ではJPだが、i8086ではRETなので
+       0103                     START:              ;間違えてMS-DOS環境で実行しても即終了できる
+000003 0103 116D01          10      LD  DE,MSG_TITLE
+000006 0106 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+000008 0108 CD0500          17      CALL    SYSTEM
+       010B                     MAIN:
+00000B 010B 0E6F             7      LD  C,06FH      ;DOSVER MSX-DOS のバージョン番号の獲得
+00000D 010D CD0500          17      CALL    SYSTEM
+000010 0110 B7               4      OR  A
+000011 0111 204F            12      JR  NZ,USAGE
+000013 0113 211D01          10      LD  HL,011DH    ;LSX-Dodgersかどうか？
+000016 0116 ED42            15      SBC HL,BC
+000018 0118 2048            12      JR  NZ,USAGE
+00001A 011A 213401          10      LD  HL,0135H-1  ;LSX-Dodgersのバージョンが1.35以上か？
+00001D 011D ED52            15      SBC HL,DE
+00001F 011F 3041            12      JR  NC,USAGE
+                                
+000021 0121 118000          10      LD  DE,DTA1;
+000024 0124 210000          10      LD  HL,0
+       0127                     TRIM:
+000027 0127 13               6      INC DE
+000028 0128 1A               7      LD  A,(DE)
+000029 0129 FE20             7      CP  020H
+00002B 012B 28FA            12      JR  Z,TRIM
+00002D 012D 7B               4      LD  A,E
+00002E 012E F5              11      PUSH    AF
+       012F                     LOOP:
+00002F 012F 1A               7      LD  A,(DE)
+000030 0130 FE20             7      CP  020H
+000032 0132 28FB            12      JR  Z,LOOP
+000034 0134 D630             7      SUB '0'
+000036 0136 3811            12      JR  C,SETFAKE
+000038 0138 FE0A             7      CP  10
+00003A 013A 300D            12      JR  NC,SETFAKE
+00003C 013C 4D               4      LD  C,L
+00003D 013D 44               4      LD  B,H
+00003E 013E 29              11      ADD HL,HL   ;*2
+00003F 013F 29              11      ADD HL,HL   ;*4
+000040 0140 09              11      ADD HL,BC   ;*5
+000041 0141 29              11      ADD HL,HL   ;*10
+000042 0142 4F               4      LD  C,A
+000043 0143 0600             7      LD  B,0
+000045 0145 09              11      ADD HL,BC
+000046 0146 13               6      INC DE
+000047 0147 18E6            12      JR  LOOP
+       0149                     SETFAKE:
+000049 0149 F1              10      POP AF
+00004A 014A BB               4      CP  E
+00004B 014B 2815            12      JR  Z,USAGE
+00004D 014D 3A0B00          13      LD  A,(BASE)
+000050 0150 1EAC             7      LD  E,_FAKEFREE
+000052 0152 57               4      LD  D,A
+000053 0153 EB               4      EX  DE,HL
+000054 0154 73               7      LD  (HL),E
+000055 0155 23               6      INC HL
+000056 0156 72               7      LD  (HL),D
+000057 0157 119A01          10      LD  DE,MSG_OK
+00005A 015A 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+00005C 015C CD0500          17      CALL    SYSTEM
+00005F 015F C30000          10      JP  0
+       0162                     USAGE:
+000062 0162 118101          10      LD  DE,MSG_USAGE
+000065 0165 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+000067 0167 CD0500          17      CALL    SYSTEM
+00006A 016A C30000          10      JP  0
+                                
+       016D                     MSG_TITLE:
+00006D 016D 66616B6566726565        DB  "fakefree v1.00",00DH,00AH
+            2076312E30300D0A    
+00007D 017D 24                      DB  '$'
+       017E                     CRLF:
+00007E 017E 0D0A                    DB  00DH,00AH
+000080 0180 24                      DB  '$'
+       0181                     MSG_USAGE:
+000081 0181 75736167653A2046        DB  "usage: FAKEFREE number",00DH,00AH
+            414B454652454520    
+            6E756D6265720D0A    
+000099 0199 24                      DB  '$'
+       019A                     MSG_OK:
+00009A 019A 4F4B                    DB  "OK"
+00009C 019C 0D0A                    DB  00DH,00AH
+00009E 019E 24                      DB  '$'
+[EOF:FAKEFREE.ASM:SHIFT_JIS]

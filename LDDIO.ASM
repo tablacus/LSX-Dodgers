@@ -10,7 +10,9 @@ DRDX:
 	PUSH	BC
 	PUSH	DE
 	LD	HL,(_DTBUF)
-	CALL	DRD16
+	LD	A,(_DBS24+1)
+	LD	C,A
+	CALL	DRD24
 	CALL	C,DRDNE
 POP_DE_BC_HL_RET:
 	POP	DE
@@ -18,6 +20,7 @@ POP_DE_BC_HL_RET:
 	POP	HL
 	RET
 
+;	CDE:セクタ番号
 DRDN:
 	XOR	A
 DRDN1:	NOP			;自己書き換え NOP / SCF
@@ -25,9 +28,13 @@ DRDN1:	NOP			;自己書き換え NOP / SCF
 DRDNX:
 	CALL	DRDY
 	RET	Z
-DRDX1:				;データバッファの情報を保存
+DRDX1:
 	CALL	DWTX
+				;データバッファの読み込んだドライブ・セクタ情報を保存
 	LD	(_DBSEC),DE
+	LD	A,C
+	LD	(_DBS24+1),A
+
 	LD	A,(_DRV)
 	LD	(_DBDRV),A
 	CALL	_CHGDRV
@@ -37,7 +44,12 @@ DRDNE:
 	LD	(_DBDRV),A
 	RET
 
+;	CDE:セクタ番号
 DRDY:
+	LD	A,(_DBS24+1)
+	CP	C
+	RET	NZ
+
 	PUSH	HL
 	LD	A,(_DRV)
 	LD	HL,_DBDRV
@@ -62,9 +74,11 @@ DWTX:
 	PUSH	DE
 	LD	A,(_DBDRV)
 	CALL	_CHGDRV
+_DBS24:	LD	C,0
 	LD	DE,(_DBSEC)
 	LD	HL,(_DTBUF)
-	CALL	NC,DWT16
+	CALL	NC,DWT24
+POP_DE_BC_HL_RET2:
 	JR	POP_DE_BC_HL_RET
 
 RDFATX:
@@ -91,7 +105,7 @@ RDFATE2:
 	LD	(_FATDRV),A
 POP_IX_DE_BC_HL_RET:
 	POP	IX
-	JR	POP_DE_BC_HL_RET
+	JR	POP_DE_BC_HL_RET2
 
 WTFATX:
 	LD	A,(_WTFATF)
@@ -275,67 +289,25 @@ SNCL16:
 	JR	FAT_CHANGED
 
 ;------------------------
-;次のセクタを探す際に「1クラスタの論理セクタ数」を掛けてまとめて扱う
+;次のセクタを探す際に_SECPSの値をチェック
 ;in
-;	DE : セクタ番号×1クラスタの論理セクタ数＋α
+;	DE : セクタ番号
 ;out
-;	DE : 次のセクタ番号×1クラスタの論理セクタ数＋α
+;	DE : 次のセクタ番号
 ;note
-;	「FAT12」最大12ビット + 「1クラスタの論理セクタ数」4ビットで計16ビットとして扱う
+;
 ;------------------------
-GNCLX:
-	LD	A,E
+NEXTX:
+_SECPS:	LD	A,0
 	INC	A
 NCPAT:	AND	0	;自己書き換え　1クラスタの論理セクタ数-1
-	JR	Z,GNCLX1
-	INC	DE	;クラスタを跨がない場合は単純に+1する
-	RET
-GNCLX1:
-	CALL	DIVSPC	;クラスタを跨ぐ場合は
-	CALL	_GNCL	;次のクラスタを探す
-
-;------------------------
-;クラスタと「1クラスタの論理セクタ数」を掛ける
-;in
-;	DE : セクタ番号
-;out
-;	DE : 掛けられた値
-;note
-;	DE以外のレジスタとフラグは保持する
-;------------------------
-MULSPC:
-	PUSH	AF
-	EX	DE,HL
-SPCPAT:	LD	A,1		;自己書き換え（1クラスタの論理セクタ数）
-CLDBL:
-	RRCA			;->CF
-	JR	C,CLDBL_RET
-	ADD	HL,HL		;*2
-	JR	CLDBL
-CLDBL_RET:
-	EX	DE,HL
-POP_AF_RET
-	POP	AF
+	LD	(_SECPS+1),A
 	RET
 
-;------------------------
-;「1クラスタの論理セクタ数」を割って論理セクタだけに戻す
-;in
-;	DE : 掛けられた値
-;out
-;	DE : セクタ番号
-;note
-;	DE以外のレジスタとフラグは保持する
-;------------------------
-DIVSPC:
-	PUSH	AF
-	LD	A,(SPCPAT+1)	;1クラスタの論理セクタ
-CLDIV1:
-	RRCA			;->CF
-	JR	C,POP_AF_RET
-	SRL	D		;DE=DE/2
-	RR	E		;
-	JR	CLDIV1
+GNCLX:
+	CALL	NEXTX
+	RET	NZ	;1クラスタのセクタ未満の場合は戻る
+	JP	_GNCL	;次のクラスタを探す
 
 RDFAT:
 	LD	A,080H
@@ -440,28 +412,41 @@ BPBDE1:
 	ADD	HL,DE		;MAXDIR
 	PUSH	HL
 	LD	C,(IY+13)	;BPB_SecPerClus
-	SLA	C
+	SLA	C		;*2
 	XOR	A
 	LD	B,A
 	SBC	HL,BC
 	LD	(IX+014H),L	;DPB_14_ADDCL16
 	LD	(IX+015H),H
 
+	POP	DE		;DE=DPB_0B_MAXDIR
 	LD	L,(IY+19)	;BPB_TotSec16
 	LD	H,(IY+20)
-	POP	DE		;DE=DPB_0B_MAXDIR
 	LD	A,H
-	OR	L
-	JR	Z,NOT_BPB	;セクタ数が16ビットを超えるものは危険なので扱わない
-	SBC	HL,DE
+	OR	L		;ここでCF=0
+	LD	A,0		;LDでフラグは変化しない。BPB_TotSec16を AHL で扱う為、Aに0を入れる
+	JR	NZ,BPB16BIT
+	LD	A,(IY+35)	;BPB_TotSec16が「0」の場合はBPB_TotSec32で計算
+	OR	A
+NOT_BPB1:
+	JP	NZ,NOT_BPB	;念のため(総セクタ数が24ビットを超える場合)
+	LD	L,(IY+32)	;BPB_TotSec32 は AHL の24ビットで扱う
+	LD	H,(IY+33)	;1クラスタの論理セクタ数(DPB_07_SECPCL)が最大128なので
+	LD	A,(IY+34)	;24ビットを超えると必ずクラスタ数が16ビットを超えてしまうのでこれで十分
+BPB16BIT:
+	SBC	HL,DE		;CF=0のはず
+	SBC	A,0
 	LD	B,(IY+13)	;BPB_SecPerClus
-BPBTC1:				;総クラスタ数 = 総セクタ数 / セクタサイズ
-	RR	B
+BPBTC1:				;総クラスタ数(AHL) = 総セクタ数(AHL) / セクタサイズ(B)
+	RR	B		;->CY
 	JR	C,BPBTC2
-	SRL	H
+	SRL	A
+	RR	H		;AHL=AHL/2
 	RR	L
 	JR	BPBTC1
 BPBTC2:
+	OR	A
+	JR	NZ,NOT_BPB1	;念のため(クラスタ数が16ビットを超える場合)
 	INC	HL
 	INC	HL
 	LD	(IX+8),L	;DPB_08_MAXCL
@@ -472,14 +457,14 @@ BPBTC2:
 
 	BIT	7,(IX+00AH)	;DPB_0A_FDMODE
 	JR	Z,NOT_FD
-	LD	L,40		;MAXCYLの設定（要検討）
+	LD	L,40		;MAXCYLの設定（要検討）ここから下はフロッピーのみ書き換える
 	CP	0FDH	;2D
 	JR	Z,SETCYL
 	LD	L,77
 	CP	0FEH	;2HD
 	JR	Z,SETCYL
 	LD	L,80	;その他2DD等
-SETCYL:
+SETCYL:	
 	LD	(IX+00CH),L	;DPB_0C_MAXCYL
 	LD	A,(IY+24)	;BPB_SecPerTr
 	LD	(IX+00DH),A	;DPB_0D_MAXSEC
@@ -497,6 +482,7 @@ RDFAT0X:
 DRD16:
 	LD	C,0
 DRD24:
+	LD	B,1
 	PUSH	IX
 	LD	IX,(_DPB)
 DRDPAT:	CALL	FDRD		;自己書き換え（ディスク読み込み）
@@ -520,6 +506,7 @@ RDFATL:
 DWT16:
 	LD	C,0
 DWT24:
+	LD	B,1
 	PUSH	IX
 	LD	IX,(_DPB)
 DWTPAT:	CALL	FDWT		;自己書き換え（ディスク書き込み）
@@ -532,11 +519,12 @@ WTFAT:
 	BIT	7,(IX+00FH)	;DPB_0F_BPS
 	RET	Z		;予備FATが無い
 	CALL	FATS2
-	LD	A,(IX+0)	;DPB_00_FATLN
-WTFAT2:
-	INC	DE
-	DEC	A
-	JR	NZ,WTFAT2
+	PUSH	HL		;予備FAT
+	LD	L,(IX+0)	;DPB_00_FATLN
+	LD	H,(IX+1)
+	ADD	HL,DE
+	EX	DE,HL
+	POP	HL
 WTFATL:
 	PUSH	BC
 	CALL	DWT16
@@ -659,7 +647,7 @@ CHGDRV2:
 
 	LD	SP,IX
 
-	POP	HL		;L=DPB_00_FATLN
+	POP	HL		;DPB_00_FATLN
 	POP	HL		;DPB_02_DRD
 	LD	(DRDPAT+1),HL
 

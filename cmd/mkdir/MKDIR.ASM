@@ -45,39 +45,32 @@ ROOT:
 	CALL	SYSTEM
 	CP	0FFH
 	JP	Z,SHOW_NOT_CREATE	;取得できない場合はエラー
-	LD	L,C		;BC←論理セクタのサイズ
-	LD	H,B
-	CP	32
-	JP	NC,SHOW_NOT_CREATE	;セクタ数が多すぎる場合はエラー
-				;A←1クラスタのセクタ数(1,2,4,8,16)
-LOOP1:				;HL=論理セクタのサイズ * 1クラスタのセクタ数
-	RRA			;->CF
-	JR	C,SKIP1
-	ADD	HL,HL
-	JR	LOOP1
-SKIP1:
-	PUSH	HL		;HL←1クラスタのサイズ
-	LD	BC, 32 * 2	;ディレクトリエントリ * 2
-	SCF
-	SBC	HL,BC		;. と .. のサイズ と 1 減らす
-	LD	C,L
-	LD	B,H
+	PUSH	AF		;A←1クラスタのセクタ数(1,2,4,8,16)
+	LD	(SECPAT+1),BC	;BC←論理セクタのサイズ
+
 	LD	HL,DIRENT3;
 	LD	DE,DIRENT3+1;
+	DEC	BC
 	LDIR			;0クリア
 
-	LD	DE,SUBD
-	LD	C,01AH		;SETDTA ディスク転送アドレスの設定 CP/M
-	CALL	SYSTEM
-
-	LD	DE,FCB1
 	LD	HL,1
 	LD	(FCB1+14),HL	;レコード・サイズ
-	POP	HL
+	POP	BC		;クラスタのセクタ数(1,2,4,8,16)
+
+	LD	DE,SUBD
+LOOP1:
+	PUSH	BC
+	LD	C,01AH		;SETDTA ディスク転送アドレスの設定 CP/M
+	CALL	SYSTEM
+SECPAT:	LD	HL,512		;論理セクタのサイズ
+	LD	DE,FCB1
 	LD	C,026H		;WRBLK FCB ランダムブロック書き込み
 	CALL	SYSTEM
+	POP	BC
 	OR	A
 	JR	NZ,SHOW_NOT_CREATE
+	LD	DE,DIRENT3
+	DJNZ	LOOP1
 
 	LD	HL,(FCB1+26)	;ファイルの先頭クラスタ
 	LD	(SELFCL),HL
@@ -135,7 +128,7 @@ SHOW_EXISTS:
 	JR	SHOW_MESSAGE 
 
 MES_TITLE:
-	DB	"mkdir v1.01 Gaku",00DH,00AH
+	DB	"mkdir v1.02 Gaku",00DH,00AH
 	DB	'$'
 ERRMES1:
 	DB	"usage: MKDIR directory",00DH,00AH

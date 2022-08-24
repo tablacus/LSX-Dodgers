@@ -18,7 +18,8 @@
 
 
 +$07 *2*3	1バイト	1クラスタの論理セクタ数(DPB_07_SECPCL)
-        		1,2,4,8,16のみ可
+        		1,2,4,8,16,32,64,128のみ可
+				通常は1セクタが512バイトなので、アロケーションユニットサイズは最大64Kになります。
 
 
 +$08	2バイト	総クラスタ数(DPB_08_MAXCL)
@@ -50,7 +51,7 @@
 				bit6:FAT16
 					1:FAT16
 					0:FAT12
-				bit2-bit0: 論理セクタのサイズ
+				bit2-bit0: 論理セクタのサイズ(最大1KBです)
 					1:256バイト
 					2:512バイト
 					4:1024バイト
@@ -112,6 +113,7 @@
 ;READ SECTOR
 ;in
 ;	IX   : DPB
+;	B    : number of sectors to read
 ;	CDE  : sector number
 ;	HL   : memory address
 ;out
@@ -125,6 +127,7 @@
 ;WRITE SECTOR
 ;in
 ;	IX   : DPB
+;	B    : number of sectors to write
 ;	CDE  : sector number
 ;	HL   : memory address
 ;out
@@ -132,7 +135,8 @@
 ;	CDE  : next sector
 ;	HL   : next address
 
-※仕様ではセクタ番号がCDEの24ビットに拡張されましたが、将来に向けてのもので
-現時点では「C」には必ず「0」が入ります。
+※CDEで24ビットとして扱いますが、そのデバイスがサイズが小さくて16ビットしか扱わない場合はCの値は無視しても良いです。
+※仕様では読み書きするセクタの数がBになりましたが、将来に向けてのもので
+現時点では「B」には必ず「1」が入ります。
 
 eof

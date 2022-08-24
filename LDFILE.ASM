@@ -223,6 +223,8 @@ SOPENX1:
 	LD	HL,(SCDIR)
 	LD	(IY+14),L	;(FCB)アクセスするディレクトリのクラスタ番号+1
 	LD	(IY+15),H
+	LD	A,(_SECPS+1)
+	LD	(IY+12),A	;(FCB)アクセスするディレクトリのセクタインデックス
 
 	LD	HL,(SFNDF)	;Direcroty location and Flags
 	LD	(_FILEN),HL
@@ -242,12 +244,10 @@ SOPENC:
 
 	XOR	A
 	LD	(_FILEN),A
-SOPEN0:
-	CALL	LDDIRX
+	CALL	LDDIRX1		;A=0で呼び出す
 	JR	Z,SDIRX1
 
-	CALL	MULSPC
-	CALL	DC		;Sub Directory
+	CALL	READ_DIR	;Sub Directory
 	JR	C,SDIRX0
 	LD	HL,(_DTBUF)
 	LD	A,(HL)
@@ -256,15 +256,15 @@ SOPEN0:
 SDIRX0:
 	XOR	A
 	LD	(_DIRF),A
+	LD	(IY+12),A	;(FCB)カレント・ブロック
 	LD	(IY+14),1	;(FCB)レコード・サイズ
-	LD	(IY+15),0
+	LD	(IY+15),A
 SDIRX1:
 	LD	DE,(_DIRPS)	;Root Directory
-
 SOPEN1:
 SDECPAT:LD	C,32		;自己書き換え 1セクタ辺りのディレクトリエントリ数  1024=32 / 512=16
 SOPEN1X:
-	CALL	DC		;FILE SEARCH
+	CALL	READ_DIR	;FILE SEARCH
 	JR	C,RDDERR
 	LD	HL,(_DTBUF)
 SOPEN2:
@@ -274,9 +274,9 @@ OPENPAT:CALL	FILESE		;(Self-rewriting)
 	JR	C,SOPENE
 	JR	Z,NOTSE
 SOPEN3:
-	LD	A,(_DIRF)
-	OR	A
-	JR	NZ,SOPEN5
+	LD	A,(_DIRF)	;bit7:ディレクトリか判別
+	ADD	A,A
+	JR	C,SOPEN5
 	INC	DE		;ルートディレクトリ
 	PUSH	HL
 MD_PAT:	LD	HL,12		;(Self-rewriting)MAXDIR
@@ -285,9 +285,11 @@ MD_PAT:	LD	HL,12		;(Self-rewriting)MAXDIR
 	JR	NZ,SOPEN1
 	JR	SOPEN6
 SOPEN5:
-	CALL	GNCLX	;END DIR
+	CALL	GNCLX		;END DIR
 	RET	C
-	CALL	ENDCLX
+	CALL	ENDCL
+	LD	A,(_SECPS+1)
+	LD	(IY+12),A	;(FCB)アクセスするディレクトリのセクタインデックス
 SOPEN6:
 	JR	C,SOPEN1
 NOTSE:
@@ -314,7 +316,7 @@ NOPEN:
 
 	CALL	LDDIRX
 	LD	DE,(_FBPS)
-	CALL	DC
+	CALL	READ_DIR
 	JR	C,RDDERR
 	LD	A,(_FBCNT)
 	DEC	A
@@ -343,9 +345,10 @@ COPEN:
 	CALL	SOPENC
 	RET	NC
 	RET	Z
-	LD	A,(_DIRF)
-	SUB	001H
-	RET	C
+	LD	A,(_DIRF)	;bit7:ディレクトリか判別
+	ADD	A,A
+	CCF
+	RET	C		;ルートディレクトリ
 	LD	B,1
 	CALL	WRDF
 	RET	C
@@ -363,31 +366,32 @@ SECSZM1:LD	BC,003FFH	;自己書き換え セクタサイズ-1(0x3FF:1023 or 0x1FF:511 or 0xF
 	LDIR
 
 	LD	A,(_DIRF)
-	OR	A
-	JR	Z,COPENE	;ルートディレクトリ
+	ADD	A,A
+	JR	NC,COPENE	;ルートディレクトリ
 
 	POP	DE		;DE=(_CLPS)
 	PUSH	DE
 	LD	A,(SPCPAT+1)	;1クラスタの論理セクタ数
-COPEN1:
 	DEC	A
-	JR	Z,COPENE	;1セクタ辺りのセクタ数が2以上の場合
-	PUSH	AF		;データバッファに入らないセクタもゼロクリア
-	INC	DE
-	PUSH	DE
+	JR	Z,COPENE
+	LD	A,1		;1セクタ辺りのセクタ数が2以上の場合
+	LD	(_SECPS+1),A
+COPEN1:
+	PUSH	DE		;データバッファに入らないセクタもゼロクリア
 	PUSH	BC
-	CALL	DCPAT
-	CALL	DWT16
+	LD	HL,(_DTBUF)
+	CALL	CLUSTX
+	CALL	DWT24
 	POP	BC
 	POP	DE
-	POP	AF
-	JR	COPEN1
+	CALL	NEXTX
+	JR	NZ,COPEN1
 COPENE:
 	LD	HL,(_DTBUF)
 	POP	DE
 	RET
 
-DC:
+READ_DIR:
 	LD	(_CLPS),DE
 	PUSH	BC
 	PUSH	DE
@@ -510,25 +514,38 @@ CPFILE2:
 	RET
 
 DCPAT:
+	LD	C,0
 	LD	HL,(_DTBUF)
-	LD	A,(_DIRF)
-	OR	A
-	RET	Z
-
-CLUST:
+	LD	A,(_DIRF)	;bit7:ディレクトリか判別
+	ADD	A,A
+	RET	NC		;ルートディレクトリの場合はCレジスタを0にしておく(CDEがセクタ番号)
+	LD	A,(_SECPS+1)
+	OR	080H
+	LD	(_DIRF),A	;bit0-6:セクタインデックス
+CLUSTX:
 	PUSH	HL
-CLSPAT:	LD	HL,8	;+8 (2D)  !ADDCL (Self-rewriting)
-	ADD	HL,DE
+	EX	DE,HL
+	XOR	A
+SPCPAT:	LD	C,1		;自己書き換え（1クラスタの論理セクタ数）
+L_CLDBL:
+	RR	C		;->CF
+	JR	C,E_CLDBL
+	ADD	HL,HL		;*2
+	ADC	A,A
+	JR	L_CLDBL
+E_CLDBL
+	LD	C,A
+	LD	A,(_SECPS+1)
+	OR	L
+	LD	L,A
+CLSPAT:	LD	DE,8	;+8 (2D)  !ADDCL (Self-rewriting)
+	XOR	A
+	ADD	HL,DE	;データ格納領域の先頭論理セクタ番号
+	ADC	A,C
+	LD	C,A
 	EX	DE,HL
 	POP	HL
 	RET
-;ADD_DE_A:
-;	ADD	A,E	;DE=DE+A
-;	LD	E,A
-;	ADC	A,D
-;	SUB	E
-;	LD	D,A
-;	RET
 
 ENDCL:
 	LD	A,D	;END CLUSTER
@@ -538,12 +555,6 @@ CLPAT1:	CP	1	;164=356	(Self-rewriting)
 CLPAT2:	CP	064H	;		(Self-rewriting)
 	RET
 
-ENDCLX:
-	PUSH	DE
-	CALL	DIVSPC
-	CALL	ENDCL
-	POP	DE
-	RET
 CAP:
 	CP	'a'
 	RET	C
@@ -582,9 +593,15 @@ LDDIR:
 	LD	(IY+14),E	;(FCB)アクセスするディレクトリのクラスタ番号+1
 	LD	(IY+15),D
 	DEC	DE
-	JR	CHDIR2
+	XOR	A
+	LD	(IY+12),A	;(FCB)アクセスするディレクトリのセクタインデックス
+	LD	(_SECPS+1),A
+	JR	CHDIR2		;POP_IX_RET
 
 LDDIRX:
+	LD	A,(IY+12)	;(FCB)アクセスするディレクトリのセクタインデックス
+LDDIRX1:
+	LD	(_SECPS+1),A
 	LD	E,(IY+14)	;(FCB)アクセスするディレクトリのクラスタ番号+1
 	LD	D,(IY+15)
 	DEC	DE
@@ -593,7 +610,9 @@ LDDIRX:
 LDDIRS:
 	LD	A,D
 	OR	E
-	LD	(_DIRF),A
+	ADD	A,0FFH
+	SBC	A,A
+	LD	(_DIRF),A	;bit7:ディレクトリか判別
 	RET
 
 KILL:
@@ -813,11 +832,11 @@ E_WRFX:
 
 WRDF:				;Bクラスタ分FATを確保する
 	LD	DE,2
-	CALL	MULSPC
+	XOR	A
+	LD	(_SECPS+1),A
 WRDF1:
 	PUSH	BC
 	PUSH	DE
-	CALL	DIVSPC
 	CALL	_GNCL
 	JR	C,WRDF3
 	LD	A,D		;空いているかチェック
@@ -829,15 +848,11 @@ WRDF1:
 	LD	(_CLPS),HL
 	LD	A,D		;元の(_CLPS)が 0 か?
 	OR	E
-	EX	DE,HL		;
-	CALL	DIVSPC		;ここでフラグは変化しない
-	EX	DE,HL		;
 	JR	NZ,WRDF2
 	LD	(IY+26),L	;(FCB)ファイルの先頭クラスタ
 	LD	(IY+27),H	;元が空の場合はFCBにクラスタをセットする
 	JR	WRDF3
 WRDF2:
-	CALL	DIVSPC
 	CALL	_SNCL
 WRDF3:
 	POP	DE
@@ -845,7 +860,6 @@ WRDF3:
 	RET	C
 	DJNZ	WRDF5		;ここでループカウンタチェック
 	LD	DE,(_CLPS)
-	CALL	DIVSPC
 	LD	HL,0FFFFH	;FATエントリ終了(EOCマーク)
 	JP	_SNCL
 
@@ -853,10 +867,8 @@ WRDF4:				;DEクラスタが空じゃないので次に移動する
 	POP	DE
 	POP	BC
 WRDF5:
-	CALL	DIVSPC
 	INC	DE
 	CALL	ENDCL
-	CALL	MULSPC
 	JR	C,WRDF1
 	SCF
 	RET
@@ -872,30 +884,35 @@ L_RWX:
 E_RWX:
 	LD	E,(IY+26)	;(FCB)ファイルの先頭クラスタ
 	LD	D,(IY+27)
-	CALL	MULSPC
+	XOR	A
+	LD	(_SECPS+1),A
 RWX1:
 	LD	(_CLPS),DE
 	LD	A,D
 	OR	E
-	SCF
-	RET	Z	;RET DE==0
+	JR	Z,SCF_RET	;RET DE==0 => CF=1
 
 	LD	A,B
 	OR	C
-	RET	Z	;RET BC==0
+	RET	Z		;RET BC==0 => CF=0
 
 	CALL	GNCLX
 	RET	C
 	DEC	BC
 
-	CALL	ENDCLX
+	CALL	ENDCL
 	JR	C,RWX1
+SCF_RET:
 	SCF
 	RET
 
 DSKF:
 MAXCLP:	LD	DE,0
-	LD	HL,0
+	LD	HL,(_FAKEFREE)
+	LD	A,H
+	OR	L
+	JR	Z,DSKF1
+	LD	DE,1
 DSKF1:
 	PUSH	DE
 	CALL	_GNCL
