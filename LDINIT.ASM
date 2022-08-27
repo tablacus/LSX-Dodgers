@@ -867,4 +867,4 @@ INITE:
 
 BDOS:
 	JP	BDOS0
-	DS	53	;Reserved
+	DS	71	;Reserved

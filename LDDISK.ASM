@@ -200,7 +200,7 @@ DISK2:
 DMAPAT:	LD	A,14		;自己書き換え
 	LD	HL,DMAD
 	CALL	SETDMA
-	OUT	(C),C		;OUT 01F87H,087H
+	OUT	(C),C		;OUT 01F87H,087H WR6 イネーブル
 	LD	A,(FDCPAT+1)
 	PUSH	BC
 	CALL	SECSET
@@ -213,8 +213,8 @@ DMAPAT:	LD	A,14		;自己書き換え
 	IN	A,(C)
 
 	POP	BC
-	OUT	(C),D
-	OUT	(C),E
+	OUT	(C),D		;読み出しマスク設定
+	OUT	(C),E		;バイトカウンタ(LH)
 	IN	E,(C)
 	IN	D,(C)
 	ADD	HL,DE
@@ -268,17 +268,20 @@ ERR:
 	SCF
 	RET
 
-SETDMA:
-	LD	BC,01F87H
-SDMA:
-	INC	B
-	OUTI
-	DEC	A
-	JR	NZ,SDMA
-	RET
-
-DMAD:	DB	0C3H,07DH,0FBH,00FH,0FFH,0FFH,02CH,010H		;X1turbo
-	DB	080H,092H,08DH,000H,000H,0CFH,001H,0CFH		;DISK DMA
+			;X1turbo DISK DMA
+DMAD:	DB	0C3H	;WR6 リセット
+	DB	07DH	;WR0 ポートA→ポートB 転送
+	DW	00FFBH	;ポートA開始アドレス FDC データレジスタ
+	DW	0FFFFH	;ブロック長(転送サイズ-1)
+	DB	02CH	;WR1 ポートAアドレス固定 I/O
+	DB	010H	;WR2 ポートBインクリメント
+	DB	080H	;WR3
+	DB	092H	;WR5 WAIT RDY:LOW
+	DB	08DH	;WR4 バイト ポートB開始アドレス(LH)
+	DW	0	;ポートB開始アドレス
+	DB	0CFH	;WR6 ロード
+	DB	001H	;WR0 ポートB←ポートB 転送
+	DB	0CFH	;WR6 ロード
 
 DMAE:
 

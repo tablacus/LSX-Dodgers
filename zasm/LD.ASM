@@ -21,7 +21,7 @@ RUN	EQU	0C600h
 MAC	EQU	01D90H		;X1
 VER_1   EQU	1
 VER_2   EQU	3
-VER_3   EQU	5
+VER_3   EQU	6
 VER	EQU	VER_1 * 256 + VER_2 * 16 + VER_3
 
 STACK	EQU	00000H
@@ -911,7 +911,7 @@ INITE:
 
 BDOS:
 	JP	BDOS0
-	DS	53	;Reserved
+	DS	71	;Reserved
 
 ;LDCCP.ASM
 
@@ -1821,7 +1821,7 @@ COMTB:
 	DW	C_REM
 
 KBFREE:	DB	"k bytes free",9,'$'
-DIRMES:	DB	"    dir $"
+DIRMES:	DB	"   <DIR>$"
 OK:	DB	"OK$"
 SKIP:	DB	"Skip$"
 COMERM:	DB	"Error!$"
@@ -1982,13 +1982,13 @@ BTFR1:
 
 
 EDWTC:
-	LD	A,17
+	LD	A,15
 	DB	1
 EDRDC:
-	LD	A,15
+	LD	A,14
 EDWTC1:
 	PUSH	DE
-	LD	(EDMAD+12),HL
+	LD	(DMAB),HL
 	EX	DE,HL
 	ADD	HL,HL
 	ADD	HL,HL
@@ -2005,9 +2005,7 @@ EDWTC1:
 
 	LD	HL,EDMAD
 	CALL	SETDMA
-	LD	A,0B3H
-	OUT	(C),A
-	OUT	(C),C		;OUT 01F87H,087H
+	CALL	GO_DMA
 	EX	DE,HL
 	INC	H
 	INC	H
@@ -2018,8 +2016,18 @@ EDWTC1:
 	XOR	A
 	RET
 
-EDMAD:	DB	0C3H,07DH,003H,00DH,0FFH,003H,02CH,050H,002H
-	DB	080H,09AH,0ADH,000H,000H,0CFH,001H,0CFH
+EDMAD:	DB	0C3H	;WR6 リセット
+	DB	07DH	;WR0 ポートA→ポートB 転送
+	DW	00D03H	;ポートA開始アドレス EMMリード/ライト
+	DW	003FFH	;ブロック長(転送サイズ-1)
+	DB	02CH	;WR1 ポートAアドレス固定 I/O
+	DB	050H	;WR2 ポートBアドレスインクリメント メモリ
+	DB	002H	;ポートBタイミング
+	DB	080H	;WR3
+	DB	09AH	;WR5 WAIT RDY:HIGH
+	DB	0ADH	;WR4 連続 ポートB開始アドレス
+DMAB:	DW	0
+	DB	001H	;WR0 ポートB←ポートB 転送
 
 EMME:
 
@@ -2195,7 +2203,6 @@ _SYS10:		;(BDOS)ファイルのクローズ
 _S10A:				;Write
 	LD	(IY+14),A	;(FCB)レコード・サイズ/アクセスするディレクトリのクラスタ番号+1
 	LD	(IY+15),A
-	LD	(IY+12),A	;(FCB)レコード・サイズ/アクセスするディレクトリのセクタインデックス
 
 	INC	(IY+28)		;0FEH->0FFH ;オープン・モード
 	CALL	SETTMS
@@ -2207,7 +2214,7 @@ _S10A:				;Write
 	LD	E,(IY+30)	;(FCB)ディレクトリ・ポジション
 	LD	D,(IY+31)
 	CALL	READ_DIR
-	JR	C,FEND
+	JR	C,FEND10
 
 	LD	A,(IY+25)	;(FCB)ディレクトリ・ロケーション
 SDECM1:	AND	01FH		;自己書き換え(1セクタ辺りのディレクトリエントリ数-1) 1024=01FH / 512=00FH / 256=7
@@ -2265,12 +2272,16 @@ _S12X1:
 	LD	L,(IY+14)	;(FCB)レコード・サイズ/アクセスするディレクトリのクラスタ番号+1
 	LD	H,(IY+15)
 	LD	(SCDIR),HL
-	LD	A,(IY+12)	;(FCB)レコード・サイズ/アクセスするディレクトリのセクタインデックス
-	LD	(_SECPS+1),A
-
 	LD	HL,(_FBPS)
 	LD	(SFBPS),HL
 	LD	HL,(_FILEN)
+	LD	A,H
+	OR	A
+	JR	Z,_S12DIR
+	LD	A,(_SECPS+1)
+	OR	080H
+	LD	H,A
+_S12DIR
 	LD	(SFNDF),HL	;Directory position and Flags
 	POP	HL
 	LD	DE,SFILE
@@ -2528,7 +2539,7 @@ S29X1:
 	LD	HL,FDRV
 	LD	BC,13
 	LDIR
-	LD	(HL),B
+	LD	(HL),B		;B=0
 	LD	C,3
 	LDIR
 	POP	HL
@@ -3437,20 +3448,12 @@ SCR:
 SCR1:
 	PUSH	BC
 	PUSH	DE
-	LD	BC,01F80H	;DMA
-	LD	E,0C3H
-	OUT	(C),E
-	LD	DE,0659AH
-	OUT	(C),E
-	OUT	(C),D
-	LD	DE,79
-	OUT	(C),E
-	OUT	(C),D
-
+	PUSH	AF
+	LD	A,7
+	LD	HL,SCRDMAD
+	CALL	SETDMA
+	POP	AF
 	LD	HL,03800H
-	LD	DE,01C18H
-	OUT	(C),D
-	OUT	(C),E
 
 SCRUP1:
 	OR	A
@@ -3470,21 +3473,41 @@ SCRUP1:
 	DEC	A
 	JR	SCRUP1
 
+SETDMA:
+	LD	BC,01F87H
+SDMA:
+	INC	B
+	OUTI
+	DEC	A
+	JR	NZ,SDMA
+	RET
+
+SCRDMAD:
+	DB	0C3H		;WR6 リセット
+	DB	09AH		;WR5 ストップ WAIT READY:HIGH
+	DB	065H		;WR0 ブロック長(LH)
+	DW	79
+	DB	01CH		;WR1 ポートAインクリメント I/O
+	DB	018H		;WR0 ポートAアドレス(LH)
+
 UPSUB:
 	LD	DE,(CRTCD+1)
 	LD	D,0
-	LD	A,0CDH
+	LD	A,0CDH		;WR4 バースト ポートB開始アドレス(LH)
 	OUT	(C),A
 	OUT	(C),L		;SOURCE
 	OUT	(C),H
 	ADD	HL,DE
-	LD	A,01DH
-	OUT	(C),A		;DEST
-	OUT	(C),L
+	LD	A,01DH		;WR0 ポートA開始アドレス(LH) ポートA→ポートB 転送
+	OUT	(C),A
+	OUT	(C),L		;DEST
 	OUT	(C),H
-	LD	DE,0CF87H
-	OUT	(C),D
-	OUT	(C),E
+GO_DMA:
+	LD	A,0CFH
+	OUT	(C),A		;WR6 ロード
+	LD	A,0B3H
+	OUT	(C),A		;WR6 強制RDY
+	OUT	(C),C		;WR6 イネーブル
 	RET
 
 SCRCL:
@@ -3689,7 +3712,7 @@ FILE:
 	LD	(FDRV),A
 DEVI1:
 	LD	A,(DE)
-	SUB	05CH
+	SUB	05CH		;\
 	JR	NZ,NOROOT
 	LD	HL,0
 	LD	(FDRV+26),HL
@@ -3701,7 +3724,7 @@ NOROOT:
 SETDIR:
 	CALL	FILED
 	LD	A,(DE)
-	CP	05CH
+	CP	05CH		;\
 	RET	NZ
 	INC	DE
 SETDIR1:
@@ -3881,8 +3904,6 @@ SOPENX1:
 	LD	HL,(SCDIR)
 	LD	(IY+14),L	;(FCB)アクセスするディレクトリのクラスタ番号+1
 	LD	(IY+15),H
-	LD	A,(_SECPS+1)
-	LD	(IY+12),A	;(FCB)アクセスするディレクトリのセクタインデックス
 
 	LD	HL,(SFNDF)	;Direcroty location and Flags
 	LD	(_FILEN),HL
@@ -3914,7 +3935,6 @@ SOPENC:
 SDIRX0:
 	XOR	A
 	LD	(_DIRF),A
-	LD	(IY+12),A	;(FCB)カレント・ブロック
 	LD	(IY+14),1	;(FCB)レコード・サイズ
 	LD	(IY+15),A
 SDIRX1:
@@ -3932,9 +3952,9 @@ OPENPAT:CALL	FILESE		;(Self-rewriting)
 	JR	C,SOPENE
 	JR	Z,NOTSE
 SOPEN3:
-	LD	A,(_DIRF)	;bit7:ディレクトリか判別
-	ADD	A,A
-	JR	C,SOPEN5
+	LD	A,(_DIRF)	;ディレクトリか判別
+	OR	A
+	JR	NZ,SOPEN5
 	INC	DE		;ルートディレクトリ
 	PUSH	HL
 MD_PAT:	LD	HL,12		;(Self-rewriting)MAXDIR
@@ -3946,8 +3966,6 @@ SOPEN5:
 	CALL	GNCLX		;END DIR
 	RET	C
 	CALL	ENDCL
-	LD	A,(_SECPS+1)
-	LD	(IY+12),A	;(FCB)アクセスするディレクトリのセクタインデックス
 SOPEN6:
 	JR	C,SOPEN1
 NOTSE:
@@ -3971,6 +3989,8 @@ NOPEN:
 	LD	(_DRV),A
 	CALL	_CHGDRV
 	RET	C
+	LD	HL,(SFNDF)	;Direcroty location and Flags
+	LD	(_FILEN),HL
 
 	CALL	LDDIRX
 	LD	DE,(_FBPS)
@@ -4003,10 +4023,10 @@ COPEN:
 	CALL	SOPENC
 	RET	NC
 	RET	Z
-	LD	A,(_DIRF)	;bit7:ディレクトリか判別
-	ADD	A,A
-	CCF
-	RET	C		;ルートディレクトリ
+	LD	A,(_DIRF)	;ディレクトリか判別
+	OR	A
+	SCF
+	RET	Z		;ルートディレクトリ
 	LD	B,1
 	CALL	WRDF
 	RET	C
@@ -4022,10 +4042,6 @@ SECSZM1:LD	BC,003FFH	;自己書き換え セクタサイズ-1(0x3FF:1023 or 0x1FF:511 or 0xF
 	XOR	A		;データバッファをセクタサイズ分ゼロクリア
 	LD	(HL),A
 	LDIR
-
-	LD	A,(_DIRF)
-	ADD	A,A
-	JR	NC,COPENE	;ルートディレクトリ
 
 	POP	DE		;DE=(_CLPS)
 	PUSH	DE
@@ -4174,10 +4190,16 @@ CPFILE2:
 DCPAT:
 	LD	C,0
 	LD	HL,(_DTBUF)
-	LD	A,(_DIRF)	;bit7:ディレクトリか判別
-	ADD	A,A
-	RET	NC		;ルートディレクトリの場合はCレジスタを0にしておく(CDEがセクタ番号)
+	LD	A,(_DIRF)	;ディレクトリか判別
+	OR	A
+	RET	Z		;ルートディレクトリの場合はCレジスタを0にしておく(CDEがセクタ番号)
+	LD	A,(SPCPAT+1)
+	LD	C,A
 	LD	A,(_SECPS+1)
+	CP	C
+	JR	NC,DC1
+	XOR	A
+DC1:
 	OR	080H
 	LD	(_DIRF),A	;bit0-6:セクタインデックス
 CLUSTX:
@@ -4239,9 +4261,7 @@ CHDIR:
 	JR	C,CHDIR2
 	LD	(IX+01AH),L		;_SDIR_
 	LD	(IX+01BH),H		;_SDIR_+1
-CHDIR2:
-	POP	IX
-	RET
+	JR	CHDIR2		;POP_IX_RET
 
 LDDIR:
 	CALL	GETDPBD
@@ -4252,12 +4272,14 @@ LDDIR:
 	LD	(IY+15),D
 	DEC	DE
 	XOR	A
-	LD	(IY+12),A	;(FCB)アクセスするディレクトリのセクタインデックス
-	LD	(_SECPS+1),A
-	JR	CHDIR2		;POP_IX_RET
+	LD	(_DIRF),A
+CHDIR2:
+	POP	IX
+	RET
 
 LDDIRX:
-	LD	A,(IY+12)	;(FCB)アクセスするディレクトリのセクタインデックス
+	LD	A,(_DIRF)	;(FCB)アクセスするディレクトリのセクタインデックス
+	AND	07FH
 LDDIRX1:
 	LD	(_SECPS+1),A
 	LD	E,(IY+14)	;(FCB)アクセスするディレクトリのクラスタ番号+1
@@ -4268,9 +4290,7 @@ LDDIRX1:
 LDDIRS:
 	LD	A,D
 	OR	E
-	ADD	A,0FFH
-	SBC	A,A
-	LD	(_DIRF),A	;bit7:ディレクトリか判別
+	LD	(_DIRF),A	;ディレクトリか判別
 	RET
 
 KILL:
@@ -5626,7 +5646,7 @@ BPBTC2:
 	CP	0FEH	;2HD
 	JR	Z,SETCYL
 	LD	L,80	;その他2DD等
-SETCYL:	
+SETCYL:
 	LD	(IX+00CH),L	;DPB_0C_MAXCYL
 	LD	A,(IY+24)	;BPB_SecPerTr
 	LD	(IX+00DH),A	;DPB_0D_MAXSEC
@@ -5638,18 +5658,9 @@ RDFAT0X:
 	RET	C
 	CP	(IX+6)		;DPB_06_FATID
 	RET	Z
+	BIT	5,(IX+012H)	;DPB_12_DEVICE
+	RET	NZ		;BPBを取得している場合はFATIDをチェックしない
 	SCF
-	RET
-
-DRD16:
-	LD	C,0
-DRD24:
-	LD	B,1
-	PUSH	IX
-	LD	IX,(_DPB)
-DRDPAT:	CALL	FDRD		;自己書き換え（ディスク読み込み）
-POP_IX_RET:
-	POP	IX
 	RET
 
 RDFATS:
@@ -5663,6 +5674,17 @@ RDFATL:
 	DJNZ	RDFATL
 	LD	HL,(_FATBF)
 	LD	A,(HL)
+	RET
+
+DRD16:
+	LD	C,0
+DRD24:
+	LD	B,1
+	PUSH	IX
+	LD	IX,(_DPB)
+DRDPAT:	CALL	FDRD		;自己書き換え（ディスク読み込み）
+POP_IX_RET:
+	POP	IX
 	RET
 
 DWT16:
@@ -6158,7 +6180,7 @@ DISK2:
 DMAPAT:	LD	A,14		;自己書き換え
 	LD	HL,DMAD
 	CALL	SETDMA
-	OUT	(C),C		;OUT 01F87H,087H
+	OUT	(C),C		;OUT 01F87H,087H WR6 イネーブル
 	LD	A,(FDCPAT+1)
 	PUSH	BC
 	CALL	SECSET
@@ -6171,8 +6193,8 @@ DMAPAT:	LD	A,14		;自己書き換え
 	IN	A,(C)
 
 	POP	BC
-	OUT	(C),D
-	OUT	(C),E
+	OUT	(C),D		;読み出しマスク設定
+	OUT	(C),E		;バイトカウンタ(LH)
 	IN	E,(C)
 	IN	D,(C)
 	ADD	HL,DE
@@ -6226,17 +6248,20 @@ ERR:
 	SCF
 	RET
 
-SETDMA:
-	LD	BC,01F87H
-SDMA:
-	INC	B
-	OUTI
-	DEC	A
-	JR	NZ,SDMA
-	RET
-
-DMAD:	DB	0C3H,07DH,0FBH,00FH,0FFH,0FFH,02CH,010H		;X1turbo
-	DB	080H,092H,08DH,000H,000H,0CFH,001H,0CFH		;DISK DMA
+			;X1turbo DISK DMA
+DMAD:	DB	0C3H	;WR6 リセット
+	DB	07DH	;WR0 ポートA→ポートB 転送
+	DW	00FFBH	;ポートA開始アドレス FDC データレジスタ
+	DW	0FFFFH	;ブロック長(転送サイズ-1)
+	DB	02CH	;WR1 ポートAアドレス固定 I/O
+	DB	010H	;WR2 ポートBインクリメント
+	DB	080H	;WR3
+	DB	092H	;WR5 WAIT RDY:LOW
+	DB	08DH	;WR4 バイト ポートB開始アドレス(LH)
+	DW	0	;ポートB開始アドレス
+	DB	0CFH	;WR6 ロード
+	DB	001H	;WR0 ポートB←ポートB 転送
+	DB	0CFH	;WR6 ロード
 
 DMAE:
 

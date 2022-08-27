@@ -31,7 +31,7 @@ FILE:
 	LD	(FDRV),A
 DEVI1:
 	LD	A,(DE)
-	SUB	05CH
+	SUB	05CH		;\
 	JR	NZ,NOROOT
 	LD	HL,0
 	LD	(FDRV+26),HL
@@ -43,7 +43,7 @@ NOROOT:
 SETDIR:
 	CALL	FILED
 	LD	A,(DE)
-	CP	05CH
+	CP	05CH		;\
 	RET	NZ
 	INC	DE
 SETDIR1:
@@ -223,8 +223,6 @@ SOPENX1:
 	LD	HL,(SCDIR)
 	LD	(IY+14),L	;(FCB)アクセスするディレクトリのクラスタ番号+1
 	LD	(IY+15),H
-	LD	A,(_SECPS+1)
-	LD	(IY+12),A	;(FCB)アクセスするディレクトリのセクタインデックス
 
 	LD	HL,(SFNDF)	;Direcroty location and Flags
 	LD	(_FILEN),HL
@@ -256,7 +254,6 @@ SOPENC:
 SDIRX0:
 	XOR	A
 	LD	(_DIRF),A
-	LD	(IY+12),A	;(FCB)カレント・ブロック
 	LD	(IY+14),1	;(FCB)レコード・サイズ
 	LD	(IY+15),A
 SDIRX1:
@@ -274,9 +271,9 @@ OPENPAT:CALL	FILESE		;(Self-rewriting)
 	JR	C,SOPENE
 	JR	Z,NOTSE
 SOPEN3:
-	LD	A,(_DIRF)	;bit7:ディレクトリか判別
-	ADD	A,A
-	JR	C,SOPEN5
+	LD	A,(_DIRF)	;ディレクトリか判別
+	OR	A
+	JR	NZ,SOPEN5
 	INC	DE		;ルートディレクトリ
 	PUSH	HL
 MD_PAT:	LD	HL,12		;(Self-rewriting)MAXDIR
@@ -288,8 +285,6 @@ SOPEN5:
 	CALL	GNCLX		;END DIR
 	RET	C
 	CALL	ENDCL
-	LD	A,(_SECPS+1)
-	LD	(IY+12),A	;(FCB)アクセスするディレクトリのセクタインデックス
 SOPEN6:
 	JR	C,SOPEN1
 NOTSE:
@@ -313,6 +308,8 @@ NOPEN:
 	LD	(_DRV),A
 	CALL	_CHGDRV
 	RET	C
+	LD	HL,(SFNDF)	;Direcroty location and Flags
+	LD	(_FILEN),HL
 
 	CALL	LDDIRX
 	LD	DE,(_FBPS)
@@ -345,10 +342,10 @@ COPEN:
 	CALL	SOPENC
 	RET	NC
 	RET	Z
-	LD	A,(_DIRF)	;bit7:ディレクトリか判別
-	ADD	A,A
-	CCF
-	RET	C		;ルートディレクトリ
+	LD	A,(_DIRF)	;ディレクトリか判別
+	OR	A
+	SCF
+	RET	Z		;ルートディレクトリ
 	LD	B,1
 	CALL	WRDF
 	RET	C
@@ -364,10 +361,6 @@ SECSZM1:LD	BC,003FFH	;自己書き換え セクタサイズ-1(0x3FF:1023 or 0x1FF:511 or 0xF
 	XOR	A		;データバッファをセクタサイズ分ゼロクリア
 	LD	(HL),A
 	LDIR
-
-	LD	A,(_DIRF)
-	ADD	A,A
-	JR	NC,COPENE	;ルートディレクトリ
 
 	POP	DE		;DE=(_CLPS)
 	PUSH	DE
@@ -516,10 +509,16 @@ CPFILE2:
 DCPAT:
 	LD	C,0
 	LD	HL,(_DTBUF)
-	LD	A,(_DIRF)	;bit7:ディレクトリか判別
-	ADD	A,A
-	RET	NC		;ルートディレクトリの場合はCレジスタを0にしておく(CDEがセクタ番号)
+	LD	A,(_DIRF)	;ディレクトリか判別
+	OR	A
+	RET	Z		;ルートディレクトリの場合はCレジスタを0にしておく(CDEがセクタ番号)
+	LD	A,(SPCPAT+1)
+	LD	C,A
 	LD	A,(_SECPS+1)
+	CP	C
+	JR	NC,DC1
+	XOR	A
+DC1:
 	OR	080H
 	LD	(_DIRF),A	;bit0-6:セクタインデックス
 CLUSTX:
@@ -581,9 +580,7 @@ CHDIR:
 	JR	C,CHDIR2
 	LD	(IX+01AH),L		;_SDIR_
 	LD	(IX+01BH),H		;_SDIR_+1
-CHDIR2:
-	POP	IX
-	RET
+	JR	CHDIR2		;POP_IX_RET
 
 LDDIR:
 	CALL	GETDPBD
@@ -594,12 +591,14 @@ LDDIR:
 	LD	(IY+15),D
 	DEC	DE
 	XOR	A
-	LD	(IY+12),A	;(FCB)アクセスするディレクトリのセクタインデックス
-	LD	(_SECPS+1),A
-	JR	CHDIR2		;POP_IX_RET
+	LD	(_DIRF),A
+CHDIR2:
+	POP	IX
+	RET
 
 LDDIRX:
-	LD	A,(IY+12)	;(FCB)アクセスするディレクトリのセクタインデックス
+	LD	A,(_DIRF)	;(FCB)アクセスするディレクトリのセクタインデックス
+	AND	07FH
 LDDIRX1:
 	LD	(_SECPS+1),A
 	LD	E,(IY+14)	;(FCB)アクセスするディレクトリのクラスタ番号+1
@@ -610,9 +609,7 @@ LDDIRX1:
 LDDIRS:
 	LD	A,D
 	OR	E
-	ADD	A,0FFH
-	SBC	A,A
-	LD	(_DIRF),A	;bit7:ディレクトリか判別
+	LD	(_DIRF),A	;ディレクトリか判別
 	RET
 
 KILL:

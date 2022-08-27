@@ -905,7 +905,7 @@ COMTB:
 	DW	C_REM
 
 KBFREE:	DB	"k bytes free",9,'$'
-DIRMES:	DB	"    dir $"
+DIRMES:	DB	"   <DIR>$"
 OK:	DB	"OK$"
 SKIP:	DB	"Skip$"
 COMERM:	DB	"Error!$"

@@ -166,7 +166,6 @@ _SYS10:		;(BDOS)ファイルのクローズ
 _S10A:				;Write
 	LD	(IY+14),A	;(FCB)レコード・サイズ/アクセスするディレクトリのクラスタ番号+1
 	LD	(IY+15),A
-	LD	(IY+12),A	;(FCB)レコード・サイズ/アクセスするディレクトリのセクタインデックス
 
 	INC	(IY+28)		;0FEH->0FFH ;オープン・モード
 	CALL	SETTMS
@@ -178,7 +177,7 @@ _S10A:				;Write
 	LD	E,(IY+30)	;(FCB)ディレクトリ・ポジション
 	LD	D,(IY+31)
 	CALL	READ_DIR
-	JR	C,FEND
+	JR	C,FEND10
 
 	LD	A,(IY+25)	;(FCB)ディレクトリ・ロケーション
 SDECM1:	AND	01FH		;自己書き換え(1セクタ辺りのディレクトリエントリ数-1) 1024=01FH / 512=00FH / 256=7
@@ -236,12 +235,16 @@ _S12X1:
 	LD	L,(IY+14)	;(FCB)レコード・サイズ/アクセスするディレクトリのクラスタ番号+1
 	LD	H,(IY+15)
 	LD	(SCDIR),HL
-	LD	A,(IY+12)	;(FCB)レコード・サイズ/アクセスするディレクトリのセクタインデックス
-	LD	(_SECPS+1),A
-
 	LD	HL,(_FBPS)
 	LD	(SFBPS),HL
 	LD	HL,(_FILEN)
+	LD	A,H
+	OR	A
+	JR	Z,_S12DIR
+	LD	A,(_SECPS+1)
+	OR	080H
+	LD	H,A
+_S12DIR
 	LD	(SFNDF),HL	;Directory position and Flags
 	POP	HL
 	LD	DE,SFILE
@@ -499,7 +502,7 @@ S29X1:
 	LD	HL,FDRV
 	LD	BC,13
 	LDIR
-	LD	(HL),B
+	LD	(HL),B		;B=0
 	LD	C,3
 	LDIR
 	POP	HL

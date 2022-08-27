@@ -866,20 +866,12 @@ SCR:
 SCR1:
 	PUSH	BC
 	PUSH	DE
-	LD	BC,01F80H	;DMA
-	LD	E,0C3H
-	OUT	(C),E
-	LD	DE,0659AH
-	OUT	(C),E
-	OUT	(C),D
-	LD	DE,79
-	OUT	(C),E
-	OUT	(C),D
-
+	PUSH	AF
+	LD	A,7
+	LD	HL,SCRDMAD
+	CALL	SETDMA
+	POP	AF
 	LD	HL,03800H
-	LD	DE,01C18H
-	OUT	(C),D
-	OUT	(C),E
 
 SCRUP1:
 	OR	A
@@ -899,21 +891,41 @@ SCRUP1:
 	DEC	A
 	JR	SCRUP1
 
+SETDMA:
+	LD	BC,01F87H
+SDMA:
+	INC	B
+	OUTI
+	DEC	A
+	JR	NZ,SDMA
+	RET
+
+SCRDMAD:
+	DB	0C3H		;WR6 リセット
+	DB	09AH		;WR5 ストップ WAIT READY:HIGH
+	DB	065H		;WR0 ブロック長(LH)
+	DW	79
+	DB	01CH		;WR1 ポートAインクリメント I/O
+	DB	018H		;WR0 ポートAアドレス(LH)
+
 UPSUB:
 	LD	DE,(CRTCD+1)
 	LD	D,0
-	LD	A,0CDH
+	LD	A,0CDH		;WR4 バースト ポートB開始アドレス(LH)
 	OUT	(C),A
 	OUT	(C),L		;SOURCE
 	OUT	(C),H
 	ADD	HL,DE
-	LD	A,01DH
-	OUT	(C),A		;DEST
-	OUT	(C),L
+	LD	A,01DH		;WR0 ポートA開始アドレス(LH) ポートA→ポートB 転送
+	OUT	(C),A
+	OUT	(C),L		;DEST
 	OUT	(C),H
-	LD	DE,0CF87H
-	OUT	(C),D
-	OUT	(C),E
+GO_DMA:
+	LD	A,0CFH
+	OUT	(C),A		;WR6 ロード
+	LD	A,0B3H
+	OUT	(C),A		;WR6 強制RDY
+	OUT	(C),C		;WR6 イネーブル
 	RET
 
 SCRCL:
