@@ -1,4 +1,4 @@
-・LSX-Dodgers for X1/turbo version 1.26 Gaku (Lovers/Tablacus)
+・LSX-Dodgers for X1/turbo version Gaku (Lovers/Tablacus)
 
 A>■
 
@@ -17,34 +17,35 @@ https://tablacus.github.io/LSX-Dodgers/
 
 ●手引書
 
-システム・コール一覧
-https://github.com/tablacus/LSX-Dodgers/blob/master/LDCALL.TXT
+[システム・コール一覧](https://github.com/tablacus/LSX-Dodgers/blob/master/LDCALL.TXT)
+
 基本的に MSX-DOS や CP/M と互換性があります。
 
-FCB ファイル・コントロール・ブロック
-https://github.com/tablacus/LSX-Dodgers/blob/master/LDFCB.TXT
+[FCB ファイル・コントロール・ブロック](https://github.com/tablacus/LSX-Dodgers/blob/master/LDFCB.TXT)
+
 基本的に MSX-DOS や CP/M と互換性があります。
 
-ディレクトリエントリ
-https://github.com/tablacus/LSX-Dodgers/blob/master/LDDIRENT.TXT
+[ディレクトリエントリ](https://github.com/tablacus/LSX-Dodgers/blob/master/LDDIRENT.TXT)
+
 MSX-DOS や MS-DOS と同じです。
 
-ドライブパラメータブロック
-https://github.com/tablacus/LSX-Dodgers/blob/master/LDDPB.TXT
+[ドライブパラメータブロック](https://github.com/tablacus/LSX-Dodgers/blob/master/LDDPB.TXT)
 
-メモリマップ
-https://github.com/tablacus/LSX-Dodgers/blob/master/LDMAP.TXT
+[メモリマップ](https://github.com/tablacus/LSX-Dodgers/blob/master/LDMAP.TXT)
 
-内部コマンド
-https://github.com/tablacus/LSX-Dodgers/blob/master/LDCMD.TXT
+[内部コマンド](https://github.com/tablacus/LSX-Dodgers/blob/master/LDCMD.TXT)
 
-スペック
-https://github.com/tablacus/LSX-Dodgers/blob/master/LDSPEC.TXT
+[スペック](https://github.com/tablacus/LSX-Dodgers/blob/master/LDSPEC.TXT)
 
-ライセンス
-https://github.com/tablacus/LSX-Dodgers/blob/master/LICENSE.TXT
+[ライセンス](https://github.com/tablacus/LSX-Dodgers/blob/master/LICENSE.TXT)
+
 MIT License のオープンソースです。
 
+●ハードディスク
+
+[LD-hdd](https://github.com/ho-ogino/LD-hdd/releases) 0.07以降でハードディスクに接続できるようになります。
+エミュレーターで使えるVHDファイルの作り方
+https://github.com/tablacus/LSX-Dodgers/issues/4
 
 ●アセンブラ
 
