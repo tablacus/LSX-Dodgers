@@ -1,0 +1,331 @@
+;
+; SOSDIR Gaku
+;
+; S-OS Hu-BASIC(X1) の2Dディスクの一覧を見る
+; 
+;
+SYSTEM	EQU	00005H
+BASE	EQU	0000BH
+JP_HL	EQU	0000FH
+FCB1	EQU	0005CH
+FCB2	EQU	0006CH
+DTA1	EQU	00080H
+_FAKEFREE	EQU	0ACH
+
+	ORG 00100H
+	JP	START		;0C3HはZ80ではJPだが、i8086ではRETなので
+START:				;間違えてMS-DOS環境で実行しても即終了できる
+	LD	C,06FH		;DOSVER MSX-DOS のバージョン番号の獲得
+	CALL	SYSTEM
+	OR	A
+	JR	NZ,USAGE
+	LD	HL,011DH	;LSX-Dodgersかどうか？
+	SBC	HL,BC
+	JR	NZ,USAGE
+	LD	HL,0135H-1	;LSX-Dodgersのバージョンが1.35以上か？
+	SBC	HL,DE
+	JR	C,MAIN
+USAGE:
+	LD	DE,MSG_TITLE
+SHOW_ERROR:
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+	JP	0
+SHOW_NOT_FD:
+	LD	DE,MSG_NOT_FD
+	JR	SHOW_ERROR
+SHOW_DISK_ERROR:
+	LD	DE,MSG_DISK_ERORR
+	JR	SHOW_ERROR
+MAIN:
+	LD	A,(FCB1)
+	OR	A
+	JR	Z,USAGE
+	DEC	A
+	LD	HL,(BASE-1)
+	LD	L,$DC		;GETDPB
+	CALL	JP_HL
+	JR	C,USAGE
+
+	LD	A,(IX+12H)	;デバイス情報(DPB_12_DEVICE)
+	AND	2FH
+	CP	27H		;BPB+フロッピー
+	JR	NZ,SHOW_NOT_FD
+
+				;DPBをS-OS用に書き換える(BPBを使って元に戻すのでそのままでOK)
+	LD	(IX+0AH),0FFH	;フロッピーディスクのモード(DPB_0A_FDMODE) 2D
+	LD	(IX+0DH),16	;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+	LD	(IX+0FH),1	;FAT情報と論理セクタのサイズ(DPB_0F_BPS)
+
+				;FATを読み込む
+	LD	DE,DATA
+	LD	C,1AH		; DTAの設定 CP/M MSX-DOS
+	CALL	SYSTEM
+
+	LD	DE,0EH		;読み出しを開始する論理セクタ番号
+	LD	H,1		;読み出す論理セクタの数
+	LD	A,(FCB1)
+	DEC	A
+	LD	L,A		;読み出すディスクドライブの番号 MSX-DOS
+	LD	C,2FH		;論理セクタを用いた読み出し
+	CALL	SYSTEM
+	OR	A
+	JR	NZ,SHOW_DISK_ERROR
+				;空きクラスタを数える
+	LD	A,'$'
+	CALL	CONOUT_A
+	LD	BC,0
+	LD	HL,DATA
+FAT1:
+	LD	A,(HL)
+	INC	HL
+	OR	A
+	JR	NZ,EXISTS
+	INC	C
+EXISTS:
+	DJNZ	FAT1
+
+	LD	A,C
+	CALL	PRHEX
+
+	LD	DE,MSG_CLUSTER
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+				;ディレクトリ一覧を読み込む
+	LD	DE,10H		;読み出しを開始する論理セクタ番号
+	LD	H,10H		;読み出す論理セクタの数
+	LD	A,(FCB1)
+	DEC	A
+	LD	L,A		;読み出すディスクドライブの番号 MSX-DOS
+	LD	C,2FH		;論理セクタを用いた読み出し
+	CALL	SYSTEM
+	OR	A
+	JR	NZ,SHOW_DISK_ERROR
+
+				;ディレクトリ一覧の表示
+	LD	IY,DATA
+	LD	A,128
+DIR1:
+	EX	AF,AF'
+	PUSH	IY
+	POP	HL
+	LD	DE,MSG_UNK
+	LD	A,(HL)	;属性
+	CP	0FFH
+	JP	Z,0		;ディレクトリエントリの終わり
+	OR	A
+	JP	Z,SKIP_DIR
+
+	AND	087H
+	CP	1
+	JR	NZ,NOTBIN
+	LD	DE,MSG_BIN
+NOTBIN:
+	CP	2
+	JR	NZ,NOTBAS
+	LD	DE,MSG_BAS
+NOTBAS:
+	CP	4
+	JR	NZ,NOTASC
+	LD	DE,MSG_ASC
+NOTASC:
+	CP	080H
+	JR	NZ,NOTDIR
+	LD	DE,MSG_DIR
+NOTDIR:
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	A,020H
+	BIT	6,(HL)
+	JR	Z,NOT_READONLY
+	LD	A,'*'
+NOT_READONLY:
+	BIT	4,(HL)
+	JR	Z,NOT_HIDDEN
+	LD	A,'-'
+NOT_HIDDEN:
+	CALL	CONOUT_A
+
+	LD	A,020H
+	CALL	CONOUT_A
+				;ドライブを表示
+	LD	A,(FCB1)
+	ADD	A,'A'-1
+	CALL	CONOUT_A
+	LD	A,':'
+	CALL	CONOUT_A
+				;ファイル名
+	LD	B,13
+FILE_NAME:
+	INC	HL
+	LD	A,(HL)
+	CALL	CONOUT_A
+	DJNZ	FILE_NAME
+				;拡張子
+	LD	A,'.'
+	CALL	CONOUT_A
+
+	LD	B,3
+FILE_EXT:
+	INC	HL
+	LD	A,(HL)
+	CALL	CONOUT_A
+	DJNZ	FILE_EXT
+
+	LD	A,':'
+	CALL	CONOUT_A
+				;先頭アドレス
+	LD	A,(IY+21)
+	LD	H,A
+	CALL	PRHEX
+	LD	A,(IY+20)
+	LD	L,A
+	CALL	PRHEX
+
+	LD	A,':'
+	CALL	CONOUT_A
+				;終了アドレス
+	LD	E,(IY+18)	;ファイルサイズ
+	LD	D,(IY+19)
+	ADD	HL,DE
+	DEC	HL
+	LD	A,H
+	CALL	PRHEX
+	LD	A,L
+	CALL	PRHEX
+
+	LD	A,':'
+	CALL	CONOUT_A
+				;実行アドレス
+	LD	A,(IY+23)
+	LD	H,A
+	CALL	PRHEX
+	LD	A,(IY+22)
+	LD	L,A
+	CALL	PRHEX
+
+	LD	A,' '
+	CALL	CONOUT_A
+				;年
+	LD	A,(IY+24)
+	OR	A
+	JR	Z,SKIP_DATETIME
+	CP	0FFH
+	JR	Z,SKIP_DATETIME
+	CALL	PRHEX
+	LD	A,'-'
+	CALL	CONOUT_A
+				;月
+	LD	A,(IY+25)
+	RRCA
+	RRCA
+	RRCA
+	RRCA
+	AND	0FH
+	CP	10
+	JR	C,UNDER10
+	ADD	A,010H-10
+UNDER10:
+	CALL	PRHEX
+
+	LD	A,'-'
+	CALL	CONOUT_A
+				;日
+	LD	A,(IY+26)
+	CALL	PRHEX
+
+	LD	A,' '
+	CALL	CONOUT_A
+				;時
+	LD	A,(IY+27)
+	CALL	PRHEX
+
+	LD	A,':'
+	CALL	CONOUT_A
+				;分
+	LD	A,(IY+28)
+	CALL	PRHEX
+
+SKIP_DATETIME:
+	LD	DE,CRLF		;改行
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+SKIP_DIR:
+	LD	DE,32
+	ADD	IY,DE
+	EX	AF,AF'
+	DEC	A
+	JP	NZ,DIR1
+
+	JP	0
+
+;16進数を表示
+;in
+;A : 表示する値
+PRHEX:
+	LD	B,2
+	LD	(HEXBF),A
+	LD	HL,HEXBF
+PRHEX1:
+	XOR	A
+	RLD
+	CP	10
+	JR	C,PRHEX2
+	ADD	A,'A'-'0'-10
+PRHEX2:
+	ADD	A,'0'
+	CALL	CONOUT_A
+	DJNZ	PRHEX1
+	RET
+
+;コンソール出力
+;in
+;A :表示する文字
+CONOUT_A:
+	PUSH	AF
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	LD	E,A
+	LD	C,2		;CONOUT コンソール出力 CP/M
+	CALL	SYSTEM
+	POP	HL
+	POP	DE
+	POP	BC
+	POP	AF
+	RET
+
+MSG_UNK:
+	DB	"???$"
+MSG_BIN:
+	DB	"Bin$"
+MSG_BAS:
+	DB	"Bas$"
+MSG_ASC:
+	DB	"Asc$"
+MSG_DIR:
+	DB	"Dir$"
+
+
+MSG_TITLE:
+	DB	"sosdir v1.00",00DH,00AH
+	DB	"usage: SOSDIR drive"
+CRLF:
+	DB	00DH,00AH
+	DB	'$'
+MSG_CLUSTER:
+	DB	" Clusters Free"
+	DB	00DH,00AH
+	DB	'$'
+MSG_NOT_FD:
+	DB	"Not a floppy drive"
+	DB	00DH,00AH
+	DB	'$'
+MSG_DISK_ERORR:
+	DB	"Disk error"
+	DB	00DH,00AH
+	DB	'$'
+HEXBF:
+DATA	EQU	HEXBF+1

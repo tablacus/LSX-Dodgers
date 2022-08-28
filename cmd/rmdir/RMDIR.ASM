@@ -20,30 +20,28 @@ START:				;間違えてMS-DOS環境で実行しても即終了できる
 	CALL	SYSTEM
 	OR	A
 	JP	NZ,SHOW_NOT_FOUND
-				
+
 	LD	A,(FCB1+13)	;属性(アトリビュート)
 	AND	010H		;ディレクトリか確認
 	JP	Z,SHOW_NOT_DIR
-						;ディレクトリが空か確認
-	LD	A,1
-	LD	(FCBSUB+29),A	;ディレクトリモードをサブディレクトリに
+				;ディレクトリが空か確認
 	LD	HL,(FCB1+26)	;ファイルの先頭クラスタ
 	INC HL
 	LD	(FCBSUB+14),HL	;アクセスするディレクトリのクラスタ番号+1
 	LD	A,(FCB1)	;ドライブ番号
 	LD	(FCBSUB),A	;ドライブ番号
-					
+
 	LD	DE,FCBLST
 	LD	C,01AH		;SETDTA ディスク転送アドレスの設定 CP/M
 	CALL	SYSTEM
-					
+
 	LD	A,0FFH		;隠しファイル等も検索対象にする
 	LD	(FCBSUB+13),A	;属性(アトリビュート)
 	LD	DE,FCBSUB
 	LD	C,011H		;SFIRST FCB ファイル検索 初回 CP/M
 	CALL	SYSTEM
 	OR	A
-	JP	NZ,SHOW_NOT_DIR
+	JP	NZ,REMOVE
 LOOP1:
 	LD	A,(FCBLST+1)
 	CP	'.'
@@ -57,12 +55,12 @@ LOOP1:
 	CP	020H		;..はスキップ
 	JP	NZ,SHOW_NOT_EMPTY
 SKIP1:
-	LD	DE,FCBSUB
+;	LD	DE,FCBSUB	;SNEXTは入力レジスタ無し
 	LD	C,012H		;SNEXT FCB ファイル検索 続き CP/M
 	CALL	SYSTEM
 	OR	A
 	JR	Z,LOOP1
-				;属性をディレクトリから通常ファイルに変更して削除する
+REMOVE:				;属性をディレクトリから通常ファイルに変更して削除する
 	LD	A,020H
 	LD	(FCB1+13),A	;属性(アトリビュート)
 	LD	A,0FEH		;ライトモード
@@ -102,13 +100,13 @@ SHOW_NOT_DIR:
 	JR	SHOW_MESSAGE
 SHOW_NOT_EMPTY:
 	LD	DE,MES_NOT_EMPTY
-	JR	SHOW_MESSAGE 
+	JR	SHOW_MESSAGE
 SHOW_NOT_REMOVE:
 	LD	DE,MES_NOT_REMOVE
-	JR	SHOW_MESSAGE 
+	JR	SHOW_MESSAGE
 
 MES_TITLE:
-	DB	"rmdir v1.01 Gaku",00DH,00AH
+	DB	"rmdir v1.02",00DH,00AH
 	DB	"usage: RMDIR directory$",
 MES_OK:
 	DB	"OK$"
