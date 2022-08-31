@@ -33,7 +33,7 @@ DEVI1:
 	LD	A,(DE)
 	SUB	05CH		;\
 	JR	NZ,NOROOT
-	LD	HL,0
+	LD	L,A		;A=0でH=0のはずなのでHL=0
 	LD	(FDRV+26),HL
 	INC	L
 	LD	(FDRV+14),HL
@@ -108,25 +108,25 @@ FILE12:
 	DJNZ	FILE4L
 	RET
 
-FILE9:
+FILE9:				;名前の*処理、名前の残りを?で埋める
 	CALL	FILE10
 	JR	FILE3
 
 FILE10:
 	LD	A,'?'
 
-FILE7:
+FILL_MEMORY:				;HLからBバイトAで埋める
 	LD	(HL),A
 	INC	HL
-	DJNZ	FILE7
+	DJNZ	FILL_MEMORY
 	RET
 
-FILEI:
+FILEI:				;名前＋拡張子をスペースで初期化
 	LD	A,020H
 	LD	BC,11*256
 	LD	HL,FNAME
 	PUSH	HL
-	CALL	FILE7
+	CALL	FILL_MEMORY
 	POP	HL
 	RET
 
@@ -140,7 +140,7 @@ CCHK2:
 	INC	C
 	DEC	C
 	RET	NZ
-CCHK3:
+CCHK3:				;ZF=1 で使えない文字
 	CP	'+'
 	RET	Z
 	CP	','
@@ -153,7 +153,7 @@ CCHK3:
 	RET	Z
 	CP	'='
 	RET	Z
-	CP	05CH
+	CP	05CH	;\
 	RET	Z
 	CP	020H
 	RET	NC
@@ -162,7 +162,7 @@ CCHK3:
 
 SS1:
 	INC	DE
-SPCUT:
+SPCUT:				;スペースをカット
 	LD	A,(DE)
 	CP	020H
 	JR	Z,SS1
@@ -734,7 +734,7 @@ FKANC:
 	BIT	0,C
 	CALL	Z,CAP2
 	JR	FKANX
-FKAN:
+FKAN:			;漢字チェック
 	INC	DE
 FKANX:
 	BIT	0,C

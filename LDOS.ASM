@@ -154,7 +154,7 @@ S16PAT:	LD	(IY+0),A
 	LD	(IY+12),A	;(FCB)カレント・ブロック
 	LD	(OFCB+1),IY
 FEND0F:
-	JP	FEND
+	JR	FEND10
 
 _SYS10:		;(BDOS)ファイルのクローズ
 	CALL	SETDRV
