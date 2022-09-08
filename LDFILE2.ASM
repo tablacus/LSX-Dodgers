@@ -11,7 +11,7 @@ RBWDD:
 RBWDD2:
 	CP	'C'
 	JR	NZ,RBWDD3
-	LD	HL,PRINTS
+	LD	HL,(STABLE+2*2)
 RBWDD3:
 	CP	'P'
 	JR	NZ,RBWDD4
@@ -35,7 +35,7 @@ RBWDDP:	CALL	_SYS02
 	JR	RBWDD1
 
 				;Write random block
-_SYS26:		;(BDOS)ランダム・ブロック・ライト
+_SYS26:		;(BDOS)ランダムブロック書き込み
 	XOR	A
 	LD	(DRDN1),A	;NOP
 	LD	(LEFT+1),HL	;HL←書き込むレコード数
@@ -65,10 +65,10 @@ _SYS26:		;(BDOS)ランダム・ブロック・ライト
 	CALL	RWXR
 	CALL	C,WRDFX
 	JP	C,RBWERR
-	
+
 	CALL	RBX2
 	JR	Z,RBWB		;NZ=セクタ以下の端数がある
-	CALL	RBXA		
+	CALL	RBXA
 	JR	C,RBWERR
 	EX	DE,HL
 	PUSH	BC
@@ -221,7 +221,7 @@ RBRDERR:
 	JR	RBRDDE2
 
 				;Read random block
-_SYS27:		;(BDOS)ランダム・ブロック・リード
+_SYS27:		;(BDOS)ランダムブロック読み込み
 	LD	(LEFTX),HL
 	CALL	SETDRV
 
@@ -315,7 +315,7 @@ RBX0:
 	LD	HL,(_DTA)
 	LD	(DTAX),HL
 	LD	HL,(LEFTX)
-	LD	A,(IY+28)	;(FCB)オープン・モード
+	LD	A,(IY+28)	;(FCB)オープンモード
 	SUB	0FDH
 	RET
 
@@ -343,7 +343,7 @@ RBX1:
 	RET
 
 RBX2:				;Cluster settings
-	LD	C,(IY+34)	;(+33)(FCB)ランダム・レコード
+	LD	C,(IY+34)	;(+33)(FCB)ランダムレコード
 	LD	B,(IY+35)
 	CALL	RWXR
 	LD	A,(SECSZM1+2)	;1024=3 / 512=1 / 256=0
@@ -363,11 +363,11 @@ RBXA:
 	RET	C
 	LD	(_CLPS),DE
 
-	LD	C,(IY+33)	;(FCB)ランダム・レコード
+	LD	C,(IY+33)	;(FCB)ランダムレコード
 SECSZ:	LD	HL,0400H	;自己書き換え 1024=0400H / 512=0200H ここに1セクタのサイズが格納される
 	LD	A,H
 	DEC	A		;1024=3 / 512=1
-	AND	(IY+34)		;(FCB)ランダム・レコード
+	AND	(IY+34)		;(FCB)ランダムレコード
 	LD	B,A		;BCに1セクタ以下の端数が入る
 	SBC	HL,BC		;残りを計算
 
@@ -411,30 +411,19 @@ RBXC:
 RBXEND:
 LEFT:	LD	DE,0
 	XOR	A
-	LD	L,(IY+33)	;(FCB)ランダム・レコード
+	LD	L,(IY+33)	;(FCB)ランダムレコード
 	LD	H,(IY+34)
 	ADD	HL,DE
 	ADC	A,(IY+35)
-	LD	(IY+33),L	;(FCB)ランダム・レコード
+	LD	(IY+33),L	;(FCB)ランダムレコード
 	LD	(IY+34),H
 	LD	(IY+35),A
 	EX	DE,HL		;HL=Read byte
 	RET
 
 GET_RR_CDE:			;CDE=Random record
-	LD	E,(IY+33)	;(FCB)ランダム・レコード
+	LD	E,(IY+33)	;(FCB)ランダムレコード
 	LD	D,(IY+34)
 	LD	C,(IY+35)
 	RET
 
-CPBUF:
-LEFTX:	DW	0
-DTAX:	DW	0
-	DB	020H	;CPBUFで使う
-	DB	020H
-	DB	020H
-	DB	020H
-	DB	020H
-	DB	020H
-	DB	020H
-;

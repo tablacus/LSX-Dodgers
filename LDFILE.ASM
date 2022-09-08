@@ -69,6 +69,7 @@ SETDIR1:
 
 FILED:
 	CALL	FILEI
+	LD	HL,FNAME
 
 	LD	B,8
 FILE2:
@@ -114,20 +115,15 @@ FILE9:				;名前の*処理、名前の残りを?で埋める
 
 FILE10:
 	LD	A,'?'
-
-FILL_MEMORY:				;HLからBバイトAで埋める
+	JR	FILL_MEMORY
+FILEI:				;名前＋拡張子をスペースで初期化
+	LD	A,020H
+	LD	BC,11*256	;C=0にしておく
+	LD	HL,FNAME
+FILL_MEMORY:			;HLからBバイトAで埋める
 	LD	(HL),A
 	INC	HL
 	DJNZ	FILL_MEMORY
-	RET
-
-FILEI:				;名前＋拡張子をスペースで初期化
-	LD	A,020H
-	LD	BC,11*256
-	LD	HL,FNAME
-	PUSH	HL
-	CALL	FILL_MEMORY
-	POP	HL
 	RET
 
 CCHKF:
@@ -254,7 +250,7 @@ SOPENC:
 SDIRX0:
 	XOR	A
 	LD	(_DIRF),A
-	LD	(IY+14),1	;(FCB)レコード・サイズ
+	LD	(IY+14),1	;(FCB)レコードサイズ
 	LD	(IY+15),A
 SDIRX1:
 	LD	DE,(_DIRPS)	;Root Directory
@@ -269,7 +265,7 @@ SOPEN2:
 OPENPAT:CALL	FILESE		;(Self-rewriting)
 	POP	DE
 	JR	C,SOPENE
-	JR	Z,NOTSE
+	JR	Z,SCF_FF_RET
 SOPEN3:
 	LD	A,(_DIRF)	;ディレクトリか判別
 	OR	A
@@ -287,7 +283,7 @@ SOPEN5:
 	CALL	ENDCL
 SOPEN6:
 	JR	C,SOPEN1
-NOTSE:
+SCF_FF_RET:
 	SCF			;CF=1
 	SBC	A,A		;A=0FFH
 	RET
@@ -302,7 +298,7 @@ NOPEN:
 	LD	(OPENPAT+1),HL
 	LD	IY,(_FCB)
 	CALL	CHKWILDX
-	JR	NC,NOTSE
+	JR	NC,SCF_FF_RET
 	LD	A,(IY+0)	;(FCB)ドライブ番号
 	DEC	A
 	LD	(_DRV),A
@@ -361,7 +357,6 @@ SECSZM1:LD	BC,003FFH	;自己書き換え セクタサイズ-1(0x3FF:1023 or 0x1FF:511 or 0xF
 	XOR	A		;データバッファをセクタサイズ分ゼロクリア
 	LD	(HL),A
 	LDIR
-
 	POP	DE		;DE=(_CLPS)
 	PUSH	DE
 	LD	A,(SPCPAT+1)	;1クラスタの論理セクタ数
@@ -449,15 +444,13 @@ CHKDDX:
 CPNAME:
 	PUSH	BC
 	PUSH	DE
-	LD	DE,CPBUF
-	LD	BC,4
-	LDIR
-	POP	DE
-	PUSH	DE
 	PUSH	HL
-	LD	HL,CPBUF
-	CALL	CPFILE
+	CALL	CPFILE4
 	POP	HL
+	INC	HL
+	INC	HL
+	INC	HL
+	INC	HL
 	POP	DE
 	POP	BC
 	JR	NZ,CPNAME1
@@ -473,6 +466,10 @@ CPNAME1:
 	SCF
 	RET
 
+CPFILE4:
+	PUSH	BC
+	LD	BC,00400H
+	JR	CPSTR1
 CPFILE:
 	PUSH	BC
 	LD	BC,00B00H
@@ -785,8 +782,8 @@ SDE1:
 	LD	(DE),A
 	INC	DE
 	DJNZ	SDE1
-					;(FCB)ファイルを最後に変更した時刻
-	LD	HL,SDDATA		;(FCB)ファイルを最後に変更した日付
+					;(FCB)更新時刻
+	LD	HL,SDDATA		;(FCB)更新年月日
 	LD	B,SDDATAE-SDDATA	;(FCB)ファイルの先頭クラスタ
 SDLOOP:					;(FCB)ファイルのサイズ(バイト単位)
 	LD	A,(HL)
@@ -807,11 +804,11 @@ WOPEN:
 	AND	01FH
 	SCF
 	RET	NZ
-	LD	(IY+28),0FEH	;(FCB)オープン・モード
+	LD	(IY+28),0FEH	;(FCB)オープンモード
 TOPEN2:
 	XOR	A
 TOPEN:				;Initializes the time stamp
-	LD	(IY+23),0FFH	;(FCB)ファイルを最後に変更した時刻
+	LD	(IY+23),0FFH	;(FCB)更新時刻
 	RET
 
 WRDFX:
@@ -986,7 +983,7 @@ SUBRR:
 
 SETSEQ:
 	PUSH	AF		;AHL=Random record
-	LD	A,(IY+33)	;(FCB)ランダム・レコード
+	LD	A,(IY+33)	;(FCB)ランダムレコード
 	LD	L,(IY+34)
 	LD	H,(IY+35)
 
@@ -994,8 +991,8 @@ SETSEQ:
 
 	ADD	HL,HL
 	SRL	L		;L=L/2
-	LD	(IY+32),L	;(FCB)カレント・レコード
-	LD	(IY+12),H	;(FCB)カレント・ブロック
+	LD	(IY+32),L	;(FCB)カレントレコード
+	LD	(IY+12),H	;(FCB)カレントブロック
 	POP	AF
 
 POPRR:
@@ -1016,8 +1013,8 @@ SSQ1:				;バイト単位からCP/Mのレコード単位を求める（1レコード=128バイト）
 	RET
 
 GETSEQ:
-	LD	L,(IY+32)	;(FCB)カレント・レコード
-	LD	H,(IY+12)	;(FCB)カレント・ブロック
+	LD	L,(IY+32)	;(FCB)カレントレコード
+	LD	H,(IY+12)	;(FCB)カレントブロック
 
 	SLA	L	;L=L*2
 
@@ -1027,17 +1024,17 @@ GETSEQ:
 
 RB_WRITE:
 	PUSH	BC
-	LD	BC,(STABLE+2*026H)	;(BDOS)ランダム・ブロック・ライト
+	LD	BC,(STABLE+2*026H)	;(BDOS)ランダムブロック書き込み
 	JR	RBRW
 RB_READ:
 	PUSH	BC
-	LD	BC,(STABLE+2*027H)	;(BDOS)ランダム・ブロック・リード
+	LD	BC,(STABLE+2*027H)	;(BDOS)ランダムブロック読み込み
 RBRW:
 	XOR	A	;HLA = HL*128
 	SRL	H	;HL=HL/2
 	RR	L	;
 	RRA			;HLA
-	LD	(IY+33),A	;(FCB)ランダム・レコード
+	LD	(IY+33),A	;(FCB)ランダムレコード
 	LD	(IY+34),L
 	LD	(IY+35),H
 	LD	HL,128
@@ -1053,5 +1050,6 @@ JP_BC:
 	PUSH	BC
 	RET
 
-SFILE:	DS	33		;DRV FILENAME
-HLBUF:	DS	3		;Random record buffer
+_SYS03	EQU	SCF_FF_RET	;(BDOS)外部入力
+_SYS2B	EQU	SCF_FF_RET	;(BDOS)日付の設定
+_SYS2D	EQU	SCF_FF_RET	;(BDOS)時刻の設定

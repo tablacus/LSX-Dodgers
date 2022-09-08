@@ -56,111 +56,96 @@ S1FD0:
 
 ;	BANK RAM DISK DRIVER
 
+BDWT:
+	DB	03EH	;LD A,??
+	SCF
+	JR	BRW
+
 BDRD:
+	DB	03EH	;LD A,??
+	AND	A
+BRW:
+	DI
+	LD	(BRWPAT),A
 	LD	(BANKSP+1),SP
 	LD	A,(BANKSP+2)
 	ADD	A,A
-	JR	C,BDRD1
+	JR	C,BRW0
 	LD	SP,EXTSP
-BDRD1:
-	PUSH	DE
+BRW0:
 	EXX		;裏レジスタ
 	 PUSH	 BC
 	 PUSH	 DE
-	 CALL	 BADR
-	CALL	BTFR
+	 LD	 BC,00B00H	 ;バンクメモリ
+	 LD	 DE,01010H
+	 EXX		;表レジスタ
+BRW1:
+	PUSH	BC
+	PUSH	DE
+	EX	DE,HL
+	ADD	HL,HL
+	ADD	HL,HL
+	LD	A,H
+	AND	00FH	;バンク
+	LD	H,L
+	SRL	H	;/2
+	LD	L,0
 	EXX		;裏レジスタ
-BDWTE:
+BRWPAT:	 AND	 A	;自己書き換え(AND A:読み出し/SCF:書き込み)
+	 JR	 C,BRWT
+	 LD	 D,A	 ;D=バンク
+	 EXX		;表レジスタ
+	EX	DE,HL
+	CALL	BTFR
+	JR	BRW2
+BRWT:
+	 LD	E,A	 ;E=バンク
+	 EXX		;表レジスタ
+	CALL	BTFR
+	EX	DE,HL
+BRW2:
+	POP	DE
+	POP	BC
+	INC	DE
+	DJNZ	BRW1
+
+	EXX		;裏レジスタ
+	 LD	 A,10H
+	 OUT	 (C),A		;メインメモリに切り替える
 	 POP	 DE
 	 POP	 BC
 	 EXX		;表レジスタ
-	POP	DE
 	XOR	A
 BANKSP:	LD	SP,0
 	EI
 	RET
 
-BDWT:
-	LD	(BANKSP+1),SP
-	LD	A,(BANKSP+2)
-	ADD	A,A
-	JR	C,BDWT1
-	LD	SP,EXTSP
-BDWT1:
-	PUSH	DE
-	EXX		;裏レジスタ
-	 PUSH	 BC
-	 PUSH	 DE
-	 CALL	 BADR
-	EXX		;裏レジスタ
-	 LD	D,E
-	 LD	E,A
-	 EXX		;表レジスタ
-	EX	DE,HL
-	CALL	BTFR
-	EX	DE,HL
-	EXX		;裏レジスタ
-	 OUT	 (C),D	 ;MAIN
-	 JR	 BDWTE
-
-BADR:
-	 EXX		;表レジスタ
-	LD	A,E
-	ADD	A,A
-	RL	D
-	ADD	A,A
-	RL	D
-	PUSH	AF
-	ADD	A,A
-	LD	A,D
-	ADC	A,A
-	AND	00FH
-	EXX		;裏レジスタ
-	 LD	 BC,00B00H
-	 LD	 D,A	  ;BANK
-	 LD	 E,010H	  ;MAIN
-	 EXX		;表レジスタ
-	POP	DE
-	LD	E,0
-	RES	7,D
-	RET
+;メインメモリ←→バンクメモリ 512バイトの転送を行う
+; DE:転送元アドレス
+; HL:転送先アドレス
+; 裏BC:バンク切り替えポート(0B00H)
+; 裏D:転送元バンク(0-0FH:10Hはメインメモリ)
+; 裏E:転送先バンク(0-0FH:10Hはメインメモリ)
 
 BTFR:
-	DI
-BTFR0:
-	PUSH	BC
-	PUSH	DE
-	LD	B,0	;256回ループ(256*4)
+	LD	B,0	;256回ループ(256*2)
 BTFR1:
 	EXX		;裏レジスタ
 	 OUT	 (C),D	 ;BANK(MAIN)
 	 EXX		;表レジスタ
-	EX	(SP),HL
-	LD	A,(HL)
-	INC	HL
-	LD	C,(HL)
-	INC	HL
-	LD	D,(HL)
-	INC	HL
-	LD	E,(HL)
-	INC	HL
-	EX	(SP),HL
+	LD	A,(DE)
+	LD	C,A
+	INC	DE
+	LD	A,(DE)
+	INC	DE
 	EXX		;裏レジスタ
 	 OUT	 (C),E	 ;MAIN(BANK)
 	 EXX		;表レジスタ
-	LD	(HL),A
-	INC	HL
 	LD	(HL),C
 	INC	HL
-	LD	(HL),D
-	INC	HL
-	LD	(HL),E
+	LD	(HL),A
 	INC	HL
 	DJNZ	BTFR1
-	POP	DE
-	INC	DE
-	POP	BC
-	DJNZ	BTFR0
 	RET
 
 ;	EMM DRIVER(DMA)
@@ -177,13 +162,13 @@ EDWT1:
 	LD	(DMAB),HL
 	LD	A,B
 	ADD	A,A
-	ADD	A,A
-	PUSH	AF
 	DEC	A
 	LD	(DMALEN+1),A
+	INC	A
+	ADD	A,H	;HL(アドレス)を先に進めておく
+	LD	H,A
 	LD	A,C
 	EX	DE,HL
-	ADD	HL,HL
 	ADD	HL,HL
 	LD	BC,(_MAXCYL-1)
 	LD	C,0
@@ -200,9 +185,6 @@ EDWT1:
 	CALL	SETDMA
 	CALL	GO_DMA
 	EX	DE,HL
-	POP	AF
-	ADD	A,H
-	LD	L,A
 	POP	DE
 	POP	BC
 DMA_ADD_SEC:
@@ -215,7 +197,7 @@ EDMAD:
 	DB	0C3H	;WR6 リセット
 	DB	07DH	;WR0 ポートA→ポートB 転送
 	DW	00D03H	;ポートA開始アドレス EMMリード/ライト
-DMALEN:	DW	003FFH	;ブロック長(転送サイズ-1)
+DMALEN:	DW	001FFH	;ブロック長(転送サイズ-1)
 	DB	02CH	;WR1 ポートAアドレス固定 I/O
 	DB	050H	;WR2 ポートBアドレスインクリメント メモリ
 	DB	002H	;ポートBタイミング
@@ -223,8 +205,7 @@ DMALEN:	DW	003FFH	;ブロック長(転送サイズ-1)
 	DB	09AH	;WR5 WAIT RDY:HIGH
 	DB	0ADH	;WR4 連続 ポートB開始アドレス
 DMAB:	DW	0
-	DB	001H	;WR0 ポートB←ポートB 転送
-	DS	1	;ノンターボ版との差分
+	DB	001H	;WR0 ポートA←ポートB 転送
 EMME:
 
 AT_RE	EQU	EDWT-AT_EDWT

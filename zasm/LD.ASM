@@ -21,24 +21,22 @@ RUN	EQU	0C600h
 MAC	EQU	01D90H		;X1
 VER_1   EQU	1
 VER_2   EQU	3
-VER_3   EQU	7
-VER	EQU	VER_1 * 256 + VER_2 * 16 + VER_3
+VER_3   EQU	8
+VER	EQU	VER_1 * 256 + VER_2 * 17 + VER_3
 
-STACK	EQU	00000H
 SYSTEM	EQU	00005H
 JP_HL	EQU	0000FH
 FCB1	EQU	0005CH
 FCB2	EQU	0006CH
+FCB1FN	EQU	FCB1+1
+FCB2FN	EQU	FCB2+1
 DTA1	EQU	00080H
-FDRV	EQU	00100H-37
-FNAME	EQU	FDRV+1
-DECBF	EQU	FDRV-6
 FATBF	EQU	0EE00H
 DTBUF	EQU	0FA00H
 KEYBF	EQU	0FE00H
 KBUF	EQU	0FF00H
-DTA	EQU	KBUF+81
-EXTSP	EQU	0FFD4H
+STACK	EQU	0FFA0H
+EXTSP	EQU	00000H
 LINE	EQU	25
 
 ;LDINIT.ASM
@@ -52,7 +50,7 @@ VERSION:DW	VER
 START:
 	DI
 	IM	2
-	LD	SP,STACK
+	LD	SP,EXTSP
 	CALL	INIT		;NZならAUTOEXECを実行
 	LD	HL,0
 	PUSH	HL
@@ -189,15 +187,13 @@ TEXT1:
 	OUT	(C),A
 	LD	BC,00A04H
 PRN:
-	LD	DE,1
-	LD	H,D
-	LD	L,D
-	LD	BC,07FH
-	LD	(HL),0FFH
-	LDIR
-	LD	BC,07FH
-	LD	(HL),0
-	LDIR
+	LD	HL,0
+	LD	B,05CH
+	LD	A,0C9H	;C9=RET
+	CALL	FILL_MEMORY
+	LD	B,0A4H
+	XOR	A
+	CALL	FILL_MEMORY
 
 	LD	A,0C3H		;JP
 	LD	HL,WBOOT
@@ -407,7 +403,7 @@ BANK2:
 	DEC	HL	;-2
 	DEC	HL	;-3
 	LD	(BANKCL),HL
-	LD	A,1
+	CALL	CALC_FATLN
 	LD	(BANKFL),A
 NOBANK:
 EMM:
@@ -445,7 +441,7 @@ ECHECK2:
 	ADD	HL,DE
 	JR	NC,NOEMM
 	LD	(EMMCL),HL
-	LD	A,3
+	CALL	CALC_FATLN
 	LD	(EMMFL),A
 NOEMM:
 KEYREP:	LD	A,000H
@@ -489,12 +485,14 @@ INIT0:
 	CALL	SYSTEM
 	XOR	A
 INIT1:
-	LD	HL,0FF00H
-	LD	DE,0FF01H
-	LD	BC,0CFH
-	LD	(HL),L
-	LDIR
-
+	DI
+	EX	AF,AF'
+	LD	L,0-2		;CALLのスタック分減らす
+	ADD	HL,SP
+	LD	DE,0FF00H
+	LD	B,L
+	CALL	ZERO_MEMORY_DE
+	EX	AF,AF'
 	OR	A
 	RET	Z
 
@@ -581,6 +579,19 @@ SETCRT1:
 	OUTI
 	LD	BC,01FD0H+00100H
 	OUTI
+	RET
+
+CALC_FATLN:	;FAT12のクラスタ数から必要なFATサイズを求める(セクタサイズ512)
+	LD	E,L
+	LD	D,H
+	ADD	HL,HL	;*2
+	ADD	HL,DE	;*3
+	SRL	H	;/2
+	RR	L	;1クラスタ辺り1.5バイト必要
+	LD	DE,511	;切り上げる
+	ADD	HL,DE
+	LD	A,H
+	SRL	A
 	RET
 
 AUTOD:	DB	"AUTOEXEC "
@@ -874,10 +885,6 @@ AT_EDWT1:
 	OUTI
 	INC	B
 	OUTI
-	INC	B
-	OUTI
-	INC	B
-	OUTI
 	DEC	A
 	JR	NZ,AT_EDWT1
 	INC	DE
@@ -892,10 +899,6 @@ AT_EDRD0:
 	PUSH	AF
 	XOR	A
 AT_EDRD1:
-	INI
-	INC	B
-	INI
-	INC	B
 	INI
 	INC	B
 	INI
@@ -937,7 +940,7 @@ INITE:
 
 BDOS:
 	JP	BDOS0
-	DS	20	;Reserved
+	DS	2	;Reserved
 
 ;LDCCP.ASM
 
@@ -977,32 +980,33 @@ SETCRT2:
 	DEC	C
 	OUT	(C),A
 	INC	C
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
+
 	DEC	C
 	INC	A
 	OUT	(C),A
 	INC	C
-;	OUT	(C),0		;未定義命令ニーモニック
-	DB	0EDH,071H
+	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 	INC	HL
 	INC	HL
 	LD	BC,01A03H+00100H
 	OUTI
 	LD	BC,01FD0H+00100H
 	OUTI
-	LD	E,4
-	CALL	_PRINT
+	LD	HL,_KEYD
+	LD	A,3
+	CP	(HL)
+	CALL	Z,KEYBC
+	LD	(HL),0
+	LD	A,4
+	CALL	MSG_A
 COMMAND:
 	CALL	SETDTA1
-	PUSH	DE
 	LD	A,(_DVSW)
 	ADD	A,'A'
-	LD	E,A
-	CALL	_PRINT
-	LD	E,'>'
-	CALL	_PRINT
-	POP	DE		;DE=DTA1
+	CALL	MSG_A
+	LD	A,'>'
+	CALL	MSG_A
 	LD	A,80
 	LD	(DE),A
 	CALL	_SYS0A		;(BDOS)文字列入力
@@ -1011,13 +1015,15 @@ COMMAND:
 	LD	DE,DTA1+2
 	CALL	_COMANL
 	JR	NC,COMMAND
-	CALL	KEYBC
 	LD	DE,COMERM
 	CALL	_SYS09		;(BDOS)文字列出力
 	RST	0
 
 COMANL:
 	CALL	FILE
+	LD	A,(FNAME+4)
+	CP	020H
+	JR	NZ,COMB2
 	PUSH	DE
 	LD	DE,FNAME
 	LD	A,(DE)
@@ -1030,15 +1036,14 @@ COMANL:
 	INC	DE
 
 	LD	HL,COMTB
-	LD	A,COMS
-	LD	B,A
+	LD	B,COMS
 	CALL	CPNAME
 COMB:
 	POP	DE
 	JP	NC,JP_HL
+COMB2:
 	EX	DE,HL
 	LD	(COMPAT+1),HL
-	LD	(BATPAT+1),HL
 	PUSH	AF
 	CALL	CEXE4
 	POP	AF
@@ -1067,21 +1072,20 @@ SDVSW:
 	LD	A,(FDRV)
 	DEC	A
 	LD	E,A
-	LD	C,00EH		;(BDOS)カレント・ドライブの設定
+	LD	C,00EH		;(BDOS)カレントドライブの設定
 	JR	SYSTEM0
 
 OPEN1:
 	LD	HL,FDRV
 OPEN:
-	LD	C,011H		;(BDOS)最初のファイルの検索
+	LD	C,011H		;(BDOS)ファイルの検索
 OPEN3:
 	PUSH	DE
-	LD	DE,DTA
+	LD	DE,DTA_CCP
 	CALL	SETDTA
 	EX	DE,HL
-	CALL	SYSTEM
+	CALL	SYSTEM0
 	POP	DE
-	OR	A
 	RET
 
 OPEN2:
@@ -1089,12 +1093,12 @@ OPEN2:
 	JR	OPEN3
 
 DEFCB:				;Z=Ok NZ=Error
-	LD	DE,DTA
+	LD	DE,DTA_CCP
 	CALL	SYSC0F
 
-	LD	HL,0
-	LD	(DTA+33),HL
-	LD	(DTA+35),HL
+	LD	DE,DTA_CCP+33	;(FCB)ランダムレコード
+	LD	B,4
+	CALL	ZERO_MEMORY_DE
 	LD	DE,00100H
 SETDTA:
 	JP	_SYS1A		;(BDOS)DTAの設定
@@ -1117,9 +1121,9 @@ C_CD:
 	JR	S27
 
 S27DTA:
-	LD	DE,DTA
+	LD	DE,DTA_CCP
 S27:
-	LD	C,027H		;(BDOS)ランダム・ブロック・リード
+	LD	C,027H		;(BDOS)ランダムブロック読み込み
 	JR	SYSTEM0
 
 CEXE4:
@@ -1142,14 +1146,14 @@ CEXE7:
 	CALL	OPEN1
 CEXE5:
 	RET	NZ
-	LD	HL,(DTA+1+9)
+	LD	HL,(DTA_CCP+1+9)
 	LD	A,H
 	CALL	CAP
 	LD	H,A
 	LD	A,L
 	CALL	CAP
 	LD	L,A
-	LD	A,(DTA+1+8)
+	LD	A,(DTA_CCP+1+8)
 	CALL	CAP
 	SUB	'B'
 	JR	Z,C_BAT
@@ -1181,7 +1185,7 @@ COMPAT:	LD	DE,0
 	XOR	A
 	LD	H,A
 	LD	L,A	;HL=0x0000
-	LD	SP,HL	;STACK=0
+	LD	SP,STACK
 	PUSH	HL
 	INC	H	;HL=0x0100
 	JP	(HL)
@@ -1238,7 +1242,7 @@ BAT2:
 	INC	HL
 	INC	A
 	LD	C,A
-BATPAT:	LD	DE,0
+	LD	DE,(COMPAT+1)
 BAT3:
 	LD	A,(DE)
 	OR	A
@@ -1335,7 +1339,7 @@ PDSKF1:
 	CALL	PUTDRV
 	LD	A,05CH
 	CALL	MSG_A
-	LD	HL,(FDRV+14)
+	LD	HL,(FDRV+14)	;ディレクトリのクラスタ番号
 	XOR	A
 	LD	DE,0-2
 	ADD	HL,DE
@@ -1344,15 +1348,12 @@ PDSKF1:
 	JR	LTNL
 
 P_NAME:
-	LD	A,(DTA+1)
+	LD	A,(DTA_CCP+1)
 	CP	'.'
 	RET	Z
-	LD	A,020H
-	CALL	MSG_A
-	CALL	MSG_A
-	LD	A,':'
-	CALL	MSG_A
-	LD	A,(DTA+1+00BH)
+	LD	DE,DIRHD
+	CALL	_SYS09		;(BDOS)文字列出力
+	LD	A,(DTA_CCP+1+00BH)
 	PUSH	AF
 	RRCA
 	SBC	A,A
@@ -1360,7 +1361,7 @@ P_NAME:
 	ADD	A,020H
 	CALL	MSG_A
 	CALL	PUTDRV
-	LD	HL,DTA+1
+	LD	HL,DTA_CCP+1
 	CALL	FPRNT
 
 	POP	AF
@@ -1370,8 +1371,8 @@ P_NAME:
 	CALL	_SYS09		;(BDOS)文字列出力
 	JR	DIR6
 DIR3:
-	LD	DE,(DTA+1+01EH)
-	LD	HL,(DTA+1+01CH)
+	LD	DE,(DTA_CCP+1+01EH)
+	LD	HL,(DTA_CCP+1+01CH)
 	CALL	PRDEC_DEHL
 DIR6:
 	LD	A,(CRTCD+1)
@@ -1379,9 +1380,7 @@ DIR6:
 	CALL	NC,PRTTMS
 
 LTNL:
-	LD	E,00DH
-	CALL	_PRINT
-	LD	E,00AH
+	LD	E,3
 	JP	_PRINT
 
 C_PATH:
@@ -1423,12 +1422,11 @@ PRDEC_AHL:
 	LD	E,A
 	LD	D,0
 PRDEC_DEHL:
-	XOR	A
-	PUSH	HL
-	LD	HL,DECBF
+	PUSH	DE
+	LD	DE,DECBF
 	LD	B,5
-	CALL	FILL_MEMORY
-	POP	HL
+	CALL	ZERO_MEMORY_DE	;A=0
+	POP	DE
 
 	LD	C,32
 DEC1:
@@ -1497,7 +1495,7 @@ PRTTMS:
 	LD	A,020H
 	CALL	MSG_A
 
-	LD	HL,(DTA+1+24)
+	LD	HL,(DTA_CCP+1+24)
 	LD	A,L
 	OR	A
 	RET	Z
@@ -1510,38 +1508,37 @@ PRTTMS:
 	LD	D,A
 	LD	A,H
 	ADD	A,80
-	CALL	PRTA
+	CALL	PRDEC_A
 	LD	A,'-'
 	CALL	MSG_A
 	LD	A,D
-	CALL	PRTA
+	CALL	PRDEC_A
 	LD	A,'-'
 	CALL	MSG_A
 	LD	A,L
 	AND	01FH
-	CALL	PRTA
+	CALL	PRDEC_A
 
-	LD	HL,(DTA+1+22)
+	LD	HL,(DTA_CCP+1+22)
 
 	LD	A,020H
 	CALL	MSG_A
 	LD	A,H
 	LD	H,L
+	LD	B,3
+PRTTMS1:
 	RRA
 	RR	L
-	RRA
-	RR	L
-	RRA
-	RR	L
+	DJNZ	PRTTMS1
 	AND	01FH
-	CALL	PRTA
+	CALL	PRDEC_A
 	LD	A,':'
 	CALL	MSG_A
 	LD	A,L
 	RRCA
 	RRCA
 	AND	03FH
-	CALL	PRTA
+	CALL	PRDEC_A
 	LD	A,':'
 	CALL	MSG_A
 	LD	A,H
@@ -1550,7 +1547,7 @@ PRTTMS:
 
 ;	PRINT10
 
-PRTA:
+PRDEC_A:
 	PUSH	HL
 	LD	B,8
 	LD	C,A
@@ -1574,15 +1571,13 @@ SETFCB:
 	JR	C,SETFCBA
 	DEC	DE
 SETFCBA:
-	PUSH	DE
+	LD	B,36
 	LD	HL,FCB1
-	LD	DE,FCB1+1
-	LD	BC,00023H
-	LD	(HL),B		;B=0
-	LDIR
-	POP	DE
+	PUSH	HL
+	XOR	A
+	CALL	FILL_MEMORY
+	POP	HL
 	PUSH	DE
-	LD	HL,FCB1
 	CALL	_SYS29		;(BDOS)ファイル名の解析
 	LD	HL,FCB2
 	CALL	_SYS29		;(BDOS)ファイル名の解析
@@ -1602,11 +1597,12 @@ SETFCB2:
 	LD	A,C
 	LD	(DTA1),A
 	INC	B
+ZERO_MEMORY_DE:
 	XOR	A
-SETFCB3:
+FILL_MEMORY_DE:
 	LD	(DE),A
 	INC	DE
-	DJNZ	SETFCB3
+	DJNZ	FILL_MEMORY_DE
 	RET
 
 C_COPY:
@@ -1635,7 +1631,7 @@ COPY1:
 	RET	NZ
 	CALL	DEFCB
 
-	LD	A,(DTA+13)
+	LD	A,(DTA_CCP+13)
 	BIT	4,A
 	JR	Z,COPY1A
 
@@ -1645,7 +1641,7 @@ COPY1:
 
 	LD	A,020H
 	LD	(FCB1+1),A
-	LD	HL,(DTA+26)
+	LD	HL,(DTA_CCP+26)
 	INC	HL
 	LD	(FCB1+14),HL
 	JR	COPY0
@@ -1662,7 +1658,7 @@ COPY9:
 COPY1A:
 	LD	HL,FCB2
 	LD	DE,FDRV
-	LD	BC,DTA+2
+	LD	BC,DTA_CCP+2
 	LDI
 	LD	A,11
 COPY2:
@@ -1714,8 +1710,8 @@ SWNE:
 	JR	NZ,COPYE2
 	LD	H,A		;A=0
 	LD	L,A
-	LD	(FDRV+33),HL
-	LD	(FDRV+35),A
+	LD	(FDRV+33),HL	;(FCB)ランダムレコード
+	LD	(FDRV+35),HL
 COPY6:
 	CALL	BUFSIZ
 	CALL	S27DTA
@@ -1726,16 +1722,14 @@ COPY6:
 	OR	L
 	JR	Z,COPY7
 	LD	DE,FDRV
-	LD	C,026H		;(BDOS)ランダム・ブロック・ライト
-	CALL	SYSTEM
-	OR	A
+	LD	C,026H		;(BDOS)ランダムブロック書き込み
+	CALL	SYSTEM0
 	JR	NZ,COPYE
-	DEC	B
-	JR	NZ,COPY6
+	DJNZ	COPY6
 COPY7:
-	LD	A,(DTA+13)
+	LD	A,(DTA_CCP+13)	;(FCB)属性
 	LD	(FDRV+13),A
-	LD	HL,DTA+20
+	LD	HL,DTA_CCP+20	;(FCB)タイムスタンプ
 	LD	DE,FDRV+20
 	LD	BC,4
 	LDIR
@@ -1757,12 +1751,12 @@ COPYE2:
 	RET
 
 CTIME:
-	LD	DE,(DTA+20)
+	LD	DE,(DTA_CCP+20)
 	LD	HL,(FDRV+20)
 	AND	A
 	SBC	HL,DE
 	RET	NZ
-	LD	DE,(DTA+22)
+	LD	DE,(DTA_CCP+22)
 	LD	HL,(FDRV+22)
 	SBC	HL,DE
 	RET
@@ -1791,8 +1785,7 @@ TYPE3:
 	INC	BC
 	CP	01AH
 	JR	Z,TYPEE
-	LD	E,A
-	CALL	_SYS02		;(BDOS)コンソール出力
+	CALL	MSG_A
 	DEC	HL
 	LD	A,H
 	OR	L
@@ -1809,21 +1802,20 @@ CWILD1:
 	CP	020H
 	RET	NZ
 CWILD2:
-	LD	D,H
-	LD	E,L
-	INC	DE
-	LD	BC,10
-	LD	(HL),'?'
-	LDIR
-	RET
+	LD	A,'?'
+	LD	B,11
+	JP	FILL_MEMORY
 
 BUFSIZ:
 	LD	A,(SYSTEM+2)
-	SUB	3
+	DEC	A
 	AND	0F8H
 	LD	H,A
 	LD	L,0
 	RET
+
+DTA_CCP:
+	DS	37
 
 PATHX	EQU	64
 PATHD:	DS	PATHX
@@ -1852,9 +1844,7 @@ COMTB:
 
 KBFREE:	DB	"k bytes free",9,'$'
 DIRMES:	DB	"     <DIR>$"
-OK:	DB	"OK$"
-SKIP:	DB	"Skip$"
-COMERM:	DB	"Error!$"
+DIRHD:	DB	"  :$"
 
 ;LDDISK2.ASM
 
@@ -1915,111 +1905,96 @@ S1FD0:
 
 ;	BANK RAM DISK DRIVER
 
+BDWT:
+	DB	03EH	;LD A,??
+	SCF
+	JR	BRW
+
 BDRD:
+	DB	03EH	;LD A,??
+	AND	A
+BRW:
+	DI
+	LD	(BRWPAT),A
 	LD	(BANKSP+1),SP
 	LD	A,(BANKSP+2)
 	ADD	A,A
-	JR	C,BDRD1
+	JR	C,BRW0
 	LD	SP,EXTSP
-BDRD1:
-	PUSH	DE
+BRW0:
 	EXX		;裏レジスタ
 	 PUSH	 BC
 	 PUSH	 DE
-	 CALL	 BADR
-	CALL	BTFR
+	 LD	 BC,00B00H	 ;バンクメモリ
+	 LD	 DE,01010H
+	 EXX		;表レジスタ
+BRW1:
+	PUSH	BC
+	PUSH	DE
+	EX	DE,HL
+	ADD	HL,HL
+	ADD	HL,HL
+	LD	A,H
+	AND	00FH	;バンク
+	LD	H,L
+	SRL	H	;/2
+	LD	L,0
 	EXX		;裏レジスタ
-BDWTE:
+BRWPAT:	 AND	 A	;自己書き換え(AND A:読み出し/SCF:書き込み)
+	 JR	 C,BRWT
+	 LD	 D,A	 ;D=バンク
+	 EXX		;表レジスタ
+	EX	DE,HL
+	CALL	BTFR
+	JR	BRW2
+BRWT:
+	 LD	E,A	 ;E=バンク
+	 EXX		;表レジスタ
+	CALL	BTFR
+	EX	DE,HL
+BRW2:
+	POP	DE
+	POP	BC
+	INC	DE
+	DJNZ	BRW1
+
+	EXX		;裏レジスタ
+	 LD	 A,10H
+	 OUT	 (C),A		;メインメモリに切り替える
 	 POP	 DE
 	 POP	 BC
 	 EXX		;表レジスタ
-	POP	DE
 	XOR	A
 BANKSP:	LD	SP,0
 	EI
 	RET
 
-BDWT:
-	LD	(BANKSP+1),SP
-	LD	A,(BANKSP+2)
-	ADD	A,A
-	JR	C,BDWT1
-	LD	SP,EXTSP
-BDWT1:
-	PUSH	DE
-	EXX		;裏レジスタ
-	 PUSH	 BC
-	 PUSH	 DE
-	 CALL	 BADR
-	EXX		;裏レジスタ
-	 LD	D,E
-	 LD	E,A
-	 EXX		;表レジスタ
-	EX	DE,HL
-	CALL	BTFR
-	EX	DE,HL
-	EXX		;裏レジスタ
-	 OUT	 (C),D	 ;MAIN
-	 JR	 BDWTE
-
-BADR:
-	 EXX		;表レジスタ
-	LD	A,E
-	ADD	A,A
-	RL	D
-	ADD	A,A
-	RL	D
-	PUSH	AF
-	ADD	A,A
-	LD	A,D
-	ADC	A,A
-	AND	00FH
-	EXX		;裏レジスタ
-	 LD	 BC,00B00H
-	 LD	 D,A	  ;BANK
-	 LD	 E,010H	  ;MAIN
-	 EXX		;表レジスタ
-	POP	DE
-	LD	E,0
-	RES	7,D
-	RET
+;メインメモリ←→バンクメモリ 512バイトの転送を行う
+; DE:転送元アドレス
+; HL:転送先アドレス
+; 裏BC:バンク切り替えポート(0B00H)
+; 裏D:転送元バンク(0-0FH:10Hはメインメモリ)
+; 裏E:転送先バンク(0-0FH:10Hはメインメモリ)
 
 BTFR:
-	DI
-BTFR0:
-	PUSH	BC
-	PUSH	DE
-	LD	B,0	;256回ループ(256*4)
+	LD	B,0	;256回ループ(256*2)
 BTFR1:
 	EXX		;裏レジスタ
 	 OUT	 (C),D	 ;BANK(MAIN)
 	 EXX		;表レジスタ
-	EX	(SP),HL
-	LD	A,(HL)
-	INC	HL
-	LD	C,(HL)
-	INC	HL
-	LD	D,(HL)
-	INC	HL
-	LD	E,(HL)
-	INC	HL
-	EX	(SP),HL
+	LD	A,(DE)
+	LD	C,A
+	INC	DE
+	LD	A,(DE)
+	INC	DE
 	EXX		;裏レジスタ
 	 OUT	 (C),E	 ;MAIN(BANK)
 	 EXX		;表レジスタ
-	LD	(HL),A
-	INC	HL
 	LD	(HL),C
 	INC	HL
-	LD	(HL),D
-	INC	HL
-	LD	(HL),E
+	LD	(HL),A
 	INC	HL
 	DJNZ	BTFR1
-	POP	DE
-	INC	DE
-	POP	BC
-	DJNZ	BTFR0
 	RET
 
 ;	EMM DRIVER(DMA)
@@ -2036,13 +2011,13 @@ EDWT1:
 	LD	(DMAB),HL
 	LD	A,B
 	ADD	A,A
-	ADD	A,A
-	PUSH	AF
 	DEC	A
 	LD	(DMALEN+1),A
+	INC	A
+	ADD	A,H	;HL(アドレス)を先に進めておく
+	LD	H,A
 	LD	A,C
 	EX	DE,HL
-	ADD	HL,HL
 	ADD	HL,HL
 	LD	BC,(_MAXCYL-1)
 	LD	C,0
@@ -2059,9 +2034,6 @@ EDWT1:
 	CALL	SETDMA
 	CALL	GO_DMA
 	EX	DE,HL
-	POP	AF
-	ADD	A,H
-	LD	L,A
 	POP	DE
 	POP	BC
 DMA_ADD_SEC:
@@ -2074,7 +2046,7 @@ EDMAD:
 	DB	0C3H	;WR6 リセット
 	DB	07DH	;WR0 ポートA→ポートB 転送
 	DW	00D03H	;ポートA開始アドレス EMMリード/ライト
-DMALEN:	DW	003FFH	;ブロック長(転送サイズ-1)
+DMALEN:	DW	001FFH	;ブロック長(転送サイズ-1)
 	DB	02CH	;WR1 ポートAアドレス固定 I/O
 	DB	050H	;WR2 ポートBアドレスインクリメント メモリ
 	DB	002H	;ポートBタイミング
@@ -2082,8 +2054,7 @@ DMALEN:	DW	003FFH	;ブロック長(転送サイズ-1)
 	DB	09AH	;WR5 WAIT RDY:HIGH
 	DB	0ADH	;WR4 連続 ポートB開始アドレス
 DMAB:	DW	0
-	DB	001H	;WR0 ポートB←ポートB 転送
-	DS	1	;ノンターボ版との差分
+	DB	001H	;WR0 ポートA←ポートB 転送
 EMME:
 
 AT_RE	EQU	EDWT-AT_EDWT
@@ -2093,24 +2064,11 @@ AT_RE	EQU	EDWT-AT_EDWT
 
 ;	LSX-Dodgers OS
 
-BOOT:
-	JP	0
-_SYS00:		;(BDOS)プログラム終了
-WBOOT:
-	JP	WBOOT1
-CONST_:
-	JP	CONSTX
-_SYS07:		;(BDOS)コンソール直接入力
-CONIN:
-	JP	FLGET
-CONOUT:
-	JP	CONOUT1
-
 BDOS0:
 	PUSH	HL
-	LD	HL,00100H
+	LD	HL,010000H-STACK
 	ADD	HL,SP
-	JR	C,BDOS1X	;EXTSP = 0FFD4H
+	JR	C,BDOS1X
 BDOS2:
 	POP	HL
 	LD	(BDSP+1),SP
@@ -2140,19 +2098,7 @@ OVERFN
 	LD	BC,011DH
 	LD	DE,VER
 _ERROR:
-_SYS04:		;(BDOS)外部出力
-_SYS05:		;(BDOS)プリンタ出力
-_SYS1C:		;(BDOS)ディスクの書き込み禁止化
-_SYS1E:		;(BDOS)ファイル属性の設定
-_SYS20:		;(BDOS)利用者番号の設定と読み出し
-_SYS2E:		;(BDOS)ベリファイ・フラグの設定
 	XOR	A
-	RET
-_SYS03:		;(BDOS)外部入力
-_SYS2B:		;(BDOS)日付の設定
-_SYS2D:		;(BDOS)時刻の設定
-	SCF			;CF=1
-	SBC	A,A		;A=0FFH
 	RET
 
 _SYS09:		;文字列出力
@@ -2162,11 +2108,17 @@ _SX09:
 	INC	DE
 	CP	'$'
 	JR	Z,SX0E2
-	PUSH	DE
-	LD	E,A
-	CALL	_SYS02
-	POP	DE
+	CALL	MSG_A
 	JR	_SX09
+
+MSX1:
+	CALL	MSG_A
+MSX:
+	LD	A,(HL)
+	INC	HL
+	OR	A
+	JR	NZ,MSX1
+	RET
 
 _SYS0C:		;(BDOS)バージョン番号の獲得
 	LD	HL,00022H
@@ -2174,7 +2126,7 @@ _SYS0C:		;(BDOS)バージョン番号の獲得
 	LD	A,L
 	RET
 
-_SYS0D:		;(BDOS)ディスク・リセット
+_SYS0D:		;(BDOS)ディスクリセット
 	CALL	_FFLUSH
 	PUSH	HL
 	LD	HL,00080H
@@ -2184,7 +2136,7 @@ _SYS0D:		;(BDOS)ディスク・リセット
 	LD	E,0
 	DB	03EH
 
-_SYS0E:		;(BDOS)カレント・ドライブの設定
+_SYS0E:		;(BDOS)カレントドライブの設定
 	PUSH	DE
 	LD	A,E
 	PUSH	IX
@@ -2200,7 +2152,7 @@ SX0E2:
 
 _SYS0F:		;(BDOS)ファイルのオープン
 	CALL	SETDRV
-	LD	A,(IY+28)	;(FCB)オープン・モード
+	LD	A,(IY+28)	;(FCB)オープンモード
 	ADD	A,002H		;Write
 	JR	Z,FEND0F
 	CALL	CHKWILDX
@@ -2210,15 +2162,15 @@ _S16XX:
 	JR	C,FEND0F
 				;Directory location
 	LD	A,(_FILEN)
-	LD	(IY+25),A	;(FCB)ディレクトリ・ロケーション
+	LD	(IY+25),A	;(FCB)ディレクトリロケーション
 ;				_DIRF
 	LD	A,(_DIRF)
-	LD	(IY+29),A	;(FCB)ディレクトリ・モード
+	LD	(IY+29),A	;(FCB)ディレクトリモード
 ;				_FBPS
-	LD	(IY+30),E	;(FCB)ディレクトリ・ポジション
+	LD	(IY+30),E	;(FCB)ディレクトリポジション
 	LD	(IY+31),D
 ;				Open(Read)
-	LD	(IY+28),0FFH	;(FCB)オープン・モード
+	LD	(IY+28),0FFH	;(FCB)オープンモード
 ;				FILENAME
 	PUSH	IY
 	POP	DE
@@ -2243,35 +2195,35 @@ S16PAT:	LD	(IY+0),A
 	DJNZ	S16LOOP
 
 	XOR	A
-	LD	(IY+12),A	;(FCB)カレント・ブロック
+	LD	(IY+12),A	;(FCB)カレントブロック
 	LD	(OFCB+1),IY
 FEND0F:
 	JR	FEND10
 
 _SYS10:		;(BDOS)ファイルのクローズ
 	CALL	SETDRV
-	LD	A,(IY+28)	;(FCB)オープン・モード
+	LD	A,(IY+28)	;(FCB)オープンモード
 	SUB	0FEH
 	SCF
 	CCF
 	JR	NZ,FEND10
 _S10A:				;Write
-	LD	(IY+14),A	;(FCB)レコード・サイズ/アクセスするディレクトリのクラスタ番号+1
+	LD	(IY+14),A	;(FCB)レコードサイズ/アクセスするディレクトリのクラスタ番号+1
 	LD	(IY+15),A
 
-	INC	(IY+28)		;0FEH->0FFH ;オープン・モード
+	INC	(IY+28)		;0FEH->0FFH ;オープンモード
 	CALL	SETTMS
 
-	LD	A,(IY+29)	;(FCB)ディレクトリ・モード
+	LD	A,(IY+29)	;(FCB)ディレクトリモード
 	LD	(_DIRF),A
 	AND	07FH
 	LD	(_SECPS+1),A
-	LD	E,(IY+30)	;(FCB)ディレクトリ・ポジション
+	LD	E,(IY+30)	;(FCB)ディレクトリポジション
 	LD	D,(IY+31)
 	CALL	READ_DIR
 	JR	C,FEND10
 
-	LD	A,(IY+25)	;(FCB)ディレクトリ・ロケーション
+	LD	A,(IY+25)	;(FCB)ディレクトリロケーション
 SDECM1:	AND	01FH		;自己書き換え(1セクタ辺りのディレクトリエントリ数-1) 1024=01FH / 512=00FH / 256=7
 	LD	L,A
 	LD	H,0
@@ -2288,7 +2240,7 @@ FEND10:
 	JR	FEND
 
 OPENDD:
-	LD	(IY+28),0FDH	;(FCB)オープン・モード
+	LD	(IY+28),0FDH	;(FCB)オープンモード
 	LD	(IY+13),020H	;(FCB)属性(アトリビュート)
 	CALL	SETTMSX
 	JR	FEND
@@ -2324,7 +2276,7 @@ _S12X1:
 	INC	DE
 	LD	BC,32
 	LDIR
-	LD	L,(IY+14)	;(FCB)レコード・サイズ/アクセスするディレクトリのクラスタ番号+1
+	LD	L,(IY+14)	;(FCB)レコードサイズ/アクセスするディレクトリのクラスタ番号+1
 	LD	H,(IY+15)
 	LD	(SCDIR),HL
 	LD	HL,(_FBPS)
@@ -2361,7 +2313,7 @@ _SYS12:		;(BDOS)次のファイルの検索
 	JR	_S12X1
 
 _S16K:
-	LD	A,(IY+28)	;(FCB)オープン・モード
+	LD	A,(IY+28)	;(FCB)オープンモード
 	CP	0FDH		;Device(0FDH)
 	SCF
 	RET	Z
@@ -2388,7 +2340,7 @@ S16K1:
 	POP	DE
 	LD	A,(DE)		;Drive
 	CP	(HL)
-	JR	NZ,S16K2
+	JR	NZ,S16K3
 				;ここはCFが必ず0
 	SBC	HL,DE		;CP HL,DE
 	SCF
@@ -2396,6 +2348,7 @@ S16K1:
 	PUSH	HL
 S16K2:
 	POP	HL
+S16K3:
 	PUSH	IY
 	POP	DE
 _SYS13:		;(BDOS)ファイルの削除
@@ -2500,12 +2453,12 @@ _SYS28:		;(BDOS)ランダムな書き込み・その2
 	CALL	POPRR
 	JR	SWRITE
 
-_SYS18:		;(BDOS)ログイン・ベクトルの獲得
+_SYS18:		;(BDOS)ログインベクトルの獲得
 	LD	HL,000FFH
 	XOR	A
 	RET
 
-_SYS19:		;(BDOS)カレント・ドライブ番号の獲得
+_SYS19:		;(BDOS)カレントドライブ番号の獲得
 	LD	A,(_DVSW)
 	AND	A
 	RET
@@ -2546,7 +2499,7 @@ _SYS1F:		;(BDOS)ディスク装置のパラメータの読み出し
 	LD	A,E
 	JP	_GETDPB
 
-_SYS23:		;(BDOS)ファイル・サイズの獲得
+_SYS23:		;(BDOS)ファイルサイズの獲得
 	PUSH	HL
 	LD	HL,(STABLE+2*00FH)	;ファイルのオープン
 	CALL	JP_HL
@@ -2571,7 +2524,7 @@ _S23X1:
 	POP	HL
 	RET
 
-_SYS24:		;(BDOS)ランダム・レコード・フィールドの設定
+_SYS24:		;(BDOS)ランダムレコードフィールドの設定
 	PUSH	HL
 	PUSH	DE		;EX DE,IY
 	EX	(SP),IY		;
@@ -2638,10 +2591,16 @@ S30X2:
 
 ;	LSX-Dodgers IO
 
+_SYS04	EQU	_ERROR		;(BDOS)外部出力
+_SYS05	EQU	_ERROR		;(BDOS)プリンタ出力
+_SYS1C	EQU	_ERROR		;(BDOS)ディスクの書き込み禁止化
+_SYS1E	EQU	_ERROR		;(BDOS)ファイル属性の設定
+_SYS20	EQU	_ERROR		;(BDOS)利用者番号の設定と読み出し
+_SYS2E	EQU	_ERROR		;(BDOS)ベリファイ・フラグの設定
 
 BIOS:
 	PUSH	HL
-	LD	HL,08100H
+	LD	HL,08010H
 	ADD	HL,SP
 	POP	HL
 	JR	NC,BIOS2
@@ -2665,10 +2624,11 @@ SPPAT:	LD	SP,0
 INT:
 	PUSH	AF
 	PUSH	HL
-	LD	HL,00100H
+	LD	HL,010000H-STACK
 	ADD	HL,SP
 	JR	C,INTP1X
 	LD	(INTSP+1),SP
+	LD	SP,EXTSP
 	CALL	INTP1
 INTSP:	LD	SP,0
 	JR	INTPE
@@ -3007,16 +2967,6 @@ _SYS2C:		;(BDOS)時刻の獲得
 	XOR	A
 	RET
 
-MSX1:
-	LD	E,A
-	CALL	_PRINT
-MSX:
-	LD	A,(HL)
-	INC	HL
-	OR	A
-	JR	NZ,MSX1
-	RET
-
 ESC1:
 	LD	A,E
 	CP	'A'
@@ -3040,6 +2990,8 @@ CT0CX:
 	JP	Z,CTRL05
 	CP	'L'
 	JP	Z,CTRL0E
+	CP	'T'
+	JP	Z,CTRL05
 	CP	'x'
 	JR	Z,ESC1X
 	CP	'y'
@@ -3321,10 +3273,6 @@ CTRL0B:
 	LD	(_TXADR),HL
 	RET
 
-PRINTS:
-	CALL	BREAK
-	JP	_PRINT
-
 CTRL1B:
 	LD	A,1
 	LD	(ESCFLG+1),A
@@ -3355,6 +3303,8 @@ CONOUT1:
 	LD	E,C
 	CALL	_PRINT
 	LD	A,E
+	CP	01AH
+	JP	Z,CTRL0C
 	CP	00AH
 	JR	NZ,CURSOR
 	CALL	CTRL0D
@@ -3805,6 +3755,7 @@ SETDIR1:
 
 FILED:
 	CALL	FILEI
+	LD	HL,FNAME
 
 	LD	B,8
 FILE2:
@@ -3850,20 +3801,15 @@ FILE9:				;名前の*処理、名前の残りを?で埋める
 
 FILE10:
 	LD	A,'?'
-
-FILL_MEMORY:				;HLからBバイトAで埋める
+	JR	FILL_MEMORY
+FILEI:				;名前＋拡張子をスペースで初期化
+	LD	A,020H
+	LD	BC,11*256	;C=0にしておく
+	LD	HL,FNAME
+FILL_MEMORY:			;HLからBバイトAで埋める
 	LD	(HL),A
 	INC	HL
 	DJNZ	FILL_MEMORY
-	RET
-
-FILEI:				;名前＋拡張子をスペースで初期化
-	LD	A,020H
-	LD	BC,11*256
-	LD	HL,FNAME
-	PUSH	HL
-	CALL	FILL_MEMORY
-	POP	HL
 	RET
 
 CCHKF:
@@ -3990,7 +3936,7 @@ SOPENC:
 SDIRX0:
 	XOR	A
 	LD	(_DIRF),A
-	LD	(IY+14),1	;(FCB)レコード・サイズ
+	LD	(IY+14),1	;(FCB)レコードサイズ
 	LD	(IY+15),A
 SDIRX1:
 	LD	DE,(_DIRPS)	;Root Directory
@@ -4005,7 +3951,7 @@ SOPEN2:
 OPENPAT:CALL	FILESE		;(Self-rewriting)
 	POP	DE
 	JR	C,SOPENE
-	JR	Z,NOTSE
+	JR	Z,SCF_FF_RET
 SOPEN3:
 	LD	A,(_DIRF)	;ディレクトリか判別
 	OR	A
@@ -4023,7 +3969,7 @@ SOPEN5:
 	CALL	ENDCL
 SOPEN6:
 	JR	C,SOPEN1
-NOTSE:
+SCF_FF_RET:
 	SCF			;CF=1
 	SBC	A,A		;A=0FFH
 	RET
@@ -4038,7 +3984,7 @@ NOPEN:
 	LD	(OPENPAT+1),HL
 	LD	IY,(_FCB)
 	CALL	CHKWILDX
-	JR	NC,NOTSE
+	JR	NC,SCF_FF_RET
 	LD	A,(IY+0)	;(FCB)ドライブ番号
 	DEC	A
 	LD	(_DRV),A
@@ -4097,7 +4043,6 @@ SECSZM1:LD	BC,003FFH	;自己書き換え セクタサイズ-1(0x3FF:1023 or 0x1FF:511 or 0xF
 	XOR	A		;データバッファをセクタサイズ分ゼロクリア
 	LD	(HL),A
 	LDIR
-
 	POP	DE		;DE=(_CLPS)
 	PUSH	DE
 	LD	A,(SPCPAT+1)	;1クラスタの論理セクタ数
@@ -4185,15 +4130,13 @@ CHKDDX:
 CPNAME:
 	PUSH	BC
 	PUSH	DE
-	LD	DE,CPBUF
-	LD	BC,4
-	LDIR
-	POP	DE
-	PUSH	DE
 	PUSH	HL
-	LD	HL,CPBUF
-	CALL	CPFILE
+	CALL	CPFILE4
 	POP	HL
+	INC	HL
+	INC	HL
+	INC	HL
+	INC	HL
 	POP	DE
 	POP	BC
 	JR	NZ,CPNAME1
@@ -4209,6 +4152,10 @@ CPNAME1:
 	SCF
 	RET
 
+CPFILE4:
+	PUSH	BC
+	LD	BC,00400H
+	JR	CPSTR1
 CPFILE:
 	PUSH	BC
 	LD	BC,00B00H
@@ -4521,8 +4468,8 @@ SDE1:
 	LD	(DE),A
 	INC	DE
 	DJNZ	SDE1
-					;(FCB)ファイルを最後に変更した時刻
-	LD	HL,SDDATA		;(FCB)ファイルを最後に変更した日付
+					;(FCB)更新時刻
+	LD	HL,SDDATA		;(FCB)更新年月日
 	LD	B,SDDATAE-SDDATA	;(FCB)ファイルの先頭クラスタ
 SDLOOP:					;(FCB)ファイルのサイズ(バイト単位)
 	LD	A,(HL)
@@ -4543,11 +4490,11 @@ WOPEN:
 	AND	01FH
 	SCF
 	RET	NZ
-	LD	(IY+28),0FEH	;(FCB)オープン・モード
+	LD	(IY+28),0FEH	;(FCB)オープンモード
 TOPEN2:
 	XOR	A
 TOPEN:				;Initializes the time stamp
-	LD	(IY+23),0FFH	;(FCB)ファイルを最後に変更した時刻
+	LD	(IY+23),0FFH	;(FCB)更新時刻
 	RET
 
 WRDFX:
@@ -4722,7 +4669,7 @@ SUBRR:
 
 SETSEQ:
 	PUSH	AF		;AHL=Random record
-	LD	A,(IY+33)	;(FCB)ランダム・レコード
+	LD	A,(IY+33)	;(FCB)ランダムレコード
 	LD	L,(IY+34)
 	LD	H,(IY+35)
 
@@ -4730,8 +4677,8 @@ SETSEQ:
 
 	ADD	HL,HL
 	SRL	L		;L=L/2
-	LD	(IY+32),L	;(FCB)カレント・レコード
-	LD	(IY+12),H	;(FCB)カレント・ブロック
+	LD	(IY+32),L	;(FCB)カレントレコード
+	LD	(IY+12),H	;(FCB)カレントブロック
 	POP	AF
 
 POPRR:
@@ -4752,8 +4699,8 @@ SSQ1:				;バイト単位からCP/Mのレコード単位を求める（1レコード=128バイト）
 	RET
 
 GETSEQ:
-	LD	L,(IY+32)	;(FCB)カレント・レコード
-	LD	H,(IY+12)	;(FCB)カレント・ブロック
+	LD	L,(IY+32)	;(FCB)カレントレコード
+	LD	H,(IY+12)	;(FCB)カレントブロック
 
 	SLA	L	;L=L*2
 
@@ -4763,17 +4710,17 @@ GETSEQ:
 
 RB_WRITE:
 	PUSH	BC
-	LD	BC,(STABLE+2*026H)	;(BDOS)ランダム・ブロック・ライト
+	LD	BC,(STABLE+2*026H)	;(BDOS)ランダムブロック書き込み
 	JR	RBRW
 RB_READ:
 	PUSH	BC
-	LD	BC,(STABLE+2*027H)	;(BDOS)ランダム・ブロック・リード
+	LD	BC,(STABLE+2*027H)	;(BDOS)ランダムブロック読み込み
 RBRW:
 	XOR	A	;HLA = HL*128
 	SRL	H	;HL=HL/2
 	RR	L	;
 	RRA			;HLA
-	LD	(IY+33),A	;(FCB)ランダム・レコード
+	LD	(IY+33),A	;(FCB)ランダムレコード
 	LD	(IY+34),L
 	LD	(IY+35),H
 	LD	HL,128
@@ -4789,8 +4736,9 @@ JP_BC:
 	PUSH	BC
 	RET
 
-SFILE:	DS	33		;DRV FILENAME
-HLBUF:	DS	3		;Random record buffer
+_SYS03	EQU	SCF_FF_RET	;(BDOS)外部入力
+_SYS2B	EQU	SCF_FF_RET	;(BDOS)日付の設定
+_SYS2D	EQU	SCF_FF_RET	;(BDOS)時刻の設定
 
 ;LDFILE2.ASM
 
@@ -4806,7 +4754,7 @@ RBWDD:
 RBWDD2:
 	CP	'C'
 	JR	NZ,RBWDD3
-	LD	HL,PRINTS
+	LD	HL,(STABLE+2*2)
 RBWDD3:
 	CP	'P'
 	JR	NZ,RBWDD4
@@ -4830,7 +4778,7 @@ RBWDDP:	CALL	_SYS02
 	JR	RBWDD1
 
 				;Write random block
-_SYS26:		;(BDOS)ランダム・ブロック・ライト
+_SYS26:		;(BDOS)ランダムブロック書き込み
 	XOR	A
 	LD	(DRDN1),A	;NOP
 	LD	(LEFT+1),HL	;HL←書き込むレコード数
@@ -4860,10 +4808,10 @@ _SYS26:		;(BDOS)ランダム・ブロック・ライト
 	CALL	RWXR
 	CALL	C,WRDFX
 	JP	C,RBWERR
-	
+
 	CALL	RBX2
 	JR	Z,RBWB		;NZ=セクタ以下の端数がある
-	CALL	RBXA		
+	CALL	RBXA
 	JR	C,RBWERR
 	EX	DE,HL
 	PUSH	BC
@@ -5016,7 +4964,7 @@ RBRDERR:
 	JR	RBRDDE2
 
 				;Read random block
-_SYS27:		;(BDOS)ランダム・ブロック・リード
+_SYS27:		;(BDOS)ランダムブロック読み込み
 	LD	(LEFTX),HL
 	CALL	SETDRV
 
@@ -5110,7 +5058,7 @@ RBX0:
 	LD	HL,(_DTA)
 	LD	(DTAX),HL
 	LD	HL,(LEFTX)
-	LD	A,(IY+28)	;(FCB)オープン・モード
+	LD	A,(IY+28)	;(FCB)オープンモード
 	SUB	0FDH
 	RET
 
@@ -5138,7 +5086,7 @@ RBX1:
 	RET
 
 RBX2:				;Cluster settings
-	LD	C,(IY+34)	;(+33)(FCB)ランダム・レコード
+	LD	C,(IY+34)	;(+33)(FCB)ランダムレコード
 	LD	B,(IY+35)
 	CALL	RWXR
 	LD	A,(SECSZM1+2)	;1024=3 / 512=1 / 256=0
@@ -5158,11 +5106,11 @@ RBXA:
 	RET	C
 	LD	(_CLPS),DE
 
-	LD	C,(IY+33)	;(FCB)ランダム・レコード
+	LD	C,(IY+33)	;(FCB)ランダムレコード
 SECSZ:	LD	HL,0400H	;自己書き換え 1024=0400H / 512=0200H ここに1セクタのサイズが格納される
 	LD	A,H
 	DEC	A		;1024=3 / 512=1
-	AND	(IY+34)		;(FCB)ランダム・レコード
+	AND	(IY+34)		;(FCB)ランダムレコード
 	LD	B,A		;BCに1セクタ以下の端数が入る
 	SBC	HL,BC		;残りを計算
 
@@ -5206,33 +5154,22 @@ RBXC:
 RBXEND:
 LEFT:	LD	DE,0
 	XOR	A
-	LD	L,(IY+33)	;(FCB)ランダム・レコード
+	LD	L,(IY+33)	;(FCB)ランダムレコード
 	LD	H,(IY+34)
 	ADD	HL,DE
 	ADC	A,(IY+35)
-	LD	(IY+33),L	;(FCB)ランダム・レコード
+	LD	(IY+33),L	;(FCB)ランダムレコード
 	LD	(IY+34),H
 	LD	(IY+35),A
 	EX	DE,HL		;HL=Read byte
 	RET
 
 GET_RR_CDE:			;CDE=Random record
-	LD	E,(IY+33)	;(FCB)ランダム・レコード
+	LD	E,(IY+33)	;(FCB)ランダムレコード
 	LD	D,(IY+34)
 	LD	C,(IY+35)
 	RET
 
-CPBUF:
-LEFTX:	DW	0
-DTAX:	DW	0
-	DB	020H	;CPBUFで使う
-	DB	020H
-	DB	020H
-	DB	020H
-	DB	020H
-	DB	020H
-	DB	020H
-;
 
 ;LDDIO.ASM
 
@@ -6333,11 +6270,40 @@ AT_R	EQU	WTTRK-AT_WTTRK
 ;LDCALL.ASM
 
 ;	LSX-Dodgers TABLES
+;
+;	CP/M互換BIOS
+;	BOOT:アドレス下位1バイトが0になるように
+BOOT:
+	JP	0
+_SYS00:		;(BDOS)プログラム終了
+WBOOT:
+	JP	WBOOT1
+CONST_:
+	JP	CONSTX
+_SYS07:		;(BDOS)コンソール直接入力
+CONIN:
+	JP	FLGET
+CONOUT:
+	JP	CONOUT1
+
+DECBF:
+	DS	5
+FDRV	DB	0
+FNAME	DS	36
+SFILE:	DS	33		;DRV FILENAME
+HLBUF:	DS	3		;Random record buffer
+
+LEFTX:	DW	0
+DTAX:	DW	0
 
 BEEPD:	DB	0,08EH,1,0,00BH,0,00CH,010H
 	DB	007H,03EH,008H,010H,00DH,0,0FFH
 
 CHECK:	DB	0
+
+OK:	DB	"OK$"
+SKIP:	DB	"Skip$"
+COMERM:	DB	"Error!$"
 
 ;	CTRLTB:アドレス下位1バイトが080Hになるように
 
@@ -6376,7 +6342,7 @@ _PE:
 
 STABLE:
 ;0
-	DW	 00000H,_SYS01,_SYS02,_SYS03
+	DW	_SYS00,_SYS01,_SYS02,_SYS03
 	DW	_SYS04,_SYS05,_SYS06,_SYS07
 	DW	_SYS08,_SYS09,_SYS0A,_SYS0B
 	DW	_SYS0C,_SYS0D,_SYS0E,_SYS0F
@@ -6592,18 +6558,18 @@ EMMFL:	DW	0	;DPB_00_FATLN
 EMMRD:	DW	EDRD	;DPB_02_DRD
 EMMWR:	DW	EDWT	;DPB_04_DWT
 	DB	0FEH	;DPB_06_FATID
-	DB	1	;DPB_07_SECPCL
+	DB	2	;DPB_07_SECPCL
 EMMCL:	DW	0	;DPB_08_MAXCL
 	DB	0	;DPB_0A_FDMODE
-	DB	6	;DPB_0B_DIRSCNT
+	DB	12	;DPB_0B_DIRSCNT
 EMMBL:	DB	0	;DPB_0C_MAXCYL
 	DB	1	;DPB_0D_MAXSEC
-	DB	1	;DPB_0E_FATPS
-	DB	4	;DPB_0F_BPS
-	DW	5	;DPB_10_DIRPS
+	DB	2	;DPB_0E_FATPS
+	DB	2	;DPB_0F_BPS
+	DW	10	;DPB_10_DIRPS
 	DB	6	;DPB_12_DEVICE
 EMMDV:	DB	0	;DPB_13_UNITNO
-	DW	9	;DPB_14_ADDCL16
+	DW	18	;DPB_14_ADDCL16
 	DW	0	;DPB_16
 	DW	0	;DPB_18
 	DW	0	;DPB_1A_SDIR
@@ -6615,18 +6581,18 @@ BANKFL:	DW	0	;DPB_00_FATLN
 	DW	BDRD	;DPB_02_DRD
 	DW	BDWT	;DPB_04_DWT
 	DB	0F9H	;DPB_06_FATID
-	DB	1	;DPB_07_SECPCL
+	DB	2	;DPB_07_SECPCL
 BANKCL:	DW	0	;DPB_08_MAXCL
 	DB	0	;DPB_0A_FDMODE
-	DB	4	;DPB_0B_DIRSCNT
+	DB	8	;DPB_0B_DIRSCNT
 	DB	0	;DPB_0C_MAXCYL
 	DB	1	;DPB_0D_MAXSEC
 	DB	0	;DPB_0E_FATPS
-	DB	4	;DPB_0F_BPS
-	DW	1	;DPB_10_DIRPS
+	DB	2	;DPB_0F_BPS
+	DW	2	;DPB_10_DIRPS
 	DB	00BH	;DPB_12_DEVICE
 	DB	0	;DPB_13_UNITNO
-	DW	3	;DPB_14_ADDCL16
+	DW	6	;DPB_14_ADDCL16
 	DW	0	;DPB_16
 	DW	0	;DPB_18
 	DW	0	;DPB_1A_SDIR

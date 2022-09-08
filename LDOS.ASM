@@ -1,24 +1,11 @@
 
 ;	LSX-Dodgers OS
 
-BOOT:
-	JP	0
-_SYS00:		;(BDOS)プログラム終了
-WBOOT:
-	JP	WBOOT1
-CONST_:
-	JP	CONSTX
-_SYS07:		;(BDOS)コンソール直接入力
-CONIN:
-	JP	FLGET
-CONOUT:
-	JP	CONOUT1
-
 BDOS0:
 	PUSH	HL
-	LD	HL,00100H
+	LD	HL,010000H-STACK
 	ADD	HL,SP
-	JR	C,BDOS1X	;EXTSP = 0FFD4H
+	JR	C,BDOS1X
 BDOS2:
 	POP	HL
 	LD	(BDSP+1),SP
@@ -48,19 +35,7 @@ OVERFN
 	LD	BC,011DH
 	LD	DE,VER
 _ERROR:
-_SYS04:		;(BDOS)外部出力
-_SYS05:		;(BDOS)プリンタ出力
-_SYS1C:		;(BDOS)ディスクの書き込み禁止化
-_SYS1E:		;(BDOS)ファイル属性の設定
-_SYS20:		;(BDOS)利用者番号の設定と読み出し
-_SYS2E:		;(BDOS)ベリファイ・フラグの設定
 	XOR	A
-	RET
-_SYS03:		;(BDOS)外部入力
-_SYS2B:		;(BDOS)日付の設定
-_SYS2D:		;(BDOS)時刻の設定
-	SCF			;CF=1
-	SBC	A,A		;A=0FFH
 	RET
 
 _SYS09:		;文字列出力
@@ -70,11 +45,17 @@ _SX09:
 	INC	DE
 	CP	'$'
 	JR	Z,SX0E2
-	PUSH	DE
-	LD	E,A
-	CALL	_SYS02
-	POP	DE
+	CALL	MSG_A
 	JR	_SX09
+
+MSX1:
+	CALL	MSG_A
+MSX:
+	LD	A,(HL)
+	INC	HL
+	OR	A
+	JR	NZ,MSX1
+	RET
 
 _SYS0C:		;(BDOS)バージョン番号の獲得
 	LD	HL,00022H
@@ -82,7 +63,7 @@ _SYS0C:		;(BDOS)バージョン番号の獲得
 	LD	A,L
 	RET
 
-_SYS0D:		;(BDOS)ディスク・リセット
+_SYS0D:		;(BDOS)ディスクリセット
 	CALL	_FFLUSH
 	PUSH	HL
 	LD	HL,00080H
@@ -92,7 +73,7 @@ _SYS0D:		;(BDOS)ディスク・リセット
 	LD	E,0
 	DB	03EH
 
-_SYS0E:		;(BDOS)カレント・ドライブの設定
+_SYS0E:		;(BDOS)カレントドライブの設定
 	PUSH	DE
 	LD	A,E
 	PUSH	IX
@@ -108,7 +89,7 @@ SX0E2:
 
 _SYS0F:		;(BDOS)ファイルのオープン
 	CALL	SETDRV
-	LD	A,(IY+28)	;(FCB)オープン・モード
+	LD	A,(IY+28)	;(FCB)オープンモード
 	ADD	A,002H		;Write
 	JR	Z,FEND0F
 	CALL	CHKWILDX
@@ -118,15 +99,15 @@ _S16XX:
 	JR	C,FEND0F
 				;Directory location
 	LD	A,(_FILEN)
-	LD	(IY+25),A	;(FCB)ディレクトリ・ロケーション
+	LD	(IY+25),A	;(FCB)ディレクトリロケーション
 ;				_DIRF
 	LD	A,(_DIRF)
-	LD	(IY+29),A	;(FCB)ディレクトリ・モード
+	LD	(IY+29),A	;(FCB)ディレクトリモード
 ;				_FBPS
-	LD	(IY+30),E	;(FCB)ディレクトリ・ポジション
+	LD	(IY+30),E	;(FCB)ディレクトリポジション
 	LD	(IY+31),D
 ;				Open(Read)
-	LD	(IY+28),0FFH	;(FCB)オープン・モード
+	LD	(IY+28),0FFH	;(FCB)オープンモード
 ;				FILENAME
 	PUSH	IY
 	POP	DE
@@ -151,35 +132,35 @@ S16PAT:	LD	(IY+0),A
 	DJNZ	S16LOOP
 
 	XOR	A
-	LD	(IY+12),A	;(FCB)カレント・ブロック
+	LD	(IY+12),A	;(FCB)カレントブロック
 	LD	(OFCB+1),IY
 FEND0F:
 	JR	FEND10
 
 _SYS10:		;(BDOS)ファイルのクローズ
 	CALL	SETDRV
-	LD	A,(IY+28)	;(FCB)オープン・モード
+	LD	A,(IY+28)	;(FCB)オープンモード
 	SUB	0FEH
 	SCF
 	CCF
 	JR	NZ,FEND10
 _S10A:				;Write
-	LD	(IY+14),A	;(FCB)レコード・サイズ/アクセスするディレクトリのクラスタ番号+1
+	LD	(IY+14),A	;(FCB)レコードサイズ/アクセスするディレクトリのクラスタ番号+1
 	LD	(IY+15),A
 
-	INC	(IY+28)		;0FEH->0FFH ;オープン・モード
+	INC	(IY+28)		;0FEH->0FFH ;オープンモード
 	CALL	SETTMS
 
-	LD	A,(IY+29)	;(FCB)ディレクトリ・モード
+	LD	A,(IY+29)	;(FCB)ディレクトリモード
 	LD	(_DIRF),A
 	AND	07FH
 	LD	(_SECPS+1),A
-	LD	E,(IY+30)	;(FCB)ディレクトリ・ポジション
+	LD	E,(IY+30)	;(FCB)ディレクトリポジション
 	LD	D,(IY+31)
 	CALL	READ_DIR
 	JR	C,FEND10
 
-	LD	A,(IY+25)	;(FCB)ディレクトリ・ロケーション
+	LD	A,(IY+25)	;(FCB)ディレクトリロケーション
 SDECM1:	AND	01FH		;自己書き換え(1セクタ辺りのディレクトリエントリ数-1) 1024=01FH / 512=00FH / 256=7
 	LD	L,A
 	LD	H,0
@@ -196,7 +177,7 @@ FEND10:
 	JR	FEND
 
 OPENDD:
-	LD	(IY+28),0FDH	;(FCB)オープン・モード
+	LD	(IY+28),0FDH	;(FCB)オープンモード
 	LD	(IY+13),020H	;(FCB)属性(アトリビュート)
 	CALL	SETTMSX
 	JR	FEND
@@ -232,7 +213,7 @@ _S12X1:
 	INC	DE
 	LD	BC,32
 	LDIR
-	LD	L,(IY+14)	;(FCB)レコード・サイズ/アクセスするディレクトリのクラスタ番号+1
+	LD	L,(IY+14)	;(FCB)レコードサイズ/アクセスするディレクトリのクラスタ番号+1
 	LD	H,(IY+15)
 	LD	(SCDIR),HL
 	LD	HL,(_FBPS)
@@ -269,7 +250,7 @@ _SYS12:		;(BDOS)次のファイルの検索
 	JR	_S12X1
 
 _S16K:
-	LD	A,(IY+28)	;(FCB)オープン・モード
+	LD	A,(IY+28)	;(FCB)オープンモード
 	CP	0FDH		;Device(0FDH)
 	SCF
 	RET	Z
@@ -296,7 +277,7 @@ S16K1:
 	POP	DE
 	LD	A,(DE)		;Drive
 	CP	(HL)
-	JR	NZ,S16K2
+	JR	NZ,S16K3
 				;ここはCFが必ず0
 	SBC	HL,DE		;CP HL,DE
 	SCF
@@ -304,6 +285,7 @@ S16K1:
 	PUSH	HL
 S16K2:
 	POP	HL
+S16K3:
 	PUSH	IY
 	POP	DE
 _SYS13:		;(BDOS)ファイルの削除
@@ -408,12 +390,12 @@ _SYS28:		;(BDOS)ランダムな書き込み・その2
 	CALL	POPRR
 	JR	SWRITE
 
-_SYS18:		;(BDOS)ログイン・ベクトルの獲得
+_SYS18:		;(BDOS)ログインベクトルの獲得
 	LD	HL,000FFH
 	XOR	A
 	RET
 
-_SYS19:		;(BDOS)カレント・ドライブ番号の獲得
+_SYS19:		;(BDOS)カレントドライブ番号の獲得
 	LD	A,(_DVSW)
 	AND	A
 	RET
@@ -454,7 +436,7 @@ _SYS1F:		;(BDOS)ディスク装置のパラメータの読み出し
 	LD	A,E
 	JP	_GETDPB
 
-_SYS23:		;(BDOS)ファイル・サイズの獲得
+_SYS23:		;(BDOS)ファイルサイズの獲得
 	PUSH	HL
 	LD	HL,(STABLE+2*00FH)	;ファイルのオープン
 	CALL	JP_HL
@@ -479,7 +461,7 @@ _S23X1:
 	POP	HL
 	RET
 
-_SYS24:		;(BDOS)ランダム・レコード・フィールドの設定
+_SYS24:		;(BDOS)ランダムレコードフィールドの設定
 	PUSH	HL
 	PUSH	DE		;EX DE,IY
 	EX	(SP),IY		;
