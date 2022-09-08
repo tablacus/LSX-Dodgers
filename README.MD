@@ -47,6 +47,10 @@ MIT License のオープンソースです。
 エミュレーターで使えるVHDファイルの作り方
 https://github.com/tablacus/LSX-Dodgers/issues/4
 
+●サンプルプログラム
+
+[wiki](https://github.com/tablacus/LSX-Dodgers/wiki)にサンプルプログラムとそれのディスクイメージがあります。
+
 ●アセンブラ
 
 OHM-Z80とZASM.COM/ZASM.EXE/AASM/AILZ80ASMでアセンブルできます。
