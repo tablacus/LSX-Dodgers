@@ -49,7 +49,7 @@ https://github.com/tablacus/LSX-Dodgers/issues/4
 
 ●サンプルプログラム
 
-[wiki]の方にサンプルプログラムとそれのディスクイメージがあります。
+[wiki](https://github.com/tablacus/LSX-Dodgers/wiki)にサンプルプログラムとそれのディスクイメージがあります。
 
 ●アセンブラ
 
