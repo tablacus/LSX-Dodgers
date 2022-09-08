@@ -111,8 +111,8 @@ TYPE:
 	LD	A,B
 	CP	'2'
 	JR	Z,TYPE2
-;	CP	'S'
-;	JR	Z,TYPES
+	CP	'L'
+	JP	Z,TYPEY
 	JR	TYPE
 TYPE0:
 	LD	HL,M2D
@@ -134,7 +134,7 @@ TYPEO:
 	LD	C,9		;文字列出力
 	CALL	SYSTEM
 	POP	AF
-	ADD	A,"0"
+	ADD	A,'0'
 	LD	E,A
 	LD	C,2		;コンソール出力
 	CALL	SYSTEM
@@ -252,7 +252,10 @@ LOW1:
 	JP	NZ,ERROR
 
 	JR	LOGICX
-
+TYPEY:
+	LD	DE,CRLF
+	LD	C,9		;文字列出力
+	CALL	SYSTEM
 LOGICY:
 	LD	A,(FCB1)
 	LD	E,A
@@ -357,7 +360,7 @@ PH1:
 	PUSH	BC
 	PUSH	DE
 	PUSH	HL
-	LD	E,"w"
+	LD	E,'w'
 	LD	C,2		;コンソール出力
 	CALL	SYSTEM
 	POP	HL
@@ -473,7 +476,7 @@ VE2:
 	PUSH	BC
 	PUSH	DE
 	PUSH	HL
-	LD	E,"v"
+	LD	E,'v'
 	LD	C,2		;コンソール出力
 	CALL	SYSTEM
 	POP	HL
@@ -535,14 +538,14 @@ SWITCH1:
 	CP	$20
 	RET	C
 	INC	DE
-	CP	"/"
+	CP	'/'
 	JR	NZ,SWITCH1
 	LD	A,(DE)
 	INC	DE
 CAP:
-	CP	"a"
+	CP	'a'
 	RET	C
-	CP	"z"+1
+	CP	'z'+1
 	RET	NC
 	SUB	$20
 	RET
@@ -551,7 +554,7 @@ GUIDE:
 	LD	A,(MAXCYL+1)
 	LD	B,A
 	LD	C,2
-	LD	E,"."
+	LD	E,'.'
 	CALL	GUIDE1
 	LD	A,(MAXCYL+1)
 	LD	B,A
@@ -572,29 +575,31 @@ ERROR:
 	JP	0
 
 TITLE:
-	DB	"X1 format v1.12",$0D,$0A
-	DB	"$"
+	DB	"X1 format v1.13"
+CRLF:
+	DB	$0D,$0A
+	DB	'$'
 MUSAGE:
 	DB	"usage: FORMAT ﾄﾞﾗｲﾌﾞ:[ｽｲｯﾁ]",$0D,$0A
 	DB	9,"/C  FAT･ﾃﾞｨﾚｸﾄﾘ ｼｮｷｶ",$0D,$0A
 ;	DB	9,"/On ｵｰﾊﾞｰﾄﾗｯｸ(n:1-9)",$0D,$0A
-	DB	"$"
+	DB	'$'
 FORMES:
 	DB	"format $"
 FOTMES:
-	DB	"format type (2D=0,2DD=1,2HD=2)? $"
+	DB	"format type (2D=0,2DD=1,2HD=2,logical only=L)? $"
 PHYMES:
-	DB	"physical format",$0D,$0A,"$"
+	DB	"physical format",$0D,$0A,'$'
 LOGMES:
-	DB	"logical  format",$0D,$0A,"$"
+	DB	"logical  format",$0D,$0A,'$'
 COMMES:
-	DB	"completed !",$0D,$0A,"$"
+	DB	"completed !",$0D,$0A,'$'
 HITMES:
 	DB	"hit [CR] to start$"
 OVERMES:
 	DB	"over track:$"
 ERRMES:
-	DB	7,"Error!",$0D,$0A,"$"
+	DB	7,"Error!",$0D,$0A,'$'
 ;
 ;	DPB Data
 ;
@@ -654,25 +659,25 @@ HGAP4:	DB	0,$4E,0,$4E,0,$4E,255
 ;
 ;	BOOT-DATA
 ;
-LIPL:	DB	$EB,$FE,$90,"L","D",$20,$20,$20
+LIPL:	DB	$EB,$FE,$90,'L','D',$20,$20,$20
 	DB	$20,$20,$20,$00,$02,$02,$01,$00
 	DB	$02,$70,$00,$D0,$02,$FD,$02,$00
 	DB	$09,$00,$02,$00,$00,$00,$18,$FE
 	DB	$00,$00
 
-DIPL:	DB	$EB,$FE,$90,"L","D",$20,$20,$20
+DIPL:	DB	$EB,$FE,$90,'L','D',$20,$20,$20
 	DB	$20,$20,$20,$00,$02,$02,$01,$00
-	DB	$02,$70,$00,$D0,$02,$F9,$03,$00
+	DB	$02,$70,$00,$A0,$05,$F9,$03,$00
 	DB	$09,$00,$02,$00,$00,$00,$18,$FE
 	DB	$00,$00
 
-HIPL:	DB	$EB,$FE,$90,"L","D",$20,$20,$20
+HIPL:	DB	$EB,$FE,$90,'L','D',$20,$20,$20
 	DB	$20,$20,$20,$00,$04,$01,$01,$00
 	DB	$02,$C0,$00,$D0,$04,$FE,$02,$00
 	DB	$08,$00,$02,$00,$00,$00,$18,$FE
 	DB	$00,$00
 
-;SIPL:	DB	$EB,$1E,$90,"L","D",$20,$20,$20
+;SIPL:	DB	$EB,$1E,$90,'L','D',$20,$20,$20
 ;	DB	$20,$20,$20,"2","H","S",$20,$20
 ;	DB	$20,$20,$04,$00,$01,$03,$00,$01
 ;	DB	$00,$C0,$05,$A0,$FB,$01,$18,$FE
