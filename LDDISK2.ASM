@@ -167,10 +167,11 @@ EDWT1:
 	INC	A
 	ADD	A,H	;HL(アドレス)を先に進めておく
 	LD	H,A
-	LD	A,C
 	EX	DE,HL
 	ADD	HL,HL
-	LD	BC,(_MAXCYL-1)
+	LD	A,(_MAXCYL)
+	LD	B,A
+	LD	A,C
 	LD	C,0
 	ADD	HL,BC
 	LD	BC,(_DRIVE)
