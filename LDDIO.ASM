@@ -318,14 +318,14 @@ RDFAT1:
 	RET	C
 	LD	A,(IX+012H)	;DPB_12_DEVICE
 	BIT	5,A
-	JP	Z,RDFAT0X
+	JR	Z,RDFAT0X
 	LD	HL,CHECK
 	AND	(HL)
 	LD	(HL),A
 	LD	DE,0		;BPB
 	LD	HL,(_FATBF)
 	CALL	DRD16
-	JR	NC,GET_BPB
+	JR	NC,GETBPB
 	LD	HL,CHECK
 	RLC	(HL)
 	CCF
@@ -343,34 +343,35 @@ RDFAT1:
 	LD	A,0FFH
 	LD	(HL),A
 	JR	RDFAT1
-GET_BPB:
+GETBPB:
 	PUSH	IY
 	LD	IY,(_FATBF)	;BPB
+	CALL	_BPB2DPB
+	POP	IY
+	RET	C
+	CALL	CHGDRV2
+RDFAT0X:
+	CALL	RDFATS
+	RET	C
+	CP	(IX+6)		;DPB_06_FATID
+	RET	Z
+	BIT	5,(IX+012H)	;DPB_12_DEVICE
+	RET	NZ		;BPBを取得している場合はFATIDをチェックしない
+	SCF
+	RET
 
+BPB2DPB:
 	LD	A,(IY+0)	;BS_JmpBoot
 	CP	0EBH		;Short jump
 	JR	Z,BPBOK
 	CP	0E9H		;Near jump
 	JR	Z,BPBOK
 	CP	060H		;X68k
-	JR	Z,BPBOK
-NOT_BPB
-	POP	IY
 	SCF
-	RET
+	RET	NZ
 BPBOK:
 	LD	A,(IY+13)	;BPB_SecPerClus
 	LD	(IX+7),A	;DPB_07_SECPCL
-
-	LD	A,(IY+16)	;BPB_NumFATs
-	CP	2		;>2:NC
-	LD	A,(IY+12)	;BPB_BytsPerSec
-	JR	C,BPBFAT1
-	CP	5
-	JR	NC,NOT_BPB	;1セクタ1024以上は無効
-	OR	080H
-BPBFAT1:
-	LD	(IX+00FH),A	;DPB_0F_BPS
 
 	LD	A,(IY+22)	;BPB_FATSz16
 	LD	(IX+0),A	;DPB_00_FATLN
@@ -423,18 +424,19 @@ BPBDE1:
 	LD	L,(IY+19)	;BPB_TotSec16
 	LD	H,(IY+20)
 	LD	A,H
-	OR	L		;ここでCF=0
+	OR	L
 	LD	A,0		;LDでフラグは変化しない。BPB_TotSec16を AHL で扱う為、Aに0を入れる
 	JR	NZ,BPB16BIT
 	LD	A,(IY+35)	;BPB_TotSec16が「0」の場合はBPB_TotSec32で計算
 	OR	A
-NOT_BPB1:
-	JP	NZ,NOT_BPB	;念のため(総セクタ数が24ビットを超える場合)
+	SCF
+	RET	NZ		;念のため(総セクタ数が24ビットを超える場合)
 	LD	L,(IY+32)	;BPB_TotSec32 は AHL の24ビットで扱う
 	LD	H,(IY+33)	;1クラスタの論理セクタ数(DPB_07_SECPCL)が最大128なので
 	LD	A,(IY+34)	;24ビットを超えると必ずクラスタ数が16ビットを超えてしまうのでこれで十分
+	AND	A		;CF=0
 BPB16BIT:
-	SBC	HL,DE		;CF=0のはず
+	SBC	HL,DE
 	SBC	A,0
 	LD	B,(IY+13)	;BPB_SecPerClus
 BPBTC1:				;総クラスタ数(AHL) = 総セクタ数(AHL) / セクタサイズ(B)
@@ -446,7 +448,8 @@ BPBTC1:				;総クラスタ数(AHL) = 総セクタ数(AHL) / セクタサイズ(B)
 	JR	BPBTC1
 BPBTC2:
 	OR	A
-	JR	NZ,NOT_BPB1	;念のため(クラスタ数が16ビットを超える場合)
+	SCF
+	RET	NZ		;念のため(クラスタ数が16ビットを超える場合)
 	INC	HL
 	INC	HL
 	LD	(IX+8),L	;DPB_08_MAXCL
@@ -467,18 +470,18 @@ BPBTC2:
 SETCYL:
 	LD	(IX+00CH),L	;DPB_0C_MAXCYL
 	LD	A,(IY+24)	;BPB_SecPerTr
-	LD	(IX+00DH),A	;DPB_0D_MAXSEC
+	LD	(IX+00DH),A	;DPB_0D_MAXSEC	;ここまでフロッピー専用
 NOT_FD:
-	POP	IY
-	CALL	CHGDRV2
-RDFAT0X:
-	CALL	RDFATS
-	RET	C
-	CP	(IX+6)		;DPB_06_FATID
-	RET	Z
-	BIT	5,(IX+012H)	;DPB_12_DEVICE
-	RET	NZ		;BPBを取得している場合はFATIDをチェックしない
-	SCF
+	LD	A,(IY+16)	;BPB_NumFATs
+	CP	2		;>2:NC
+	LD	A,(IY+12)	;BPB_BytsPerSec
+	JR	C,BPBFAT1
+	OR	080H
+BPBFAT1:
+	LD	(IX+00FH),A	;DPB_0F_BPS
+
+	AND	07FH		;セクタバッファが1KBしかないので1KBを超える場合はCF=1でエラーにする
+	ADD	A,0-5		;0-4:NC 5以上:C
 	RET
 
 RDFATS:
@@ -689,12 +692,11 @@ CHGDRV2:
 	LD	A,H		;DPB_0F_BPS
 	AND	7
 	LD	(SECSZ+2),A	;1セクタのサイズの上位1バイト 0x400 - 0x200 - 0x100
-	DEC	A		;1セクタ512 2D/2DD/2HC/2HQ(2HD1.44MB)等
+				;1セクタ512 2D/2DD/2HC/2HQ(2HD1.44MB)等
 				;1セクタ1024 2HD/EMM/BRAM
 				;1セクタ256 GRAM等
 				;1024	512	256
-	LD	(SECSZM1+2),A	;3	1	0	1セクタのサイズ-1したものの上位1バイト (0x3FF - 0x1FF - 0xFF)
-	INC	A		;4	2	1
+				;4	2	1
 	ADD	A,A		;8	4	2
 	ADD	A,A		;010H	8	4
 	ADD	A,A		;020H	010H	8

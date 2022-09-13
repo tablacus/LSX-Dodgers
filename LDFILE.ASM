@@ -350,20 +350,22 @@ COPEN:
 	CALL	DCPAT
 	CALL	DRDNX
 	LD	HL,(_DTBUF)	;ディレクトリエントリを0クリア
-	LD	E,L
-	LD	D,H
-	INC	DE		;DE,DTBUF+1
-SECSZM1:LD	BC,003FFH	;自己書き換え セクタサイズ-1(0x3FF:1023 or 0x1FF:511 or 0xFF:255)
-	XOR	A		;データバッファをセクタサイズ分ゼロクリア
+	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
+	LD	B,A
+	XOR	A
+	LD	C,A
+COPENCL:
 	LD	(HL),A
-	LDIR
-	POP	DE		;DE=(_CLPS)
-	PUSH	DE
+	CPI			;HL=HL+1 BC=BC-1 BCが0の場合にP/V=0
+	JP	PE,COPENCL
+
 	LD	A,(SPCPAT+1)	;1クラスタの論理セクタ数
 	DEC	A
 	JR	Z,COPENE
 	LD	A,1		;1セクタ辺りのセクタ数が2以上の場合
 	LD	(_SECPS+1),A
+	POP	DE		;DE=(_CLPS)
+	PUSH	DE
 COPEN1:
 	PUSH	DE		;データバッファに入らないセクタもゼロクリア
 	PUSH	BC
@@ -513,7 +515,7 @@ DCPAT:
 	LD	C,A
 	LD	A,(_SECPS+1)
 	CP	C
-	JR	NC,DC1
+	JR	C,DC1
 	XOR	A
 DC1:
 	OR	080H
@@ -935,11 +937,11 @@ SETTMS:
 SETTMSX:			;FCBに日付時刻をセットする
 	CALL	_SYS2C		;(BDOS)時刻の獲得
 				;H←時  L←分  D←秒
-	SLA	L		;L=L/2
-	SLA	L		;L=L/2
-	ADD	HL,HL		;*2
-	ADD	HL,HL		;*4
-	ADD	HL,HL		;*8
+	SLA	L		;   *2
+	SLA	L		;   *4
+	ADD	HL,HL		;*2 *8
+	ADD	HL,HL		;*4 *16
+	ADD	HL,HL		;*8 *32
 	LD	A,D
 	RRCA			;bit.0->7->->->0->C
 	AND	01FH
