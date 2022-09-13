@@ -875,12 +875,9 @@ AT_EADR:
 	EX	DE,HL
 	ADD	HL,HL
 	ADD	HL,HL
+	LD	BC,(_MAXCYL-1)
 	LD	C,0
-	LD	A,(_MAXCYL)
-	LD	B,A
 	ADD	HL,BC
-	LD	A,(_DRIVE)
-	LD	C,A
 	LD	B,00DH
 	OUT	(C),C
 	INC	C
@@ -891,7 +888,7 @@ AT_EADR:
 	EX	DE,HL
 	POP	DE
 	POP	AF
-	AND	A	;CF=0
+	OR	A	;CF=0
 	RET
 
 AT_EMME:
@@ -901,4 +898,4 @@ INITE:
 
 BDOS:
 	JP	BDOS0
-	DS	25	;Reserved
+	DS	2	;Reserved

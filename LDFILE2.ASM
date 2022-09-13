@@ -346,8 +346,7 @@ RBX2:				;Cluster settings
 	LD	C,(IY+34)	;(+33)(FCB)ランダムレコード
 	LD	B,(IY+35)
 	CALL	RWXR
-	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
-	DEC	A
+	LD	A,(SECSZM1+2)	;1024=3 / 512=1 / 256=0
 	AND	(IY+34)
 	OR	(IY+33)
 	RET
@@ -403,8 +402,7 @@ RBXB2:
 
 RBXC:
 	LD	BC,(LEFTX)
-	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
-	DEC	A
+	LD	A,(SECSZM1+2)	;1024=3 / 512=1 / 256=0
 	AND	B
 	LD	B,A		;1セクタ以下の端数がない場合はZ
 	OR	C
