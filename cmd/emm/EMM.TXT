@@ -1,0 +1,36 @@
+・LSX-Dodgers専用外部コマンド
+
+●EMM	EMMの領域設定
+
+●書式
+
+EMM 領域番号(0~FF)
+
+
+●解説
+
+　EMMの使用する領域を設定します。領域番号は0~FFまで16進数で設定します。
+領域番号×64kBからEMMを確保します。
+
+　320kB以上のEMMをS-OS/HuBASICとLSX-Dodgers/L-os Angelesで分割して使用することが
+できるようになります。
+
+
+●例
+
+・ERADやHERADと同じ領域(EMM先頭から)に設定する
+
+EMM 0
+
+・HERADBと同じ領域(512kB以降)に設定する
+
+EMM 8
+
+・320kB以降をEMM領域に設定する
+
+EMM 5
+
+●History
+
+1.00	1995. 2. 7	新規作成
+

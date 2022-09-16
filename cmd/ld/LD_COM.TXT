@@ -1,0 +1,38 @@
+・CDOSII(JETターボターミナル)
+・CP/M　MSX-DOS　LSX-Dodgers
+
+●LD.COM		LSX-Dodgersの起動
+
+●書式
+
+A>LD
+
+※　A>は各DOSのプロンプトですので入力する必要はありません。
+
+
+●解説
+
+　CDOSII CP/M MSX-DOS LSX-DodgersからLSX-Dodgersを起動します。
+
+
+●注意
+
+　カレントドライブに "LD.BIN" が必要です。
+
+　CDOSかCP/M MSX-DOS LSX-Dodgersの判別は$0007番地の内容が
+
+$AF以下	CDOSII
+$B0以上	CP/M MSX-DOS LSX-Dodgers
+
+
+●History
+
+1.00	1995. 7.22	新規作成
+
+1.01	1995.11.23	起動OSのカレントドライブがLDのカレントドライブとなるようにした。
+
+1.02	1996. 8.12	CDOSIIからの実行した場合、起動OSのカレントドライブがLDのカレント
+			ドライブになっていなかったのを直した。
+
+1.03	1996. 9.17	CP/Mで動作しなかったバグをfix、hamachiさんありがとう。
+
