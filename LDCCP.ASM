@@ -239,15 +239,14 @@ C_EXE:
 	SCF
 	RET	Z
 	CALL	SETDTA1
-COMPAT:	LD	DE,0
-	CALL	SETFCB
-	XOR	A
-	LD	H,A
-	LD	L,A	;HL=0x0000
-	LD	SP,STACK
-	PUSH	HL
-	INC	H	;HL=0x0100
-	JP	(HL)
+COMPAT:	LD	DE,0				; self-modifying code
+	LD	SP,(SYSTEM+1)
+	LD	H,A				; A=0 in SETDTA1(_SYS1A)
+	LD	L,A
+	PUSH	HL				; push $0000 (reboot address)
+	INC	H
+	PUSH	HL				; push $0100 (TPA address)
+	JP	SETFCB				; and JP $0100
 
 C_BAT:
 	LD	DE,'A'+'T'*256
