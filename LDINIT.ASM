@@ -290,7 +290,7 @@ TURBO:
 	LD	HL,SCRNX
 	LD	(_SCRN+1),HL
 BIOSOK:
-	LD	A,01FH
+	LD	A,01FH		;スタートポート
 	IN	A,(0F0H)
 	RRCA
 	JR	C,CRT1
@@ -706,9 +706,9 @@ AT_DWT:
 	LD	A,0A0H
 AT_WTTRK1:
 	LD	(FDCPAT+1),A
+DWTBL:
 	LD	A,B
 	LD	(AT_WTB+1+AT_R),A
-DWTBL:
 	LD	A,2		;Retry count
 	LD	(RETRY),A
 
@@ -901,4 +901,4 @@ INITE:
 
 BDOS:
 	JP	BDOS0
-	DS	25	;Reserved
+	DS	71	;Reserved

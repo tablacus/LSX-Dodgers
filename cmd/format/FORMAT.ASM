@@ -31,8 +31,7 @@ MAIN:
 	CP	1DH
 	RET	NZ
 	LD	A,L
-	AND	0F0H
-	CP	090H
+	OR	A		;X1
 	RET	NZ
 
 	LD	SP,(SYSTEM+1)
@@ -575,13 +574,13 @@ ERROR:
 	JP	0
 
 TITLE:
-	DB	"X1 format v1.13"
+	DB	"X1 format v1.14"
 CRLF:
 	DB	$0D,$0A
 	DB	'$'
 MUSAGE:
 	DB	"usage: FORMAT ÄÞ×²ÌÞ:[½²¯Á]",$0D,$0A
-	DB	9,"/C  FAT¥ÃÞ¨Ú¸ÄØ ¼®·¶",$0D,$0A
+	DB	9,"/C  FAT,ÃÞ¨Ú¸ÄØ ¼®·¶",$0D,$0A
 ;	DB	9,"/On µ°ÊÞ°Ä×¯¸(n:1-9)",$0D,$0A
 	DB	'$'
 FORMES:

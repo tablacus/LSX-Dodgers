@@ -12,7 +12,7 @@
 000000 0100                         ORG 0100H
 000000 0100 C30301          10      JP  START
        0103                     START:
-000003 0103 110E02          10      LD  DE,TITLE
+000003 0103 110B02          10      LD  DE,TITLE
 000006 0106 0E09             7      LD  C,09H
 000008 0108 CD0500          17      CALL    SYSTEM
 00000B 010B 3A5C00          13      LD  A,(FCB1)
@@ -21,7 +21,7 @@
 000011 0111 3A5D00          13      LD  A,(FCB1+1)
 000014 0114 FE20             7      CP  20H
 000016 0116 2008            12      JR  NZ,MAIN
-000018 0118 112902          10      LD  DE,MSG_USAGE
+000018 0118 112602          10      LD  DE,MSG_USAGE
 00001B 011B 0E09             7      LD  C,09H
 00001D 011D C30500          10      JP  SYSTEM
        0120                     MAIN:
@@ -30,159 +30,158 @@
 000024 0124 FE1D             7      CP  1DH
 000026 0126 C0              11      RET NZ
 000027 0127 7D               4      LD  A,L
-000028 0128 E6F0             7      AND 0F0H
-00002A 012A FE90             7      CP  090H
-00002C 012C C0              11      RET NZ
-00002D 012D 217502          10      LD  HL,BUF
-000030 0130 117602          10      LD  DE,BUF+1
-000033 0133 010040          10      LD  BC,4000H
-000036 0136 EDB0                    LDIR
-000038 0138 CDFF01          17      CALL    SWITCH
-00003B 013B CDF601          17      CALL    CAP
-00003E 013E FE49             7      CP  'I'
-000040 0140 2003            12      JR  NZ,NOT_I
-000042 0142 329B01          13      LD  (I_PAT+1),A
-       0145                     NOT_I:
-000045 0145 118100          10      LD  DE,DTA+1
-000048 0148 CDF001          17      CALL    SKIP_SP
-       014B                     RM0145:
-00004B 014B 1A               7      LD  A,(DE)
-00004C 014C 13               6      INC DE
-00004D 014D B7               4      OR  A
-00004E 014E C8              11      RET Z
-00004F 014F FE3A             7      CP  ':'
-000051 0151 28F8            12      JR  Z,RM0145
-000053 0153 CDF601          17      CALL    CAP
-000056 0156 D641             7      SUB 'A'
-000058 0158 D8              11      RET C
-000059 0159 FE08             7      CP  8
-00005B 015B D0              11      RET NC
-00005C 015C 327102          13      LD  (DRIVE),A
-00005F 015F D5              11      PUSH    DE
-000060 0160 F5              11      PUSH    AF
-000061 0161 C641             7      ADD A,'A'
-000063 0163 5F               4      LD  E,A
-000064 0164 0E02             7      LD  C,2
-000066 0166 CD0500          17      CALL    SYSTEM
-000069 0169 1E3A             7      LD  E,':'
-00006B 016B 0E02             7      LD  C,2
-00006D 016D CD0500          17      CALL    SYSTEM
-000070 0170 F1              10      POP AF
-000071 0171 F5              11      PUSH    AF
-000072 0172 2A0A00          16      LD  HL,(BASE-1)
-000075 0175 2EDC             7      LD  L,DCH
-000077 0177 CD0F00          17      CALL    JP_HL
-00007A 017A F1              10      POP AF
-00007B 017B 3C               4      INC A
-00007C 017C 5F               4      LD  E,A
-00007D 017D DD7E00          19      LD  A,(IX+00H)  ;FAT領域のセクタ単位でのサイズ(DPB_00_FATLN)
-000080 0180 B7               4      OR  A
-000081 0181 2860            12      JR  Z,SKIP
-000083 0183 DDCB0F76        20      BIT 6,(IX+0FH)  ;FAT情報と論理セクタのサイズ(DPB_0F_BPS)
-000087 0187 205A            12      JR  NZ,SKIP     ;FAT16
-000089 0189 DD7E12          19      LD  A,(IX+12H)  ;デバイス情報(DPB_12_DEVICE)
-00008C 018C E60F             7      AND 0FH
-00008E 018E FE05             7      CP  05H
-000090 0190 2808            12      JR  Z,RAMDISK
-000092 0192 FE06             7      CP  06H
-000094 0194 2804            12      JR  Z,RAMDISK
-000096 0196 FE0B             7      CP  0BH
-000098 0198 2049            12      JR  NZ,SKIP
-       019A                     RAMDISK:
-00009A 019A 3E00             7  I_PAT:  LD  A,00H
-00009C 019C B7               4      OR  A
-00009D 019D 2008            12      JR  NZ,FORMAT
-00009F 019F 0E1B             7      LD  C,1BH
-0000A1 01A1 CD0500          17      CALL    SYSTEM
-0000A4 01A4 3C               4      INC A
-0000A5 01A5 203C            12      JR  NZ,SKIP
-       01A7                     FORMAT:
-0000A7 01A7 117202          10      LD  DE,FDATA
-0000AA 01AA 0E1A             7      LD  C,1AH
-0000AC 01AC CD0500          17      CALL    SYSTEM
-0000AF 01AF DD7E06          19      LD  A,(IX+06H)  ;メディアバイト(DPB_06_FATID)
-0000B2 01B2 327202          13      LD  (FDATA),A
-0000B5 01B5 DD5E0E          19      LD  E,(IX+0EH)  ;FAT領域の先頭論理セクタ番号(DPB_0E_FATPS)
-0000B8 01B8 1600             7      LD  D,00H
-0000BA 01BA 2A7102          16      LD  HL,(DRIVE)
-0000BD 01BD DD6600          19      LD  H,(IX+00H)  ;FAT領域のセクタ単位でのサイズ(DPB_00_FATLN)
-0000C0 01C0 0E30             7      LD  C,30H
-0000C2 01C2 CD0500          17      CALL    SYSTEM
-0000C5 01C5 117502          10      LD  DE,BUF
-0000C8 01C8 0E1A             7      LD  C,1AH
-0000CA 01CA CD0500          17      CALL    SYSTEM
-0000CD 01CD DD5E10          19      LD  E,(IX+10H)  ;ルートディレクトリ領域の先頭論理セクタ番号(DPB_10_DIRPS)
-0000D0 01D0 1600             7      LD  D,00H
-0000D2 01D2 2A7102          16      LD  HL,(DRIVE)
-0000D5 01D5 DD7E0B          19      LD  A,(IX+0BH)  ;ルートディレクトリ領域の論理セクタ数(DPB_0B_DIRSCNT)
-0000D8 01D8 67               4      LD  H,A
-0000D9 01D9 0E30             7      LD  C,30H
-0000DB 01DB CD0500          17      CALL    SYSTEM
-0000DE 01DE 115F02          10      LD  DE,MSG_FORMAT
-0000E1 01E1 1803            12      JR  SHOW_MSG
-       01E3                     SKIP:
-0000E3 01E3 116902          10      LD  DE,MSG_SKIP
-       01E6                     SHOW_MSG:
-0000E6 01E6 0E09             7      LD  C,09H
-0000E8 01E8 CD0500          17      CALL    SYSTEM
-0000EB 01EB D1              10      POP DE
-0000EC 01EC C34B01          10      JP  RM0145
-       01EF                     SKIP_SP1:
-0000EF 01EF 13               6      INC DE
-       01F0                     SKIP_SP:
-0000F0 01F0 1A               7      LD  A,(DE)
-0000F1 01F1 FE20             7      CP  20H
-0000F3 01F3 28FA            12      JR  Z,SKIP_SP1
-0000F5 01F5 C9              10      RET
-       01F6                     CAP:
-0000F6 01F6 FE61             7      CP  'a'
-0000F8 01F8 D8              11      RET C
-0000F9 01F9 FE7B             7      CP  'z'+1
-0000FB 01FB D0              11      RET NC
-0000FC 01FC D620             7      SUB 20H
-0000FE 01FE C9              10      RET
-       01FF                     SWITCH:
-0000FF 01FF 118100          10      LD  DE,DTA+1
-       0202                     SWITCH1:
-000102 0202 1A               7      LD  A,(DE)
-000103 0203 FE20             7      CP  20H
-000105 0205 D8              11      RET C
-000106 0206 13               6      INC DE
-000107 0207 FE2F             7      CP  2FH
-000109 0209 20F7            12      JR  NZ,SWITCH1
-00010B 020B 1A               7      LD  A,(DE)
-00010C 020C 13               6      INC DE
-00010D 020D C9              10      RET
-       020E                     TITLE:
-00010E 020E 4C442072616D2064        DB  "LD ram disk format v1.02"
+000028 0128 B7               4      OR  A
+000029 0129 C0              11      RET NZ
+00002A 012A 217202          10      LD  HL,BUF
+00002D 012D 117302          10      LD  DE,BUF+1
+000030 0130 010040          10      LD  BC,4000H
+000033 0133 EDB0                    LDIR
+000035 0135 CDFC01          17      CALL    SWITCH
+000038 0138 CDF301          17      CALL    CAP
+00003B 013B FE49             7      CP  'I'
+00003D 013D 2003            12      JR  NZ,NOT_I
+00003F 013F 329801          13      LD  (I_PAT+1),A
+       0142                     NOT_I:
+000042 0142 118100          10      LD  DE,DTA+1
+000045 0145 CDED01          17      CALL    SKIP_SP
+       0148                     RM0145:
+000048 0148 1A               7      LD  A,(DE)
+000049 0149 13               6      INC DE
+00004A 014A B7               4      OR  A
+00004B 014B C8              11      RET Z
+00004C 014C FE3A             7      CP  ':'
+00004E 014E 28F8            12      JR  Z,RM0145
+000050 0150 CDF301          17      CALL    CAP
+000053 0153 D641             7      SUB 'A'
+000055 0155 D8              11      RET C
+000056 0156 FE08             7      CP  8
+000058 0158 D0              11      RET NC
+000059 0159 326E02          13      LD  (DRIVE),A
+00005C 015C D5              11      PUSH    DE
+00005D 015D F5              11      PUSH    AF
+00005E 015E C641             7      ADD A,'A'
+000060 0160 5F               4      LD  E,A
+000061 0161 0E02             7      LD  C,2
+000063 0163 CD0500          17      CALL    SYSTEM
+000066 0166 1E3A             7      LD  E,':'
+000068 0168 0E02             7      LD  C,2
+00006A 016A CD0500          17      CALL    SYSTEM
+00006D 016D F1              10      POP AF
+00006E 016E F5              11      PUSH    AF
+00006F 016F 2A0A00          16      LD  HL,(BASE-1)
+000072 0172 2EDC             7      LD  L,DCH
+000074 0174 CD0F00          17      CALL    JP_HL
+000077 0177 F1              10      POP AF
+000078 0178 3C               4      INC A
+000079 0179 5F               4      LD  E,A
+00007A 017A DD7E00          19      LD  A,(IX+00H)  ;FAT領域のセクタ単位でのサイズ(DPB_00_FATLN)
+00007D 017D B7               4      OR  A
+00007E 017E 2860            12      JR  Z,SKIP
+000080 0180 DDCB0F76        20      BIT 6,(IX+0FH)  ;FAT情報と論理セクタのサイズ(DPB_0F_BPS)
+000084 0184 205A            12      JR  NZ,SKIP     ;FAT16
+000086 0186 DD7E12          19      LD  A,(IX+12H)  ;デバイス情報(DPB_12_DEVICE)
+000089 0189 E60F             7      AND 0FH
+00008B 018B FE05             7      CP  05H
+00008D 018D 2808            12      JR  Z,RAMDISK
+00008F 018F FE06             7      CP  06H
+000091 0191 2804            12      JR  Z,RAMDISK
+000093 0193 FE0B             7      CP  0BH
+000095 0195 2049            12      JR  NZ,SKIP
+       0197                     RAMDISK:
+000097 0197 3E00             7  I_PAT:  LD  A,00H
+000099 0199 B7               4      OR  A
+00009A 019A 2008            12      JR  NZ,FORMAT
+00009C 019C 0E1B             7      LD  C,1BH
+00009E 019E CD0500          17      CALL    SYSTEM
+0000A1 01A1 3C               4      INC A
+0000A2 01A2 203C            12      JR  NZ,SKIP
+       01A4                     FORMAT:
+0000A4 01A4 116F02          10      LD  DE,FDATA
+0000A7 01A7 0E1A             7      LD  C,1AH
+0000A9 01A9 CD0500          17      CALL    SYSTEM
+0000AC 01AC DD7E06          19      LD  A,(IX+06H)  ;メディアバイト(DPB_06_FATID)
+0000AF 01AF 326F02          13      LD  (FDATA),A
+0000B2 01B2 DD5E0E          19      LD  E,(IX+0EH)  ;FAT領域の先頭論理セクタ番号(DPB_0E_FATPS)
+0000B5 01B5 1600             7      LD  D,00H
+0000B7 01B7 2A6E02          16      LD  HL,(DRIVE)
+0000BA 01BA DD6600          19      LD  H,(IX+00H)  ;FAT領域のセクタ単位でのサイズ(DPB_00_FATLN)
+0000BD 01BD 0E30             7      LD  C,30H
+0000BF 01BF CD0500          17      CALL    SYSTEM
+0000C2 01C2 117202          10      LD  DE,BUF
+0000C5 01C5 0E1A             7      LD  C,1AH
+0000C7 01C7 CD0500          17      CALL    SYSTEM
+0000CA 01CA DD5E10          19      LD  E,(IX+10H)  ;ルートディレクトリ領域の先頭論理セクタ番号(DPB_10_DIRPS)
+0000CD 01CD 1600             7      LD  D,00H
+0000CF 01CF 2A6E02          16      LD  HL,(DRIVE)
+0000D2 01D2 DD7E0B          19      LD  A,(IX+0BH)  ;ルートディレクトリ領域の論理セクタ数(DPB_0B_DIRSCNT)
+0000D5 01D5 67               4      LD  H,A
+0000D6 01D6 0E30             7      LD  C,30H
+0000D8 01D8 CD0500          17      CALL    SYSTEM
+0000DB 01DB 115C02          10      LD  DE,MSG_FORMAT
+0000DE 01DE 1803            12      JR  SHOW_MSG
+       01E0                     SKIP:
+0000E0 01E0 116602          10      LD  DE,MSG_SKIP
+       01E3                     SHOW_MSG:
+0000E3 01E3 0E09             7      LD  C,09H
+0000E5 01E5 CD0500          17      CALL    SYSTEM
+0000E8 01E8 D1              10      POP DE
+0000E9 01E9 C34801          10      JP  RM0145
+       01EC                     SKIP_SP1:
+0000EC 01EC 13               6      INC DE
+       01ED                     SKIP_SP:
+0000ED 01ED 1A               7      LD  A,(DE)
+0000EE 01EE FE20             7      CP  20H
+0000F0 01F0 28FA            12      JR  Z,SKIP_SP1
+0000F2 01F2 C9              10      RET
+       01F3                     CAP:
+0000F3 01F3 FE61             7      CP  'a'
+0000F5 01F5 D8              11      RET C
+0000F6 01F6 FE7B             7      CP  'z'+1
+0000F8 01F8 D0              11      RET NC
+0000F9 01F9 D620             7      SUB 20H
+0000FB 01FB C9              10      RET
+       01FC                     SWITCH:
+0000FC 01FC 118100          10      LD  DE,DTA+1
+       01FF                     SWITCH1:
+0000FF 01FF 1A               7      LD  A,(DE)
+000100 0200 FE20             7      CP  20H
+000102 0202 D8              11      RET C
+000103 0203 13               6      INC DE
+000104 0204 FE2F             7      CP  2FH
+000106 0206 20F7            12      JR  NZ,SWITCH1
+000108 0208 1A               7      LD  A,(DE)
+000109 0209 13               6      INC DE
+00010A 020A C9              10      RET
+       020B                     TITLE:
+00010B 020B 4C442072616D2064        DB  "LD ram disk format v1.03"
             69736B20666F726D    
-            61742076312E3032    
-000126 0226 0D0A                    DB  0DH, 0AH
-000128 0228 24                      DB  '$'
-       0229                     MSG_USAGE:
-000129 0229 75736167653A2052        DB  "usage: RAMF ﾄﾞﾗｲﾌﾞ[ﾄﾞﾗｲﾌﾞ･･･][ｽｲｯﾁ]"
+            61742076312E3033    
+000123 0223 0D0A                    DB  0DH, 0AH
+000125 0225 24                      DB  '$'
+       0226                     MSG_USAGE:
+000126 0226 75736167653A2052        DB  "usage: RAMF ﾄﾞﾗｲﾌﾞ[ﾄﾞﾗｲﾌﾞ･･･][ｽｲｯﾁ]"
             414D4620C4DED7B2    
             CCDE5BC4DED7B2CC    
             DEA5A5A55D5BBDB2    
             AFC15D              
-00014C 024C 0D0A                    DB  00DH, 00AH
-00014E 024E 092F4920B7AEB3BE        DB  9,"/I ｷｮｳｾｲ ｼｮｷｶ"
+000149 0249 0D0A                    DB  00DH, 00AH
+00014B 024B 092F4920B7AEB3BE        DB  9,"/I ｷｮｳｾｲ ｼｮｷｶ"
             B220BCAEB7B6        
-00015C 025C 0D0A                    DB  0DH, 0AH
-00015E 025E 24                      DB  '$'
-       025F                     MSG_FORMAT:
-00015F 025F 20666F726D6174          DB  " format"
-000166 0266 0D0A                    DB  0DH, 0AH
-000168 0268 24                      DB  '$'
-       0269                     MSG_SKIP:
-000169 0269 20736B6970              DB  " skip"
-00016E 026E 0D0A                    DB  0DH, 0AH
-000170 0270 24                      DB  '$'
-       0271                     DRIVE:
-000171 0271 00                      DB  0
-       0272                     FDATA:
+000159 0259 0D0A                    DB  0DH, 0AH
+00015B 025B 24                      DB  '$'
+       025C                     MSG_FORMAT:
+00015C 025C 20666F726D6174          DB  " format"
+000163 0263 0D0A                    DB  0DH, 0AH
+000165 0265 24                      DB  '$'
+       0266                     MSG_SKIP:
+000166 0266 20736B6970              DB  " skip"
+00016B 026B 0D0A                    DB  0DH, 0AH
+00016D 026D 24                      DB  '$'
+       026E                     DRIVE:
+00016E 026E 00                      DB  0
+       026F                     FDATA:
+00016F 026F 00                      DB  0
+000170 0270 FFFF                    DB  0FFH, 0FFH
+       0272                     BUF:
 000172 0272 00                      DB  0
-000173 0273 FFFF                    DB  0FFH, 0FFH
-       0275                     BUF:
-000175 0275 00                      DB  0
 [EOF:RAMF.ASM:SHIFT_JIS]

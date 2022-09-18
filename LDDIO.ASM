@@ -298,7 +298,7 @@ SNCL16:
 ;
 ;------------------------
 NEXTX:
-_SECPS:	LD	A,0
+_SECPS:	LD	A,0	;自己書き換え
 	INC	A
 NCPAT:	AND	0	;自己書き換え　1クラスタの論理セクタ数-1
 	LD	(_SECPS+1),A
@@ -488,11 +488,8 @@ RDFATS:
 	CALL	FATSETUP
 	RET	C
 RDFATL:
-	PUSH	BC
-	CALL	DRD16
-	POP	BC
-	RET	C
-	DJNZ	RDFATL
+	LD	C,0
+	CALL	DRD24B
 	LD	HL,(_FATBF)
 	LD	A,(HL)
 	RET
@@ -501,6 +498,7 @@ DRD16:
 	LD	C,0
 DRD24:
 	LD	B,1
+DRD24B:
 	PUSH	IX
 	LD	IX,(_DPB)
 DRDPAT:	CALL	FDRD		;自己書き換え（ディスク読み込み）
@@ -512,6 +510,7 @@ DWT16:
 	LD	C,0
 DWT24:
 	LD	B,1
+DWT24B:
 	PUSH	IX
 	LD	IX,(_DPB)
 DWTPAT:	CALL	FDWT		;自己書き換え（ディスク書き込み）
@@ -531,12 +530,8 @@ WTFAT:
 	EX	DE,HL
 	POP	HL
 WTFATL:
-	PUSH	BC
-	CALL	DWT16
-	POP	BC
-	RET	C
-	DJNZ	WTFATL
-	RET
+	LD	C,0
+	JP	DWT24B
 ;------------------------
 ;FATのセットアップ
 ;out

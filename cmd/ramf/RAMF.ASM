@@ -29,8 +29,7 @@ MAIN:
 	CP	1DH
 	RET	NZ
 	LD	A,L
-	AND	0F0H
-	CP	090H
+	OR	A
 	RET	NZ
 	LD	HL,BUF
 	LD	DE,BUF+1
@@ -153,7 +152,7 @@ SWITCH1:
 	INC	DE
 	RET
 TITLE:
-	DB	"LD ram disk format v1.02"
+	DB	"LD ram disk format v1.03"
 	DB	0DH, 0AH
 	DB	'$'
 MSG_USAGE:
