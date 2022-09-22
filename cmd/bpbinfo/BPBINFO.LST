@@ -6,7 +6,6 @@
                                 ; LSX-Dodgers/MSX-DOS/MSX-DOS2
                                 ;
        0005                     SYSTEM  EQU 00005H
-       000F                     JP_HL   EQU 0000FH
        005C                     FCB1    EQU 0005CH
        006C                     FCB2    EQU 0006CH
        0080                     DTA1    EQU 00080H
@@ -14,18 +13,18 @@
 000000 0100                         ORG 00100H
 000000 0100 C30301          10      JP  START       ;0C3HはZ80ではJPだが、i8086ではRETなので
        0103                     START:              ;間違えてMS-DOS環境で実行しても即終了できる
-000003 0103 116003          10      LD  DE,MSG_TITLE
+000003 0103 117703          10      LD  DE,MSG_TITLE
 000006 0106 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
 000008 0108 CD0500          17      CALL    SYSTEM
                                 
-00000B 010B 11A004          10      LD  DE,BPB
+00000B 010B 11B704          10      LD  DE,BPB
 00000E 010E 0E1A             7      LD  C,01AH      ;SETDTA ディスク転送アドレスの設定 CP/M
 000010 0110 CD0500          17      CALL    SYSTEM
                                 
 000013 0113 3A5C00          13      LD  A,(FCB1)
 000016 0116 B7               4      OR  A
 000017 0117 200B            12      JR  NZ,DRVOK
-000019 0119 117303          10      LD  DE,MSG_USAGE
+000019 0119 118A03          10      LD  DE,MSG_USAGE
 00001C 011C 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
 00001E 011E CD0500          17      CALL    SYSTEM
 000021 0121 C30000          10      JP  0
@@ -35,405 +34,421 @@
 000026 0126 0E1B             7      LD  C,01BH      ;ALLOC ディスク情報の獲得
 000028 0128 CD0500          17      CALL    SYSTEM
 00002B 012B E1              10      POP HL
-00002C 012C 110000          10      LD  DE,0
-00002F 012F 2D               4      DEC L
-000030 0130 2601             7      LD  H,1
-000032 0132 E5              11      PUSH    HL
-000033 0133 0E2F             7      LD  C,02FH      ;RDABS 論理セクタの読み出し
+00002C 012C 2D               4      DEC L
+00002D 012D 2601             7      LD  H,1     ;1セクタ
+00002F 012F 110000          10      LD  DE,0
+000032 0132 0E2F             7      LD  C,02FH      ;RDABS 論理セクタの読み出し
+000034 0134 E5              11      PUSH    HL
 000035 0135 CD0500          17      CALL    SYSTEM
 000038 0138 E1              10      POP HL
 000039 0139 B7               4      OR  A
-00003A 013A 281C            12      JR  Z,READOK
-00003C 013C 7D               4      LD  A,L
-00003D 013D 0601             7      LD  B,1
-00003F 013F 210000          10      LD  HL,0
-000042 0142 110000          10      LD  DE,0
-000045 0145 0E73             7      LD  C,73H       ;RDDRV セクタ直接読み出し(MSX-DOS2)
-000047 0147 CD0500          17      CALL    SYSTEM
-00004A 014A B7               4      OR  A
-00004B 014B 280B            12      JR  Z,READOK
-00004D 014D 118A03          10      LD  DE,MSG_ERROR
-000050 0150 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-000052 0152 CD0500          17      CALL    SYSTEM
-000055 0155 C30000          10      JP  0
-       0158                     READOK:
-000058 0158 119303          10      LD  DE,BS_JmpBoot
-00005B 015B 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-00005D 015D CD0500          17      CALL    SYSTEM
+00003A 013A 282A            12      JR  Z,READOK
+00003C 013C E5              11      PUSH    HL
+00003D 013D 0E6F             7      LD  C,06FH      ;MSX-DOS のバージョン番号の獲得(_DOSVER)
+00003F 013F CD0500          17      CALL    SYSTEM
+000042 0142 E1              10      POP HL
+000043 0143 3816            12      JR  C,ERROR     ;CP/M
+000045 0145 78               4      LD  A,B
+000046 0146 FE02             7      CP  2
+000048 0148 3811            12      JR  C,ERROR     ;MSX-DOS1
+00004A 014A 7D               4      LD  A,L
+00004B 014B 0601             7      LD  B,1     ;1セクタ
+00004D 014D 110000          10      LD  DE,0
+000050 0150 210000          10      LD  HL,0
+000053 0153 0E73             7      LD  C,73H       ;RDDRV セクタ直接読み出し(Nextor)
+000055 0155 CD0500          17      CALL    SYSTEM
+000058 0158 B7               4      OR  A
+000059 0159 280B            12      JR  Z,READOK
+       015B                     ERROR:
+00005B 015B 11A103          10      LD  DE,MSG_ERROR
+00005E 015E 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+000060 0160 CD0500          17      CALL    SYSTEM
+000063 0163 C30000          10      JP  0
+       0166                     READOK:
+000066 0166 11AA03          10      LD  DE,BS_JmpBoot
+000069 0169 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+00006B 016B CD0500          17      CALL    SYSTEM
                                 
-000060 0160 21A004          10      LD  HL,BPB      ;BS_JmpBoot
-000063 0163 0603             7      LD  B,3
-000065 0165 CDEC02          17      CALL    PRHEXS
+00006E 016E 21B704          10      LD  HL,BPB      ;BS_JmpBoot
+000071 0171 0603             7      LD  B,3
+000073 0173 CD0303          17      CALL    PRHEXS
                                 
-000068 0168 117003          10      LD  DE,CRLF
-00006B 016B 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-00006D 016D CD0500          17      CALL    SYSTEM
+000076 0176 118703          10      LD  DE,CRLF
+000079 0179 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+00007B 017B CD0500          17      CALL    SYSTEM
                                 
-000070 0170 11A503          10      LD  DE,BS_OEMName
-000073 0173 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-000075 0175 CD0500          17      CALL    SYSTEM
+00007E 017E 11BC03          10      LD  DE,BS_OEMName
+000081 0181 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+000083 0183 CD0500          17      CALL    SYSTEM
                                 
-000078 0178 21A304          10      LD  HL,BPB+3
-00007B 017B 0609             7      LD  B,8+1
-00007D 017D CDE402          17      CALL    MSX
+000086 0186 21BA04          10      LD  HL,BPB+3
+000089 0189 0609             7      LD  B,8+1
+00008B 018B CDFB02          17      CALL    MSX
                                 
-000080 0180 117003          10      LD  DE,CRLF
-000083 0183 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-000085 0185 CD0500          17      CALL    SYSTEM
+00008E 018E 118703          10      LD  DE,CRLF
+000091 0191 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+000093 0193 CD0500          17      CALL    SYSTEM
                                 
-000088 0188 11B503          10      LD  DE,BPB_BytsPerSec
-00008B 018B 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-00008D 018D CD0500          17      CALL    SYSTEM
-                                
-000090 0190 2AAB04          16      LD  HL,(BPB+11)
-000093 0193 CD1103          17      CALL    PRDEC0
-                                
-000096 0196 117003          10      LD  DE,CRLF
+000096 0196 11CC03          10      LD  DE,BPB_BytsPerSec
 000099 0199 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
 00009B 019B CD0500          17      CALL    SYSTEM
                                 
-00009E 019E 11C503          10      LD  DE,BPB_SecPerClus
-0000A1 01A1 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-0000A3 01A3 CD0500          17      CALL    SYSTEM
+00009E 019E 2AC204          16      LD  HL,(BPB+11)
+0000A1 01A1 CD2803          17      CALL    PRDEC0
                                 
-0000A6 01A6 2AAD04          16      LD  HL,(BPB+13)
-0000A9 01A9 2600             7      LD  H,0
-0000AB 01AB CD1103          17      CALL    PRDEC0
+0000A4 01A4 118703          10      LD  DE,CRLF
+0000A7 01A7 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+0000A9 01A9 CD0500          17      CALL    SYSTEM
                                 
-0000AE 01AE 117003          10      LD  DE,CRLF
-0000B1 01B1 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-0000B3 01B3 CD0500          17      CALL    SYSTEM
+0000AC 01AC 11DC03          10      LD  DE,BPB_SecPerClus
+0000AF 01AF 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+0000B1 01B1 CD0500          17      CALL    SYSTEM
                                 
-0000B6 01B6 11D503          10      LD  DE,BPB_RsvdSecCnt
-0000B9 01B9 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-0000BB 01BB CD0500          17      CALL    SYSTEM
+0000B4 01B4 2AC404          16      LD  HL,(BPB+13)
+0000B7 01B7 2600             7      LD  H,0
+0000B9 01B9 CD2803          17      CALL    PRDEC0
                                 
-0000BE 01BE 2AAE04          16      LD  HL,(BPB+14)
-0000C1 01C1 CD1103          17      CALL    PRDEC0
+0000BC 01BC 118703          10      LD  DE,CRLF
+0000BF 01BF 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+0000C1 01C1 CD0500          17      CALL    SYSTEM
                                 
-0000C4 01C4 117003          10      LD  DE,CRLF
+0000C4 01C4 11EC03          10      LD  DE,BPB_RsvdSecCnt
 0000C7 01C7 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
 0000C9 01C9 CD0500          17      CALL    SYSTEM
                                 
-0000CC 01CC 11E503          10      LD  DE,BPB_NumFATs
-0000CF 01CF 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-0000D1 01D1 CD0500          17      CALL    SYSTEM
+0000CC 01CC 2AC504          16      LD  HL,(BPB+14)
+0000CF 01CF CD2803          17      CALL    PRDEC0
                                 
-0000D4 01D4 2AB004          16      LD  HL,(BPB+16)
-0000D7 01D7 2600             7      LD  H,0
-0000D9 01D9 CD1103          17      CALL    PRDEC0
+0000D2 01D2 118703          10      LD  DE,CRLF
+0000D5 01D5 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+0000D7 01D7 CD0500          17      CALL    SYSTEM
                                 
-0000DC 01DC 117003          10      LD  DE,CRLF
-0000DF 01DF 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-0000E1 01E1 CD0500          17      CALL    SYSTEM
+0000DA 01DA 11FC03          10      LD  DE,BPB_NumFATs
+0000DD 01DD 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+0000DF 01DF CD0500          17      CALL    SYSTEM
                                 
-0000E4 01E4 11F503          10      LD  DE,BPB_RootEntCnt
-0000E7 01E7 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-0000E9 01E9 CD0500          17      CALL    SYSTEM
+0000E2 01E2 2AC704          16      LD  HL,(BPB+16)
+0000E5 01E5 2600             7      LD  H,0
+0000E7 01E7 CD2803          17      CALL    PRDEC0
                                 
-0000EC 01EC 2AB104          16      LD  HL,(BPB+17)
-0000EF 01EF CD1103          17      CALL    PRDEC0
+0000EA 01EA 118703          10      LD  DE,CRLF
+0000ED 01ED 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+0000EF 01EF CD0500          17      CALL    SYSTEM
                                 
-0000F2 01F2 117003          10      LD  DE,CRLF
+0000F2 01F2 110C04          10      LD  DE,BPB_RootEntCnt
 0000F5 01F5 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
 0000F7 01F7 CD0500          17      CALL    SYSTEM
                                 
-0000FA 01FA 110504          10      LD  DE,BPB_TotSec16
-0000FD 01FD 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-0000FF 01FF CD0500          17      CALL    SYSTEM
+0000FA 01FA 2AC804          16      LD  HL,(BPB+17)
+0000FD 01FD CD2803          17      CALL    PRDEC0
                                 
-000102 0202 2AB304          16      LD  HL,(BPB+19)
-000105 0205 CD1103          17      CALL    PRDEC0
+000100 0200 118703          10      LD  DE,CRLF
+000103 0203 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+000105 0205 CD0500          17      CALL    SYSTEM
                                 
-000108 0208 117003          10      LD  DE,CRLF
-00010B 020B 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-00010D 020D CD0500          17      CALL    SYSTEM
+000108 0208 2ACA04          16      LD  HL,(BPB+19)
+00010B 020B 7C               4      LD  A,H
+00010C 020C B5               4      OR  L
+00010D 020D 2810            12      JR  Z,TotSec32
                                 
-000110 0210 111504          10      LD  DE,BPB_TotSec32
-000113 0213 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-000115 0215 CD0500          17      CALL    SYSTEM
+00010F 020F 111C04          10      LD  DE,BPB_TotSec16
+000112 0212 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+000114 0214 CD0500          17      CALL    SYSTEM
                                 
-000118 0218 3AC304          13      LD  A,(BPB+35)
-00011B 021B B7               4      OR  A
-00011C 021C 2817            12      JR  Z,TOTSECDEC
-00011E 021E CDF802          17      CALL    PRHEX   
-000121 0221 3AC204          13      LD  A,(BPB+34)
-000124 0224 CDF802          17      CALL    PRHEX   
-000127 0227 3AC104          13      LD  A,(BPB+33)
-00012A 022A CDF802          17      CALL    PRHEX   
-00012D 022D 3AC004          13      LD  A,(BPB+32)
-000130 0230 CDF802          17      CALL    PRHEX   
-000133 0233 1809            12      JR  TOTSECCRLF
-       0235                     TOTSECDEC:
-000135 0235 2AC004          16      LD  HL,(BPB+32)
-000138 0238 3AC204          13      LD  A,(BPB+34)
-00013B 023B CD1203          17      CALL    PRDEC
-       023E                     TOTSECCRLF:
-00013E 023E 117003          10      LD  DE,CRLF
-000141 0241 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-000143 0243 CD0500          17      CALL    SYSTEM
+000117 0217 2ACA04          16      LD  HL,(BPB+19)
+00011A 021A CD2803          17      CALL    PRDEC0
                                 
-000146 0246 112504          10      LD  DE,BPB_Media
-000149 0249 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-00014B 024B CD0500          17      CALL    SYSTEM
+00011D 021D 182E            12      JR  TOTSECCRLF
+       021F                     TotSec32:
+00011F 021F 112C04          10      LD  DE,BPB_TotSec32
+000122 0222 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+000124 0224 CD0500          17      CALL    SYSTEM
                                 
-00014E 024E 3AB504          13      LD  A,(BPB+21)
-000151 0251 CDF802          17      CALL    PRHEX
+000127 0227 3ADA04          13      LD  A,(BPB+35)
+00012A 022A B7               4      OR  A
+00012B 022B 2817            12      JR  Z,TOTSECDEC
+00012D 022D CD0F03          17      CALL    PRHEX
+000130 0230 3AD904          13      LD  A,(BPB+34)
+000133 0233 CD0F03          17      CALL    PRHEX
+000136 0236 3AD804          13      LD  A,(BPB+33)
+000139 0239 CD0F03          17      CALL    PRHEX
+00013C 023C 3AD704          13      LD  A,(BPB+32)
+00013F 023F CD0F03          17      CALL    PRHEX
+000142 0242 1809            12      JR  TOTSECCRLF
+       0244                     TOTSECDEC:
+000144 0244 2AD704          16      LD  HL,(BPB+32)
+000147 0247 3AD904          13      LD  A,(BPB+34)
+00014A 024A CD2903          17      CALL    PRDEC
+       024D                     TOTSECCRLF:
+00014D 024D 118703          10      LD  DE,CRLF
+000150 0250 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+000152 0252 CD0500          17      CALL    SYSTEM
                                 
-000154 0254 117003          10      LD  DE,CRLF
-000157 0257 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-000159 0259 CD0500          17      CALL    SYSTEM
+000155 0255 113C04          10      LD  DE,BPB_Media
+000158 0258 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+00015A 025A CD0500          17      CALL    SYSTEM
                                 
-00015C 025C 113B04          10      LD  DE,BPB_FATSz16
-00015F 025F 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-000161 0261 CD0500          17      CALL    SYSTEM
+00015D 025D 3ACC04          13      LD  A,(BPB+21)
+000160 0260 CD0F03          17      CALL    PRHEX
                                 
-000164 0264 2AB604          16      LD  HL,(BPB+22)
-000167 0267 CD1103          17      CALL    PRDEC0
+000163 0263 118703          10      LD  DE,CRLF
+000166 0266 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+000168 0268 CD0500          17      CALL    SYSTEM
                                 
-00016A 026A 117003          10      LD  DE,CRLF
-00016D 026D 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-00016F 026F CD0500          17      CALL    SYSTEM
+00016B 026B 115204          10      LD  DE,BPB_FATSz16
+00016E 026E 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+000170 0270 CD0500          17      CALL    SYSTEM
                                 
-000172 0272 114B04          10      LD  DE,BPB_SecPerTrk
-000175 0275 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-000177 0277 CD0500          17      CALL    SYSTEM
+000173 0273 2ACD04          16      LD  HL,(BPB+22)
+000176 0276 CD2803          17      CALL    PRDEC0
                                 
-00017A 027A 2AB804          16      LD  HL,(BPB+24)
-00017D 027D CD1103          17      CALL    PRDEC0
+000179 0279 118703          10      LD  DE,CRLF
+00017C 027C 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+00017E 027E CD0500          17      CALL    SYSTEM
                                 
-000180 0280 117003          10      LD  DE,CRLF
-000183 0283 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-000185 0285 CD0500          17      CALL    SYSTEM
+000181 0281 116204          10      LD  DE,BPB_SecPerTrk
+000184 0284 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+000186 0286 CD0500          17      CALL    SYSTEM
                                 
-000188 0288 115B04          10      LD  DE,BPB_NumHeads
-00018B 028B 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-00018D 028D CD0500          17      CALL    SYSTEM
+000189 0289 2ACF04          16      LD  HL,(BPB+24)
+00018C 028C CD2803          17      CALL    PRDEC0
                                 
-000190 0290 2ABA04          16      LD  HL,(BPB+26)
-000193 0293 CD1103          17      CALL    PRDEC0
+00018F 028F 118703          10      LD  DE,CRLF
+000192 0292 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+000194 0294 CD0500          17      CALL    SYSTEM
                                 
-000196 0296 117003          10      LD  DE,CRLF
-000199 0299 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-00019B 029B CD0500          17      CALL    SYSTEM
+000197 0297 117204          10      LD  DE,BPB_NumHeads
+00019A 029A 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+00019C 029C CD0500          17      CALL    SYSTEM
                                 
-00019E 029E 116B04          10      LD  DE,BS_VolID
-0001A1 02A1 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-0001A3 02A3 CD0500          17      CALL    SYSTEM
+00019F 029F 2AD104          16      LD  HL,(BPB+26)
+0001A2 02A2 CD2803          17      CALL    PRDEC0
                                 
-0001A6 02A6 21C704          10      LD  HL,BPB+39
-0001A9 02A9 0604             7      LD  B,4
-0001AB 02AB CDEC02          17      CALL    PRHEXS
+0001A5 02A5 118703          10      LD  DE,CRLF
+0001A8 02A8 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+0001AA 02AA CD0500          17      CALL    SYSTEM
                                 
-0001AE 02AE 117003          10      LD  DE,CRLF
-0001B1 02B1 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-0001B3 02B3 CD0500          17      CALL    SYSTEM
+0001AD 02AD 3ADD04          13      LD  A,(BPB+38)  ;BS_BootSig
+0001B0 02B0 FE29             7      CP  029H
+0001B2 02B2 C20000          10      JP  NZ,0
                                 
-0001B6 02B6 117B04          10      LD  DE,BS_VolLab
-0001B9 02B9 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-0001BB 02BB CD0500          17      CALL    SYSTEM
+0001B5 02B5 118204          10      LD  DE,BS_VolID
+0001B8 02B8 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+0001BA 02BA CD0500          17      CALL    SYSTEM
                                 
-0001BE 02BE 21CB04          10      LD  HL,BPB+43
-0001C1 02C1 060C             7      LD  B,11+1
-0001C3 02C3 CDE402          17      CALL    MSX
+0001BD 02BD 21DE04          10      LD  HL,BPB+39
+0001C0 02C0 0604             7      LD  B,4
+0001C2 02C2 CD0303          17      CALL    PRHEXS
                                 
-0001C6 02C6 117003          10      LD  DE,CRLF
-0001C9 02C9 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-0001CB 02CB CD0500          17      CALL    SYSTEM
+0001C5 02C5 118703          10      LD  DE,CRLF
+0001C8 02C8 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+0001CA 02CA CD0500          17      CALL    SYSTEM
                                 
-0001CE 02CE 118B04          10      LD  DE,BS_FilSysType
-0001D1 02D1 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-0001D3 02D3 CD0500          17      CALL    SYSTEM
+0001CD 02CD 119204          10      LD  DE,BS_VolLab
+0001D0 02D0 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+0001D2 02D2 CD0500          17      CALL    SYSTEM
                                 
-0001D6 02D6 21D604          10      LD  HL,BPB+54
-0001D9 02D9 0609             7      LD  B,8+1
-0001DB 02DB CDE402          17      CALL    MSX
+0001D5 02D5 21E204          10      LD  HL,BPB+43
+0001D8 02D8 060C             7      LD  B,11+1
+0001DA 02DA CDFB02          17      CALL    MSX
                                 
-0001DE 02DE C30000          10      JP  0
+0001DD 02DD 118703          10      LD  DE,CRLF
+0001E0 02E0 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+0001E2 02E2 CD0500          17      CALL    SYSTEM
+                                
+0001E5 02E5 11A204          10      LD  DE,BS_FilSysType
+0001E8 02E8 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+0001EA 02EA CD0500          17      CALL    SYSTEM
+                                
+0001ED 02ED 21ED04          10      LD  HL,BPB+54
+0001F0 02F0 0609             7      LD  B,8+1
+0001F2 02F2 CDFB02          17      CALL    MSX
+                                
+0001F5 02F5 C30000          10      JP  0
                                 
                                 ;文字列を表示
                                 ;in
                                 ;HL : 文字列の先頭アドレス
-       02E1                     MSX1:               
-0001E1 02E1 CD5103          17      CALL    CONOUT_A
-       02E4                     MSX:
-0001E4 02E4 7E               7      LD  A,(HL)
-0001E5 02E5 23               6      INC HL
-0001E6 02E6 FE20             7      CP  20H
-0001E8 02E8 D8              11      RET C
-0001E9 02E9 10F6            13      DJNZ    MSX1
-0001EB 02EB C9              10      RET
+       02F8                     MSX1:
+0001F8 02F8 CD6803          17      CALL    CONOUT_A
+       02FB                     MSX:
+0001FB 02FB 7E               7      LD  A,(HL)
+0001FC 02FC 23               6      INC HL
+0001FD 02FD FE20             7      CP  20H
+0001FF 02FF D8              11      RET C
+000200 0300 10F6            13      DJNZ    MSX1
+000202 0302 C9              10      RET
                                 
                                 ;16進数を表示
                                 ;in
                                 ;HL :表示する値のアドレス
                                 ;B  :表示バイト
-       02EC                     PRHEXS:
-0001EC 02EC 7E               7      LD  A,(HL)
-0001ED 02ED 23               6      INC HL
-0001EE 02EE C5              11      PUSH    BC
-0001EF 02EF E5              11      PUSH    HL
-0001F0 02F0 CDF802          17      CALL    PRHEX
-0001F3 02F3 E1              10      POP HL
-0001F4 02F4 C1              10      POP BC
-0001F5 02F5 10F5            13      DJNZ    PRHEXS
-0001F7 02F7 C9              10      RET
+       0303                     PRHEXS:
+000203 0303 7E               7      LD  A,(HL)
+000204 0304 23               6      INC HL
+000205 0305 C5              11      PUSH    BC
+000206 0306 E5              11      PUSH    HL
+000207 0307 CD0F03          17      CALL    PRHEX
+00020A 030A E1              10      POP HL
+00020B 030B C1              10      POP BC
+00020C 030C 10F5            13      DJNZ    PRHEXS
+00020E 030E C9              10      RET
                                 ;16進数を表示
                                 ;in
                                 ;A : 表示する値
-       02F8                     PRHEX:
-0001F8 02F8 0602             7      LD  B,2
-0001FA 02FA 329B04          13      LD  (DECBF),A
-0001FD 02FD 219B04          10      LD  HL,DECBF
-       0300                     PRHEX1:
-000200 0300 AF               4      XOR A
-000201 0301 ED6F            18      RLD
-000203 0303 FE0A             7      CP  10
-000205 0305 3802            12      JR  C,PRHEX2
-000207 0307 C607             7      ADD A,'A'-'0'-10
-       0309                     PRHEX2:
-000209 0309 C630             7      ADD A,'0'
-00020B 030B CD5103          17      CALL    CONOUT_A
-00020E 030E 10F0            13      DJNZ    PRHEX1
-000210 0310 C9              10      RET
+       030F                     PRHEX:
+00020F 030F 0602             7      LD  B,2
+000211 0311 32B204          13      LD  (DECBF),A
+000214 0314 21B204          10      LD  HL,DECBF
+       0317                     PRHEX1:
+000217 0317 AF               4      XOR A
+000218 0318 ED6F            18      RLD
+00021A 031A FE0A             7      CP  10
+00021C 031C 3802            12      JR  C,PRHEX2
+00021E 031E C607             7      ADD A,'A'-'0'-10
+       0320                     PRHEX2:
+000220 0320 C630             7      ADD A,'0'
+000222 0322 CD6803          17      CALL    CONOUT_A
+000225 0325 10F0            13      DJNZ    PRHEX1
+000227 0327 C9              10      RET
                                 
                                 ;10進数を表示
                                 ;in
                                 ;HL : 表示する値
-       0311                     PRDEC0:
-000211 0311 AF               4      XOR A
+       0328                     PRDEC0:
+000228 0328 AF               4      XOR A
                                 ;10進数を表示(24ビット)
                                 ;in
                                 ;A  : 表示する値の上位8ビット
                                 ;HL : 表示する値の下位16ビット
-       0312                     PRDEC:
-000212 0312 5F               4      LD  E,A
-000213 0313 010000          10      LD  BC,0
-000216 0316 ED439B04        20      LD  (DECBF),BC
-00021A 031A ED439D04        20      LD  (DECBF+2),BC
+       0329                     PRDEC:
+000229 0329 5F               4      LD  E,A
+00022A 032A 010000          10      LD  BC,0
+00022D 032D ED43B204        20      LD  (DECBF),BC
+000231 0331 ED43B404        20      LD  (DECBF+2),BC
                                 
-00021E 031E 0E18             7      LD  C,24
-       0320                     DEC1:
-000220 0320 29              11      ADD HL,HL
-000221 0321 7B               4      LD  A,E
-000222 0322 8F               4      ADC A,A
-000223 0323 5F               4      LD  E,A
-000224 0324 E5              11      PUSH    HL
-000225 0325 219E04          10      LD  HL,DECBF+3
-000228 0328 0604             7      LD  B,4
-       032A                     DEC2:
-00022A 032A 7E               7      LD  A,(HL)
-00022B 032B 8F               4      ADC A,A
-00022C 032C 27               4      DAA
-00022D 032D 77               7      LD  (HL),A
-00022E 032E 2B               6      DEC HL
-00022F 032F 10F9            13      DJNZ    DEC2
-000231 0331 E1              10      POP HL
-000232 0332 0D               4      DEC C
-000233 0333 20EB            12      JR  NZ,DEC1
+000235 0335 0E18             7      LD  C,24
+       0337                     DEC1:
+000237 0337 29              11      ADD HL,HL
+000238 0338 7B               4      LD  A,E
+000239 0339 8F               4      ADC A,A
+00023A 033A 5F               4      LD  E,A
+00023B 033B E5              11      PUSH    HL
+00023C 033C 21B504          10      LD  HL,DECBF+3
+00023F 033F 0604             7      LD  B,4
+       0341                     DEC2:
+000241 0341 7E               7      LD  A,(HL)
+000242 0342 8F               4      ADC A,A
+000243 0343 27               4      DAA
+000244 0344 77               7      LD  (HL),A
+000245 0345 2B               6      DEC HL
+000246 0346 10F9            13      DJNZ    DEC2
+000248 0348 E1              10      POP HL
+000249 0349 0D               4      DEC C
+00024A 034A 20EB            12      JR  NZ,DEC1
                                 
-000235 0335 219B04          10      LD  HL,DECBF
-000238 0338 3E20             7      LD  A,020H
-00023A 033A 0603             7      LD  B,3
-       033C                     DEC3:
-00023C 033C CD4903          17      CALL    DEC4
-00023F 033F CD4903          17      CALL    DEC4
-000242 0342 23               6      INC HL
-000243 0343 10F7            13      DJNZ    DEC3
-       0345                     DECX:
-000245 0345 CD4903          17      CALL    DEC4
-000248 0348 AF               4      XOR A
-       0349                     DEC4:
-000249 0349 ED6F            18      RLD
-00024B 034B FE20             7      CP  020H
-00024D 034D 2802            12      JR  Z,DEC5
-00024F 034F F630             7      OR  030H
-       0351                     DEC5:
+00024C 034C 21B204          10      LD  HL,DECBF
+00024F 034F 3E20             7      LD  A,020H
+000251 0351 0603             7      LD  B,3
+       0353                     DEC3:
+000253 0353 CD6003          17      CALL    DEC4
+000256 0356 CD6003          17      CALL    DEC4
+000259 0359 23               6      INC HL
+00025A 035A 10F7            13      DJNZ    DEC3
+       035C                     DECX:
+00025C 035C CD6003          17      CALL    DEC4
+00025F 035F AF               4      XOR A
+       0360                     DEC4:
+000260 0360 ED6F            18      RLD
+000262 0362 FE20             7      CP  020H
+000264 0364 2802            12      JR  Z,DEC5
+000266 0366 F630             7      OR  030H
+       0368                     DEC5:
                                 ;コンソール出力
                                 ;in
                                 ;A :表示する文字
-       0351                     CONOUT_A:
-000251 0351 F5              11      PUSH    AF
-000252 0352 C5              11      PUSH    BC
-000253 0353 D5              11      PUSH    DE
-000254 0354 E5              11      PUSH    HL
-000255 0355 5F               4      LD  E,A
-000256 0356 0E02             7      LD  C,2     ;CONOUT コンソール出力 CP/M
-000258 0358 CD0500          17      CALL    SYSTEM
-00025B 035B E1              10      POP HL
-00025C 035C D1              10      POP DE
-00025D 035D C1              10      POP BC
-00025E 035E F1              10      POP AF
-00025F 035F C9              10      RET
+       0368                     CONOUT_A:
+000268 0368 F5              11      PUSH    AF
+000269 0369 C5              11      PUSH    BC
+00026A 036A D5              11      PUSH    DE
+00026B 036B E5              11      PUSH    HL
+00026C 036C 5F               4      LD  E,A
+00026D 036D 0E02             7      LD  C,2     ;CONOUT コンソール出力 CP/M
+00026F 036F CD0500          17      CALL    SYSTEM
+000272 0372 E1              10      POP HL
+000273 0373 D1              10      POP DE
+000274 0374 C1              10      POP BC
+000275 0375 F1              10      POP AF
+000276 0376 C9              10      RET
                                 
-       0360                     MSG_TITLE:
-000260 0360 627062696E666F20        DB  "bpbinfo v1.02",00DH,00AH
-            76312E30320D0A      
-00026F 036F 24                      DB  '$'
-       0370                     CRLF:
-000270 0370 0D0A                    DB  00DH,00AH
-000272 0372 24                      DB  '$'
-       0373                     MSG_USAGE:
-000273 0373 75736167653A2042        DB  "usage: BPBINFO drive",00DH,00AH
+       0377                     MSG_TITLE:
+000277 0377 627062696E666F20        DB  "bpbinfo v1.03",00DH,00AH
+            76312E30330D0A      
+000286 0386 24                      DB  '$'
+       0387                     CRLF:
+000287 0387 0D0A                    DB  00DH,00AH
+000289 0389 24                      DB  '$'
+       038A                     MSG_USAGE:
+00028A 038A 75736167653A2042        DB  "usage: BPBINFO drive",00DH,00AH
             5042494E464F2064    
             726976650D0A        
-000289 0389 24                      DB  '$'
-       038A                     MSG_ERROR:
-00028A 038A 4572726F72210D0A        DB  "Error!",00DH,00AH
-000292 0392 24                      DB  '$'
+0002A0 03A0 24                      DB  '$'
+       03A1                     MSG_ERROR:
+0002A1 03A1 4572726F72210D0A        DB  "Error!",00DH,00AH
+0002A9 03A9 24                      DB  '$'
                                 
-       0393                     BS_JmpBoot:
-000293 0393 42535F4A6D70426F        DB  "BS_JmpBoot    :  $"
+       03AA                     BS_JmpBoot:
+0002AA 03AA 42535F4A6D70426F        DB  "BS_JmpBoot    :  $"
             6F74202020203A20    
             2024                
-       03A5                     BS_OEMName:
-0002A5 03A5 42535F4F454D4E61        DB  "BS_OEMName    :$"
+       03BC                     BS_OEMName:
+0002BC 03BC 42535F4F454D4E61        DB  "BS_OEMName    :$"
             6D65202020203A24    
-       03B5                     BPB_BytsPerSec:
-0002B5 03B5 4250425F42797473        DB  "BPB_BytsPerSec:$"
+       03CC                     BPB_BytsPerSec:
+0002CC 03CC 4250425F42797473        DB  "BPB_BytsPerSec:$"
             5065725365633A24    
-       03C5                     BPB_SecPerClus:
-0002C5 03C5 4250425F53656350        DB  "BPB_SecPerClus:$"
+       03DC                     BPB_SecPerClus:
+0002DC 03DC 4250425F53656350        DB  "BPB_SecPerClus:$"
             6572436C75733A24    
-       03D5                     BPB_RsvdSecCnt:
-0002D5 03D5 4250425F52737664        DB  "BPB_RsvdSecCnt:$"
+       03EC                     BPB_RsvdSecCnt:
+0002EC 03EC 4250425F52737664        DB  "BPB_RsvdSecCnt:$"
             536563436E743A24    
-       03E5                     BPB_NumFATs:
-0002E5 03E5 4250425F4E756D46        DB  "BPB_NumFATs   :$"
+       03FC                     BPB_NumFATs:
+0002FC 03FC 4250425F4E756D46        DB  "BPB_NumFATs   :$"
             4154732020203A24    
-       03F5                     BPB_RootEntCnt:
-0002F5 03F5 4250425F526F6F74        DB  "BPB_RootEntCnt:$"
+       040C                     BPB_RootEntCnt:
+00030C 040C 4250425F526F6F74        DB  "BPB_RootEntCnt:$"
             456E74436E743A24    
-       0405                     BPB_TotSec16:
-000305 0405 4250425F546F7453        DB  "BPB_TotSec16  :$"
+       041C                     BPB_TotSec16:
+00031C 041C 4250425F546F7453        DB  "BPB_TotSec16  :$"
             6563313620203A24    
-       0415                     BPB_TotSec32:
-000315 0415 4250425F546F7453        DB  "BPB_TotSec32  :$"
+       042C                     BPB_TotSec32:
+00032C 042C 4250425F546F7453        DB  "BPB_TotSec32  :$"
             6563333220203A24    
-       0425                     BPB_Media:
-000325 0425 4250425F4D656469        DB  "BPB_Media     :      $"
+       043C                     BPB_Media:
+00033C 043C 4250425F4D656469        DB  "BPB_Media     :      $"
             6120202020203A20    
             202020202024        
-       043B                     BPB_FATSz16:
-00033B 043B 4250425F46415453        DB  "BPB_FATSz16   :$"
+       0452                     BPB_FATSz16:
+000352 0452 4250425F46415453        DB  "BPB_FATSz16   :$"
             7A31362020203A24    
-       044B                     BPB_SecPerTrk:
-00034B 044B 4250425F53656350        DB  "BPB_SecPerTrk :$"
+       0462                     BPB_SecPerTrk:
+000362 0462 4250425F53656350        DB  "BPB_SecPerTrk :$"
             657254726B203A24    
-       045B                     BPB_NumHeads:
-00035B 045B 4250425F4E756D48        DB  "BPB_NumHeads  :$"
+       0472                     BPB_NumHeads:
+000372 0472 4250425F4E756D48        DB  "BPB_NumHeads  :$"
             6561647320203A24    
-       046B                     BS_VolID:
-00036B 046B 42535F566F6C4944        DB  "BS_VolID      :$"
+       0482                     BS_VolID:
+000382 0482 42535F566F6C4944        DB  "BS_VolID      :$"
             2020202020203A24    
-       047B                     BS_VolLab:
-00037B 047B 42535F566F6C4C61        DB  "BS_VolLab     :$"
+       0492                     BS_VolLab:
+000392 0492 42535F566F6C4C61        DB  "BS_VolLab     :$"
             6220202020203A24    
-       048B                     BS_FilSysType:
-00038B 048B 42535F46696C5379        DB  "BS_FilSysType :$"
+       04A2                     BS_FilSysType:
+0003A2 04A2 42535F46696C5379        DB  "BS_FilSysType :$"
             7354797065203A24    
                                 
-       049B                     DECBF   DS  5
+       04B2                     DECBF   DS  5
                                 
-       04A0                     BPB:
+       04B7                     BPB:
 [EOF:BPBINFO.ASM:SHIFT_JIS]
