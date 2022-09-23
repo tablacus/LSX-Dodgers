@@ -17,7 +17,7 @@ BDOS1:
 	PUSH	HL
 BDOS1X:
 	LD	A,C
-	CP	031H
+	CP	03CH
 	JR	NC,OVERFN
 	ADD	A,A
 	LD	L,A
@@ -27,6 +27,7 @@ BDOS1X:
 	LD	H,(HL)
 	LD	L,A
 	EX	(SP),HL
+	LD	A,C
 	RET
 OVERFN
 	POP	HL
@@ -34,8 +35,9 @@ OVERFN
 	JR	NZ,_ERROR
 	LD	BC,011DH
 	LD	DE,VER
-_ERROR:
 	XOR	A
+_ERROR:
+	AND	A
 	RET
 
 _SYS09:		;文字列出力
@@ -59,7 +61,6 @@ MSX:
 
 _SYS0C:		;(BDOS)バージョン番号の獲得
 	LD	HL,00022H
-	XOR	A
 	LD	A,L
 	RET
 
@@ -176,31 +177,8 @@ SDECM1:	AND	01FH		;自己書き換え(1セクタ辺りのディレクトリエントリ数-1) 1024=01FH
 FEND10:
 	JR	FEND
 
-OPENDD:
-	LD	(IY+28),0FDH	;(FCB)オープンモード
-	LD	(IY+13),020H	;(FCB)属性(アトリビュート)
-	CALL	SETTMSX
-	JR	FEND
-
 _SYS11:		;(BDOS)最初のファイルの検索
 	CALL	SETDRV
-	CALL	CHKDDX
-	JR	C,_S11A
-	PUSH	IY
-	POP	HL
-	LD	DE,(_DTA)
-	LD	BC,12
-	LDIR
-	LD	A,020H
-	LD	(DE),A
-	INC	DE
-	LD	H,D
-	LD	L,E
-	INC	DE
-	LD	C,19
-	LD	(HL),B
-	JR	_S11B
-_S11A:
 	CALL	SOPEN
 _S12X1:
 	JR	C,FEND
@@ -520,3 +498,14 @@ S30X2:
 	POP	BC
 	SBC	A,A
 	RET
+
+_SYS3B:		;(BDOS)カレントディレクトリの変更
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	CALL	FILEC
+	LD	HL,0
+	LD	DE,FDRV
+	LD	HL,(STABLE+2*027H)	;ランダムブロック読み込み
+	CALL	JP_HL
+	JR	S30X2

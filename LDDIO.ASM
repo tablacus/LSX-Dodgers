@@ -132,8 +132,9 @@ NCL1:
 	RET	Z
 
 	LD	A,D
-	AND	8		;DE(targetCluster >= 0x800)
-N16CL1X:
+	SRL	A	;/2
+	SRL	A	;/2
+
 	PUSH	HL
 	LD	(NCLPAT+2),A	;_FATIX
 	LD	HL,(_FATDRV)	;L=_FATDRV H=_FATIX
@@ -158,27 +159,28 @@ NCLPAT:	LD	BC,0		;自己書き換え C=_FATDRV B=_FATIX
 
 NCL3:
 	RES	3,D
+	RES	2,D
 	LD	L,E
 	LD	H,D
 	SRL	H	;
 	RR	L	;HLA=HLA/2
 	RRA		;
+	PUSH	AF
+	LD	A,(_FATIX)
+	RRCA
+	JR	NC,NCL3X1
+	LD	A,(SECSZ+2)
+	CP	4		;1セクタ1024バイトの場合は奇数インデックスの場合に先頭を512バイトずらす
+	JR	NZ,NCL3X1
+	LD	BC,512
+	ADD	HL,BC
+NCL3X1:
+	POP	AF
 	LD	BC,(_FATBF)
 	ADD	HL,DE
 	ADD	HL,BC
 	RLA
 	RET
-
-N16CL1:
-	LD	A,D
-	OR	E
-	SCF
-	RET	Z
-
-	LD	A,D
-	SRL	A	;/2
-	SRL	A	;/2
-	JR	N16CL1X
 
 GNCL:
 	CALL	NCL1		;GET NEXT CLUSTER
@@ -263,7 +265,7 @@ N16CL3:
 	RET
 
 GNCL16:
-	CALL	N16CL1		;GET NEXT CLUSTER for FAT16
+	CALL	NCL1		;GET NEXT CLUSTER for FAT16
 	RET	C
 	PUSH	HL
 	CALL	N16CL3
@@ -274,7 +276,7 @@ GNCL16:
 	RET
 
 SNCL16:
-	CALL	N16CL1		;GET NEXT CLUSTER for FAT16
+	CALL	NCL1		;GET NEXT CLUSTER for FAT16
 	RET	C
 	PUSH	DE
 	PUSH	HL
@@ -426,11 +428,11 @@ BPBDE1:
 	LD	A,H
 	OR	L
 	LD	A,0		;LDでフラグは変化しない。BPB_TotSec16を AHL で扱う為、Aに0を入れる
-	JR	NZ,BPB16BIT
-	LD	A,(IY+35)	;BPB_TotSec16が「0」の場合はBPB_TotSec32で計算
+	JR	NZ,BPB16BIT	;BPB_TotSec16が「0」の場合はBPB_TotSec32で計算
+	LD	A,(IY+35)	;念のために総セクタ数が24ビットを超える場合はエラーを返す
 	OR	A
 	SCF
-	RET	NZ		;念のため(総セクタ数が24ビットを超える場合)
+	RET	NZ
 	LD	L,(IY+32)	;BPB_TotSec32 は AHL の24ビットで扱う
 	LD	H,(IY+33)	;1クラスタの論理セクタ数(DPB_07_SECPCL)が最大128なので
 	LD	A,(IY+34)	;24ビットを超えると必ずクラスタ数が16ビットを超えてしまうのでこれで十分
@@ -542,7 +544,7 @@ WTFATL:
 ;note
 ;	FATサイズがFATバッファを超える場合は
 ;	対象クラスタ領域==(_FATIX)によって
-;	FAT12:FATの前半3KBと後半3KBを切り替える
+;	FAT12:対象クラスタ1024毎に1.5KBを切り替える
 ;	FAT16:対象クラスタ1024毎に2KBを切り替える
 ;------------------------
 FATSETUP:
@@ -550,72 +552,59 @@ FATSETUP:
 	CALL	CHGDRVR		;ドライブ切り替え
 	RET	C
 FATS2:
-	LD	DE,(_FATPS)	;fat sector pos
-FATSX:	JP	FATSETUP12	;自己書き換え
-
-FATSETUP12:
-	LD	HL,(_FATBF)
-	LD	A,24		;3072 / 256 FATバッファに読み込めるセクタ数
-	LD	B,(IX+00FH)	;DPB_0F_BPS
-L_FATS2:
-	RRA			;CF=0 なので A=A/2
-	RR	B		;->CF
-	JR	NC,L_FATS2
-
-	LD	B,(IX+0)	;DPB_00_FATLN
-	CP	B
-	RET	NC		;DPB_00_FATLN x sectorSize < fatBufSize
-;targetCluster
-	LD	C,A		;C = skipCount
-	LD	A,(_FATIX)	;(targetCluster >= 0x800)
-	OR	A
-	JR	Z,FATS3
-;(targerCluster>=0x800)
+	LD	A,(IX+00FH)	;DPB_0F_BPS 512=2 1024=4
+	RRCA
+FATSX:	CALL	FATSETUP12	;自己書き換え
+	LD	HL,0
+	LD	C,D
+	LD	D,H
+	LD	A,(_FATIX)	;範囲FAT12:0-3/FAT16:0-63(0-03FH):65535*2/2048
+	LD	B,A
+	INC	B
+	LD	A,(IX+0)	;DPB_00_FATLN
 FAT_SKP:
-	INC	DE		;FATPS++
-	DEC	B		;FATSIZE--
-	DEC	C		;skipCnt--
-	JR	NZ,FAT_SKP
-	LD	C,B
-FATS3:
-	LD	B,C		;3 or 6 or 12
-	XOR	A
+	DEC	B
+	JR	Z,FAT1
+	ADD	HL,DE
+	SUB	E
+	JR	NC,FAT_SKP
+	RET
+FAT1:
+	EX	DE,HL
+	CP	C		;C=FATバッファに読み込めるセクタ数
+	JR	C,FAT2
+	LD	A,C
+FAT2:
+	LD	B,A
+
+	LD	HL,(_FATPS)	;fat sector pos
+	ADD	HL,DE
+	EX	DE,HL
+	LD	HL,(_FATBF)
+	XOR	A		;CF=0
+	RET
+;
+;	FATバッファに読み込める最大のセクタ数と_FATIXで進めるセクタ数
+;	FATSETUP* (FAT12/FAT16)
+;out
+;	D : FATバッファに読み込める最大のセクタ数
+;	E : _FATIXで進めるセクタ数
+FATSETUP12:
+	LD	DE,0606H	;256
+	RET	C
+	LD	DE,0303H	;512
+	RRCA
+	RET	C
+	LD	DE,0201H	;1024
 	RET
 
 FATSETUP16:
-	LD	A,(IX+00FH)	;DPB_0F_BPS 512=2 1024=4
-	LD	B,16		;2048 / 256 FATバッファに読み込むセクタ数 512=4/1024=2
-	LD	H,A		;DPB_0F_BPS
-L_F16S2:
-	SRL	B		;/2
-	RRA			;->CF
-	JR	NC,L_F16S2
-
-	LD	A,H		;DPB_0F_BPS
-	LD	HL,(_FATIX)	;範囲は0-63(0-03FH):65535*2/2048
-	LD	H,0
-	LD	C,L		;_FATIX
-L_F16S3:
-	ADD	HL,HL
-	ADD	A,A
-	BIT	3,A
-	JR	Z,L_F16S3
-
-	ADD	HL,DE
-	EX	DE,HL
-
-	LD	A,C		;_FATIX
-	LD	L,(IX+0)	;DPB_00_FATLN
-	DEC	L		;DPB_00_FATLN-1
-	XOR	L		;Lと同じか比較してCFを0に
-	JR	NZ,F16E		;FATバッファが最後の場合はFATセクタ数を調整
-	LD	A,L		;DPB_00_FATLN-1
-	DEC	B
-	AND	B
-	LD	B,A
-	INC	B
-F16E:
-	LD	HL,(_FATBF)
+	LD	DE,0808H	;256
+	RET	C
+	LD	DE,0404H
+	RRCA			;512
+	RET	C
+	LD	DE,0202H	;1024
 	RET
 
 CHGDRV:

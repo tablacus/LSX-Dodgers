@@ -1,20 +1,39 @@
 
 ;	LSX-Dodgers WORK
+;
+;	CP/M互換BIOS
+;	BOOT:アドレス下位1バイトが0になるように
+BOOT:
+	JP	0
+_SYS00:		;(BDOS)プログラム終了
+WBOOT:
+	JP	WBOOT1
+CONST_:
+	JP	CONSTX
+_SYS07:		;(BDOS)コンソール直接入力
+CONIN:
+	JP	FLGET
+CONOUT:
+	JP	CONOUT1
 
-DDS	EQU	4
-DDTB:
-	DB	"CON "
-	DW	OPENDD
-	DB	"AUX "
-	DW	OPENDD
-	DB	"PRN "
-	DW	OPENDD
-	DB	"NUL "
-	DW	OPENDD
+DECBF:
+	DS	5
+FDRV	DB	0
+FNAME	DS	36
+SFILE:	DS	33		;DRV FILENAME
+HLBUF:	DS	3		;Random record buffer
 
-	DS	2
-_FATBF:	DW	FATBF
-_DTBUF:	DW	DTBUF
+LEFTX:	DW	0
+DTAX:	DW	0
+
+BEEPD:	DB	0,08EH,1,0,00BH,0,00CH,010H
+	DB	007H,03EH,008H,010H,00DH,0,0FFH
+
+CHECK:	DB	0
+
+OK:	DB	"OK$"
+SKIP:	DB	"Skip$"
+COMERM:	DB	"Error!$"
 
 ;	_CYL0:アドレス下位1バイトが080Hになるように
 _CYL0:	DB	0FFH	;Cylinder
@@ -31,9 +50,9 @@ _DTA:	DW	00080H
 _CTC:	DW	0
 _TXADR:	DW	0
 _KEYPS:	DW	0
-_KEYD:	DW	0FF00H
+_KEYD:	DW	0FF00H	;キーデータ
 _KEYSP:	DW	010C2H
-_COLORF:DB	7
+_COLORF:DB	7	;色
 _LINE:	DB	LINE
 
 _FCB:	DW	0
@@ -41,7 +60,7 @@ _FBPS:	DW	0	;SEARCH FILES
 _FBAD:	DW	0	;    //
 _FBCNT:	DB	0	;    //
 _FILEN:	DB	0
-_DIRF:	DB	0	;bit7:ディレクトリ bit0-6:セクタインデックス 
+_DIRF:	DB	0	;bit7:ディレクトリ bit0-6:セクタインデックス
 _MAXCYL:DB	0
 _WTFATF:DB	0	;FATバッファの更新フラグ
 		DS	1
@@ -49,9 +68,11 @@ _WTDBF:	DB	0	;データバッファの更新フラグ
 _DBDRV:	DB	0FFH	;データバッファにあるデータを読み込んだドライブ
 _DBSEC:	DW	0	;データバッファにあるデータを読み込んだセクタ番号
 _DPB:	DW	0
-_FATDRV:DB	0FFH	;FATバッファに読み込んでいるドライブ
+_FATDRV:
+	DB	0FFH	;FATバッファに読み込んでいるドライブ
 _FATIX:	DB	0	;FATバッファに読み込んでいるインデックス
-_FAKEFREE:	DW	0	;偽の残量（FATサイズが大きくなると重くなるのでその対策）
+_FAKEFREE:
+	DW	0	;偽の残量（FATサイズが大きくなると重くなるのでその対策）
 
 	DS	2
 
@@ -90,9 +111,9 @@ _BPB2DPB:
 	JP	BPB2DPB
 	DS	3
 _GNCL:
-GNCPAT:	JP	GNCL		;自己書き換え
+GNCPAT:	JP	GNCL		; self-modifying code
 _SNCL:
-SNCPAT:	JP	SNCL		;自己書き換え
+SNCPAT:	JP	SNCL		; self-modifying code
 _COMANL:JP	COMANL
 
-WE:
+_WE:

@@ -1,18 +1,18 @@
 ;
-;	MAG  by Gaku Nakagawa
+;	MAG  by Gaku
 ;
 THOLD	EQU	11
 WIDTH	EQU	80
 ;
 OSFLG	EQU	$0003
 SYSTEM	EQU	$0005
-[HL]	EQU	$000F
+JP_HL	EQU	$000F
 BIOS	EQU	$0018
 FCB1	EQU	$005C
 DTA	EQU	$0080
 
 FLAGBF	EQU	$1000		;256
-LINEBF	EQU	FLAGBF+256	;16*512	ﾘﾝｸﾞﾊﾞｯﾌｧ
+LINEBF	EQU	FLAGBF+256	;16*512	リングバッファ
 
 KWABF1:	EQU	LINEBF+16*512
 KWABF2:	EQU	KWABF1+2048
@@ -31,6 +31,28 @@ PALBF	EQU	HEADBF+32
 	ORG	$0100
 	JP	START
 START:
+	LD	A,(000BH)
+	LD	(SMC01+2),A
+	LD	(SMC02+2),A
+	LD	(SMC03+2),A
+	LD	(SMC04+2),A
+	LD	(SMC05+2),A
+	LD	(SMC06+2),A
+	LD	(SMC07+2),A
+	LD	(SMC08+2),A
+	LD	(SMC09+2),A
+	LD	(SMC10+2),A
+	LD	(SMC11+2),A
+	LD	(SMC12+2),A
+	LD	(SMC13+2),A
+	LD	(SMC14+2),A
+	LD	(SMC15+2),A
+	LD	(SMC16+2),A
+	LD	(SMC17+2),A
+	LD	(SMC18+2),A
+	LD	(SMC19+2),A
+	LD	(SMC20+2),A
+	LD	(SMC21+2),A
 	LD	DE,TITLE
 	LD	C,9
 	CALL	SYSTEM
@@ -65,7 +87,7 @@ ALL1:
 	INC	HL
 	DJNZ	ALL1
 ALL2:
-				;ｶｸﾁｮｳｼ MAG
+				;拡張子 MAG
 	LD	A,(FCB1+9)
 	CP	$20
 	JR	NZ,EXT1
@@ -265,7 +287,7 @@ HEADER:
 	LD	HL,HEADBF
 	LD	(HL),A
 	INC	HL
-	LD	BC,31+48	;ﾍｯﾀﾞ ﾊﾟﾚｯﾄ
+	LD	BC,31+48	;ヘッダ パレット
 	CALL	READ
 	PUSH	HL
 
@@ -273,14 +295,14 @@ HEADER:
 	LD	DE,DEGI8
 	LD	B,48
 	CALL	CPSTR
-	LD	A,(HEADBF+3)	;ｽｸﾘｰﾝ･ﾓｰﾄﾞ
+	LD	A,(HEADBF+3)	;スクリーンモード
 	JR	NZ,NOTD
 	OR	6
 	LD	(HEADBF+3),A
 NOTD:
-	BIT	7,A		;256ｼｮｸ
+	BIT	7,A		;256色
 	JP	NZ,NEXT
-	AND	1		;200ﾗｲﾝ
+	AND	1		;200ライン
 	LD	(L200+1),A
 
 	LD	HL,(HEADBF+16)
@@ -290,8 +312,8 @@ NOTD:
 	LD	B,H
 	LD	C,L
 	POP	HL
-	CALL	READ		;ﾌﾗｸﾞA
-				;ﾌﾗｸﾞB
+	CALL	READ		;フラグA
+				;フラグB
 	LD	HL,FILE
 	LD	DE,FILE2
 	LD	BC,37
@@ -334,17 +356,17 @@ RGBSW:	LD	B,$00
 	LD	HL,KUWANO
 	LD	DE,KUWANO
 
-	LD	A,($ECBF)
+SMC01:	LD	A,($ECBF)
 	RRCA
 	JR	NC,LOW
 				;High Reso
-	LD	A,(HEADBF+3)	;ｽｸﾘｰﾝ･ﾓｰﾄﾞ
+	LD	A,(HEADBF+3)	;スクリーンモード
 	LD	B,0
 	AND	6
 	CP	6
 	JR	NZ,HIGH3
-				;ﾃﾞｼﾞﾀﾙ 8 ｼｮｸ
-	LD	A,(HEADBF+3)	;ｽｸﾘｰﾝ･ﾓｰﾄﾞ
+				;デジタル 8 色
+	LD	A,(HEADBF+3)	;スクリーンモード
 	LD	DE,RGB
 
 	ADD	A,A
@@ -356,10 +378,10 @@ HIGH2:
 	LD	HL,RGB
 HIGH3:
 	LD	B,A
-	LD	A,($ECBF)
+SMC02:	LD	A,($ECBF)
 	AND	$FD
 	OR	B
-	LD	($ECBF),A
+SMC03:	LD	($ECBF),A
 	LD	BC,$1FD0
 	OUT	(C),A
 
@@ -369,7 +391,7 @@ LOW:
 	LD	HL,KUWANO2
 	LD	DE,NUL
 
-	LD	A,(HEADBF+3)	;ｽｸﾘｰﾝ･ﾓｰﾄﾞ
+	LD	A,(HEADBF+3)	;スクリーンモード
 	AND	7
 	CP	7
 	JR	NZ,FA
@@ -379,7 +401,7 @@ FA:
 	LD	(MODE1+1),HL
 	LD	(MODE2+1),DE
 ;
-				;ﾊﾟﾚｯﾄ 8bit->4bit
+				;パレット 8bit->4bit
 	LD	B,48
 	LD	HL,PALBF
 PALI:
@@ -397,10 +419,10 @@ PLUS:
 	INC	HL
 	DJNZ	PALI
 
-	LD	IX,(HEADBF+12)	;ﾌﾗｸﾞA
+	LD	IX,(HEADBF+12)	;フラグA
 	LD	DE,HEADBF
 	ADD	IX,DE
-	LD	IY,(HEADBF+16)	;ﾌﾗｸﾞB
+	LD	IY,(HEADBF+16)	;フラグB
 	ADD	IY,DE
 
 	LD	B,25
@@ -449,9 +471,9 @@ LOOP2:
 	PUSH	BC
 	PUSH	BC
 	EXX
-	LD	A,($ECBF)
+SMC04:	LD	A,($ECBF)
 	AND	$EF
-	LD	($ECBF),A
+SMC05:	LD	($ECBF),A
 	LD	BC,$1FD0
 	OUT	(C),A
 
@@ -465,9 +487,9 @@ L200:	LD	A,$00
 	EX	(SP),HL
 MODE1:	CALL	KUWANO
 
-	LD	A,($ECBF)
+SMC06:	LD	A,($ECBF)
 	OR	$10
-	LD	($ECBF),A
+SMC07:	LD	($ECBF),A
 	LD	BC,$1FD0
 	OUT	(C),A
 
@@ -578,7 +600,7 @@ WAIT2:
 	OR	A
 	JR	NZ,WAIT2
 
-	LD	A,($EC92)
+SMC08:	LD	A,($EC92)
 	OR	A
 	JR	NZ,WAIT2
 	RET
@@ -738,8 +760,8 @@ PALETX:
 	LD	A,E
 	LD	HL,BLUE		;BLUE
 KUWANO1:
-	ADD	A,(IX)		;ｸﾜﾉ
-	LD	(IX),0
+	ADD	A,(IX+0)		;桑野
+	LD	(IX+0),0
 	ADD	A,-THOLD
 	JR	C,PSET
 	SUB	-THOLD
@@ -757,8 +779,8 @@ PSET:
 	SUB	B
 	PUSH	BC		;B=A/8
 
-	ADD	A,(IY)		;Y+1
-	LD	(IY),A
+	ADD	A,(IY+0)		;Y+1
+	LD	(IY+0),A
 
 	POP	AF		;A=A/8
 	ADD	A,(IY+3*1)	;Y+1 X+1
@@ -902,7 +924,7 @@ PALET2:
 	LD	A,C
 	JP	PALETX
 
-;				ﾌﾗｸﾞ&ﾋﾟｸｾﾙ ﾃﾝｶｲ
+;				フラグ&ピクセル 展開
 MAG:
 	LD	A,(LINEX+2)
 	SUB	LINEBF/256-2
@@ -922,7 +944,7 @@ YSIZE:	LD	HL,0
 
 	LD	HL,FLAGBF
 FLAGA1:
-	RLC	(IX)
+	RLC	(IX+0)
 	JR	C,FLAGA3
 	XOR	A
 	JR	FLAGA4
@@ -967,7 +989,7 @@ FLAGA2:
 
 CLEAR:
 	LD	C,4
-CLEAR1
+CLEAR1:
 	LD	(DE),A
 	INC	DE
 	DJNZ	CLEAR1
@@ -1054,15 +1076,15 @@ FGETC2:
 	ADD	A,$FE
 	JP	C,NEXT
 
-	LD	A,($EC88)
+SMC09:	LD	A,($EC88)
 	PUSH	IX
-	CALL	$ECDC
+SMC10:	CALL	$ECDC
 	LD	A,(IX+$12)
 	POP	IX
 	AND	$7F
 	CP	7
 	JR	NZ,FGETC3
-	LD	A,($EC84)
+SMC11:	LD	A,($EC84)
 	OR	$80
 	LD	BC,$FFC
 	OUT	(C),A
@@ -1098,15 +1120,15 @@ FGETP2:
 	ADD	A,$FE
 	JP	C,NEXT
 
-	LD	A,($EC88)
+SMC12:	LD	A,($EC88)
 	PUSH	IX
-	CALL	$ECDC
+SMC13:	CALL	$ECDC
 	LD	A,(IX+$12)
 	POP	IX
 	AND	$7F
 	CP	7
 	JR	NZ,FGETP3
-	LD	A,($EC84)
+SMC14:	LD	A,($EC84)
 	OR	$80
 	LD	BC,$FFC
 	OUT	(C),A
@@ -1120,7 +1142,7 @@ FGETP3:
 	JR	FGETP1
 
 MOTOFF:
-	LD	A,($EC84)
+SMC15:	LD	A,($EC84)
 	AND	$7F
 	LD	BC,$FFC
 	OUT	(C),A
@@ -1136,21 +1158,21 @@ CPSTR:
 	RET
 
 CLS:
-	LD	A,($ECBF)
+SMC16:	LD	A,($ECBF)
 	RES	4,A
 	CALL	CLS0
-	LD	A,($ECBF)
+SMC17:	LD	A,($ECBF)
 	SET	4,A
 CLS0:
 	LD	BC,$1FD0
 	OUT	(C),A
-	LD	($ECBF),A
+SMC18:	LD	($ECBF),A
 	XOR	A
 	LD	C,A
 	LD	HL,$4003
-CLS1
+CLS1:
 	LD	B,H
-CLS2
+CLS2:
 	DB	$ED,$71
 	INC	B
 	JR	NZ,CLS2
@@ -1178,33 +1200,24 @@ CAP:
 	RET
 
 GRAPH0:
+	LD	B,$10
+	DB	$ED,$71
+	INC	B
+	DB	$ED,$71
+	INC	B
+	DB	$ED,$71
+	INC	B
+	DB	$ED,$71
 	LD	A,(BIOS)
 	INC	A
-	JR	NZ,GR1
-	LD	B,$10
-	OUT	(C),A
-	INC	B
-	OUT	(C),A
-	INC	B
-	OUT	(C),A
-	INC	B
-	OUT	(C),A
-	RET
+	RET	Z
 GR1:
-	CALL	GR2
+	CALL	G1FD0
 	OR	$80
 	JR	GR3
 GRAPH1:
 	LD	BC,$1FB0
 	DB	$ED,$71
-	CALL	GR2
-	AND	$77
-GR3:
-	LD	(HL),A
-	LD	BC,$1FD0
-	OUT	(C),A
-	RET
-GR2:
 	LD	BC,$10AA
 	OUT	(C),C
 	LD	BC,$11CC
@@ -1213,15 +1226,22 @@ GR2:
 	OUT	(C),C
 	INC	B
 	DB	$ED,$71
-
-	LD	HL,$ECBF
+	CALL	G1FD0
+	AND	$77
+GR3:
+	LD	(HL),A
+	LD	BC,$1FD0
+	OUT	(C),A
+	RET
+G1FD0:
+SMC19:	LD	HL,$ECBF
 	LD	A,(HL)
 	RET
 
-	$INCLUDE	MAGS.ASM
+	INCLUDE	"MAGS.ASM"
 
 TITLE:
-	DB	"X1 MAG loader/saver v1.00 Lovers",$0D,$0A
+	DB	"X1 MAG loader/saver v1.01",$0D,$0A
 	DB	"$"
 MUSAGE:
 	DB	"usage: MAG ﾌｧｲﾙﾈｰﾑ[.MAG][ｽｲｯﾁ]",$0D,$0A
@@ -1262,4 +1282,3 @@ FILE2:
 GREEN:	DB	0
 RED:	DB	0
 BLUE:	DB	0
-
