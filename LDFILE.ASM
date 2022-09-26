@@ -200,7 +200,6 @@ GETDRV1:
 	RET
 
 SOPENX:
-SOPENX1:
 	LD	DE,SFILE
 	LD	A,(DE)
 	CP	(IY+0)		;(FCB)ドライブ番号
@@ -251,14 +250,14 @@ SDIRX0:
 SDIRX1:
 	LD	DE,(_DIRPS)	;Root Directory
 SOPEN1:
-SDECPAT:LD	C,32		;自己書き換え 1セクタ辺りのディレクトリエントリ数  1024=32 / 512=16
+SDECPAT:LD	C,32		;自己書き換え 1セクタ辺りのディレクトリエントリ数  1024=32 / 512=16 / 256=8
 SOPEN1X:
 	CALL	READ_DIR	;FILE SEARCH
 	JR	C,RDDERR
 	LD	HL,(_DTBUF)
 SOPEN2:
 	PUSH	DE
-OPENPAT:CALL	FILESE		;(Self-rewriting)
+OPENPAT:CALL	FILESE		;(self-modifying code)
 	POP	DE
 	JR	C,SOPENE
 	JR	Z,SCF_FF_RET
@@ -268,7 +267,7 @@ SOPEN3:
 	JR	NZ,SOPEN5
 	INC	DE		;ルートディレクトリ
 	PUSH	HL
-MD_PAT:	LD	HL,12		;(Self-rewriting)MAXDIR
+MD_PAT:	LD	HL,12		;(self-modifying code)MAXDIR
 	SBC	HL,DE		;CF=0 なので SUB HL,DE
 	POP	HL
 	JR	NZ,SOPEN1
@@ -524,7 +523,7 @@ E_CLDBL
 	LD	A,(_SECPS+1)
 	OR	L
 	LD	L,A
-CLSPAT:	LD	DE,8	;+8 (2D)  !ADDCL (Self-rewriting)
+CLSPAT:	LD	DE,8	;+8 (2D)  !ADDCL (self-modifying code)
 	XOR	A
 	ADD	HL,DE	;データ格納領域の先頭論理セクタ番号
 	ADC	A,C
@@ -535,10 +534,10 @@ CLSPAT:	LD	DE,8	;+8 (2D)  !ADDCL (Self-rewriting)
 
 ENDCL:
 	LD	A,D	;END CLUSTER
-CLPAT1:	CP	1	;164=356	(Self-rewriting)
+CLPAT1:	CP	1	;164=356	(self-modifying code)
 	RET	NZ
 	LD	A,E
-CLPAT2:	CP	064H	;		(Self-rewriting)
+CLPAT2:	CP	064H	;		(self-modifying code)
 	RET
 
 CAP:
@@ -602,7 +601,7 @@ LDDIRS:
 KILL:
 	CALL	CHKWILDX
 	JR	C,KILLW
-	CALL	SOPENX1
+	CALL	SOPENX
 KILLS:
 	LD	A,01FH
 	CALL	NC,CHKATT
@@ -615,10 +614,7 @@ KILLSX:
 	LD	E,(HL)
 	INC	HL
 	LD	D,(HL)
-	JR	KILLS2
 KILLS1:
-	LD	DE,(_CLPS)	;FAT
-KILLS2:
 	CALL	ENDCL
 	RET	NC		;CF=0
 	LD	HL,0-2
@@ -630,8 +626,9 @@ KILLS2:
 	POP	DE
 	LD	HL,0
 	CALL	NC,_SNCL
-	JR	NC,KILLS1
-	RET
+	RET	C
+	LD	DE,(_CLPS)	;FAT
+	JR	KILLS1
 
 KILLW:
 	CALL	SOPEN
@@ -666,16 +663,16 @@ NAME:
 	CALL	CHKWILD
 	RET	C
 
-	CALL	SOPENX1
+	CALL	SOPENX
 	LD	A,00FH
 	CALL	NC,CHKATT
 	RET	C
 
 	LD	A,(IY+0)
 	PUSH	IY
-NAMEP:	LD	IY,0
+NAMEP:	LD	IY,0		;自己書き換え
 	LD	(IY+0),A
-	CALL	SOPENX1
+	CALL	SOPENX
 	EX	(SP),IY
 	CCF
 	CALL	NC,SOPEN
@@ -1041,3 +1038,6 @@ JP_BC:
 _SYS03	EQU	SCF_FF_RET	;(BDOS)外部入力
 _SYS2B	EQU	SCF_FF_RET	;(BDOS)日付の設定
 _SYS2D	EQU	SCF_FF_RET	;(BDOS)時刻の設定
+_SYS39	EQU	SCF_FF_RET	;(BDOS)サブディレクトリの作成
+_SYS3A	EQU	SCF_FF_RET	;(BDOS)サブディレクトリの削除
+

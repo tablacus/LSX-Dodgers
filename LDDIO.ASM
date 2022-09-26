@@ -483,14 +483,12 @@ BPBFAT1:
 	LD	(IX+00FH),A	;DPB_0F_BPS
 
 	AND	07FH		;セクタバッファが1KBしかないので1KBを超える場合はCF=1でエラーにする
-	ADD	A,0-5		;0-4:NC 5以上:C
+	ADD	A,0-5		;0-4:CF=0 5以上:CF=1
 	RET
 
 RDFATS:
 	CALL	FATSETUP
 	RET	C
-RDFATL:
-	LD	C,0
 	CALL	DRD24B
 	LD	HL,(_FATBF)
 	LD	A,(HL)
@@ -520,7 +518,7 @@ DWTPAT:	CALL	FDWT		;自己書き換え（ディスク書き込み）
 
 WTFAT:
 	CALL	FATSETUP
-	CALL	NC,WTFATL
+	CALL	NC,DWT24B
 	RET	C
 	BIT	7,(IX+00FH)	;DPB_0F_BPS
 	RET	Z		;予備FATが無い
@@ -531,9 +529,7 @@ WTFAT:
 	ADD	HL,DE
 	EX	DE,HL
 	POP	HL
-WTFATL:
-	LD	C,0
-	JP	DWT24B
+	JR	DWT24B
 ;------------------------
 ;FATのセットアップ
 ;out
@@ -582,6 +578,7 @@ FAT2:
 	EX	DE,HL
 	LD	HL,(_FATBF)
 	XOR	A		;CF=0
+	LD	C,A
 	RET
 ;
 ;	FATバッファに読み込める最大のセクタ数と_FATIXで進めるセクタ数
@@ -629,11 +626,10 @@ CHGDRV0:
 	LD	A,L
 	LD	(_DSK),A
 CHGDRV2:
-	DI
 	PUSH	BC
 	PUSH	DE
 	LD	(SPPAT2+1),SP
-
+	DI
 	LD	SP,IX
 
 	POP	HL		;DPB_00_FATLN
@@ -676,8 +672,8 @@ CHGDRV2:
 	LD	A,H		;DPB_0F_BPS
 	AND	7
 	LD	(SECSZ+2),A	;1セクタのサイズの上位1バイト 0x400 - 0x200 - 0x100
-				;1セクタ512 2D/2DD/2HC/2HQ(2HD1.44MB)等
-				;1セクタ1024 2HD/EMM/BRAM
+				;1セクタ512 2D/2DD/2HC/2HQ(2HD1.44MB)/EMM/BRAM等
+				;1セクタ1024 2HD/2HDE98
 				;1セクタ256 GRAM等
 				;1024	512	256
 				;4	2	1
@@ -685,8 +681,6 @@ CHGDRV2:
 	ADD	A,A		;010H	8	4
 	ADD	A,A		;020H	010H	8
 	LD	(SDECPAT+1),A	;1セクタ辺りのディレクトリエントリ数
-	DEC	A		;01FH	00FH	7
-	LD	(SDECM1+1),A	;1セクタ辺りのディレクトリエントリ数-1
 
 	LD	H,0
 	LD	(_FATPS),HL
@@ -758,13 +752,15 @@ GETDPB:
 	LD	H,DEVICE/256	;LD	IXH,DEVICE/256
 	LD	A,(IX+0)	;DPB_00_FATLN
 	OR	A		;CF=0の為
-	BIT	6,(IX+00FH)	;DPB_0F_BPS
+	BIT	5,(IX+00FH)	;DPB_0F_BPS
 	RET	NZ		;FAT16
 	BIT	5,(IX+012H)	;DPB_12_DEVICE
 	RET	NZ		;BPB
 	CP	001H		;A=0 THEN CF=1
 	RET
 
+_SYS5F:
+	XOR	A
 FFLUSH:
 	PUSH	AF
 	LD	A,0FFH

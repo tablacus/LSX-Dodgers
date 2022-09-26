@@ -18,7 +18,9 @@ BDOS1:
 BDOS1X:
 	LD	A,C
 	CP	03CH
-	JR	NC,OVERFN
+	JR	C,DOS1
+	LD	A,03CH
+DOS1:
 	ADD	A,A
 	LD	L,A
 	LD	H,STABLE/256
@@ -29,9 +31,14 @@ BDOS1X:
 	EX	(SP),HL
 	LD	A,C
 	RET
-OVERFN
-	POP	HL
-	CP	06FH		;DOSVER MSX-DOS のバージョン番号の獲得
+_DOS2:
+	CP	05AH		;(BDOS)カレントディレクトリの変更(_CHDIR)
+	JP	Z,_SYS5A
+	CP	05CH		;(BDOS)ファイル名の解析(_PFILE)
+	JP	Z,_SYS5C
+	CP	05FH		;(BDOS)ディスクバッファのフラッシュ(_FLUSH)
+	JP	Z,_SYS5F
+	CP	06FH		;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
 	JR	NZ,_ERROR
 	LD	BC,011DH
 	LD	DE,VER
@@ -161,8 +168,9 @@ _S10A:				;Write
 	CALL	READ_DIR
 	JR	C,FEND10
 
-	LD	A,(IY+25)	;(FCB)ディレクトリロケーション
-SDECM1:	AND	01FH		;自己書き換え(1セクタ辺りのディレクトリエントリ数-1) 1024=01FH / 512=00FH / 256=7
+SDECM1:	LD	A,(SDECPAT+1)	;1セクタ辺りのディレクトリエントリ数
+ 	DEC	A		;1024=01FH / 512=00FH / 256=7
+	AND	(IY+25)		;(FCB)ディレクトリロケーション
 	LD	L,A
 	LD	H,0
 	ADD	HL,HL		;*2
@@ -448,7 +456,7 @@ _SYS24:		;(BDOS)ランダムレコードフィールドの設定
 	CALL	GETSEQ
 	JR	_S24X1		;^^^^^^^^^^^^^^^^^^^^^^^^
 
-_SYS29:		;(BDOS)ファイル名の解析
+_SYS5C:		;(BDOS)ファイル名の解析
 	PUSH	BC
 	PUSH	HL
 	CALL	FILE
@@ -499,7 +507,7 @@ S30X2:
 	SBC	A,A
 	RET
 
-_SYS3B:		;(BDOS)カレントディレクトリの変更
+_SYS5A:		;(BDOS)カレントディレクトリの変更
 	PUSH	BC
 	PUSH	DE
 	PUSH	HL

@@ -27,32 +27,25 @@ SETCRT2:
 	LD	BC,01800H
 	OUT	(C),A
 	INC	C
-	INC	B
-	OUTI
+	LD	D,(HL)
+	CP	13
+	JR	C,SETCRT3
+	LD	D,0
+SETCRT3:
+	OUT	(C),D
+	INC	HL
 	INC	A
-	CP	12
+	CP	14
 	JR	NZ,SETCRT2
-	DEC	C
-	OUT	(C),A
-	INC	C
-	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
 
-	DEC	C
-	INC	A
-	OUT	(C),A
-	INC	C
-	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
-	INC	HL
-	INC	HL
 	LD	BC,01A03H+00100H
 	OUTI
 	LD	BC,01FD0H+00100H
 	OUTI
 	LD	HL,_KEYD
-	LD	A,3
-	CP	(HL)
-	CALL	Z,KEYBC
+	LD	A,(HL)
 	LD	(HL),0
+	CALL	KEYBC_IFBREAK
 	LD	A,4
 	CALL	MSG_A
 COMMAND:
@@ -170,7 +163,7 @@ SYSTEM0:
 	RET
 
 C_CD:
-	LD	C,3BH
+	LD	C,5AH
 	JR	SYSTEM0
 
 S27BUF:
@@ -373,24 +366,26 @@ PDSKF:
 	LD	C,A		;C←1クラスタ辺りの論理セクタ数
 	ADD	A,001H
 	RET	C		;Aが0FFHだった場合
-	XOR	A
+	LD	A,8-2
 PDS1:				;HL=未使用クラスタの総数
+	INC	A
 	RR	C
-	JR	C,PDS2
+	JR	NC,PDS1
+PDS2:				;B←論理セクタのサイズの上位8ビット
+	INC	A
+	RR	B
+	JR	NC,PDS2
+	LD	B,A
+
+	LD	DE,0
+PDS3:
 	ADD	HL,HL
-	ADC	A,A
-	JR	PDS1
-PDS2:
-	BIT	2,B		;B←論理セクタのサイズの上位8ビット
-	JR	NZ,PDSKF1	;K単位(4)になるまで未使用を2で割る
-	SRL	A
-	RR	H
-	RR	L
-	RL	B
-	JR	PDS2
+	RL	E
+	RL	D
+	DJNZ	PDS3
 PDSKF1:
-	CALL	PRDEC_AHL
-	LD	DE,KBFREE
+	CALL	PRDEC_DEHL
+	LD	DE,FREE
 	CALL	_SYS09		;(BDOS)文字列出力
 	CALL	PUTDRV
 	LD	A,05CH
@@ -632,9 +627,9 @@ SETFCBA:
 	CALL	FILL_MEMORY
 	POP	HL
 	PUSH	DE
-	CALL	_SYS29		;(BDOS)ファイル名の解析
+	CALL	_SYS5C		;(BDOS)ファイル名の解析
 	LD	HL,FCB2
-	CALL	_SYS29		;(BDOS)ファイル名の解析
+	CALL	_SYS5C		;(BDOS)ファイル名の解析
 	POP	HL
 	LD	BC,05000H
 	LD	DE,00081H
@@ -886,6 +881,6 @@ COMTB:
 	DB	"REM "	;9
 	DW	C_REM
 
-KBFREE:	DB	"k bytes free",9,'$'
+FREE:	DB	" bytes free",9,'$'
 DIRMES:	DB	"     <DIR>$"
 DIRHD:	DB	"  :$"
