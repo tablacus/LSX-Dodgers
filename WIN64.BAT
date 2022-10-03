@@ -1,1 +1,1 @@
-msdos zasm LD.ASZ -CLD.BIN -LLD.PRN
+msdos zasm X1.ASZ -CLD.BIN -LLD.PRN

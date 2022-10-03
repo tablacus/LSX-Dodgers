@@ -7,4 +7,4 @@ rem
 set ASM=\tool\zasm\zasm.exe
 set DOS=\tool\msdos\msdos.exe
 
-%DOS% %ASM% LD.ASZ -CLD.BIN -L
+%DOS% %ASM% X1.ASZ -CLD.BIN -L

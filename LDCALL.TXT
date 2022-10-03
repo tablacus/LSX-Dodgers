@@ -566,6 +566,9 @@ $2A	日付の獲得(_GDATE)	*1 MSX-DOS
   戻り値:
   HL←年  D←月  E←日  A←曜日(0:日～6:土)
 
+  備考:
+  MZ-700/1500:サポートしていない
+
 
 $2B	日付の設定(_SDATE)	*1 *4 MSX-DOS
 
@@ -577,7 +580,8 @@ $2B	日付の設定(_SDATE)	*1 *4 MSX-DOS
 
   失敗した場合  A←$FF
 
-  備考:サポートしていない
+  備考:
+  サポートしていない
 
 
 $2C	時刻の獲得(_GTIME)	*1 MSX-DOS
@@ -589,7 +593,8 @@ $2C	時刻の獲得(_GTIME)	*1 MSX-DOS
   H←時  L←分  D←秒  E←1/100秒
 
   備考:
-  X1の仕様によりE←0
+  X1/turbo/Z:仕様によりE←0
+  MZ-700/1500:サポートしていない
 
 
 $2D	時刻の設定(_STIME)	*1 *4 MSX-DOS
@@ -725,13 +730,25 @@ $5F ディスクバッファのフラッシュ(_FLUSH) *1 *2 MSX-DOS2
 
 
 $6F MSX-DOS のバージョン番号の獲得(_DOSVER) *1 MSX-DOS
+
   戻り値:
   BC←$011D(MSX-DOSのバージョン)
   DE←LSX-Dodgersのバージョン
+  H←デバイスフラグ
+  L←機種ID
   A←0
 
+  デバイスフラグ
+  bit0: 0:FDCがMB8877系 1:その他
+
+  機種ID
+  0: X1/turbo/Z
+  1: MZ-700/1500
+
+  bit7: DPBがLAと同じ場合に1になる
+
+
   備考:
-  MSX-DOSとの互換用
   MSX-DOS1の場合はBが2未満
   CP/M80の場合はCF=1で返るのでCFで判別可能
   バージョン表記は $1234 であれば 12.34 (BCD 形式)
@@ -744,8 +761,8 @@ $6F MSX-DOS のバージョン番号の獲得(_DOSVER) *1 MSX-DOS
 
   ※システムコール備考
 
-  [CTRL]+[C]は[SHIFT]+[BREAK]と同じ
-  [CTRL]+[S]は[BREAK]と同じ
+  [CTRL]+[C]は[SHIFT]+[BREAK]でも良い
+  [CTRL]+[S]は[BREAK]でも良い(X1/turbo/Zのみ)
 
   LSX-Dodgersでは戻り値として使用するレジスタとAレジスタ、フラグ以外は保存する。
   CP/M80やMSX-DOSでは基本的にレジスタを破壊されるようなので、CP/M80やMSX-DOSで

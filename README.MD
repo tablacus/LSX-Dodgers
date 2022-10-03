@@ -1,11 +1,11 @@
-・LSX-Dodgers for X1/turbo version Gaku (Lovers/Tablacus)
+・LSX-Dodgers for X1/turbo/Z and MZ-700/1500 Gaku
 
 A>■
 
 
 ●機能概略
 
- このソフトはX1/turbo/ZでCP/M80やMSX-DOSのソフトを実行するためのOSです。
+ このソフトはX1/turbo/ZやMZ-700/1500でCP/M80やMSX-DOSのソフトを実行するためのOSです。
 MS-DOS互換のファイルフォーマットを持ちCP/M80やMSX-DOSと互換のシステム・コールを持っています。
 また、階層ディレクトリにも対応しています。
 
@@ -17,48 +17,46 @@ https://tablacus.github.io/LSX-Dodgers/
 
 ●手引書
 
-[システム・コール一覧](https://github.com/tablacus/LSX-Dodgers/blob/master/LDCALL.TXT)
-
+システム・コール一覧
+https://github.com/tablacus/LSX-Dodgers/blob/master/LDCALL.TXT
 基本的に MSX-DOS や CP/M と互換性があります。
 
-[FCB ファイル・コントロール・ブロック](https://github.com/tablacus/LSX-Dodgers/blob/master/LDFCB.TXT)
-
+FCB ファイル・コントロール・ブロック
+https://github.com/tablacus/LSX-Dodgers/blob/master/LDFCB.TXT
 基本的に MSX-DOS や CP/M と互換性があります。
 
-[ディレクトリエントリ](https://github.com/tablacus/LSX-Dodgers/blob/master/LDDIRENT.TXT)
-
+ディレクトリエントリ
+https://github.com/tablacus/LSX-Dodgers/blob/master/LDDIRENT.TXT
 MSX-DOS や MS-DOS と同じです。
 
-[ドライブパラメータブロック](https://github.com/tablacus/LSX-Dodgers/blob/master/LDDPB.TXT)
+ドライブパラメータブロック
+https://github.com/tablacus/LSX-Dodgers/blob/master/LDDPB.TXT
 
-[メモリマップ](https://github.com/tablacus/LSX-Dodgers/blob/master/LDMAP.TXT)
+メモリマップ
+https://github.com/tablacus/LSX-Dodgers/blob/master/LDMAP.TXT
 
-[内部コマンド](https://github.com/tablacus/LSX-Dodgers/blob/master/LDCMD.TXT)
+内部コマンド
+https://github.com/tablacus/LSX-Dodgers/blob/master/LDCMD.TXT
 
-[スペック](https://github.com/tablacus/LSX-Dodgers/blob/master/LDSPEC.TXT)
+スペック
+https://github.com/tablacus/LSX-Dodgers/blob/master/LDSPEC.TXT
 
-[ライセンス](https://github.com/tablacus/LSX-Dodgers/blob/master/LICENSE.TXT)
-
+ライセンス
+https://github.com/tablacus/LSX-Dodgers/blob/master/LICENSE.TXT
 MIT License のオープンソースです。
 
-●ハードディスク
-
-[LD-hdd](https://github.com/ho-ogino/LD-hdd/releases) 0.07以降でハードディスクに接続できるようになります。
-エミュレーターで使えるVHDファイルの作り方
-https://github.com/tablacus/LSX-Dodgers/issues/4
-
-●サンプルプログラム
-
-[wiki](https://github.com/tablacus/LSX-Dodgers/wiki)にサンプルプログラムとそれのディスクイメージがあります。
 
 ●アセンブラ
 
-OHM-Z80とZASM.COM/ZASM.EXE/AASM/AILZ80ASMでアセンブルできます。
+X1/turbo/Z版はOHM-Z80とZASM.COM/ZASM.EXE/AASM/AILZ80ASMでアセンブルできます。
 make.jsを使うと zasm に ZASM.COM/ZASM.EXE用にコンバートします。
 ZASMはINCLUDEを使うとPRNがいい感じに出ないのでWSHでコンバーターを作りました。
 コンバートにZephyr1969さんの変更方法を参考にさせてもらいました。ありがとうございます。
 
 https://github.com/tablacus/LSX-Dodgers/issues/3
+
+MZ-700/1500版はAILZ80ASMでアセンブルできます。
+
 
 ◇OHM-Z80
 L-os AngelesでASM.BATを使用します。
@@ -86,7 +84,8 @@ ASM_AASM.BAT
 ◇AILZ80ASM
 AILZ80ASMは以下のアドレスから入手してください。
 以下のバッチファイルを使用します。
-ASM_AILZ80ASM.BAT
+ASM_AILZ80ASM_X1.BAT  
+ASM_AILZ80ASM_M7.BAT
 
 
 ●注意
@@ -102,109 +101,3 @@ ASM_AILZ80ASM.BAT
  ステップレートの関係でCZ-800Fは使えません。
 MS-DOS互換のファイル・フォーマットとS-OS"SWORD"のファンクションをもつOS、L-os Angelesもよろしく
 
-
-●History
-
-1.00	1995. 7.24
-新規作成
-
-1.01	1995. 7.26
-ファイルのクローズ($10)でオープンモードをクリアしていなかったバグをfix
-ファイルの作成($16)でカレント&ランダム・レコードをクリアしないようにした。
-
-1.02	1995. 8. 2
-シェルで小文字のドライブ名を受け付けなかったので受け付けるよ
-うにした。内部コマンドLでルートを指定できなくなったバグをfix
-内部コマンドTでバッファを増やした。割り込みルーチンのバグfix
-
-1.04	1995. 9. 4
-利用者番号の設定と読み出し($20)を簡易処理するようにした
-
-1.10	1995.11.12
-コンソール入出力をBIOS-ROMを使わず自前で処理
-MSX-DOSのランダム・ブロック・アクセスのサブセットをサポート
-論理セクタを用いた読み書きをサポート。このためDPBが変わった。
-システムコール時にスタックを別に確保するようにした
-外部コマンドのサーチパスにサブディレクトリを指定できる様にした
-バッチファイルで仮パラメータ(%1~%8)を扱える様にした。
-起動時にAUTOEXEC.BAT,AUTOEXEC.COMを実行するようにした
-ファイル末尾への追加でバッファの充填を抑制するようにした。
-ディスク・バッファのフラッシュの改良。テンプレートのCAをサポート
-内部コマンドM,T,Vがなくなった。
-2HSのオーバー・トラックをサポート
-ノンターボのX1で動作するようにした。
-
-1.11	1996. 2.11
-内部コマンドをMS-DOS風にした。内部コマンドTYPE復活
-X1turboでは漢字を表示できるようになった。2HSをよりサポート
-リダイレクト書き込みをサポート。エスケープ・シーケンスをサポート
-デバイスをファイルとして扱えるようにした。(CON,AUX,PRN,NUL)
-プリンタ(ANKのみ)のサポート。外部入出力にRS-232Cをサポート
-シェルは情報を10進数で表示するようにした。
-ファイル名の変更($17)で違うファイルをリネームする事があるバグをfix
-ファイルの検索($11,$12)で検索したファイルをファイルのオープン($0F)、
-ファイルの削除($13)、ファイルの作成($16)、ファイル名の変更($17)で
-使う場合、速くなるようにした。
-ディスク・エラーのIgnore(無視)の処理を少し安全にした。無視の
-処理としては甘くなったかも…
-フロッピーディスク・ドライバのシーク周りを変更
-通過パスを指定できる様にした
-キーリピートの開始時間を変更できるようにした
-
-1.12	1996. 4.14
-IBM系のフロッピーフォーマットをサポート
-ノンターボでデバイス・エラーの処理のバグをfix
-同じドライブの別のパスを指定できるようにした。
-ソフトウェア・リセットを CTRL + GRAPH + DEL に変更した。
-システムコールにファイル名の解析($29)を追加した。
-
-1.20	1996. 6.14
-v1.12で「..」(親ディレクトリ)を指定した場合、親ディレクトリがルート・
-ディレクトリの場合、親ディレクトリに戻らなくなったエンバグをfix
-上の処理の都合でFCBのアクセスするディレクトリのクラスタ番号の仕様変更
-外部コマンドとバッチファイルを一緒に検索するようにした。
-拡張子が.CPMの外部コマンドも実行できるようにした。
-拡張子で(.COM,CPM,BAT)を指定した場合、指定した拡張子の
-コマンド(バッチファイル)を実行するようにした。
-ファイル・サイズの獲得($23)でDEレジスタに設定するFCBをオープンされた
-FCBからオープンされていないFCBに変更した
-MSX-DOS2に合わせてFCBの属性を+28から+13に変更した。
-RS232C(AUX)のフロー制御をソフトフロー(Xon/Xoff)から
-ハードフロー(RTS/CTS)に変更した
-CP/M互換のファイル・アクセスはシステム・コール内部でランダム・ブロック・アクセスを
-呼び出して実行するようにした。
-
-1.21	1996. 8.12
-リモート・リンクに対応していない部分を直した。
-ブートとコンソール関係のみCP/M互換のBIOSコールを用意した。
-システムのメモリ不足の都合でFCBのレコードサイズは指定しなくても1バイト
-として扱うようにした。
-CP/M用のコマンドでデフォルトのFCBとデフォルトのDTAを使用している
-コマンドではv1.20ではファイル読み込みの際に先頭の1バイトが化ける
-というエンバグの為、FCBのランダム・レコードを4バイトからCP/Mに合
-わせた3バイトに変更した。
-G-RAMディスクでパラメータによってエラーがでるバグをfix
-コピー等の際のファイルの同時アクセスで簡易安全機能をOS側に付けた。
-内部コマンドCOPYでコピー元でワイルドカードを指定しコピー先を同一ドライ
-ブの別ディレクトリにした場合2つ目のファイルでエラーになるバグをfix
-
-1.22	1996.11.12
-イニシャル時に「IM 2」を実行するようにした
-外部コマンドやバッチファイルの拡張子が小文字でも実行で
-きるようにした。
-TYPE等でサブディレクトリでワイルドカードを使ったりした
-ばあい検索されないはずの「.」や「..」が検索されていたの
-を直した。
-80文字以外の画面モードに対応した。 GRAPH + HTAB でアナ
-ログモードのON/OFFができるようになった。
-FCBのオープンモードを+24から+28へ移動した。
-リダイレクト機能がなくなった。
-
-1.23	1997. 3.24
-ノンターボでディスクエラーが出るとエラーメッセージが止
-まらなくなるバグをfix
-CP/M互換のBIOSコールのCONOUTで表示するレジスタが間違っ
-ていたのを直した。
-
-これ以降の更新情報は
-https://github.com/tablacus/LSX-Dodgers/releases

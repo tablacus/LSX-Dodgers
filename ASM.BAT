@@ -1,1 +1,1 @@
-zasm LD.ASZ -CLD.BIN
+zasm X1.ASZ -CLD.BIN

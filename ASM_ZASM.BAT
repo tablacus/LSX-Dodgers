@@ -5,4 +5,4 @@ rem
 
 set ASM=\tool\zasm\zasm.exe
 
-%ASM% LD.ASZ -CLD.BIN
+%ASM% X1.ASZ -CLD.BIN

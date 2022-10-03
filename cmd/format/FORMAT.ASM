@@ -32,8 +32,10 @@ MAIN:
 	RET	NZ
 	LD	A,L
 	OR	A		;X1
+	JR	Z,OK
+	CP	1		;MZ-700/1500
 	RET	NZ
-
+OK:
 	LD	SP,(SYSTEM+1)
 	LD	A,(FCB1)
 	DEC	A
@@ -74,25 +76,29 @@ PRNAME:
 	INC	IX
 	DJNZ	PRNAME
 	POP	IX
-	CALL	LTNL
+	CALL	NL
 
 	LD	A,(IX+$12)	;デバイス情報(DPB_12_DEVICE)
 	AND	$0F
-	CP	7
+	CP	7		;FDD
 	JP	NZ,LOGIC
 LOGSW:	LD	A,1
 	OR	A
 	JP	Z,LOGICY
 
-	LD	A,(BIOS)
-	INC	A
-	JR	Z,NONT
-
 OVER:	LD	A,$00
 	OR	A
 	JR	NZ,TYPEO
-NONT:
+
+	BIT	0,(IX+$0A)	;フロッピーディスクのモード(DPB_0A_FDMODE)
+	JR	Z,ENABLE_2HD
+	BIT	7,(IX+$12)	;デバイス情報(DPB_12_DEVICE)
+	JR	NZ,ENABLE_2HD
+	LD	DE,FOTMESL	;format type
+	JR	DISABLE_2HD
+ENABLE_2HD:
 	LD	DE,FOTMES	;format type
+DISABLE_2HD:
 	LD	C,9		;文字列出力
 	CALL	SYSTEM
 TYPE:
@@ -149,7 +155,7 @@ TYPEX:
 	LD	E,A
 	LD	C,2		;コンソール出力
 	CALL	SYSTEM
-	CALL	LTNL
+	CALL	NL
 
 	PUSH	IX
 	POP	DE
@@ -206,10 +212,10 @@ OTFE:
 	CALL	SYSTEM
 
 	CALL	PHYSIC
-	CALL	LTNL
+	CALL	NL
 	JP	C,ERROR
 	CALL	VERIFY
-	CALL	LTNL
+	CALL	NL
 	JP	C,ERROR
 
 	LD	HL,FDATA
@@ -261,10 +267,17 @@ LOGICY:
 	LD	C,$1B		;ディスク情報の獲得
 	CALL	SYSTEM
 	INC	A
-	JP	Z,ERROR
+	JP	NZ,LOGIC
+	LD	A,(IX+$12)	;デバイス情報(DPB_12_DEVICE)
+	CP	$26		;デバイスはEMMでBPBからDPBを作成する
+	JP	NZ,ERROR
 LOGIC:
 	CALL	SURE
 LOGICX:
+	LD	A,(IX+$12)	;デバイス情報(DPB_12_DEVICE)
+	CP	$26		;デバイスはEMMでBPBからDPBを作成する
+	CALL	Z,BPB_FROM_EMM
+LOGICX1:
 	LD	DE,LOGMES
 	LD	C,9		;文字列出力
 	CALL	SYSTEM
@@ -339,12 +352,9 @@ SURE1:
 	CALL	SYSTEM
 	CP	$0D
 	JR	NZ,SURE1
-LTNL:
+NL:
 	PUSH	AF
-	LD	E,$0D
-	LD	C,6		;コンソール直接入出力
-	CALL	SYSTEM
-	LD	E,$0A
+	LD	E,4
 	LD	C,6		;コンソール直接入出力
 	CALL	SYSTEM
 	POP	AF
@@ -573,8 +583,129 @@ ERROR:
 	CALL	SYSTEM
 	JP	0
 
+BPB_FROM_EMM:			;EMMのサイズからBPBを作成する
+	LD	A,(IX+$0D)	;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+	LD	(EMMAL),A
+	LD	A,(IX+$0C)	;フロッピーディスクのシリンダ数(DPB_0C_MAXCYL)
+	LD	(EMMBL),A
+	LD	A,(IX+$13)	;デバイスドライバ内におけるユニット番号(DPB_13_UNITNO)
+	LD	(EMMDV),A
+
+	CALL	EADR0
+	IN	A,(C)
+	PUSH	AF
+
+	LD	DE,0
+ECHECK1:
+	INC	DE
+	CALL	EADR2
+	IN	H,(C)
+	CALL	EADR2
+	LD	A,H
+	ADD	A,0E5H
+	OUT	(C),A
+	INC	A
+	CALL	EADR0
+	OUT	(C),A
+	DEC	A
+	CALL	EADR2
+	IN	L,(C)
+	CALL	EADR2
+	OUT	(C),H
+	CP	L
+	JR	NZ,ECHECK2
+	BIT	6,D
+	JR	Z,ECHECK1
+ECHECK2:
+	CALL	EADR0
+	POP	AF
+	OUT	(C),A
+
+	LD	HL,0-9
+	ADD	HL,DE
+	JP	NC,ERROR
+
+	LD	BC,4086
+	AND	A
+	SBC	HL,BC
+	JR	C,EFAT12
+	LD	HL,CALC_FATLN16
+	LD	(CALC_FATLN),HL
+EFAT12:
+	PUSH	DE
+	POP	HL
+	ADD	HL,HL
+	LD	(EMM_TotSec16),HL	;総セクタ数
+	EX	DE,HL
+CALC_FATLN	EQU	$+1
+	CALL	CALC_FATLN12		;自己書き換え
+	LD	(EMM_FATSz16),A		;FATのサイズ
+	LD	(IX+0),A		;FAT領域のセクタ単位でのサイズ(DPB_00_FATLN)
+
+	LD	HL,FDATA
+	LD	DE,FDATA+1
+	LD	(HL),0
+	LD	BC,512-FDATA+EMM_BPB
+	LDIR
+
+	LD	DE,0
+	LD	HL,EMM_BPB
+	CALL	DWT
+	OR	A
+	JP	NZ,ERROR
+
+	LD	A,(FCB1)
+	LD	E,A
+	LD	C,$1B		;ディスク情報の獲得
+	JP	SYSTEM
+EADR2:
+	PUSH	DE
+	EX	DE,HL
+	ADD	HL,HL
+	ADD	HL,HL
+	LD	BC,(EMMAL)
+	ADD	HL,BC
+	LD	BC,(EMMDV)
+	OUT	(C),C
+	INC	C
+	OUT	(C),L
+	INC	C
+	OUT	(C),H
+	INC	C
+	EX	DE,HL
+	POP	DE
+	RET
+
+EADR0:
+	PUSH	DE
+	LD	DE,0
+	CALL	EADR2
+	POP	DE
+	RET
+
+CALC_FATLN12:	;FAT12 - クラスタ数から必要なFATサイズを求める(セクタサイズ512)
+	LD	E,L
+	LD	D,H
+	ADD	HL,HL	;*2
+	ADD	HL,DE	;*3
+	SRL	H	;/2
+	RR	L	;1クラスタ辺り1.5バイト必要
+	LD	DE,511	;切り上げる
+	ADD	HL,DE
+	LD	A,H
+	SRL	A
+	RET
+
+CALC_FATLN16:	;FAT16 - クラスタ数から必要なFATサイズを求める(セクタサイズ512)
+	LD	A,L
+	ADD	A,$FF
+	SBC	A,A
+	AND	1
+	ADD	A,H
+	RET
+
 TITLE:
-	DB	"X1 format v1.14"
+	DB	"format v1.15"
 CRLF:
 	DB	$0D,$0A
 	DB	'$'
@@ -587,6 +718,8 @@ FORMES:
 	DB	"format $"
 FOTMES:
 	DB	"format type (2D=0,2DD=1,2HD=2,logical only=L)? $"
+FOTMESL:
+	DB	"format type (2D=0,2DD=1,logical only=L)? $"
 PHYMES:
 	DB	"physical format",$0D,$0A,'$'
 LOGMES:
@@ -661,25 +794,25 @@ HGAP4:	DB	0,$4E,0,$4E,0,$4E,255
 LIPL:	DB	$EB,$FE,$90,'L','D',$20,$20,$20
 	DB	$20,$20,$20,$00,$02,$02,$01,$00
 	DB	$02,$70,$00,$D0,$02,$FD,$02,$00
-	DB	$09,$00,$02,$00,$00,$00,$18,$FE
+	DB	$09,$00,$02,$00,$00,$00,$C9,$00
 	DB	$00,$00
 
 DIPL:	DB	$EB,$FE,$90,'L','D',$20,$20,$20
 	DB	$20,$20,$20,$00,$02,$02,$01,$00
 	DB	$02,$70,$00,$A0,$05,$F9,$03,$00
-	DB	$09,$00,$02,$00,$00,$00,$18,$FE
+	DB	$09,$00,$02,$00,$00,$00,$C9,$00
 	DB	$00,$00
 
 HIPL:	DB	$EB,$FE,$90,'L','D',$20,$20,$20
 	DB	$20,$20,$20,$00,$04,$01,$01,$00
 	DB	$02,$C0,$00,$D0,$04,$FE,$02,$00
-	DB	$08,$00,$02,$00,$00,$00,$18,$FE
+	DB	$08,$00,$02,$00,$00,$00,$C9,$00
 	DB	$00,$00
 
 ;SIPL:	DB	$EB,$1E,$90,'L','D',$20,$20,$20
 ;	DB	$20,$20,$20,"2","H","S",$20,$20
 ;	DB	$20,$20,$04,$00,$01,$03,$00,$01
-;	DB	$00,$C0,$05,$A0,$FB,$01,$18,$FE
+;	DB	$00,$C0,$05,$A0,$FB,$01,$C9,$00
 ;	DB	$EB,$FE
 
 IPLPRG:
@@ -689,4 +822,30 @@ IPLPRG:
 	LD	($FF86),A
 	JP	$F5
 IPLPEND:
+
+EMMDV:	DW	$0B00
+EMMAL:	DB	0
+EMMBL:	DB	0
+
+EMM_BPB:
+	DB	0EBH,0FEH,090H
+EMM_OEMName:
+	DB	"LD-EMM  "
+EMM_BytsPerSec:
+	DW	512
+EMM_SecPerClus:
+	DB	2
+EMM_RsvdSecCnt:
+	DW	1
+EMM_NumFATs:
+	DB	1
+EMM_RootEntCnt:
+	DW	512
+EMM_TotSec16:
+	DW	0
+EMM_Media:
+	DB	0FAH
+EMM_FATSz16:
+	DW	0
+
 FDATA:

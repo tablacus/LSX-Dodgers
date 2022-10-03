@@ -1,6 +1,6 @@
 
 ;	LSX-Dodgers DISK
-
+;	X1/turbo/Z
 
 SEEK:
 	LD	A,D
@@ -38,7 +38,7 @@ DIV3:
 	OR	C
 	LD	(MOPAT+1),A	;Motor off data
 	LD	BC,00FFCH
-	OR	080H		;Mortor on
+	OR	080H		;Motor on
 	OUT	(C),A
 
 	CALL	SETMODE
@@ -80,7 +80,7 @@ FSPAT:	AND	0FFH
 FDCCMD:
 	CALL	COMSET
 
-FDCPAT:	LD	A,080H		;FDC COMMAND(Self-rewriting)
+FDCPAT:	LD	A,080H		;FDC COMMAND(Self-modifying code)
 	AND	020H		;Write data Write track
 	INC	A
 
@@ -96,10 +96,10 @@ SST1:
 	CALL	READY
 SETMODE:
 	LD	A,B		;B=00FH
-FDMODE:	IN	A,(0FFH)		;Floppy mode(2D/2HD) (Self-rewriting)
+FDMODE:	IN	A,(0FFH)	;Floppy mode(2D/2HD) (Self-modifying code)
 
 	LD	A,B
-	IN	A,(0FDH)		;MFM mode
+	IN	A,(0FDH)	;MFM mode
 
 	CALL	DELAY0		;Head select time
 	LD	A,081H

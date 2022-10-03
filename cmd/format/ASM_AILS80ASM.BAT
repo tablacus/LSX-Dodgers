@@ -5,4 +5,4 @@ rem
 
 set ASM=\tool\AILSZ80\AILZ80ASM.exe
 
-%ASM% -lst -bin FORMAT.COM -i FORMAT.ASM -f
+%ASM% -lst -bin FORMAT.COM -i FORMAT.ASM -f -gap 0 -sym

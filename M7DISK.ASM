@@ -1,0 +1,340 @@
+
+;	LSX-Dodgers DISK
+;	MZ-700/1500
+
+SEEK:
+	LD	A,D
+	OR	E
+	LD	A,001H
+	JR	Z,DIV3
+
+	LD	B,16
+MAXSEC:	LD	C,000H
+	XOR	A
+	EX	DE,HL
+DIV1:
+	ADD	HL,HL
+	ADC	A,A
+	CP	C
+	JR	C,DIV2
+	SUB	C
+	INC	L
+DIV2:
+	DJNZ	DIV1
+
+	INC	A	;最小のセクタは１固定
+	LD	D,L	;TRACK
+DIV3:
+	LD	E,A	;Remainder
+
+	LD	A,(_DRIVE)
+	CP	4
+	CCF
+	RET	C
+	OR	084H		;Motor on + ドライブセレクト有効
+	OUT	(0DCH),A
+	SRL	D		;CYLINDER
+	SBC	A,A
+	OUT	(0DDH),A	;SIDE
+
+	CALL	SETMODE
+	RET	C
+
+	CALL	DRIVE
+	CP	0FFH		;A=0FFH Unknown CYLINDER
+	CALL	Z,FDCRES	;Restore
+	CPL			;データバスが負論理
+	OUT	(0D9H),A	;Currrent CYLINDER
+	CPL			;データバスが負論理
+	SUB	D
+	RET	Z		;No seek
+
+	LD	A,(_ISEEK)
+	LD	C,A
+
+	LD	A,(_MAXCYL)	;Max CYLINDER
+	DEC	A
+	CP	D		;Over CYLINDER
+	RET	C
+
+	LD	A,D
+	CPL			;データバスが負論理
+	OUT	(0DBH),A
+	LD	(HL),D
+
+	LD	C,018H		;Seek
+FDCCMD2:
+	LD	A,(_SEEKSP)
+FSPAT:	AND	0FFH
+	OR	C
+
+FDCCMD:
+	CALL	COMSET
+FDCSMC	EQU	$+1
+	LD	A,080H		;FDC COMMAND(Self-modifying code)
+	AND	020H		;Write data Write track
+	INC	A
+
+SST:
+	LD	C,0
+SST1:
+	DEC	C		; 4
+	JR	NZ,SST1		;12 * 256 / 4 = About 1ms
+	DEC	A
+	JR	NZ,SST1
+
+	INC	A		;A=1
+	CALL	READY
+SETMODE:
+	CALL	DELAY0		;Head select time
+	LD	A,081H
+READY:
+	LD	(WAITA),A
+	PUSH	HL
+	LD	H,0F8H
+READY2:
+	IN	A,(0D8H)
+	CPL			;データバスが負論理
+WAITA	EQU	$+1
+	AND	081H		;NOT READY,BUSY
+	JR	Z,READYE
+	EX	(SP),HL		;wait 19clock
+	EX	(SP),HL		; //
+	DEC	HL
+	LD	A,H
+	OR	L
+	JR	NZ,READY2
+	SCF
+READYE:
+	POP	HL
+	RET
+
+FDCRES:
+	LD	(HL),0
+	LD	C,8
+	JR	FDCCMD2
+
+FDMOFF:
+	XOR	A		;Motor off(ドライブセレクト無効)
+	OUT	(0DCH),A
+	RET
+
+SECSET:
+	PUSH	AF
+	LD	A,E
+	CPL			;データバスが負論理
+	OUT	(0DAH),A
+	POP	AF
+COMSET:
+	CPL			;データバスが負論理
+	OUT	(0D8H),A
+DELAY0:
+	LD	A,26
+DELAY:
+	DEC	A
+	JR	NZ,DELAY
+	RET
+
+DRIVE:
+	LD	HL,(_DRIVE)
+	LD	H,_CYL0/256
+	SET	7,L
+	LD	A,(HL)
+	RET
+
+RNF:
+	CALL	DRIVE
+	LD	(HL),0FFH
+	RET
+
+RETRY:	DB	2
+
+
+;	FLOPPY DISK DRIVER
+
+WTTRK:
+	LD	B,1
+	LD	A,0F0H
+	JR	WTTRK1
+FDWT:
+	LD	A,0A0H
+WTTRK1:
+	LD	(FDCSMC),A
+DWTBL:
+	LD	A,B
+	LD	(WTBSMC),A
+	LD	A,2		;Retry count
+	LD	(RETRY),A
+
+DWT0:
+	PUSH	DE
+	PUSH	HL
+	LD	(DHLSMC),HL
+	CALL	SEEK		;Write disk
+	POP	HL
+	JR	C,ERRDW
+	DI
+	LD	A,(FDCSMC)
+	CALL	SECSET
+	LD	C,0DBH
+DWT1:
+	LD	A,(HL)
+	CPL			;データバスが負論理
+	LD	D,A
+
+DWT2:
+	IN	A,(0D8H)
+	CPL			;データバスが負論理
+	RRCA
+	JR	NC,DWT4
+	RRCA
+	JR	NC,DWT2
+DWT3:
+	OUT	(C),D
+	INC	HL
+	JR	DWT1
+
+DWT4:
+	DEC	A
+	JR	Z,DWT3
+	INC	A
+	EI
+	POP	DE
+	INC	DE
+	CALL	FDMOFF
+	JR	Z,DISKOK_WT
+	CALL	DISKC
+	JR	NZ,DWT0
+	OR	A
+	JR	NZ,ERRW
+
+DISKOK_WT:
+WTBSMC	EQU	$+1
+	LD	B,1
+	DJNZ	DWTBL
+	RET
+
+ERRW:
+	LD	A,0FFH
+ERRZ:
+	CP	A
+	SCF
+	JP	FDMOFF
+
+ERRDW:
+	POP	DE
+	CALL	DELP
+	JR	NZ,DWT0
+	OR	A
+	JR	NZ,ERRW
+	RET
+
+FDRD:
+	LD	A,080H
+	LD	(FDCSMC),A
+DRDBL:
+	LD	A,B
+	LD	(RDBSMC),A
+	LD	A,2		;Retry count
+	LD	(RETRY),A
+DRD0:
+	PUSH	DE
+	PUSH	HL
+	LD	(DHLSMC),HL
+	CALL	SEEK		;Read disk
+	POP	HL
+	JR	C,ERRDR
+	DI
+	LD	A,(FDCSMC)
+	CALL	SECSET
+DRD1:
+	IN	A,(0D8H)
+	CPL			;データバスが負論理
+	RRCA
+	JR	NC,DRD3
+	RRCA
+	JR	NC,DRD1
+	IN	A,(0DBH)
+	CPL			;データバスが負論理
+	LD	(HL),A
+	INC	HL
+	JR	DRD1
+
+DRD3:
+	OR	A
+	EI
+	POP	DE
+	INC	DE
+	CALL	FDMOFF
+	JR	Z,DISKOK_RD
+	CALL	DISKC
+	JR	NZ,DRD0
+	OR	A
+	JR	NZ,ERRW
+
+DISKOK_RD:
+RDBSMC	EQU	$+1
+	LD	B,1
+	DJNZ	DRDBL
+	RET
+
+ERRDR:
+	POP	DE
+	CALL	DELP
+	JR	NZ,DRD0
+	OR	A
+	JR	NZ,ERRW
+	RET
+DISKC:
+	DEC	DE
+	BIT	3,A
+	CALL	NZ,RNF
+DISKD:
+	PUSH	HL
+	LD	HL,RETRY
+	DEC	(HL)
+	POP	HL
+	JR	NZ,ERR		;Retry
+	OR	A
+	JR	Z,ERR		;Error
+
+DELP:
+	CALL	RNF
+	CALL	FDMOFF
+	LD	A,(_SEEKSP)
+	ADD	A,A
+	JR	C,AERRZ
+DELP1:
+	PUSH	DE
+	LD	HL,DEMES
+	CALL	MSX
+	CALL	KEYBC
+DELP2:
+	CALL	_INKEY
+	JR	Z,DELP2
+
+	POP	DE
+	CALL	CAP
+	CP	'R'		;Retry
+	JR	NZ,DELP3
+DHLSMC	EQU	$+1
+	LD	HL,0		;Self-modifying code
+	LD	A,2
+	LD	(RETRY),A
+	OR	A
+	RET
+DELP3:
+	CP	'I'		;Ignore
+	JR	Z,IGNORE
+	CP	'A'		;Abort
+	JR	NZ,DELP1
+	JP	CPM_BOOT
+IGNORE:
+	LD	A,0FFH
+AERRZ:
+	CP	A
+ERR:
+	LD	A,0FFH
+	RET
+
+FDMODE:	LD	A,0FFH		;Floppy mode(2D/2HD) (Self-modifying code)

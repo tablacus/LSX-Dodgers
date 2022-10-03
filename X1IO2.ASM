@@ -1,6 +1,7 @@
 
 ;	LSX-Dodgers IO2
-;	メモリが空いたら戻す
+;	X1/turbo/Z
+;	(未使用)メモリが空いたら戻したい
 
 _SYS03:		;(BDOS)外部入力
 	DI
@@ -51,5 +52,29 @@ XMIT1:
 	DEC	C
 	OUT	(C),E
 	POP	BC
+	RET
+
+
+_SYS05:		;(BDOS)プリンタ出力
+	PUSH	BC
+	LD	BC,01A01H
+_S05X1:
+	CALL	BREAK2
+	IN	A,(C)
+	AND	8
+	JR	NZ,_S05X1
+	DI
+	DEC	C
+	OUT	(C),E
+	LD	C,3
+	LD	A,00EH
+	OUT	(C),A
+	INC	A
+	INC	BC
+	DEC	BC
+	OUT	(C),A
+	EI
+	POP	BC
+	XOR	A
 	RET
 

@@ -42,6 +42,7 @@ _DOS2:
 	JR	NZ,_ERROR
 	LD	BC,011DH
 	LD	DE,VER
+	LD	HL,MACD
 	XOR	A
 _ERROR:
 	AND	A
@@ -211,7 +212,7 @@ _S12X1:
 	LD	A,(_SECPS+1)
 	OR	080H
 	LD	H,A
-_S12DIR
+_S12DIR:
 	LD	(SFNDF),HL	;Directory position and Flags
 	POP	HL
 	LD	DE,SFILE
