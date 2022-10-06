@@ -814,7 +814,10 @@ PATHX	EQU	64
 PATHD:	DS	PATHX
 PATHE:	DB	0
 
-COMS	EQU	9
+FREE:	DB	" bytes free",9,'$'
+DIRMES:	DB	"     <DIR>$"
+DIRHD:	DB	"  :$"
+
 COMTB:
 	DB	"D   "	;1
 	DW	C_DIR
@@ -834,7 +837,3 @@ COMTB:
 	DW	C_TYPE
 	DB	"REM "	;9
 	DW	C_REM
-
-FREE:	DB	" bytes free",9,'$'
-DIRMES:	DB	"     <DIR>$"
-DIRHD:	DB	"  :$"

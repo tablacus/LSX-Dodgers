@@ -10,7 +10,7 @@
 0000 00 00 00 00    MAC	EQU	0		;X1
 0000 00 00 00 01    VER_1   EQU	1
 0000 00 00 00 04    VER_2   EQU	4
-0000 00 00 00 03    VER_3   EQU	3
+0000 00 00 00 04    VER_3   EQU	4
 0000                
 0000 00 00 CB 00    RUN	EQU	0CB00H
 0000 00 00 D1 06    BDOS	EQU	0D106H
@@ -24,6 +24,7 @@
 0000 00 00 00 50    WIDTH	EQU	80
 0000 00 00 00 18    LINE	EQU	24
 0000 00 00 00 07    COLORF	EQU	7
+0000 00 00 00 09    COMS	EQU	9
 0000                
 0000                	INCLUDE	"LDDEF.ASM"
 0000                
@@ -31,7 +32,7 @@
 0000                
 0000 00 00 1D 00    MACW	EQU	MAC + 01D00H	;機種フラグとLD判別フラグ
 0000 00 00 00 00    MACD	EQU	MAC + 00000H	;機種フラグとデバイスフラグ
-0000 00 00 01 47    VER	EQU	VER_1 * 256 + VER_2 * 17 + VER_3
+0000 00 00 01 48    VER	EQU	VER_1 * 256 + VER_2 * 17 + VER_3
 0000                
 0000 00 00 00 05    SYSTEM	EQU	00005H
 0000 00 00 00 0F    JP_HL	EQU	0000FH
@@ -53,7 +54,7 @@ CAFA 00 CB          	DW	RUN
 CAFC                ;	MSX BINARY END ADDRESS
 CAFC 00 F2          	DW	LAST_ADR
 CAFE                ;	MSX BINARY EXEC ADDRESS
-CAFE 00 CB          	DW	RUN
+CAFE 04 CB          	DW	START
 CB00                
 CB00                	INCLUDE	"X1INIT.ASM"
 CB00                
@@ -61,7 +62,7 @@ CB00                ;	LSX-Dodgers INIT
 CB00                ;	X1/turbo/Z
 CB00                
 CB00 00 1D          	DW	MACW
-CB02 47 01          	DW	VER
+CB02 48 01          	DW	VER
 CB04                
 CB04                START:
 CB04 F3             	DI
@@ -248,7 +249,7 @@ CC3A
 CC3A 3E FF          	LD	A,KBUF/256
 CC3C 32 1F 00       	LD	(0001FH),A
 CC3F                
-CC3F 21 47 01       	LD	HL,VER
+CC3F 21 48 01       	LD	HL,VER
 CC42 22 5A 00       	LD	(0005AH),HL
 CC45                
 CC45 3E E6          	LD	A,0E6H
@@ -620,7 +621,7 @@ CED8 20 76 65 72
 CEDC 73 69 6F 6E
 CEE0 20
 CEE1 31 2E          	DB	030H + VER_1, '.'
-CEE3 34 33          	DB	030H + VER_2 ,030H + VER_3
+CEE3 34 34          	DB	030H + VER_2 ,030H + VER_3
 CEE5 20 47 61 6B    	DB	' Gaku',0DH,0AH
 CEE9 75 0D 0A
 CEEC 00             	DB	0
@@ -754,7 +755,7 @@ CF9E                AT_SCRE:
 CF9E                
 CF9E                AT_WTTRK:
 CF9E 06 01          	LD	B,1
-CFA0 3E F0          	LD	A,0F0H
+CFA0 3E F4          	LD	A,0F4H
 CFA2 18 02          	JR	AT_WTTRK1
 CFA4                AT_DWT:
 CFA4 3E A0          	LD	A,0A0H
@@ -1071,7 +1072,7 @@ D19C C6 FF          	ADD	A,0FFH
 D19E 38 09          	JR	C,COMB
 D1A0 13             	INC	DE
 D1A1                
-D1A1 21 D2 D6       	LD	HL,COMTB
+D1A1 21 EE D6       	LD	HL,COMTB
 D1A4 06 09          	LD	B,COMS
 D1A6 CD 6E E3       	CALL	CPNAME
 D1A9                COMB:
@@ -1374,7 +1375,7 @@ D364 EB             	EX	DE,HL
 D365 10 F9          	DJNZ	PDS3
 D367                PDSKF1:
 D367 CD FF D3       	CALL	PRDEC_DEHL
-D36A 11 08 D7       	LD	DE,FREE
+D36A 11 D2 D6       	LD	DE,FREE
 D36D CD 5F D8       	CALL	_SYS09		;(BDOS)文字列出力
 D370 CD EE D3       	CALL	PUTDRV
 D373 3E 5C          	LD	A,05CH		;\
@@ -1391,7 +1392,7 @@ D386                P_NAME:
 D386 3A 6D D6       	LD	A,(DTA_CCP+1)
 D389 FE 2E          	CP	'.'
 D38B C8             	RET	Z
-D38C 11 20 D7       	LD	DE,DIRHD
+D38C 11 EA D6       	LD	DE,DIRHD
 D38F CD 5F D8       	CALL	_SYS09		;(BDOS)文字列出力
 D392 3A 78 D6       	LD	A,(DTA_CCP+1+00BH)
 D395 F5             	PUSH	AF
@@ -1407,7 +1408,7 @@ D3A8
 D3A8 F1             	POP	AF
 D3A9 CB 67          	BIT	4,A
 D3AB 28 08          	JR	Z,DIR3
-D3AD 11 15 D7       	LD	DE,DIRMES
+D3AD 11 DF D6       	LD	DE,DIRMES
 D3B0 CD 5F D8       	CALL	_SYS09		;(BDOS)文字列出力
 D3B3 18 0A          	JR	DIR6
 D3B5                DIR3:
@@ -1849,35 +1850,34 @@ D691 00 00 00 40    PATHX	EQU	64
 D691                PATHD:	DS	PATHX
 D6D1 00             PATHE:	DB	0
 D6D2                
-D6D2 00 00 00 09    COMS	EQU	9
-D6D2                COMTB:
-D6D2 44 20 20 20    	DB	"D   "	;1
-D6D6 27 D3          	DW	C_DIR
-D6D8 44 49 52 20    	DB	"DIR "	;2
-D6DC 27 D3          	DW	C_DIR
-D6DE 43 4F 50 59    	DB	"COPY"	;3
-D6E2 0B D5          	DW	C_COPY
-D6E4 43 44 20 20    	DB	"CD  "	;4
-D6E8 1E D2          	DW	C_CD
-D6EA 44 45 4C 20    	DB	"DEL "	;5
-D6EE 0A D3          	DW	C_DEL
-D6F0 50 41 54 48    	DB	"PATH"	;6
-D6F4 CC D3          	DW	C_PATH
-D6F6 52 45 4E 20    	DB	"REN "	;7
-D6FA 14 D3          	DW	C_REN
-D6FC 54 59 50 45    	DB	"TYPE"	;8
-D700 29 D6          	DW	C_TYPE
-D702 52 45 4D 20    	DB	"REM "	;9
-D706 08 D3          	DW	C_REM
-D708                
-D708 20 62 79 74    FREE:	DB	" bytes free",9,'$'
-D70C 65 73 20 66
-D710 72 65 65 09
-D714 24
-D715 20 20 20 20    DIRMES:	DB	"     <DIR>$"
-D719 20 3C 44 49
-D71D 52 3E 24
-D720 20 20 3A 24    DIRHD:	DB	"  :$"
+D6D2 20 62 79 74    FREE:	DB	" bytes free",9,'$'
+D6D6 65 73 20 66
+D6DA 72 65 65 09
+D6DE 24
+D6DF 20 20 20 20    DIRMES:	DB	"     <DIR>$"
+D6E3 20 3C 44 49
+D6E7 52 3E 24
+D6EA 20 20 3A 24    DIRHD:	DB	"  :$"
+D6EE                
+D6EE                COMTB:
+D6EE 44 20 20 20    	DB	"D   "	;1
+D6F2 27 D3          	DW	C_DIR
+D6F4 44 49 52 20    	DB	"DIR "	;2
+D6F8 27 D3          	DW	C_DIR
+D6FA 43 4F 50 59    	DB	"COPY"	;3
+D6FE 0B D5          	DW	C_COPY
+D700 43 44 20 20    	DB	"CD  "	;4
+D704 1E D2          	DW	C_CD
+D706 44 45 4C 20    	DB	"DEL "	;5
+D70A 0A D3          	DW	C_DEL
+D70C 50 41 54 48    	DB	"PATH"	;6
+D710 CC D3          	DW	C_PATH
+D712 52 45 4E 20    	DB	"REN "	;7
+D716 14 D3          	DW	C_REN
+D718 54 59 50 45    	DB	"TYPE"	;8
+D71C 29 D6          	DW	C_TYPE
+D71E 52 45 4D 20    	DB	"REM "	;9
+D722 08 D3          	DW	C_REM
 D724                	INCLUDE	"X1DISK2.ASM"
 D724                
 D724                ;	LSX-Dodgers DISK2
@@ -2135,7 +2135,7 @@ D84C CA 51 ED       	JP	Z,_SYS5F
 D84F FE 6F          	CP	06FH		;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
 D851 20 0A          	JR	NZ,_ERROR
 D853 01 1D 01       	LD	BC,011DH
-D856 11 47 01       	LD	DE,VER
+D856 11 48 01       	LD	DE,VER
 D859 21 00 00       	LD	HL,MACD
 D85C AF             	XOR	A
 D85D                _ERROR:

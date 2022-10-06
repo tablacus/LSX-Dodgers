@@ -268,16 +268,33 @@ ESCFLG	EQU	$+1
 INSFLG	EQU	$
 	LD	BC,INSERT	;自己書き換え
 ANK:
+	LD	A,(_COLORF)
+	LD	C,A
+	LD	A,E
+	CP	'a'		;英小文字
+	JR	C,PRT1
+	CP	'z'+1
+	JR	NC,PRT1
+	SET	7,C
+PRT1:
+	CP	$86		;ひらがな1(を－そ)
+	JR	C,PRT2
+	CP	$A0
+	JR	NC,PRT2
+	SET	7,C
+PRT2:
+	CP	$E0		;ひらがな2(たーん)
+	JR	C,PRT3
+	SET	7,C
+PRT3:
 	LD	HL,(_TXADR)
 	LD	A,H
 	ADD	A,0D0H
 	LD	H,A
-	LD	C,D
+	LD	B,D
 	LD	D,CD_TABLE/256
-	LD	A,(_COLORF)
-	LD	(IPCSMC),A
 	LD	A,(DE)
-	LD	D,C
+	LD	D,B
 	CALL	IO_PRINT
 	CALL	CTRL1C
 PRINTE5:
@@ -355,6 +372,7 @@ CTRL02:
 	RET	Z
 	PUSH	DE
 	CALL	_POS
+	LD	D,H
 	LD	A,WIDTH
 	SUB	L
 	LD	C,A
@@ -363,9 +381,22 @@ CTRL02:
 	LD	HL,(_TXADR)
 	ADD	HL,BC
 	LD	B,A
-	LD	E,0		;E:Text
-	LD	A,(_COLORF)	;A:Color
-	JP	IO_BS
+
+	LD	A,(MULINE)
+	CP	D
+	JR	NZ,C02X1
+	LD	DE,WIDTH
+	ADD	HL,DE
+	LD	A,B
+	ADD	A,E
+	LD	B,A
+C02X1:
+	LD	A,(_COLORF)	;C:Color
+	LD	C,A
+	XOR	A		;A:Text
+	CALL	IO_BS
+	POP	DE
+	RET
 
 CTRL05:
 	CALL	_POS
@@ -378,8 +409,9 @@ C08X1:
 	ADD	A,0D0H
 	LD	H,A
 CLLINE:
-	LD	C,0
 	LD	A,(_COLORF)
+	LD	C,A
+	XOR	A
 	JP	IO_CLLINE
 
 CTRL0D:
@@ -441,17 +473,17 @@ CURSOR:
 	RET
 
 CTRL07:
-	LD	A,1
-	LD	HL,0E008H
-	CALL	WRMMIO
-	DEC	L
-	LD	A,036H
-	CALL	WRMMIO
-	LD	L,004H
-	LD	A,0F9H
-	CALL	WRMMIO
-	LD	A,003H
-	CALL	WRMMIO
+	LD	B,0E0H
+	LD	HL,BEEPD+1
+C07X0:
+	LD	C,(HL)
+	INC	HL
+	LD	A,(HL)
+	INC	HL
+	CALL	WRMMIO_BC
+	LD	A,L
+	CP	(BEEPD+1+M7BEEPE-M7BEEPD)&255
+	JR	NZ,C07X0
 	LD	B,16
 C07X1:
 	CALL	RD556VSYNC
@@ -471,6 +503,7 @@ C07X2:
 INSERT:
 	PUSH	DE
 	CALL	_POS
+	LD	D,H
 	LD	A,WIDTH
 	SUB	L
 	LD	B,A
@@ -478,9 +511,24 @@ INSERT:
 	LD	A,H
 	ADD	A,0D0H
 	LD	H,A
-	LD	E,0		;E:Text
-	LD	A,(_COLORF)	;L:Color
-	JP	IO_INS
+	LD	A,(_COLORF)	;C:Color
+	LD	C,A
+	XOR	A		;A:Text
+	CALL	IO_INS
+	OR	A
+	JR	NZ,INS1
+MULINE	EQU	$+1
+	LD	A,-1
+	SUB	D
+	JR	NZ,INS2
+INS1:
+	LD	B,WIDTH
+	CALL	IO_INS
+	LD	A,D
+	LD	(MULINE),A
+INS2:
+	POP	DE
+	RET
 
 CTRL0C:
 	CALL	CTRL0B
@@ -560,8 +608,17 @@ GETL1:
 	JR	GETL1
 GETL1V:
 	LD	E,A
+	CALL	_POS
 	CALL	_PRINT
-
+	LD	A,E
+	CP	$20
+	JR	C,GETL1V1
+	LD	A,L
+	CP	WIDTH-1
+	JR	NZ,GETL1V1
+	LD	A,H
+	LD	(MULINE),A
+GETL1V1:
 	LD	A,E
 	CP	00DH
 	JR	NZ,GETL1
@@ -577,6 +634,22 @@ GETL1V:
 	LD	A,WIDTH
 	SUB	L
 	LD	D,A
+
+	LD	A,(MULINE)
+	SUB	H
+	JR	Z,GL2X
+	INC	A
+	JR	NZ,GL3X
+	DEC	H
+	JR	GL4X
+GL2X:
+	LD	A,$1F
+	CALL	MSG_A
+GL4X:
+	LD	A,D
+	ADD	A,WIDTH
+	LD	D,A
+GL3X:
 	CALL	LOC1
 	LD	C,L
 	LD	A,H
@@ -688,6 +761,7 @@ INKEY2:
 	LD	A,C
 	INC	A
 	JR	NZ,INKEY1
+	DB	$06		;LD B,?? 次の1バイトを飛ばす
 INKEY3:
 	LD	A,(HL)
 	POP	HL
@@ -700,44 +774,34 @@ SCRN:
 	LD	L,A
 	LD	H,DC_TABLE/256
 	LD	A,(HL)
-	CP	'A'
+	CP	'A'		;英小文字チェック
 	JR	C,SCRN1
 	CP	'Z'+1
-	JR	NC,SCRN1
-	ADD	A,'a'-'A'
+	CALL	C,SCRNC
+	CP	$A6		;ひらがなチェック
+	JR	C,SCRN1
+	CP	$E0
+	CALL	C,SCRNC
 SCRN1:
 	POP	HL
 	RET
 
-KEY_TABLE:
-	DB	12H,08H,1EH,1FH,1CH,1DH,5CH,'/'
-	DB	5CH,'^','-',20H,'0','9',',','.'
-	DB	'1','2','3','4','5','6','7','8'
-	DB	'a','b','c','d','e','f','g','h'
-	DB	'i','j','k','l','m','n','o','p'
-	DB	'q','r','s','t','u','v','w','x'
-	DB	'y','z','@','[',']',00H,00H,00H
-	DB	00H,1BH,'=',09H,00H,';',':',0DH
-	DB	00H
-SHIFT_TABLE:
-	DB	12H,08H,1EH,1FH,1CH,1DH,'_','?'
-	DB	'|','~','=',20H,'0',')','<','>'
-	DB	'!','"','#','$','%','&',27H,'('
-	DB	'A','B','C','D','E','F','G','H'
-	DB	'I','J','K','L','M','N','O','P'
-	DB	'Q','R','S','T','U','V','W','X'
-	DB	'Y','Z','`','{','}',00H,00H,00H
-	DB	00H,00H,'=',09H,00H,'+','*',0DH
-	DB	00H
-CTRL_TABLE:
-	DB	12H,08H,1EH,1FH,1CH,1DH,'?','/'
-	DB	'*','+','-',20H,'0','9',',','.'
-	DB	'1','2','3','4','5','6','7','8'
-	DB	01H,02H,03H,04H,05H,06H,07H,08H
-	DB	09H,0AH,0BH,0CH,0DH,0EH,0FH,10H
-	DB	11H,12H,13H,14H,15H,16H,17H,18H
-	DB	19H,1AH,1BH,'[',']',00H,00H,00H
-	DB	00H,00H,'=',09H,00H,';',':',0DH
-	DB	00H
-
-
+SCRNC:
+	LD	L,A
+	LD	H,B
+	SET	3,B
+	CALL	RDMMIO_BC
+	LD	B,H
+	BIT	7,A
+	LD	A,L
+	RET	Z
+	CP	'Z'+1
+	JR	C,SCRNC_ADD
+	CP	$C0
+	JR	C,SCRNC_SUB
+SCRNC_ADD:
+	ADD	A,$20
+	RET
+SCRNC_SUB:
+	SUB	$20
+	RET

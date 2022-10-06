@@ -3,7 +3,7 @@
 ;	MZ-700/1500
 
 ;	EMM DRIVER
-
+;	1セクタ可変(256/512/1024)
 
 EDWT:
 	PUSH	AF
@@ -56,3 +56,70 @@ EADR1:				;読み込むセクタ数と1クラスタのセクタ数を掛ける
 	RET	C
 	ADD	A,A
 	JR	EADR1
+
+;	CMOS BACKUP MEMORY DRIVER(32KB)
+;	1セクタ256
+
+CDWT:
+	LD	A,B
+	LD	C,(IX+013H)	;DPB_13_UNITNO
+	IN	B,(C)		;アドレスカウンタを0000にリセット
+	OUT	(C),E		;W)アドレスカウンタ上位
+	INC	C		;C=F9
+	INC	C		;C=FA
+	LD	B,0
+CDWT1:
+	OTIR			;W)データ書き込み・アドレスカウンタ+1
+	INC	DE
+	DEC	A
+	JR	NZ,CDWT1
+	AND	A
+	RET
+
+CDRD:
+	LD	A,B
+	LD	C,(IX+013H)	;DPB_13_UNITNO
+	IN	B,(C)		;アドレスカウンタを0000にリセット
+	OUT	(C),E		;W)アドレスカウンタ上位
+	INC	C		;C=F9
+	LD	B,0
+CDRD1:
+	INIR			;R)データ読み出し・アドレスカウンタ+1
+	INC	DE
+	DEC	A
+	JR	NZ,CDRD1
+	AND	A
+	RET
+
+;	RAM DISK DRIVER (64KB)
+;	1セクタ256
+
+RDWT:
+	LD	A,B
+	LD	B,E		;B=アドレスカウンタ上位
+	LD	C,0EBH
+	OUT	(C),0		;0=アドレスカウンタ下位
+	DEC	C		;EA(W)データ書き込み・アドレスカウンタ+1
+	LD	B,0
+RDWT1:
+	OTIR
+	INC	DE
+	DEC	A
+	JR	NZ,RDWT1
+	AND	A
+	RET
+
+RDRD:
+	LD	A,B
+	LD	B,E		;B=アドレスカウンタ上位
+	LD	C,0EBH
+	OUT	(C),0		;0=アドレスカウンタ下位
+	DEC	C		;EA(R)データ読み出し・アドレスカウンタ+1
+	LD	B,0
+RDRD1:
+	INIR
+	INC	DE
+	DEC	A
+	JR	NZ,RDRD1
+	AND	A
+	RET
