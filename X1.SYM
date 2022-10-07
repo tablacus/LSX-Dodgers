@@ -1,11 +1,11 @@
 0000*mac              	
-0001*ver_1            	0004*ver_2            	0004*ver_3            	
 CB00*run              	D106*bdos             	EF00*workad           	
 F200*fatbf            	FA00*dtbuf            	FE00*keybf            	
 FF00*kbuf             	FFCA*extsp            	FFD9*trap38           	
 0050*width            	0018*line             	0007*colorf           	
-0009*coms             	1D00*macw             	0000*macd             	
-0148*ver              	0005*system           	000F*jp_hl            	
+0009*coms             	0001*ver_1            	0004*ver_2            	
+0005*ver_3            	1D00*macw             	0000*macd             	
+0145*ver              	0005*system           	000F*jp_hl            	
 005C*fcb1             	006C*fcb2             	005D*fcb1fn           	
 006D*fcb2fn           	0080*dta1             	FFCA*extbio           	
 CB04 start            	CB18 init             	CB3B inisio           	

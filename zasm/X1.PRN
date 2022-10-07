@@ -8,9 +8,6 @@
                       	;	X1/turbo/Z
                       	
   0000                	MAC	EQU	0		;X1
-  0001                	VER_1   EQU	1
-  0004                	VER_2   EQU	4
-  0004                	VER_3   EQU	4
                       	
   CB00                	RUN	EQU	0CB00H
   D106                	BDOS	EQU	0D106H
@@ -31,9 +28,12 @@
                       	
                       	;	LSX-Dodgers DEF
                       	
+  0001                	VER_1   EQU	1
+  0004                	VER_2   EQU	4
+  0005                	VER_3   EQU	5
   1D00                	MACW	EQU	MAC + 01D00H	;機種フラグとLD判別フラグ
   0000                	MACD	EQU	MAC + 00000H	;機種フラグとデバイスフラグ
-  0148                	VER	EQU	VER_1 * 256 + VER_2 * 17 + VER_3
+  0145                	VER	EQU	VER_1 * 256 + VER_2 * 16 + VER_3
                       	
   0005                	SYSTEM	EQU	00005H
   000F                	JP_HL	EQU	0000FH
@@ -63,7 +63,7 @@
                       	;	X1/turbo/Z
                       	
   CB00  001D          		DW	MACW
-  CB02  4801          		DW	VER
+  CB02  4501          		DW	VER
                       	
   CB04                	START:
   CB04  F3            		DI
@@ -250,7 +250,7 @@
   CC3A  3EFF          		LD	A,KBUF/256
   CC3C  321F00        		LD	(0001FH),A
                       	
-  CC3F  214801        		LD	HL,VER
+  CC3F  214501        		LD	HL,VER
   CC42  225A00        		LD	(0005AH),HL
                       	
   CC45  3EE6          		LD	A,0E6H
@@ -612,7 +612,7 @@
                       	
   CEC0  4C53582D446F64	INIMES:	DB	"LSX-Dodgers for X1/turbo version "
   CEE1  312E          		DB	030H + VER_1, '.'
-  CEE3  3434          		DB	030H + VER_2 ,030H + VER_3
+  CEE3  3435          		DB	030H + VER_2 ,030H + VER_3
   CEE5  2047616B750D0A		DB	' Gaku',0DH,0AH
   CEEC  00            		DB	0
                       	
@@ -2122,7 +2122,7 @@
   D84F  FE6F          		CP	06FH		;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
   D851  200A          		JR	NZ,_ERROR
   D853  011D01        		LD	BC,011DH
-  D856  114801        		LD	DE,VER
+  D856  114501        		LD	DE,VER
   D859  210000        		LD	HL,MACD
   D85C  AF            		XOR	A
   D85D                	_ERROR:
@@ -6470,22 +6470,22 @@
                       	
                       	;	G:
                       	
-  F1C0  0100          		DW	1	;DPB_00_FATLN
+  F1C0  0200          		DW	2	;DPB_00_FATLN
   F1C2  24D7          		DW	GDRD	;DPB_02_DRD
   F1C4  3BD7          		DW	GDWT	;DPB_04_DWT
-  F1C6  F9            		DB	0F9H	;DPB_06_FATID
-  F1C7  04            		DB	4	;DPB_07_SECPCL
-  F1C8  3000          		DW	48	;DPB_08_MAXCL
+  F1C6  FA            		DB	0FAH	;DPB_06_FATID
+  F1C7  01            		DB	1	;DPB_07_SECPCL
+  F1C8  B800          		DW	184	;DPB_08_MAXCL
   F1CA  00            		DB	0	;DPB_0A_FDMODE
-  F1CB  04            		DB	4	;DPB_0B_DIRSCNT
+  F1CB  07            		DB	7	;DPB_0B_DIRSCNT
   F1CC  00            		DB	0	;DPB_0C_MAXCYL
   F1CD  01            		DB	1	;DPB_0D_MAXSEC
-  F1CE  00            		DB	0	;DPB_0E_FATPS
+  F1CE  01            		DB	1	;DPB_0E_FATPS
   F1CF  01            		DB	1	;DPB_0F_BPS
-  F1D0  0400          		DW	4	;DPB_10_DIRPS
+  F1D0  0300          		DW	3	;DPB_10_DIRPS
   F1D2  05            		DB	5	;DPB_12_DEVICE
   F1D3  01            		DB	1	;DPB_13_UNITNO
-  F1D4  0000          		DW	0	;DPB_14_ADDCL16
+  F1D4  0800          		DW	8	;DPB_14_ADDCL16
   F1D6  0000          		DW	0	;DPB_16
   F1D8  0000          		DW	0	;DPB_18
   F1DA  0000          		DW	0	;DPB_1A_SDIR

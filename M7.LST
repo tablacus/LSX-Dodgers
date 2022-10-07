@@ -9,9 +9,6 @@
                                 ;   MZ-700/1500
                                 
        0001                     MAC EQU 1   ;MZ-700/1500
-       0001                     VER_1   EQU 1
-       0004                     VER_2   EQU 4
-       0004                     VER_3   EQU 4
                                 
        8080                     RUN EQU 08080H
        8000                     OFFSET  EQU RUN-128
@@ -32,9 +29,12 @@
                                 
                                 ;   LSX-Dodgers DEF
                                 
+       0001                     VER_1   EQU 1
+       0004                     VER_2   EQU 4
+       0005                     VER_3   EQU 5
        1D01                     MACW    EQU MAC + 01D00H    ;機種フラグとLD判別フラグ
        0001                     MACD    EQU MAC + 00000H    ;機種フラグとデバイスフラグ
-       0148                     VER EQU VER_1 * 256 + VER_2 * 17 + VER_3
+       0145                     VER EQU VER_1 * 256 + VER_2 * 16 + VER_3
                                 
        0005                     SYSTEM  EQU 00005H
        000F                     JP_HL   EQU 0000FH
@@ -67,7 +67,7 @@
                                 
 000080 8080 C38780          10      JP  START
 000083 8083 011D                    DW  MACW
-000085 8085 4801                    DW  VER
+000085 8085 4501                    DW  VER
                                 
        8087                     START:
 000087 8087 F3               4      DI
@@ -137,7 +137,7 @@
 000108 8108 3EFF             7      LD  A,KBUF/256
 00010A 810A 321F00          13      LD  (0001FH),A
                                 
-00010D 810D 214801          10      LD  HL,VER
+00010D 810D 214501          10      LD  HL,VER
 000110 8110 225A00          16      LD  (0005AH),HL
                                 
 000113 8113 214981          10      LD  HL,INIMES
@@ -169,7 +169,7 @@
             204D5A2D3730302F    
             313530302076        
 000167 8167 312E                    DB  030H + VER_1, '.'
-000169 8169 3434                    DB  030H + VER_2 ,030H + VER_3
+000169 8169 3435                    DB  030H + VER_2 ,030H + VER_3
                                 ;   DB  8,'PR.2'            ;表示
 00016B 816B 2047616B750D0A          DB  ' Gaku',0DH,0AH
 000172 8172 00                      DB  0
@@ -1284,7 +1284,7 @@
 0008B6 D61A FE6F             7      CP  06FH        ;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
 0008B8 D61C 200A            12      JR  NZ,_ERROR
 0008BA D61E 011D01          10      LD  BC,011DH
-0008BD D621 114801          10      LD  DE,VER
+0008BD D621 114501          10      LD  DE,VER
 0008C0 D624 210100          10      LD  HL,MACD
 0008C3 D627 AF               4      XOR A
        D628                     _ERROR:
@@ -5623,19 +5623,19 @@
                                 
                                 ;   F:
                                 
-00243C F1A0 0100                    DW  1   ;DPB_00_FATLN
+00243C F1A0 0200                    DW  2   ;DPB_00_FATLN
 00243E F1A2 03EC                    DW  RDRD    ;DPB_02_DRD
 002440 F1A4 F2EB                    DW  RDWT    ;DPB_04_DWT
 002442 F1A6 FA                      DB  0FAH    ;DPB_06_FATID
 002443 F1A7 01                      DB  1   ;DPB_07_SECPCL
 002444 F1A8 F600                    DW  246 ;DPB_08_MAXCL
 002446 F1AA 00                      DB  0   ;DPB_0A_FDMODE
-002447 F1AB 0A                      DB  10  ;DPB_0B_DIRSCNT
+002447 F1AB 09                      DB  9   ;DPB_0B_DIRSCNT
 002448 F1AC 00                      DB  0   ;DPB_0C_MAXCYL
 002449 F1AD 00                      DB  0   ;DPB_0D_MAXSEC
-00244A F1AE 00                      DB  0   ;DPB_0E_FATPS
+00244A F1AE 01                      DB  1   ;DPB_0E_FATPS
 00244B F1AF 01                      DB  1   ;DPB_0F_BPS
-00244C F1B0 0200                    DW  2   ;DPB_10_DIRPS
+00244C F1B0 0300                    DW  3   ;DPB_10_DIRPS
 00244E F1B2 0F                      DB  00FH    ;DPB_12_DEVICE
 00244F F1B3 00                      DB  0   ;DPB_13_UNITNO
 002450 F1B4 0A00                    DW  10  ;DPB_14_ADDCL16

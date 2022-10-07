@@ -8,9 +8,6 @@
 0000                ;	X1/turbo/Z
 0000                
 0000 00 00 00 00    MAC	EQU	0		;X1
-0000 00 00 00 01    VER_1   EQU	1
-0000 00 00 00 04    VER_2   EQU	4
-0000 00 00 00 04    VER_3   EQU	4
 0000                
 0000 00 00 CB 00    RUN	EQU	0CB00H
 0000 00 00 D1 06    BDOS	EQU	0D106H
@@ -30,9 +27,12 @@
 0000                
 0000                ;	LSX-Dodgers DEF
 0000                
+0000 00 00 00 01    VER_1   EQU	1
+0000 00 00 00 04    VER_2   EQU	4
+0000 00 00 00 05    VER_3   EQU	5
 0000 00 00 1D 00    MACW	EQU	MAC + 01D00H	;機種フラグとLD判別フラグ
 0000 00 00 00 00    MACD	EQU	MAC + 00000H	;機種フラグとデバイスフラグ
-0000 00 00 01 48    VER	EQU	VER_1 * 256 + VER_2 * 17 + VER_3
+0000 00 00 01 45    VER	EQU	VER_1 * 256 + VER_2 * 16 + VER_3
 0000                
 0000 00 00 00 05    SYSTEM	EQU	00005H
 0000 00 00 00 0F    JP_HL	EQU	0000FH
@@ -62,7 +62,7 @@ CB00                ;	LSX-Dodgers INIT
 CB00                ;	X1/turbo/Z
 CB00                
 CB00 00 1D          	DW	MACW
-CB02 48 01          	DW	VER
+CB02 45 01          	DW	VER
 CB04                
 CB04                START:
 CB04 F3             	DI
@@ -249,7 +249,7 @@ CC3A
 CC3A 3E FF          	LD	A,KBUF/256
 CC3C 32 1F 00       	LD	(0001FH),A
 CC3F                
-CC3F 21 48 01       	LD	HL,VER
+CC3F 21 45 01       	LD	HL,VER
 CC42 22 5A 00       	LD	(0005AH),HL
 CC45                
 CC45 3E E6          	LD	A,0E6H
@@ -621,7 +621,7 @@ CED8 20 76 65 72
 CEDC 73 69 6F 6E
 CEE0 20
 CEE1 31 2E          	DB	030H + VER_1, '.'
-CEE3 34 34          	DB	030H + VER_2 ,030H + VER_3
+CEE3 34 35          	DB	030H + VER_2 ,030H + VER_3
 CEE5 20 47 61 6B    	DB	' Gaku',0DH,0AH
 CEE9 75 0D 0A
 CEEC 00             	DB	0
@@ -2135,7 +2135,7 @@ D84C CA 51 ED       	JP	Z,_SYS5F
 D84F FE 6F          	CP	06FH		;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
 D851 20 0A          	JR	NZ,_ERROR
 D853 01 1D 01       	LD	BC,011DH
-D856 11 48 01       	LD	DE,VER
+D856 11 45 01       	LD	DE,VER
 D859 21 00 00       	LD	HL,MACD
 D85C AF             	XOR	A
 D85D                _ERROR:
@@ -6513,22 +6513,22 @@ F1BC 42 52 41 4D    	DB	"BRAM"	;DPB_1C_NAME
 F1C0                
 F1C0                ;	G:
 F1C0                
-F1C0 01 00          	DW	1	;DPB_00_FATLN
+F1C0 02 00          	DW	2	;DPB_00_FATLN
 F1C2 24 D7          	DW	GDRD	;DPB_02_DRD
 F1C4 3B D7          	DW	GDWT	;DPB_04_DWT
-F1C6 F9             	DB	0F9H	;DPB_06_FATID
-F1C7 04             	DB	4	;DPB_07_SECPCL
-F1C8 30 00          	DW	48	;DPB_08_MAXCL
+F1C6 FA             	DB	0FAH	;DPB_06_FATID
+F1C7 01             	DB	1	;DPB_07_SECPCL
+F1C8 B8 00          	DW	184	;DPB_08_MAXCL
 F1CA 00             	DB	0	;DPB_0A_FDMODE
-F1CB 04             	DB	4	;DPB_0B_DIRSCNT
+F1CB 07             	DB	7	;DPB_0B_DIRSCNT
 F1CC 00             	DB	0	;DPB_0C_MAXCYL
 F1CD 01             	DB	1	;DPB_0D_MAXSEC
-F1CE 00             	DB	0	;DPB_0E_FATPS
+F1CE 01             	DB	1	;DPB_0E_FATPS
 F1CF 01             	DB	1	;DPB_0F_BPS
-F1D0 04 00          	DW	4	;DPB_10_DIRPS
+F1D0 03 00          	DW	3	;DPB_10_DIRPS
 F1D2 05             	DB	5	;DPB_12_DEVICE
 F1D3 01             	DB	1	;DPB_13_UNITNO
-F1D4 00 00          	DW	0	;DPB_14_ADDCL16
+F1D4 08 00          	DW	8	;DPB_14_ADDCL16
 F1D6 00 00          	DW	0	;DPB_16
 F1D8 00 00          	DW	0	;DPB_18
 F1DA 00 00          	DW	0	;DPB_1A_SDIR

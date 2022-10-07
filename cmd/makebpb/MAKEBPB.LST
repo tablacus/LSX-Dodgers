@@ -1,0 +1,169 @@
+                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.0.0, LST:Full:4
+                                ;
+                                ;   MAKEBPB by Gaku
+                                ;
+                                ;   Make BPB from DPB
+                                ;
+       0005                     SYSTEM  EQU $0005
+       000F                     JP_HL   EQU $000F
+       005C                     FCB1    EQU $005C
+       0080                     DTA EQU $0080
+                                
+000000 0100                         ORG $0100
+000000 0100 C30301          10      JP  START
+       0103                     START:
+000003 0103 11F901          10      LD  DE,TITLE
+000006 0106 0E09             7      LD  C,9     ;文字列出力
+000008 0108 CD0500          17      CALL    SYSTEM
+00000B 010B 3A5C00          13      LD  A,(FCB1)
+00000E 010E B7               4      OR  A
+00000F 010F 2010            12      JR  NZ,MAIN
+       0111                     SHOW_USAGE:
+000011 0111 110902          10      LD  DE,MUSAGE
+       0114                     SHOW_MESSAGE:
+000014 0114 0E09             7      LD  C,9     ;文字列出力
+000016 0116 CD0500          17      CALL    SYSTEM
+000019 0119 C30000          10      JP  0
+       011C                     NOT_SUPPOTED:
+00001C 011C 112102          10      LD  DE,ERRMES
+00001F 011F 18F3            12      JR  SHOW_MESSAGE
+       0121                     MAIN:
+000021 0121 0E6F             7      LD  C,$6F       ;MSX-DOS のバージョン番号の獲得(_DOSVER)
+000023 0123 CD0500          17      CALL    SYSTEM
+000026 0126 38F4            12      JR  C,NOT_SUPPOTED
+000028 0128 211D01          10      LD  HL,$011D    ;LSX-Dodgers
+00002B 012B ED42            15      SBC HL,BC
+00002D 012D 20ED            12      JR  NZ,NOT_SUPPOTED
+                                
+00002F 012F DD210000        14      LD  IX,0
+000033 0133 3A5C00          13      LD  A,(FCB1)
+000036 0136 3D               4      DEC A
+000037 0137 5F               4      LD  E,A
+000038 0138 0E1F             7      LD  C,$1F       ;ディスク装置のパラメータの読み出し
+00003A 013A CD0500          17      CALL    SYSTEM
+00003D 013D 38D2            12      JR  C,SHOW_USAGE
+00003F 013F DD7C             9      LD  A,IXH       ;旧バージョンはIXにDPBが入らない
+000041 0141 B7               4      OR  A
+000042 0142 28D8            12      JR  Z,NOT_SUPPOTED
+                                
+000044 0144 DDCB126E        20      BIT 5,(IX+$12)  ;デバイス情報(DPB_12_DEVICE)
+000048 0148 20D2            12      JR  NZ,NOT_SUPPOTED ;BPBがすでに存在する場合はエラー
+                                
+00004A 014A DD7E0E          19      LD  A,(IX+$0E)  ;FAT領域の先頭論理セクタ番号(DPB_0E_FATPS)
+00004D 014D B7               4      OR  A
+00004E 014E 28CC            12      JR  Z,NOT_SUPPOTED  ;BPB領域が無い場合はエラー
+                                
+000050 0150 215302          10      LD  HL,BPB+11   ;1KBほどゼロクリア
+000053 0153 115402          10      LD  DE,BPB+12
+000056 0156 01F503          10      LD  BC,1013
+000059 0159 EDB0                    LDIR
+                                
+00005B 015B DD7E0F          19      LD  A,(IX+$0F)  ;FAT情報と論理セクタのサイズ(DPB_0F_BPS)
+00005E 015E E607             7      AND 7
+000060 0160 325402          13      LD  (BPB+12),A  ;BPB_BytsPerSec
+                                
+000063 0163 DD7E07          19      LD  A,(IX+7)    ;1クラスタの論理セクタ数(DPB_07_SECPCL)
+000066 0166 325502          13      LD  (BPB+13),A  ;BPB_SecPerClus
+                                
+000069 0169 DD7E0E          19      LD  A,(IX+$0E)  ;FAT領域の先頭論理セクタ番号(DPB_0E_FATPS)
+00006C 016C 325602          13      LD  (BPB+14),A  ;BPB_RsvdSecCnt
+                                
+00006F 016F DD7E0F          19      LD  A,(IX+$0F)  ;FAT情報と論理セクタのサイズ(DPB_0F_BPS)
+000072 0172 87               4      ADD A,A
+000073 0173 3E01             7      LD  A,1
+000075 0175 CE00             7      ADC A,0
+000077 0177 325802          13      LD  (BPB+16),A  ;BPB_NumFATs
+                                
+00007A 017A DD6E0B          19      LD  L,(IX+$0B)  ;ルートディレクトリ領域の論理セクタ数(DPB_0B_DIRSCNT)
+00007D 017D 2600             7      LD  H,0
+00007F 017F DD7E0F          19      LD  A,(IX+$0F)  ;FAT情報と論理セクタのサイズ(DPB_0F_BPS)
+000082 0182 B7               4      OR  A
+000083 0183 CA1C01          10      JP  Z,NOT_SUPPOTED
+000086 0186 87               4      ADD A,A
+000087 0187 87               4      ADD A,A
+000088 0188 87               4      ADD A,A
+000089 0189 CDF001          17      CALL    MUL_HL_A
+00008C 018C 225902          16      LD  (BPB+17),HL ;BPB_RootEntCnt
+                                
+00008F 018F DD6E08          19      LD  L,(IX+8)    ;総クラスタ数(DPB_08_MAXCL)
+000092 0192 DD6609          19      LD  H,(IX+9)    ;
+000095 0195 DD7E0F          19      LD  A,(IX+$0F)  ;FAT情報と論理セクタのサイズ(DPB_0F_BPS)
+000098 0198 110000          10      LD  DE,0
+00009B 019B CDF001          17      CALL    MUL_HL_A
+00009E 019E DD4E14          19      LD  C,(IX+$14)  ;データ格納領域の先頭論理セクタ番号(DPB_14_ADDCL16)
+0000A1 01A1 DD4615          19      LD  B,(IX+$15)  ;
+0000A4 01A4 09              11      ADD HL,BC
+0000A5 01A5 7B               4      LD  A,E
+0000A6 01A6 CE00             7      ADC A,0
+0000A8 01A8 5F               4      LD  E,A
+0000A9 01A9 53               4      LD  D,E
+0000AA 01AA CE00             7      ADC A,0
+0000AC 01AC 57               4      LD  D,A
+0000AD 01AD B3               4      OR  E
+0000AE 01AE 2005            12      JR  NZ,SEC32
+0000B0 01B0 225B02          16      LD  (BPB+19),HL ;BPB_TotSec16
+0000B3 01B3 1807            12      JR  SEC16
+       01B5                     SEC32:
+0000B5 01B5 226802          16      LD  (BPB+32),HL ;BPB_TotSec32
+0000B8 01B8 ED536A02        20      LD  (BPB+34),DE ;
+       01BC                     SEC16:
+0000BC 01BC DD7E06          19      LD  A,(IX+6)    ;メディアバイト(DPB_06_FATID)
+0000BF 01BF 325D02          13      LD  (BPB+21),A  ;BPB_Media
+                                
+0000C2 01C2 DD6E00          19      LD  L,(IX+0)    ;FAT領域のセクタ単位でのサイズ(DPB_00_FATLN)
+0000C5 01C5 DD6601          19      LD  H,(IX+1)
+0000C8 01C8 225E02          16      LD  (BPB+22),HL ;BPB_FATSz16
+                                
+0000CB 01CB 114802          10      LD  DE,BPB
+0000CE 01CE 0E1A             7      LD  C,$1A       ;DTAの設定(_SETDTA)
+0000D0 01D0 CD0500          17      CALL    SYSTEM
+                                
+0000D3 01D3 110000          10      LD  DE,0        ;書き込みを開始する論理セクタ番号
+0000D6 01D6 2601             7      LD  H,1
+0000D8 01D8 3A5C00          13      LD  A,(FCB1)
+0000DB 01DB 3D               4      DEC A
+0000DC 01DC 6F               4      LD  L,A     ;書き込むディスクドライブの番号
+                                
+0000DD 01DD 0E30             7      LD  C,$30       ;論理セクタを用いた書き込み(_WRABS)
+0000DF 01DF CD0500          17      CALL    SYSTEM
+0000E2 01E2 2806            12      JR  Z,OK
+0000E4 01E4 113202          10      LD  DE,ERRMES2
+0000E7 01E7 C31401          10      JP  SHOW_MESSAGE
+       01EA                     OK:
+0000EA 01EA 113B02          10      LD  DE,COMPLETED
+0000ED 01ED C31401          10      JP  SHOW_MESSAGE
+                                
+       01F0                     MUL_HL_A:
+0000F0 01F0 0F               4      RRCA
+0000F1 01F1 D8              11      RET C
+0000F2 01F2 29              11      ADD HL,HL
+0000F3 01F3 CB13             8      RL  E
+0000F5 01F5 CB12             8      RL  D
+0000F7 01F7 18F7            12      JR  MUL_HL_A
+                                
+       01F9                     TITLE:
+0000F9 01F9 6D616B6562706220        DB  "makebpb v1.00"
+            76312E3030          
+       0206                     CRLF:
+000106 0206 0D0A                    DB  $0D,$0A
+000108 0208 24                      DB  '$'
+       0209                     MUSAGE:
+000109 0209 75736167653A204D        DB  "usage: MAKEBPB drive:",$0D,$0A
+            414B454250422064    
+            726976653A0D0A      
+000120 0220 24                      DB  '$'
+       0221                     ERRMES:
+000121 0221 4E6F742073757070        DB  "Not supported.",$0D,$0A,'$'
+            6F727465642E0D0A    
+            24                  
+       0232                     ERRMES2:
+000132 0232 4572726F72210D0A        DB  "Error!",$0D,$0A,'$'
+            24                  
+       023B                     COMPLETED:
+00013B 023B 436F6D706C657465        DB  "Completed.",$0D,$0A,'$'
+            642E0D0A24          
+                                
+       0248                     BPB:
+000148 0248 EBFE904C44202020        DB  $EB,$FE,$90,"LD      ", 0
+            20202000            
+[EOF:MAKEBPB.ASM:SHIFT_JIS]
