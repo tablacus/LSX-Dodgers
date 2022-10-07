@@ -17,29 +17,29 @@ CD10 tz1              	CD21 tz2              	CD27 bank
 CD2E bank1            	CD3E bank2            	CD59 nobank           	
 CD59 emm              	CD66 echeck1          	CD8C echeck2          	
 CDA1 noemm            	CDA1 keyrep           	CDAD keyr1            	
-CDFF init0            	CE07 init1            	CE39 eadr2            	
-CE55 eadr0            	CE5E chkctc           	CE62 inictc1          	
-CE85 setcrtc          	CE89 setcrt1          	CEA4 calc_fatln       	
-CEB4 autod            	CEBD autodv           	CEC0 inimes           	
-CEED _c8025h          	CEFD textdt           	CF04 siodata          	
-CF10 at_scr1          	CF1F at_scrup1        	CF36 at_scrcl         	
-CF41 at_upsub         	CF45 at_upsub1        	CF51 diskc            	
-CF57 diskd            	CF62 at_delp          	CF6E at_delp1         	
-CF78 at_delp2         	CF85 dhlpat           	CF8F at_delp3         	
-CF98 at_ignore        	CF9A at_errz          	CF9B at_err           	
-CF9E at_scre          	CF9E at_wttrk         	CFA4 at_dwt           	
-CFA6 at_wttrk1        	CFA9 dwtbl            	CFB2 dwt0             	
-CFC6 dwt1             	CFC7 dwt2             	CFD0 dwt3             	
-CFD5 dwt4             	CFE9 diskok_wt        	CFE9 at_wtb           	
-CFEE errw             	CFF0 errz             	CFF5 errdw            	
-CFFF at_drd           	D004 drdbl            	D00D drd0             	
-D021 drd1             	D02F drd3             	D040 diskok_rd        	
-D040 at_rdb           	D045 errdr            	D04F at_cpue          	
-D04F at_edwt          	D052 at_edwt0         	D054 at_edwt1         	
-D063 at_edrd          	D066 at_edrd0         	D068 at_edrd1         	
-D077 at_eadr          	D095 at_emme          	D095 at_trap38        	
-D0A4 prhx             	D0AD prhx2            	D0B5 prhx3            	
-D0BC at_trape         	2F44*at_rt            	D0BC inite            	
+CDED init0            	CDF5 init1            	CE27 eadr2            	
+CE43 eadr0            	CE4C chkctc           	CE50 inictc1          	
+CE73 setcrtc          	CE77 setcrt1          	CE92 calc_fatln       	
+CEA2 autod            	CEAB autodv           	CEAE inimes           	
+CEDB _c8025h          	CEEB textdt           	CEF2 siodata          	
+CEFE at_scr1          	CF0D at_scrup1        	CF24 at_scrcl         	
+CF2F at_upsub         	CF33 at_upsub1        	CF3F diskc            	
+CF45 diskd            	CF50 at_delp          	CF5C at_delp1         	
+CF66 at_delp2         	CF73 dhlpat           	CF7D at_delp3         	
+CF86 at_ignore        	CF88 at_errz          	CF89 at_err           	
+CF8C at_scre          	CF8C at_wttrk         	CF92 at_dwt           	
+CF94 at_wttrk1        	CF97 dwtbl            	CFA0 dwt0             	
+CFB4 dwt1             	CFB5 dwt2             	CFBE dwt3             	
+CFC3 dwt4             	CFD7 diskok_wt        	CFD7 at_wtb           	
+CFDC errw             	CFDE errz             	CFE3 errdw            	
+CFED at_drd           	CFF2 drdbl            	CFFB drd0             	
+D00F drd1             	D01D drd3             	D02E diskok_rd        	
+D02E at_rdb           	D033 errdr            	D03D at_cpue          	
+D03D at_edwt          	D040 at_edwt0         	D042 at_edwt1         	
+D051 at_edrd          	D054 at_edrd0         	D056 at_edrd1         	
+D065 at_eadr          	D083 at_emme          	D083 at_trap38        	
+D092 prhx             	D09B prhx2            	D0A3 prhx3            	
+D0AA at_trape         	2F56*at_rt            	D0AA inite            	
 D109 wboot1           	D12E setcrt0          	D132 setcrt2          	
 D13F setcrt3          	D15F command          	D187 comanl           	
 D1A9 comb             	D1AD comb2            	D1C4 cex1             	
@@ -88,7 +88,7 @@ D7A3 brw2             	D7B1 banksp           	D7B6 btfr
 D7B8 btfr1            	D7CC edwt             	D7D0 edrd             	
 D7D2 edwt1            	D803 dma_add_sec      	D808 edmad            	
 D80C dmalen           	D814 dmab             	D817 emme             	
-077D*at_re            	D817 bdos0            	D81E bdos2            	
+078F*at_re            	D817 bdos0            	D81E bdos2            	
 D829 bdsp             	D82D bdos1            	D82E bdos1x           	
 D835 dos1             	D840 _dos2            	D85D _error           	
 D85F _sys09           	D860 _sx09            	D86B msx1             	
@@ -161,7 +161,7 @@ E029 scrcl            	E034 scrn             	E053 scrn1
 E056 scrne            	E059 scrnx            	E05C pos              	
 E065 pos1             	E070 getl             	E079 getl1            	
 E088 getl1v           	E0B6 getl2            	E0BF getl3            	
-E0CA inkey            	E0DC inkey1           	10BA*at_rs            	
+E0CA inkey            	E0DC inkey1           	10CC*at_rs            	
 E0DF filec            	E0E2 filec2           	E0EA file             	
 E10D devi1            	E11B noroot           	E11B setdir           	
 E123 setdir1          	E147 filed            	E14F file2            	
@@ -269,7 +269,7 @@ EE54 disk1            	EE5B diskr            	EE60 disk2
 EE67 dmapat           	EE9F diske2           	EEA9 errf             	
 EEAA delp             	EEB7 delp1            	EEC1 delp2            	
 EEDA ignore           	EEDC err              	EEDF dmad             	
-EEEA dmahl            	EEEF dmae             	1E98*at_r             	
+EEEA dmahl            	EEEF dmae             	1EAA*at_r             	
 EEEF at_work          	EF00 cpm_boot         	EF03 _sys00           	
 EF03 cpm_wboot        	EF06 cpm_const        	EF09 _sys07           	
 EF09 cpm_conin        	EF0C cpm_conout       	EF0F decbf            	
