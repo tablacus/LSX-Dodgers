@@ -195,7 +195,7 @@ https://github.com/ho-ogino/LD-hdd/releases
 エミュレータでは以下の方法でイメージファイルを作成する事ができます。現在は512MBまで作成可能です。
 
 ## WindowsでのVHDファイルの作り方
-https://github.com/tablacus/LSX-Dodgers/issues/4
+[WindowsでのVHDファイルの作り方](https://github.com/tablacus/LSX-Dodgers/issues/4)
 
 VHDはWindowsにもそのままマウントできるのでファイルのやり取りにも使えます。
 
@@ -210,7 +210,13 @@ VHDはWindowsにもそのままマウントできるのでファイルのやり�
 1. 作成したイメージファイルをXmillennium系と同じフォルダに`sasi0_0.hdd`という名前にリネームして置いておきます。
 2. フロッピーから`hdd.com`を実行
 
-# アセンブラ  
+# 基本的なシステムコールの使い方のサンプル
+
+https://github.com/tablacus/LSX-Dodgers/wiki
+
+wikiに文字列を表示したり、ファイルを読み出したり、書き込んだり、削除したりするサンプルがあります。
+
+# アセンブラ
 
 X1/turbo/Z版はOHM-Z80とZASM.COM/ZASM.EXE/AASM/AILZ80ASMでアセンブルできます。  
 make.jsを使うと zasm に ZASM.COM/ZASM.EXE用にコンバートします。  
