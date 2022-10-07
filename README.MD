@@ -125,7 +125,7 @@ http://mzakd.cool.coocan.jp/mz-memories/mz700win.html##6
 
 ### 互換フォント
 
-MZ-700WIN /EmuZ-700フォントデータの作成
+MZ-700WIN /EmuZ-700フォントデータの作成  
 http://mzakd.cool.coocan.jp/starthp/subpage15.html
 
 
