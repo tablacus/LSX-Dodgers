@@ -35,7 +35,7 @@ BEEPD:	DB	0,08EH,1,0,00BH,0,00CH,010H
 CHECK:	DB	0
 
 OK:	DB	"OK$"
-SKIP:	DB	"Skip$"
+	DS	5
 COMERM:	DB	"Error!$"
 ;	システムワークエリア
 ;	_CYL0:アドレス下位1バイトが080Hになるように

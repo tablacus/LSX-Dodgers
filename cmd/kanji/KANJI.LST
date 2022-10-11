@@ -1,0 +1,320 @@
+                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.0.0, LST:Full:4
+                                ;
+                                ;   KANJI by Gaku
+                                ;
+                                ;
+       0005                     SYSTEM  EQU $0005
+       000F                     JP_HL   EQU $000F
+       005C                     FCB1    EQU $005C
+       0080                     DTA EQU $0080
+                                
+000000 0100                         ORG $0100
+000000 0100 C30301          10      JP  START
+       0103                     START:
+000003 0103 116502          10      LD  DE,TITLE
+000006 0106 0E09             7      LD  C,9     ;文字列出力
+000008 0108 CD0500          17      CALL    SYSTEM
+       010B                     MAIN:
+00000B 010B 3A1800          13      LD  A,(0018H)
+00000E 010E 3C               4      INC A
+00000F 010F 2041            12      JR  NZ,SHOW_COMPLETED
+000011 0111 0E6F             7      LD  C,$6F       ;MSX-DOS のバージョン番号の獲得(_DOSVER)
+000013 0113 CD0500          17      CALL    SYSTEM
+000016 0116 3845            12      JR  C,NOT_SUPPOTED
+000018 0118 7D               4      LD  A,L     ;機種フラグ
+000019 0119 B7               4      OR  A
+00001A 011A 2041            12      JR  NZ,NOT_SUPPOTED
+00001C 011C 211D01          10      LD  HL,$011D    ;LSX-Dodgers
+00001F 011F ED42            15      SBC HL,BC
+000021 0121 203A            12      JR  NZ,NOT_SUPPOTED
+                                
+000023 0123 2A0600          16      LD  HL,(SYSTEM+1)
+000026 0126 010301          10      LD  BC,TSR_END-TSR
+000029 0129 ED42            15      SBC HL,BC
+00002B 012B F9               6      LD  SP,HL
+00002C 012C E5              11      PUSH    HL
+00002D 012D 2A0600          16      LD  HL,(SYSTEM+1)
+000030 0130 226501          16      LD  (TSR+3),HL
+                                
+000033 0133 23               6      INC HL
+000034 0134 7E               7      LD  A,(HL)
+000035 0135 23               6      INC HL
+000036 0136 66               7      LD  H,(HL)
+000037 0137 6F               4      LD  L,A
+000038 0138 226301          16      LD  (TSR+1),HL
+                                
+00003B 013B D1              10      POP DE
+00003C 013C D5              11      PUSH    DE
+00003D 013D 216201          10      LD  HL,TSR
+000040 0140 EDB0                    LDIR
+000042 0142 E1              10      POP HL
+000043 0143 220600          16      LD  (SYSTEM+1),HL
+000046 0146 3EC3             7      LD  A,$C3       ;JP
+000048 0148 321800          13      LD  (0018H),A
+00004B 014B 110C00          10      LD  DE,RST18-TSR
+00004E 014E 19              11      ADD HL,DE
+00004F 014F 221900          16      LD  (0019H),HL
+       0152                     SHOW_COMPLETED:
+000052 0152 118402          10      LD  DE,COMPLETED
+       0155                     SHOW_MESSAGE:
+000055 0155 0E09             7      LD  C,9     ;文字列出力
+000057 0157 CD0500          17      CALL    SYSTEM
+00005A 015A C30000          10      JP  0
+       015D                     NOT_SUPPOTED:
+00005D 015D 117302          10      LD  DE,ERRMES
+000060 0160 18F3            12      JR  SHOW_MESSAGE
+       0162                     TSR:
+000062 0162 C30000          10      JP  0       ;+1 SYSTEM CALL
+000065 0165 0000                    DW  0       ;+3 NEXT
+000067 0167 5B4B414E4A4900          DB  "[KANJI",0  ;+5 NAME
+                                ;
+                                ;   BIOS-ROM互換ルーチン（漢字関連のみ）
+                                ;
+       016E                     RST18:
+00006E 016E 78               4      LD  A,B
+                                
+00006F 016F FE2F             7      CP  $2F
+000071 0171 200D            12      JR  NZ,RST1
+000073 0173 79               4      LD  A,C
+000074 0174 FE52             7      CP  $52
+000076 0176 2816            12      JR  Z,JISSFT
+000078 0178 FE81             7      CP  $81
+00007A 017A 2826            12      JR  Z,SFTJIS
+00007C 017C FEC3             7      CP  $C3
+00007E 017E 283A            12      JR  Z,JISVRM
+       0180                     RST1:
+000080 0180 78               4      LD  A,B
+000081 0181 FE30             7      CP  $30
+000083 0183 2005            12      JR  NZ,RST2
+000085 0185 79               4      LD  A,C
+000086 0186 FE37             7      CP  $37
+000088 0188 287E            12      JR  Z,VRMJIS
+       018A                     RST2:
+00008A 018A C5              11      PUSH    BC
+00008B 018B C33800          10      JP  00038H
+                                
+                                ;
+                                ;   SHIT_JISコードからJISコードを得る
+                                ;in
+                                ;DE:    SHIFT_JISコード
+                                ;out
+                                ;DE:    JISコード
+                                ;破壊
+                                ;A
+       018E                     JISSFT:
+00008E 018E 7B               4      LD  A,E
+00008F 018F C67E             7      ADD A,$7E
+000091 0191 5F               4      LD  E,A
+000092 0192 7A               4      LD  A,D
+000093 0193 CE21             7      ADC A,$21
+000095 0195 EE40             7      XOR $40
+000097 0197 37               4      SCF
+000098 0198 1F               4      RRA
+000099 0199 57               4      LD  D,A
+00009A 019A D8              11      RET C
+00009B 019B 7B               4      LD  A,E
+00009C 019C D6DE             7      SUB $DE
+00009E 019E DE80             7      SBC A,$80
+0000A0 01A0 5F               4      LD  E, A
+0000A1 01A1 C9              10      RET
+                                ;
+                                ;   JISコードからSHIFT_JISコードを得る
+                                ;in
+                                ;DE:    JISコード
+                                ;out
+                                ;DE:    SHIFT_JISコード
+                                ;破壊
+                                ;A
+       01A2                     SFTJIS:
+0000A2 01A2 CB22             8      SLA D
+0000A4 01A4 7B               4      LD  A,E
+0000A5 01A5 FE80             7      CP  $80
+0000A7 01A7 CE61             7      ADC A,$61
+0000A9 01A9 5F               4      LD  E,A
+0000AA 01AA 7A               4      LD  A,D
+0000AB 01AB CE1F             7      ADC A,$1F
+0000AD 01AD 57               4      LD  D,A
+0000AE 01AE 7B               4      LD  A,E
+0000AF 01AF C67F             7      ADD A,$7F
+0000B1 01B1 5F               4      LD  E,A
+0000B2 01B2 3802            12      JR  C,SFTJIS1
+0000B4 01B4 C6A2             7      ADD A,$A2
+       01B6                     SFTJIS1:
+0000B6 01B6 5F               4      LD  E,A
+0000B7 01B7 CBBA             8      RES 7,D
+0000B9 01B9 C9              10      RET
+                                ;
+                                ;   JISコードから漢字ROMコードを得る
+                                ;in
+                                ;DE:    JISコード
+                                ;out
+                                ;D: RH  漢字アトリビュート
+                                ;E: RL  テキストVRAM
+                                ;破壊
+                                ;A,BC
+       01BA                     JISVRM:
+0000BA 01BA 7A               4      LD  A,D
+0000BB 01BB 0F               4      RRCA
+0000BC 01BC 0F               4      RRCA
+0000BD 01BD 0F               4      RRCA
+0000BE 01BE 0F               4      RRCA
+0000BF 01BF E607             7      AND 7   ;JH6,JH5,JH4
+0000C1 01C1 FE02             7      CP  2
+0000C3 01C3 282F            12      JR  Z,JR2
+0000C5 01C5 3828            12      JR  C,JR0
+0000C7 01C7 FE07             7      CP  7
+0000C9 01C9 2825            12      JR  Z,JR7
+                                            ;3-6
+0000CB 01CB D603             7      SUB 3
+0000CD 01CD 47               4      LD  B,A
+0000CE 01CE 87               4      ADD A,A ;*2
+0000CF 01CF 80               4      ADD A,B ;*3
+0000D0 01D0 3C               4      INC A
+0000D1 01D1 47               4      LD  B,A
+0000D2 01D2 7B               4      LD  A,E
+0000D3 01D3 07               4      RLCA
+0000D4 01D4 07               4      RLCA
+0000D5 01D5 07               4      RLCA
+0000D6 01D6 E603             7      AND 3   ;JL6,JL5
+0000D8 01D8 80               4      ADD A,B
+0000D9 01D9 87               4      ADD A,A ;*2
+       01DA                     JRE:
+0000DA 01DA CB5A             8      BIT 3,D ;JH3
+0000DC 01DC 2801            12      JR  Z,JR3_1
+0000DE 01DE 3C               4      INC A   ;RH0
+       01DF                     JR3_1:
+0000DF 01DF 42               4      LD  B,D
+0000E0 01E0 F680             7      OR  $80 ;RH7
+0000E2 01E2 57               4      LD  D,A
+0000E3 01E3 7B               4      LD  A,E
+0000E4 01E4 E61F             7      AND $1F
+0000E6 01E6 5F               4      LD  E,A
+0000E7 01E7 78               4      LD  A,B
+0000E8 01E8 0F               4      RRCA
+0000E9 01E9 0F               4      RRCA
+0000EA 01EA 0F               4      RRCA
+0000EB 01EB E6E0             7      AND $E0
+0000ED 01ED B3               4      OR  E
+0000EE 01EE 5F               4      LD  E,A
+       01EF                     JR0:
+0000EF 01EF C9              10      RET
+       01F0                     JR7:
+0000F0 01F0 061C             7      LD  B,$1C
+0000F2 01F2 1802            12      JR  JR2_1
+       01F4                     JR2:
+0000F4 01F4 0600             7      LD  B,0
+       01F6                     JR2_1:
+0000F6 01F6 7B               4      LD  A,E
+0000F7 01F7 E660             7      AND $60     ;JL6,JL5
+0000F9 01F9 FE40             7      CP  2*$20
+0000FB 01FB 2002            12      JR  NZ,JR2_2
+0000FD 01FD CBC8             8      SET 1,B
+       01FF                     JR2_2:
+0000FF 01FF FE60             7      CP  3*$20
+000101 0201 78               4      LD  A,B
+000102 0202 2002            12      JR  NZ,JR2_3
+000104 0204 EE01             7      XOR 1
+       0206                     JR2_3:
+000106 0206 18D2            12      JR  JRE
+                                
+                                ;
+                                ;   漢字ROMコードからJISコードを得る
+                                ;in
+                                ;D: RH  漢字アトリビュート
+                                ;E: RL  テキストVRAM
+                                ;out
+                                ;DE:    JISコード
+                                ;破壊
+                                ;A,BC
+       0208                     VRMJIS:
+000108 0208 7B               4      LD  A,E
+000109 0209 07               4      RLCA
+00010A 020A 07               4      RLCA
+00010B 020B 07               4      RLCA
+00010C 020C E607             7      AND 7   ;RL7,RL6,RL5 >> 5
+00010E 020E 47               4      LD  B,A
+00010F 020F 7B               4      LD  A,E
+000110 0210 E61F             7      AND $1F ;RL4,RL3,RL2,RL1
+000112 0212 5F               4      LD  E,A
+                                
+000113 0213 7A               4      LD  A,D
+000114 0214 E61F             7      AND $1F ;RH4,RH3,RH2,RH1,RH0
+000116 0216 FE04             7      CP  4
+000118 0218 3831            12      JR  C,VJ4   ;2121H-277EH
+00011A 021A FE1D             7      CP  $1C+1
+00011C 021C 3029            12      JR  NC,VJ3  ;7021H-777EH
+00011E 021E CB3F             8      SRL A   ;/2
+000120 0220 3C               4      INC A
+000121 0221 D5              11      PUSH    DE
+000122 0222 110308          10      LD  DE,$0803    ;3で割る
+000125 0225 4F               4      LD  C,A     ;C / E(3) = C ... A
+000126 0226 AF               4      XOR A
+       0227                     VJ1:
+000127 0227 CB21             8      SLA C
+000129 0229 17               4      RLA
+00012A 022A 93               4      SUB E
+00012B 022B 3804            12      JR  C,VJ2
+00012D 022D 0C               4      INC C
+00012E 022E 15               4      DEC D
+00012F 022F 20F6            12      JR  NZ,VJ1
+       0231                     VJ2:
+000131 0231 D1              10      POP DE
+000132 0232 C604             7      ADD A,3+1
+000134 0234 0F               4      RRCA
+000135 0235 0F               4      RRCA
+000136 0236 0F               4      RRCA
+000137 0237 E660             7      AND $60
+000139 0239 B3               4      OR  E
+00013A 023A 5F               4      LD  E,A
+                                
+00013B 023B 79               4      LD  A,C
+00013C 023C C602             7      ADD A,2
+                                
+00013E 023E CB1A             8      RR  D   ;RH0
+000140 0240 8F               4      ADC A,A ;JH3
+000141 0241 87               4      ADD A,A
+000142 0242 87               4      ADD A,A
+000143 0243 87               4      ADD A,A
+000144 0244 B0               4      OR  B   ;RL7,RL6,RL5 >> 5
+000145 0245 57               4      LD  D,A
+000146 0246 C9              10      RET
+       0247                     VJ3:            ;7021H-777EH
+000147 0247 78               4      LD  A,B ;RL7,RL6,RL5 >> 5
+000148 0248 F670             7      OR  $70
+00014A 024A 47               4      LD  B,A
+       024B                     VJ4:            ;2121H-277EH
+00014B 024B CBE8             8      SET 5,B ;RL7,RL6,RL5 >> 5
+00014D 024D 7A               4      LD  A,D
+00014E 024E 50               4      LD  D,B
+00014F 024F E603             7      AND 3
+000151 0251 280B            12      JR  Z,VJ6
+000153 0253 3D               4      DEC A
+000154 0254 2806            12      JR  Z,VJ5
+000156 0256 3D               4      DEC A
+000157 0257 2008            12      JR  NZ,VJ7
+000159 0259 CBF3             8      SET 6,E
+00015B 025B C9              10      RET
+       025C                     VJ5:
+00015C 025C CBF3             8      SET 6,E
+       025E                     VJ6:    
+00015E 025E CBEB             8      SET 5,E
+000160 0260 C9              10      RET
+       0261                     VJ7:
+000161 0261 112822          10      LD  DE,$2228    ;※のJISコード
+000164 0264 C9              10      RET
+                                
+       0265                     TSR_END:
+                                
+       0265                     TITLE:
+000165 0265 6B616E6A69207631        DB  "kanji v1.00"
+            2E3030              
+       0270                     CRLF:
+000170 0270 0D0A                    DB  $0D,$0A
+000172 0272 24                      DB  '$'
+       0273                     ERRMES:
+000173 0273 4E6F742073757070        DB  "Not supported.",$0D,$0A,'$'
+            6F727465642E0D0A    
+            24                  
+       0284                     COMPLETED:
+000184 0284 8AAE97B92E0D0A24        DB  "完了.",$0D,$0A,'$'
+[EOF:KANJI.ASM:SHIFT_JIS]

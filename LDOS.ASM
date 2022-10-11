@@ -43,6 +43,7 @@ _DOS2:
 	LD	BC,011DH
 	LD	DE,VER
 	LD	HL,MACD
+C_REM:
 	XOR	A
 _ERROR:
 	AND	A
@@ -357,8 +358,7 @@ _SYS21:		;(BDOS)ランダムな読み出し
 
 	CALL	SETDRV
 	CALL	PUSHRR
-	LD	L,(IY+33)	;(FCB)Random record
-	LD	H,(IY+34)
+	CALL	GET_RR_AHL
 
 	CALL	RB_READ
 	PUSH	HL
@@ -369,8 +369,7 @@ _SYS22:		;(BDOS)ランダムな書き込み
 _SYS28:		;(BDOS)ランダムな書き込み・その2
 	CALL	SETDRV
 	CALL	PUSHRR
-	LD	L,(IY+33)	;(FCB)Random record
-	LD	H,(IY+34)
+	CALL	GET_RR_AHL
 
 	CALL	RB_WRITE
 	PUSH	HL
@@ -433,11 +432,17 @@ _SYS23:		;(BDOS)ファイルサイズの獲得
 	EX	(SP),IY		;
 ;	POP	DE		;
 ;	PUSH	DE		;DEを破壊しないように注意vv
-	CALL	GETSIZE
+	LD	A,(IY+16)	;(FCB)ファイルのサイズ(バイト単位)
+	LD	L,(IY+17)	;
+	LD	H,(IY+18)	;
+	PUSH	BC		;
+	LD	B,(IY+19)	;
+	CALL	GET_CPM_R_SIZE
+	POP	BC
 _S24X1:
 	LD	(IY+33),L	;(FCB)Random record
 	LD	(IY+34),H
-	LD	(IY+35),0
+	LD	(IY+35),A
 ;	POP	DE		;^^^^^^^^^^^^^^^^^^^^^^^^
 ;	PUSH	DE		;EX DE,IY
 	EX	(SP),IY		;

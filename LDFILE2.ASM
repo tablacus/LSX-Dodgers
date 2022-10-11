@@ -19,15 +19,12 @@ _SYS26:		;(BDOS)ランダムブロック書き込み
 
 	DEC	HL
 
-	CALL	GET_RR_CDE	;CDE=Random record
+	CALL	GET_RR_BCDE	;BCDE=Random record
 
-	XOR	A	;AHL=HL+CDE
-	ADD	HL,DE
-	ADC	A,C
-
-	LD	B,A
-	LD	C,H
-
+	ADD	HL,DE		;BCHL=HL+BCDE
+	JR	NC,S26X1	;
+	INC	BC		;
+S26X1:
 	CALL	RWXR
 	CALL	C,WRDFX
 	JP	C,RBWERR
@@ -81,14 +78,14 @@ RBWEND:
 	JR	NC,RBW1
 	LD	HL,(LEFT+1)
 	LD	E,(IY+16)	;(FCB)ファイルのサイズ(バイト単位)
-	LD	D,(IY+17)	;CDE=File size
-	LD	C,(IY+18)
-	XOR	A
+	LD	D,(IY+17)	;DE=File size
 	ADD	HL,DE
-	ADC	A,C
 	LD	(IY+16),L	;(FCB)ファイルのサイズ(バイト単位)
 	LD	(IY+17),H
-	LD	(IY+18),A
+	JR	NC,RBW1
+	INC	(IY+18)
+	JR	NZ,RBW1
+	INC	(IY+19)
 RBW1:
 	POP	IY
 	POP	BC
@@ -152,11 +149,13 @@ _SYS27:		;(BDOS)ランダムブロック読み込み
 	JP	C,RBRERR
 	CALL	RBX1
 	JP	C,RBRERR1
-	LD	A,C
 	EX	DE,HL
-	SBC	HL,DE		;CP 0HL,CDE
+	SBC	HL,DE		;CP 00HL,BCDE
 	ADD	HL,DE
-	SBC	A,000H
+	LD	A,C
+	SBC	A,0
+	LD	A,B
+	SBC	A,0
 	JR	C,RBR1
 	EX	DE,HL
 RBR1:
@@ -243,19 +242,23 @@ RBX1:
 	PUSH	HL		;Record byte
 				;AHL=File size
 	LD	L,(IY+16)	;ファイルのサイズ(バイト単位)
-	LD	H,(IY+17)
-	LD	A,(IY+18)
+	LD	H,(IY+17)	;
+	LD	A,(IY+18)	;
 
-	CALL	GET_RR_CDE	;CDE=Random record
+	CALL	GET_RR_BCDE	;BCDE=Random record
 
 	AND	A
 	SBC	HL,DE
 	SBC	A,C
+	LD	C,A
+	LD	A,(IY+19)	;ファイルのサイズ
+	SBC	A,B
 	POP	DE
 
 	RET	C
-	LD	C,A
-	EX	DE,HL	;CDE=File byte	HL=Record byte
+	LD	B,A
+	OR	C
+	EX	DE,HL	;BCDE=File byte	HL=Record byte
 	OR	D
 	OR	E
 	RET	NZ
@@ -263,8 +266,9 @@ RBX1:
 	RET
 
 RBX2:				;Cluster settings
-	LD	C,(IY+34)	;(+33)(FCB)ランダムレコード
-	LD	B,(IY+35)
+	LD	H,(IY+34)	;(+33)(FCB)ランダムレコード
+	LD	C,(IY+35)
+	LD	B,(IY+36)
 	CALL	RWXR
 	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
 	DEC	A
@@ -336,16 +340,26 @@ LEFT:	LD	DE,0
 	LD	L,(IY+33)	;(FCB)ランダムレコード
 	LD	H,(IY+34)
 	ADD	HL,DE
-	ADC	A,(IY+35)
 	LD	(IY+33),L	;(FCB)ランダムレコード
 	LD	(IY+34),H
-	LD	(IY+35),A
+	JR	NC,RBXEND1
+	INC	(IY+35)
+	JR	NZ,RBXEND1
+	INC	(IY+36)
+RBXEND1:
 	EX	DE,HL		;HL=Read byte
 	RET
 
-GET_RR_CDE:			;CDE=Random record
+GET_RR_BCDE:			;BCDE=Random record
 	LD	E,(IY+33)	;(FCB)ランダムレコード
 	LD	D,(IY+34)
 	LD	C,(IY+35)
+	LD	B,(IY+36)
 	RET
+
+GET_RR_AHL:
+	LD	L,(IY+33)	;(FCB)Random record
+	LD	H,(IY+34)	;
+	LD	A,(IY+35)	;
+
 

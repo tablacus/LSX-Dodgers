@@ -1,0 +1,315 @@
+;
+;	KANJI by Gaku
+;
+;
+SYSTEM	EQU	$0005
+JP_HL	EQU	$000F
+FCB1	EQU	$005C
+DTA	EQU	$0080
+
+	ORG	$0100
+	JP	START
+START:
+	LD	DE,TITLE
+	LD	C,9		;文字列出力
+	CALL	SYSTEM
+MAIN:
+	LD	A,(0018H)
+	INC	A
+	JR	NZ,SHOW_COMPLETED
+	LD	C,$6F		;MSX-DOS のバージョン番号の獲得(_DOSVER)
+	CALL	SYSTEM
+	JR	C,NOT_SUPPOTED
+	LD	A,L		;機種フラグ
+	OR	A
+	JR	NZ,NOT_SUPPOTED
+	LD	HL,$011D	;LSX-Dodgers
+	SBC	HL,BC
+	JR	NZ,NOT_SUPPOTED
+
+	LD	HL,(SYSTEM+1)
+	LD	BC,TSR_END-TSR
+	SBC	HL,BC
+	LD	SP,HL
+	PUSH	HL
+	LD	HL,(SYSTEM+1)
+	LD	(TSR+3),HL
+
+	INC	HL
+	LD	A,(HL)
+	INC	HL
+	LD	H,(HL)
+	LD	L,A
+	LD	(TSR+1),HL
+
+	POP	DE
+	PUSH	DE
+	LD	HL,TSR
+	LDIR
+	POP	HL
+	LD	(SYSTEM+1),HL
+	LD	A,$C3		;JP
+	LD	(0018H),A
+	LD	DE,RST18-TSR
+	ADD	HL,DE
+	LD	(0019H),HL
+SHOW_COMPLETED:
+	LD	DE,COMPLETED
+SHOW_MESSAGE:
+	LD	C,9		;文字列出力
+	CALL	SYSTEM
+	JP	0
+NOT_SUPPOTED:
+	LD	DE,ERRMES
+	JR	SHOW_MESSAGE
+TSR:
+	JP	0		;+1	SYSTEM CALL
+	DW	0		;+3	NEXT
+	DB	"[KANJI",0	;+5	NAME
+;
+;	BIOS-ROM互換ルーチン（漢字関連のみ）
+;
+RST18:
+	LD	A,B
+
+	CP	$2F
+	JR	NZ,RST1
+	LD	A,C
+	CP	$52
+	JR	Z,JISSFT
+	CP	$81
+	JR	Z,SFTJIS
+	CP	$C3
+	JR	Z,JISVRM
+RST1:
+	LD	A,B
+	CP	$30
+	JR	NZ,RST2
+	LD	A,C
+	CP	$37
+	JR	Z,VRMJIS
+RST2:
+	PUSH	BC
+	JP	00038H
+
+;
+;	SHIT_JISコードからJISコードを得る
+;in
+;DE:	SHIFT_JISコード
+;out
+;DE:	JISコード
+;破壊
+;A
+JISSFT:
+	LD	A,E
+	ADD	A,$7E
+	LD	E,A
+	LD	A,D
+	ADC	A,$21
+	XOR	$40
+	SCF
+	RRA
+	LD	D,A
+	RET	C
+	LD	A,E
+	SUB	$DE
+	SBC	A,$80
+	LD	E, A
+	RET
+;
+;	JISコードからSHIFT_JISコードを得る
+;in
+;DE:	JISコード
+;out
+;DE:	SHIFT_JISコード
+;破壊
+;A
+SFTJIS:
+	SLA	D
+	LD	A,E
+	CP	$80
+	ADC	A,$61
+	LD	E,A
+	LD	A,D
+	ADC	A,$1F
+	LD	D,A
+	LD	A,E
+	ADD	A,$7F
+	LD	E,A
+	JR	C,SFTJIS1
+	ADD	A,$A2
+SFTJIS1:
+	LD	E,A
+	RES	7,D
+	RET
+;
+;	JISコードから漢字ROMコードを得る
+;in
+;DE:	JISコード
+;out
+;D:	RH	漢字アトリビュート
+;E:	RL	テキストVRAM
+;破壊
+;A,BC
+JISVRM:
+	LD	A,D
+	RRCA
+	RRCA
+	RRCA
+	RRCA
+	AND	7	;JH6,JH5,JH4
+	CP	2
+	JR	Z,JR2
+	JR	C,JR0
+	CP	7
+	JR	Z,JR7
+			;3-6
+	SUB	3
+	LD	B,A
+	ADD	A,A	;*2
+	ADD	A,B	;*3
+	INC	A
+	LD	B,A
+	LD	A,E
+	RLCA
+	RLCA
+	RLCA
+	AND	3	;JL6,JL5
+	ADD	A,B
+	ADD	A,A	;*2
+JRE:
+	BIT	3,D	;JH3
+	JR	Z,JR3_1
+	INC	A	;RH0
+JR3_1:
+	LD	B,D
+	OR	$80	;RH7
+	LD	D,A
+	LD	A,E
+	AND	$1F
+	LD	E,A
+	LD	A,B
+	RRCA
+	RRCA
+	RRCA
+	AND	$E0
+	OR	E
+	LD	E,A
+JR0:
+	RET
+JR7:
+	LD	B,$1C
+	JR	JR2_1
+JR2:
+	LD	B,0
+JR2_1:
+	LD	A,E
+	AND	$60		;JL6,JL5
+	CP	2*$20
+	JR 	NZ,JR2_2
+	SET	1,B
+JR2_2:
+	CP	3*$20
+	LD	A,B
+	JR	NZ,JR2_3
+	XOR	1
+JR2_3:
+	JR	JRE
+
+;
+;	漢字ROMコードからJISコードを得る
+;in
+;D:	RH	漢字アトリビュート
+;E:	RL	テキストVRAM
+;out
+;DE:	JISコード
+;破壊
+;A,BC
+VRMJIS:
+	LD	A,E
+	RLCA
+	RLCA
+	RLCA
+	AND	7	;RL7,RL6,RL5 >> 5
+	LD	B,A
+	LD	A,E
+	AND	$1F	;RL4,RL3,RL2,RL1
+	LD	E,A
+
+	LD	A,D
+	AND	$1F	;RH4,RH3,RH2,RH1,RH0
+	CP	4
+	JR	C,VJ4	;2121H-277EH
+	CP	$1C+1
+	JR	NC,VJ3	;7021H-777EH
+	SRL	A	;/2
+	INC	A
+	PUSH	DE
+	LD	DE,$0803	;3で割る
+	LD	C,A		;C / E(3) = C ... A
+	XOR	A
+VJ1:
+	SLA	C
+	RLA
+	SUB	E
+	JR	C,VJ2
+	INC	C
+	DEC	D
+	JR	NZ,VJ1
+VJ2:
+	POP	DE
+	ADD	A,3+1
+	RRCA
+	RRCA
+	RRCA
+	AND	$60
+	OR	E
+	LD	E,A
+
+	LD	A,C
+	ADD	A,2
+
+	RR	D	;RH0
+	ADC	A,A	;JH3
+	ADD	A,A
+	ADD	A,A
+	ADD	A,A
+	OR	B	;RL7,RL6,RL5 >> 5
+	LD	D,A
+	RET
+VJ3:			;7021H-777EH
+	LD	A,B	;RL7,RL6,RL5 >> 5
+	OR	$70
+	LD	B,A
+VJ4:			;2121H-277EH
+	SET	5,B	;RL7,RL6,RL5 >> 5
+	LD	A,D
+	LD	D,B
+	AND	3
+	JR	Z,VJ6
+	DEC	A
+	JR	Z,VJ5
+	DEC	A
+	JR	NZ,VJ7
+	SET	6,E
+	RET
+VJ5:
+	SET	6,E
+VJ6:	
+	SET	5,E
+	RET
+VJ7:
+	LD	DE,$2228	;※のJISコード
+	RET
+
+TSR_END:
+
+TITLE:
+	DB	"kanji v1.00"
+CRLF:
+	DB	$0D,$0A
+	DB	'$'
+ERRMES:
+	DB	"Not supported.",$0D,$0A,'$'
+COMPLETED:
+	DB	"完了.",$0D,$0A,'$'

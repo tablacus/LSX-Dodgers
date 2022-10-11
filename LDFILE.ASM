@@ -799,12 +799,13 @@ TOPEN:				;Initializes the time stamp
 WRDFX:
 	LD	A,(SPCPAT+1)	;1クラスタの論理セクタ
 L_WRFX:
-	RRA		;->CF
+	RRA			;->CF
 	JR	C,E_WRFX
-	SRL	C	;C=C/2
+	SRL	C
+	RR	H		;CH=CH/2
 	JR	L_WRFX
 E_WRFX:
-	LD	B,C
+	LD	B,H
 	INC	B
 	LD	A,037H		;SCF
 	LD	(DRDN1),A
@@ -857,8 +858,9 @@ RWXR:
 L_RWX:
 	RRA		;->CF
 	JR	C,E_RWX
-	SRL	B	;BC=BC/2
+	SRL	B	;BCH=BCH/2
 	RR	C	;
+	RR	H	;
 	JR	L_RWX
 E_RWX:
 	LD	E,(IY+26)	;(FCB)ファイルの先頭クラスタ
@@ -873,12 +875,17 @@ RWX1:
 
 	LD	A,B
 	OR	C
-	RET	Z		;RET BC==0 => CF=0
+	OR	H
+	RET	Z		;RET BCH==0 => CF=0
 
 	CALL	GNCLX
 	RET	C
-	DEC	BC
-
+	LD	A,H		;
+	DEC	H		;
+	OR	A		;DEC BCH
+	JR	NZ,RWX2		;
+	DEC	BC		;
+RWX2:
 	CALL	ENDCL
 	JR	C,RWX1
 SCF_RET:
@@ -968,16 +975,21 @@ SUBRR:
 
 SETSEQ:
 	PUSH	AF		;AHL=Random record
+	PUSH	BC
 	LD	A,(IY+33)	;(FCB)ランダムレコード
 	LD	L,(IY+34)
 	LD	H,(IY+35)
+RR36:	LD	BC,0		;(IY+36)
 
-	CALL	SSQ1
+	CALL	GET_CPM_R_SIZE
 
 	ADD	HL,HL
+	ADC	A,A
 	SRL	L		;L=L/2
 	LD	(IY+32),L	;(FCB)カレントレコード
 	LD	(IY+12),H	;(FCB)カレントブロック
+	LD	(IY+24),A	;(FCB)カレントブロック上位
+	POP	BC
 	POP	AF
 
 POPRR:
@@ -985,25 +997,29 @@ POPRR:
 	EX	DE,HL
 	JR	POPRR1
 
-GETSIZE:
-	LD	A,(IY+16)	;(FCB)ファイルのサイズ(バイト単位)
-	LD	L,(IY+17)
-	LD	H,(IY+18)
-SSQ1:				;バイト単位からCP/Mのレコード単位を求める（1レコード=128バイト）
-	ADD	A,A		;in HLA => out HL
+GET_CPM_R_SIZE:		;バイト単位からCP/Mのレコード単位を求める（1レコード=128バイト）
+	ADD	A,A		;in BHLA => out AHL
 	ADC	HL,HL
+	RR	B
 	OR	A
+	LD	A,B		;ここでフラグは変化しない
 	RET	Z
-	INC	HL
+	INC	L		;INC AHL
+	RET	NZ		;
+	INC	H		;
+	RET	NZ		;
+	INC	A		;
 	RET
 
 GETSEQ:
 	LD	L,(IY+32)	;(FCB)カレントレコード
 	LD	H,(IY+12)	;(FCB)カレントブロック
+	LD	A,(IY+24)	;(FCB)カレントブロック上位
 
 	SLA	L	;L=L*2
 
-	SRL	H	;HL=HL/2
+	SRL	A	;
+	RR	H	;AHL=AHL/2
 	RR	L	;
 	RET
 
@@ -1015,13 +1031,19 @@ RB_READ:
 	PUSH	BC
 	LD	BC,(STABLE+2*027H)	;(BDOS)ランダムブロック読み込み
 RBRW:
-	XOR	A	;HLA = HL*128
-	SRL	H	;HL=HL/2
+	SRL	A	;AHLA' = HL*128
+	PUSH	AF
+	RR	H	;AHL=AHL/2
 	RR	L	;
-	RRA			;HLA
+	LD	A,0
+	RRA			;A'HLA
 	LD	(IY+33),A	;(FCB)ランダムレコード
 	LD	(IY+34),L
 	LD	(IY+35),H
+	LD	A,(IY+36)	;ランダムレコードを4バイトで扱うとCP/M用のコマンドで
+	LD	(PBRSWC+3),A	;デフォルトのFCBとデフォルトのDTAを使用しているコマンドで
+	POP	AF		;ファイル読み込みの際に先頭の1バイトが化けるので保存
+	LD	(IY+36),A	;
 	LD	HL,128
 
 	PUSH	IY
@@ -1029,7 +1051,10 @@ RBRW:
 	PUSH	DE
 	CALL	JP_BC
 	POP	IY
+	LD	B,(IY+36)
+	LD	(RR36+1),BC
 	POP	BC
+PBRSWC:	LD	(IY+36),0	;自己書き換え	ここでランダムレコードを復元
 	RET
 JP_BC:
 	PUSH	BC
