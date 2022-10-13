@@ -1,0 +1,315 @@
+                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.0.0, LST:Full:4
+                                ;
+                                ;   MAKESYS by Gaku
+                                ;
+                                ;
+       0005                     SYSTEM  EQU $0005
+       000F                     JP_HL   EQU $000F
+       005C                     FCB1    EQU $005C
+       006C                     FCB2    EQU $006C
+       0080                     DTA EQU $0080
+                                
+       FF51                     TSD EQU $FF51
+       4000                     BUFSZ   EQU $4000
+000000 0100                         ORG $0100
+000000 0100 C30301          10      JP  START
+       0103                     START:
+000003 0103 11F702          10      LD  DE,TITLE
+000006 0106 0E09             7      LD  C,9     ;文字列出力
+000008 0108 CD0500          17      CALL    SYSTEM
+       010B                     MAIN:
+00000B 010B 0E6F             7      LD  C,$6F       ;MSX-DOS のバージョン番号の獲得(_DOSVER)
+00000D 010D CD0500          17      CALL    SYSTEM
+000010 0110 DA0F02          10      JP  C,NOT_SUPPOTED
+000013 0113 7D               4      LD  A,L     ;機種フラグ
+000014 0114 B7               4      OR  A
+000015 0115 C20F02          10      JP  NZ,NOT_SUPPOTED
+000018 0118 211D01          10      LD  HL,$011D    ;LSX-Dodgers
+00001B 011B ED42            15      SBC HL,BC
+00001D 011D C20F02          10      JP  NZ,NOT_SUPPOTED
+                                
+000020 0120 3A5D00          13      LD  A,(FCB1+1)
+000023 0123 FE21             7      CP  ' '+1
+000025 0125 DA1402          10      JP  C,SHOW_USGAE
+000028 0128 3A6D00          13      LD  A,(FCB2+1)
+00002B 012B FE21             7      CP  ' '+1
+00002D 012D CA1402          10      JP  Z,SHOW_USGAE
+000030 0130 216C00          10      LD  HL,FCB2     ;引数が2つの場合はFCB1とFCB2が重なっているので
+000033 0133 114F03          10      LD  DE,FCB_DEST ;FCB2を移動させて使う
+000036 0136 010C00          10      LD  BC,12       ;ドライブ(1)＋ファイル名(8)＋拡張子(3)=12
+000039 0139 EDB0                    LDIR
+                                
+00003B 013B 114F03          10      LD  DE,FCB_DEST ;転送先FCB
+00003E 013E 0E16             7      LD  C,016H      ;ファイルの作成(_FMAKE) CP/M MSX-DOS
+000040 0140 CD0500          17      CALL    SYSTEM
+000043 0143 B7               4      OR  A
+000044 0144 C21902          10      JP  NZ,SHOW_ERROR   ;失敗したら終了
+                                
+000047 0147 210100          10      LD  HL,1
+00004A 014A 225D03          16      LD  (FCB_DEST+14),HL    ;レコードサイズを1にする
+                                
+00004D 014D 117002          10      LD  DE,IPL      ;データの読み書き先
+000050 0150 0E1A             7      LD  C,01AH      ;DTAの設定(_SETDTA) CP/M MSX-DOS
+000052 0152 CD0500          17      CALL    SYSTEM
+000055 0155 218700          10      LD  HL,IPL_E-IPL
+000058 0158 114F03          10      LD  DE,FCB_DEST
+00005B 015B 0E26             7      LD  C,026H      ;ランダムブロック書き込み(_WRBLK) MSX-DOS
+00005D 015D CD0500          17      CALL    SYSTEM
+000060 0160 FEFF             7      CP  0FFH
+000062 0162 CA1902          10      JP  Z,SHOW_ERROR    ;失敗したら終了
+                                
+000065 0165 FD215C00        14      LD  IY,FCB1
+000069 0169 CD1E02          17      CALL    COPY
+                                
+00006C 016C FD217403        14      LD  IY,FCB_LD
+000070 0170 CD1E02          17      CALL    COPY
+                                
+000073 0173 2A9C03          16      LD  HL,(BUFAD+3)
+000076 0176 227302          16      LD  (LAST),HL
+000079 0179 2A9E03          16      LD  HL,(BUFAD+5)
+00007C 017C 228F02          16      LD  (RUN_LD),HL
+00007F 017F 110700          10      LD  DE,$0B-4
+000082 0182 19              11      ADD HL,DE
+000083 0183 228302          16      LD  (_INIT1),HL
+000086 0186 228C02          16      LD  (_INIT2),HL
+                                
+000089 0189 2A9A03          16      LD  HL,(BUFAD+1)
+00008C 018C 11F9FF          10      LD  DE,-7
+00008F 018F 19              11      ADD HL,DE
+000090 0190 ED5B6C00        20      LD  DE,(FCB1+16)
+000094 0194 ED537E02        20      LD  (COM_SIZE),DE
+000098 0198 A7               4      AND A
+000099 0199 ED52            15      SBC HL,DE
+00009B 019B 227802          16      LD  (COM_START),HL
+00009E 019E 1180FF          10      LD  DE,IPL-IPL_E+7
+0000A1 01A1 19              11      ADD HL,DE
+0000A2 01A2 227102          16      LD  (RUN),HL
+0000A5 01A5 227502          16      LD  (EXEC),HL
+0000A8 01A8 111A00          10      LD  DE,INITX-_START
+0000AB 01AB 19              11      ADD HL,DE
+0000AC 01AC 228902          16      LD  (_INITX),HL
+0000AF 01AF 23               6      INC HL
+0000B0 01B0 228602          16      LD  (_INIT_X1),HL
+0000B3 01B3 114200          10      LD  DE,TSS-INITX1
+0000B6 01B6 19              11      ADD HL,DE
+0000B7 01B7 229502          16      LD  (_TSS),HL
+                                
+0000BA 01BA 210000          10      LD  HL,0
+0000BD 01BD 227003          16      LD  (FCB_DEST+33),HL
+0000C0 01C0 227203          16      LD  (FCB_DEST+35),HL
+                                
+0000C3 01C3 118100          10      LD  DE,DTA+1
+0000C6 01C6 215C00          10      LD  HL,FCB1
+0000C9 01C9 0E5C             7      LD  C,$5C       ;ファイル名の解析(_PFILE)
+0000CB 01CB CD0500          17      CALL    SYSTEM
+                                
+0000CE 01CE 215C00          10      LD  HL,FCB1
+0000D1 01D1 0E5C             7      LD  C,$5C       ;ファイル名の解析(_PFILE)
+0000D3 01D3 CD0500          17      CALL    SYSTEM
+                                
+0000D6 01D6 215C00          10      LD  HL,FCB1
+0000D9 01D9 0E5C             7      LD  C,$5C       ;ファイル名の解析(_PFILE)
+0000DB 01DB CD0500          17      CALL    SYSTEM
+                                
+0000DE 01DE 3A5C00          13      LD  A,(FCB1)
+0000E1 01E1 32DF02          13      LD  (DRIVE),A
+                                
+0000E4 01E4 117002          10      LD  DE,IPL      ;データの読み書き先
+0000E7 01E7 0E1A             7      LD  C,01AH      ;DTAの設定(_SETDTA) CP/M MSX-DOS
+0000E9 01E9 CD0500          17      CALL    SYSTEM
+0000EC 01EC 218700          10      LD  HL,IPL_E-IPL
+0000EF 01EF 114F03          10      LD  DE,FCB_DEST
+0000F2 01F2 0E26             7      LD  C,026H      ;ランダムブロック書き込み(_WRBLK) MSX-DOS
+0000F4 01F4 CD0500          17      CALL    SYSTEM
+0000F7 01F7 FEFF             7      CP  0FFH
+0000F9 01F9 CA1902          10      JP  Z,SHOW_ERROR    ;失敗したら終了
+                                
+0000FC 01FC 114F03          10      LD  DE,FCB_DEST
+0000FF 01FF 0E10             7      LD  C,010H      ;ファイルのクローズ(_FCLOSE) CP/M MSX-DOS
+000101 0201 CD0500          17      CALL    SYSTEM
+       0204                     SHOW_COMPLETED:
+000104 0204 114203          10      LD  DE,COMPLETED
+       0207                     SHOW_MESSAGE:
+000107 0207 0E09             7      LD  C,9     ;文字列出力
+000109 0209 CD0500          17      CALL    SYSTEM
+00010C 020C C30000          10      JP  0
+       020F                     NOT_SUPPOTED:
+00010F 020F 112803          10      LD  DE,ERRMES
+000112 0212 18F3            12      JR  SHOW_MESSAGE
+       0214                     SHOW_USGAE:
+000114 0214 110703          10      LD  DE,USAGE
+000117 0217 18EE            12      JR  SHOW_MESSAGE
+       0219                     SHOW_ERROR:
+000119 0219 113903          10      LD  DE,ERRMES1
+00011C 021C 18E9            12      JR  SHOW_MESSAGE
+                                
+       021E                     COPY:
+00011E 021E FDE5            15      PUSH    IY
+000120 0220 D1              10      POP DE
+000121 0221 0E0F             7      LD  C,00FH      ;ファイルのオープン(_FOPEN) CP/M MSX-DOS
+000123 0223 CD0500          17      CALL    SYSTEM
+000126 0226 B7               4      OR  A
+000127 0227 C21902          10      JP  NZ,SHOW_ERROR   ;失敗したら終了
+                                
+00012A 022A FD360E01        19      LD  (IY+14),1   ;レコードサイズを1にする
+00012E 022E AF               4      XOR A
+00012F 022F FD770F          19      LD  (IY+15),A
+                                
+000132 0232 FD7721          19      LD  (IY+33),A   ;ランダムレコード
+000135 0235 FD7722          19      LD  (IY+34),A
+000138 0238 FD7723          19      LD  (IY+35),A
+00013B 023B FD7724          19      LD  (IY+36),A
+                                
+00013E 023E 119903          10      LD  DE,BUFAD    ;データの読み書き先
+000141 0241 0E1A             7      LD  C,01AH      ;DTAの設定(_SETDTA) CP/M MSX-DOS
+000143 0243 CD0500          17      CALL    SYSTEM
+       0246                     LOOP1:
+000146 0246 FDE5            15      PUSH    IY
+000148 0248 D1              10      POP DE
+000149 0249 210040          10      LD  HL,BUFSZ    ;データを読み出すサイズ（バイト単位）
+00014C 024C 0E27             7      LD  C,027H      ;ランダムブロック読み出し(_RDBLK) MSX-DOS
+00014E 024E CD0500          17      CALL    SYSTEM
+000151 0251 FEFF             7      CP  0FFH
+000153 0253 CA1902          10      JP  Z,SHOW_ERROR    ;失敗したら終了
+000156 0256 F5              11      PUSH    AF
+                                                ;HLには読み込んだデータ数が入っている
+000157 0257 114F03          10      LD  DE,FCB_DEST
+00015A 025A 0E26             7      LD  C,026H      ;ランダムブロック書き込み(_WRBLK) MSX-DOS
+00015C 025C CD0500          17      CALL    SYSTEM
+00015F 025F FEFF             7      CP  0FFH
+000161 0261 CA1902          10      JP  Z,SHOW_ERROR    ;失敗したら終了
+                                
+000164 0264 F1              10      POP AF
+000165 0265 B7               4      OR  A       ;A=0の場合はバッファサイズすべて読み込みできたなので、まだ読み込みできていない残りがある
+000166 0266 28DE            12      JR  Z,LOOP1     ;A=1の場合はすべて読み込み完了している
+                                
+000168 0268 115C00          10      LD  DE,FCB1
+00016B 026B 0E10             7      LD  C,010H      ;ファイルのクローズ(_FCLOSE) CP/M MSX-DOS
+00016D 026D C30500          10      JP  SYSTEM
+                                
+       0270                     IPL:
+                                ;   MSX BINARY HEADER
+000170 0270 FE                      DB  0FEH
+                                ;   MSX BINARY START ADDRESS
+000171 0271 0000                RUN:    DW  0
+                                ;   MSX BINARY END ADDRESS
+000173 0273 0000                LAST:   DW  0
+                                ;   MSX BINARY EXEC ADDRESS
+000175 0275 0000                EXEC:   DW  0
+       0277                     _START:
+       0278                     COM_START   EQU $+1
+000177 0277 210000          10      LD  HL,0
+00017A 027A 110001          10      LD  DE,$0100
+       027E                     COM_SIZE    EQU $+1
+00017D 027D 010000          10      LD  BC,0
+000180 0280 EDB0                    LDIR
+       0283                     _INIT1  EQU $+1
+000182 0282 2A0BCB          16      LD  HL,($CB0B)
+       0286                     _INIT_X1    EQU $+1
+000185 0285 229202          16      LD  (INITX1),HL
+       0289                     _INITX  EQU $+1
+000188 0288 210000          10      LD  HL,0
+       028C                     _INIT2  EQU $+1
+00018B 028B 220BCB          16      LD  ($CB0B),HL
+                                
+       028F                     RUN_LD  EQU $+1
+00018E 028E C30000          10      JP  0
+       0291                     INITX:  
+       0292                     INITX1  EQU $+1
+000191 0291 CD0000          17      CALL    0
+       0295                     _TSS    EQU $+1
+000194 0294 21D402          10      LD  HL,TSS
+000197 0297 1151FF          10      LD  DE,TSD
+00019A 029A 012300          10      LD  BC,TSS_E-TSS
+00019D 029D EDB0                    LDIR
+                                
+00019F 029F 2A0100          16      LD  HL,(1)
+0001A2 02A2 7C               4      LD  A,H
+0001A3 02A3 326AFF          13      LD  (_COMANL),A
+0001A6 02A6 23               6      INC HL
+0001A7 02A7 2252FF          16      LD  (CWBOOT),HL ;EF04
+0001AA 02AA 5E               7      LD  E,(HL)
+0001AB 02AB 23               6      INC HL
+0001AC 02AC 56               7      LD  D,(HL)
+0001AD 02AD 13               6      INC DE
+0001AE 02AE ED5355FF        20      LD  (WBOOT),DE
+0001B2 02B2 1151FF          10      LD  DE,TSD
+0001B5 02B5 72               7      LD  (HL),D
+0001B6 02B6 2B               6      DEC HL
+0001B7 02B7 73               7      LD  (HL),E
+0001B8 02B8 D5              11      PUSH    DE
+0001B9 02B9 210220          10      LD  HL,$2002
+0001BC 02BC 228000          16      LD  (DTA),HL
+0001BF 02BF 3E20             7      LD  A,$20
+0001C1 02C1 215D00          10      LD  HL,FCB1+1
+0001C4 02C4 060B             7      LD  B,11
+       02C6                     CLRFCB1:
+0001C6 02C6 77               7      LD  (HL),A
+0001C7 02C7 10FD            13      DJNZ    CLRFCB1
+0001C9 02C9 216D00          10      LD  HL,FCB2+1
+0001CC 02CC 060B             7      LD  B,11
+       02CE                     CLRFCB2:
+0001CE 02CE 77               7      LD  (HL),A
+0001CF 02CF 10FD            13      DJNZ    CLRFCB2
+                                
+0001D1 02D1 C30001          10      JP  $0100
+       02D4                     TSS:                ;TSD
+       FF52                     CWBOOT  EQU $+TSD-TSS+1
+0001D4 02D4 210000          10      LD  HL,0
+       FF55                     WBOOT   EQU $+TSD-TSS+1
+0001D7 02D7 110000          10      LD  DE,0
+0001DA 02DA 73               7      LD  (HL),E
+0001DB 02DB 23               6      INC HL
+0001DC 02DC 72               7      LD  (HL),D
+0001DD 02DD D5              11      PUSH    DE
+       02DF                     DRIVE   EQU $+1
+0001DE 02DE 1E00             7      LD  E,0
+0001E0 02E0 0E0E             7      LD  C,$0E       ;カレントドライブの設定(_SELDSK)
+0001E2 02E2 7B               4      LD  A,E
+0001E3 02E3 1D               4      DEC E
+0001E4 02E4 B7               4      OR  A
+0001E5 02E5 C40500          17      CALL    NZ,SYSTEM
+0001E8 02E8 116BFF          10      LD  DE,AUTOD+TSD-TSS
+       FF6A                     _COMANL EQU $+TSD-TSS+2
+0001EB 02EB C3FDEF          10      JP  $EFFD
+0001EE 02EE 4155544F45584543    AUTOD:  DB  "AUTOEXEC "
+            20                  
+       02F7                     TSS_E:
+       02F7                     IPL_E:
+                                
+       02F7                     TITLE:
+0001F7 02F7 6D616B6573797320        DB  "makesys v1.00"
+            76312E3030          
+       0304                     CRLF:
+000204 0304 0D0A                    DB  $0D,$0A
+000206 0306 24                      DB  '$'
+       0307                     USAGE:
+000207 0307 75736167653A204D        DB  "usage: MAKESYS com out [drive]"
+            414B455359532063    
+            6F6D206F7574205B    
+            64726976655D        
+000225 0325 0D0A                    DB  $0D,$0A
+000227 0327 24                      DB  '$'
+                                
+       0328                     ERRMES:
+000228 0328 4E6F742073757070        DB  "Not supported.",$0D,$0A,'$'
+            6F727465642E0D0A    
+            24                  
+       0339                     ERRMES1:
+000239 0339 4572726F722E0D0A        DB  "Error.",$0D,$0A,'$'
+            24                  
+       0342                     COMPLETED:
+000242 0342 436F6D706C657465        DB  "Completed.",$0D,$0A,'$'
+            642E0D0A24          
+                                
+       034F                     FCB_DEST:
+00024F 034F                         DS  37
+       0374                     FCB_LD:
+000274 0374 004C442020202020        DB  0,"LD      BIN" ;カレントドライブ=0,ファイル名8文字,拡張子3文字
+            2042494E            
+000280 0380 0000000000000000        DB  0,0,0,0, 0,0,0,0, 0,0,0,0   ;残りは0で埋める
+            00000000            
+00028C 038C 0000000000000000        DB  0,0,0,0, 0,0,0,0, 0,0,0,0, 0
+            0000000000          
+       0399                     BUFAD:
+[EOF:MAKESYS.ASM:SHIFT_JIS]
