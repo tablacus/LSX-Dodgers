@@ -263,14 +263,14 @@ TYPEY:
 	CALL	SYSTEM
 LOGICY:
 	LD	A,(FCB1)
-	LD	E,A
-	LD	C,$1B		;ディスク情報の獲得
-	CALL	SYSTEM
-	INC	A
-	JP	NZ,LOGIC
-	LD	A,(IX+$12)	;デバイス情報(DPB_12_DEVICE)
-	CP	$26		;デバイスはEMMでBPBからDPBを作成する
-	JP	NZ,ERROR
+	DEC	A
+	LD	HL,(BASE-1)
+	LD	L,$DC		;_GETDPB
+	CALL	JP_HL
+	LD	HL,(BASE-1)
+	LD	L,$E2		;_RDFATX
+	CALL	JP_HL
+	JP	C,ERROR
 LOGIC:
 	CALL	SURE
 LOGICX:
@@ -402,7 +402,7 @@ MAKE:
 GDATA:	LD	HL,FDATA
 WTTRK:
 	PUSH	DE
-WTTRKP:	CALL	$00E8		;#WTTRK
+WTTRKP:	CALL	$00E8		;_WTTRK
 	POP	DE
 ;
 	LD	L,(IX+$0D)	;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
@@ -705,7 +705,7 @@ CALC_FATLN16:	;FAT16 - クラスタ数から必要なFATサイズを求める(セクタサイズ512)
 	RET
 
 TITLE:
-	DB	"format v1.15"
+	DB	"format v1.16"
 CRLF:
 	DB	$0D,$0A
 	DB	'$'
@@ -725,7 +725,7 @@ PHYMES:
 LOGMES:
 	DB	"logical  format",$0D,$0A,'$'
 COMMES:
-	DB	"completed !",$0D,$0A,'$'
+	DB	"completed!",$0D,$0A,'$'
 HITMES:
 	DB	"hit [CR] to start$"
 OVERMES:
