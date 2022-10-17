@@ -30,12 +30,6 @@ MAIN:
 	LD	A,H
 	CP	1DH
 	RET	NZ
-	LD	A,L
-	OR	A		;X1
-	JR	Z,OK
-	CP	1		;MZ-700/1500
-	RET	NZ
-OK:
 	LD	SP,(SYSTEM+1)
 	LD	A,(FCB1)
 	DEC	A
@@ -90,6 +84,16 @@ OVER:	LD	A,$00
 	OR	A
 	JR	NZ,TYPEO
 
+	LD	HL,(OSFLG)
+	LD	A,H
+	CP	1DH
+	LD	A,L
+	OR	A		;X1
+	JR	Z,ENABLE_PHISIC
+	CP	1		;MZ-700/1500
+	JR	Z,ENABLE_PHISIC
+	JP	TYPEY
+ENABLE_PHISIC:
 	BIT	0,(IX+$0A)	;フロッピーディスクのモード(DPB_0A_FDMODE)
 	JR	Z,ENABLE_2HD
 	BIT	7,(IX+$12)	;デバイス情報(DPB_12_DEVICE)
@@ -705,7 +709,7 @@ CALC_FATLN16:	;FAT16 - クラスタ数から必要なFATサイズを求める(セクタサイズ512)
 	RET
 
 TITLE:
-	DB	"format v1.16"
+	DB	"format v1.17"
 CRLF:
 	DB	$0D,$0A
 	DB	'$'
