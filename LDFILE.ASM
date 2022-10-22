@@ -979,16 +979,14 @@ SETSEQ:
 	LD	A,(IY+33)	;(FCB)ƒ‰ƒ“ƒ_ƒ€ƒŒƒR[ƒh
 	LD	L,(IY+34)
 	LD	H,(IY+35)
-RR36:	LD	BC,0		;(IY+36)
+	LD	B,0
 
 	CALL	GET_CPM_R_SIZE
 
 	ADD	HL,HL
-	ADC	A,A
 	SRL	L		;L=L/2
 	LD	(IY+32),L	;(FCB)ƒJƒŒƒ“ƒgƒŒƒR[ƒh
 	LD	(IY+12),H	;(FCB)ƒJƒŒƒ“ƒgƒuƒƒbƒN
-	LD	(IY+24),A	;(FCB)ƒJƒŒƒ“ƒgƒuƒƒbƒNãˆÊ
 	POP	BC
 	POP	AF
 
@@ -1014,12 +1012,11 @@ GET_CPM_R_SIZE:		;ƒoƒCƒg’PˆÊ‚©‚çCP/M‚ÌƒŒƒR[ƒh’PˆÊ‚ð‹‚ß‚éi1ƒŒƒR[ƒh=128ƒoƒCƒg
 GETSEQ:
 	LD	L,(IY+32)	;(FCB)ƒJƒŒƒ“ƒgƒŒƒR[ƒh
 	LD	H,(IY+12)	;(FCB)ƒJƒŒƒ“ƒgƒuƒƒbƒN
-	LD	A,(IY+24)	;(FCB)ƒJƒŒƒ“ƒgƒuƒƒbƒNãˆÊ
+	XOR	A
 
 	SLA	L	;L=L*2
 
-	SRL	A	;
-	RR	H	;AHL=AHL/2
+	SRL	H	;HL=HL/2
 	RR	L	;
 	RET
 
@@ -1032,18 +1029,14 @@ RB_READ:
 	LD	BC,(STABLE+2*027H)	;(BDOS)ƒ‰ƒ“ƒ_ƒ€ƒuƒƒbƒN“Ç‚Ýž‚Ý
 RBRW:
 	SRL	A	;AHLA' = HL*128
-	PUSH	AF
 	RR	H	;AHL=AHL/2
 	RR	L	;
 	LD	A,0
-	RRA			;A'HLA
+	RRA		;A'HLA
 	LD	(IY+33),A	;(FCB)ƒ‰ƒ“ƒ_ƒ€ƒŒƒR[ƒh
 	LD	(IY+34),L
 	LD	(IY+35),H
-	LD	A,(IY+36)	;ƒ‰ƒ“ƒ_ƒ€ƒŒƒR[ƒh‚ð4ƒoƒCƒg‚Åˆµ‚¤‚ÆCP/M—p‚ÌƒRƒ}ƒ“ƒh‚Å
-	LD	(PBRSWC+3),A	;ƒfƒtƒHƒ‹ƒg‚ÌFCB‚ÆƒfƒtƒHƒ‹ƒg‚ÌDTA‚ðŽg—p‚µ‚Ä‚¢‚éƒRƒ}ƒ“ƒh‚Å
-	POP	AF		;ƒtƒ@ƒCƒ‹“Ç‚Ýž‚Ý‚ÌÛ‚Éæ“ª‚Ì1ƒoƒCƒg‚ª‰»‚¯‚é‚Ì‚Å•Û‘¶
-	LD	(IY+36),A	;
+	SET	7,(IY+32)	;(FCB)ƒJƒŒƒ“ƒgƒŒƒR[ƒh
 	LD	HL,128
 
 	PUSH	IY
@@ -1051,10 +1044,8 @@ RBRW:
 	PUSH	DE
 	CALL	JP_BC
 	POP	IY
-	LD	B,(IY+36)
-	LD	(RR36+1),BC
 	POP	BC
-PBRSWC:	LD	(IY+36),0	;Ž©ŒÈ‘‚«Š·‚¦	‚±‚±‚Åƒ‰ƒ“ƒ_ƒ€ƒŒƒR[ƒh‚ð•œŒ³
+	RES	7,(IY+32)	;(FCB)ƒJƒŒƒ“ƒgƒŒƒR[ƒh
 	RET
 JP_BC:
 	PUSH	BC

@@ -1,0 +1,319 @@
+
+;	LSX-Dodgers DISK
+;	PC-8801mkIISR
+
+;	FLOPPY DISK DRIVER
+
+PUTCOM:
+	PUSH	BC
+	LD	BC,037CCH
+	CALL	CALLROM
+	POP	BC
+	RET
+
+PUTDAT:
+	PUSH	BC
+	LD	BC,037D2H
+	CALL	CALLROM
+	POP	BC
+	RET
+
+GETDAT:
+	PUSH	BC
+	LD	BC,03847H
+	CALL	CALLROM
+	POP	BC
+	RET
+
+CALLROM:
+	DI
+	PUSH	AF
+	LD	A,(WK31)
+	RES	1,A
+	OUT	(031H),A
+	POP	AF
+	CALL	JP_BC
+	PUSH	AF
+	LD	A,(WK31)
+	OUT	(031H),A
+	POP	AF
+	EI
+	RET
+
+;	高速ハンドシェイク（ホストが送信）
+;	HL:アドレス BC:受信サイズ（必ず偶数にする）
+FPUTDAT:
+FPUTDAT1:
+	IN	A,(0FEH)	;ディスクサブシステムI/F 8255 ポートC
+	AND	2		;RFD
+	JR	Z,FPUTDAT1
+	LD	A,00EH		;ATN=0
+	OUT	(0FFH),A	;ディスクサブシステムI/F 8255 コントロール
+
+	LD	A,(HL)
+	OUT	(0FDH),A	;標準状態ではサブシステムへのデータ送信ポート
+
+	LD	A,9		;DAV=1
+	OUT	(0FFH),A
+	INC	HL
+	DEC	BC
+FPUTDAT2:
+	IN	A,(0FEH)	;ディスクサブシステムI/F 8255 ポートC
+	AND	4		;DAC
+	JR	Z,FPUTDAT2
+
+	LD	A,(HL)
+	OUT	(0FDH),A	;標準状態ではサブシステムへのデータ送信ポート
+
+	LD	A,8		;DAV=0
+	OUT	(0FFH),A
+FPUTDAT3:
+	IN	A,(0FEH)	;ディスクサブシステムI/F 8255 ポートC
+	AND	4		;DAC
+	JR	NZ,FPUTDAT3
+
+	CPI			;HL=HL+1 BC=BC-1 BCが0の場合にP/V=0
+	JP	PE,FPUTDAT
+	RET
+
+
+;	高速ハンドシェイク（ホストが受信）
+;	HL:アドレス BC:受信サイズ（必ず偶数にする）
+FGETDAT:
+	LD	A,00BH		;RFD=1
+	OUT	(0FFH),A	;ディスクサブシステムI/F 8255 コントロール
+FGETDAT1:
+	IN	A,(0FEH)	;ディスクサブシステムI/F 8255 ポートC
+	RRCA			;DAV
+	JR	NC,FGETDAT1
+	
+	LD	A,00AH		;RFD=0
+	OUT	(0FFH),A	;ディスクサブシステムI/F 8255 コントロール
+	
+	IN	A,(0FCH)	;標準状態ではサブシステムからのデータ受信ポート
+	LD	(HL),A
+
+	LD	A,00DH		;DAC=1
+	OUT	(0FFH),A	;ディスクサブシステムI/F 8255 コントロール
+	INC	HL
+	DEC	BC
+FGETDAT2:
+	IN	A,(0FEH)	;ディスクサブシステムI/F 8255 ポートC
+	RRCA			;DAV
+	JR	C,FGETDAT2
+
+	IN	A,(0FCH)	;標準状態ではサブシステムからのデータ受信ポート
+	LD	(HL),A
+
+	LD	A,00CH		;DAC=0
+	OUT	(0FFH),A
+
+	CPI			;HL=HL+1 BC=BC-1 BCが0の場合にP/V=0
+	JP	PE,FGETDAT
+	RET
+
+;	論理セクタ番号からトラック番号とセクタ番号を得る
+;	in 
+;	DE:論理セクタ
+CALC_SECTOR:
+	PUSH	BC
+	LD	C,(IX+00DH)	;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+	LD	B,16
+	XOR	A
+	EX	DE,HL
+DIV1:
+	ADD	HL,HL
+	ADC	A,A
+	CP	C
+	JR	C,DIV2
+	SUB	C
+	INC	L
+DIV2:
+	DJNZ	DIV1
+
+	INC	A	;最小のセクタは１固定
+	LD	D,L	;TRACK
+DIV3:
+	LD	E,A	;SECTOR
+	POP	BC
+	RET
+
+WTTRK:
+	SCF
+	RET
+FDWT:
+	PUSH	HL
+	PUSH	DE
+	CALL	CALC_SECTOR
+	LD	A,D		;トラック
+	LD	(FDWT_TRACK),A
+	LD	A,E		;セクタ
+	LD	(FDWT_SECTOR),A
+	LD	A,(IX+00DH)	;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+	SUB	E
+	INC	A
+	LD	H,A
+	POP	DE
+	LD	A,(SECSZ+2)	;1セクタのサイズの上位1バイト
+	LD	C,A
+	XOR	A
+FDWT2:
+	ADD	A,C
+	INC	DE
+	DEC	B
+	JR	Z,FDWT3
+	DEC	H		;トラック、ヘッドを跨がない
+	JR	Z,FDWT3
+	CP	03AH		;バッファとして04000H-07BFFHまで使える
+	JR	C,FDWT2
+FDWT3:
+	LD	C,A
+	POP	HL
+	LD	A,16H		;高速レシーブメモリ
+	CALL	PUTCOM
+	LD	A,DSS_DATA/256	;開始アドレスH
+	CALL	PUTDAT
+	XOR	A		;開始アドレスL
+	CALL	PUTDAT
+	LD	A,C		;バイト数H
+	CALL	PUTDAT
+	XOR	A		;バイト数L
+	CALL	PUTDAT
+	PUSH	BC
+	LD	B,C
+	LD	C,0
+	CALL	FPUTDAT
+	POP	BC
+	LD	A,0DH		;エグゼキュート
+	CALL	PUTCOM
+	LD	A,WRITEDISKEX/256
+	CALL	PUTDAT
+	LD	A,WRITEDISKEX%256
+	CALL	PUTDAT
+	LD	A,(IX+013H)	;デバイスドライバ内におけるユニット番号(DPB_13_UNITNO)
+	CALL	PUTDAT
+	LD	A,(IX+00DH)	;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+	CALL	PUTDAT
+FDWT_SECTOR	EQU	$+1
+	LD	A,0		;セクタ
+	CALL	PUTDAT
+FDWT_TRACK	EQU	$+1
+	LD	A,0		;トラック
+	CALL	PUTDAT
+	LD	A,(IX+00AH)	;フロッピーディスクのモード(DPB_0A_FDMODE)
+	CALL	PUTDAT
+	LD	A,(SECSZ+2)	;1セクタのサイズの上位1バイト
+	CALL	PUTDAT
+	LD	A,C
+	CALL	PUTDAT		;バイト数H
+	LD	A,(IX+$0C)	;フロッピーディスクのシリンダ数(DPB_0C_MAXCYL)
+	CALL	PUTDAT
+
+	LD	A,0DH		;エグゼキュート
+	CALL	PUTCOM
+	LD	A,RESULTEX/256
+	CALL	PUTDAT
+	LD	A,RESULTEX%256
+	CALL	PUTDAT
+
+	CALL	GETDAT
+	LD	C,A
+	CP	1
+	RET	C
+
+	LD	A,B
+	OR	A
+	JP	NZ,FDWT
+	RET
+
+FDRD:
+	LD	A,D
+	OR	E
+	JR	NZ,FDRD1
+				;初期化
+	XOR	A		;イニシャライズ
+	CALL	PUTCOM
+	LD	A,017H		;セットサーフィスモード
+	CALL	PUTCOM
+	LD	A,7		;Bit3～Bit0 0:片面 1:両面
+	CALL	PUTDAT
+FDRD1:
+	LD	A,0DH		;エグゼキュート
+	CALL	PUTCOM
+	LD	A,READDISKEX/256
+	CALL	PUTDAT
+	XOR	A
+	CALL	PUTDAT
+	LD	A,(IX+013H)	;デバイスドライバ内におけるユニット番号(DPB_13_UNITNO)
+	CALL	PUTDAT
+	LD	A,(IX+00DH)	;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+	CALL	PUTDAT
+	PUSH	HL
+	PUSH	DE
+	CALL	CALC_SECTOR
+	LD	A,E		;セクタ
+	CALL	PUTDAT
+	LD	A,D		;トラック
+	CALL	PUTDAT
+	LD	A,(IX+00DH)	;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+	SUB	E
+	INC	A
+	LD	H,A
+	POP	DE
+	LD	A,(IX+00AH)	;フロッピーディスクのモード(DPB_0A_FDMODE)
+	CALL	PUTDAT
+	LD	A,(SECSZ+2)	;1セクタのサイズの上位1バイト
+	CALL	PUTDAT
+	LD	C,A
+	XOR	A
+FDRD2:
+	ADD	A,C
+	INC	DE
+	DEC	B
+	JR	Z,FDRD3
+	DEC	H		;トラック、ヘッドを跨がない
+	JR	Z,FDRD3
+	CP	03AH		;バッファとして04000H-07BFFHまで使える
+	JR	C,FDRD2
+FDRD3:
+	POP	HL
+	LD	C,A
+	CALL	PUTDAT		;バイト数H
+	LD	A,(IX+$0C)	;フロッピーディスクのシリンダ数(DPB_0C_MAXCYL)
+	CALL	PUTDAT
+
+	LD	A,0DH		;エグゼキュート
+	CALL	PUTCOM
+	LD	A,RESULTEX/256
+	CALL	PUTDAT
+	LD	A,RESULTEX%256
+	CALL	PUTDAT
+
+	CALL	GETDAT
+	LD	C,A
+	CP	1
+	RET	C
+
+	LD	A,15H		;高速センドメモリ
+	CALL	PUTCOM
+	LD	A,DSS_DATA/256	;開始アドレスH
+	CALL	PUTDAT
+	XOR	A		;開始アドレスL
+	CALL	PUTDAT
+	LD	A,C		;バイト数H
+	CALL	PUTDAT
+	XOR	A		;バイト数L
+	CALL	PUTDAT
+	PUSH	BC
+	LD	B,C
+	LD	C,0
+	CALL	FGETDAT
+	POP	BC
+	LD	A,B
+	OR	A
+	JP	NZ,FDRD1
+	RET
+
+FDMODE	EQU	BEEPD+7
+FSPAT	EQU	BEEPD+9
+

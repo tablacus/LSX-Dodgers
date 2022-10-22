@@ -1,0 +1,56 @@
+
+;	LSX-Dodgers DISK2
+;	PC-8801mkIISR
+
+;	BANK RAM DISK DRIVER
+
+BDWT:
+	LD	A,010H	;ライト可　リード不可
+JR	BRW
+
+BDRD:
+	LD	A,001H	;ライト不可　リード可
+BRW:
+	DI
+	OUT	(0E2H),A	;拡張RAM リード/ライト制御
+	LD	(BANKSP+1),SP
+	LD	A,(BANKSP+2)
+	ADD	A,A
+	JR	C,BRW1
+	LD	SP,EXTSP
+BRW1:
+	PUSH	BC
+	PUSH	DE
+	EX	DE,HL
+	ADD	HL,HL
+	ADD	HL,HL
+	LD	A,H
+	AND	00FH		;バンク
+	OUT	(0E3H),A	;拡張RAM バンク選択
+	LD	H,L
+	SRL	H	;/2
+	LD	L,0
+	IN	A,(0E2H)	;拡張RAM リード/ライト制御
+	RRCA
+	JR	NC,BRW2
+	EX	DE,HL
+BRW2:
+	LD	BC,512
+	LDIR
+
+	IN	A,(0E2H)	;拡張RAM リード/ライト制御
+	RRCA
+	JR	C,BRW3
+	EX	DE,HL
+BRW3:
+	POP	DE
+	POP	BC
+	INC	DE
+	DJNZ	BRW1
+
+	XOR	A
+	OUT	(0E2H),A	;メインメモリに切り替える
+BANKSP:	LD	SP,0
+	EI
+	RET
+

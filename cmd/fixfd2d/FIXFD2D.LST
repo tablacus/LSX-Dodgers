@@ -1,0 +1,115 @@
+                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.0.0, LST:Full:4
+                                ;
+                                ;   FIXFD by Gaku
+                                ;
+       0005                     SYSTEM  EQU $0005
+       000F                     JP_HL   EQU $000F
+       005C                     FCB1    EQU $005C
+       0080                     DTA EQU $0080
+                                
+000000 0100                         ORG $0100
+000000 0100 C30301          10      JP  START
+       0103                     START:
+000003 0103 11A901          10      LD  DE,TITLE
+000006 0106 0E09             7      LD  C,9     ;文字列出力
+000008 0108 CD0500          17      CALL    SYSTEM
+00000B 010B 3A5C00          13      LD  A,(FCB1)
+00000E 010E B7               4      OR  A
+00000F 010F 2010            12      JR  NZ,MAIN
+       0111                     USAGE:
+000011 0111 11B901          10      LD  DE,MUSAGE
+       0114                     SHOW_MESSAGE:
+000014 0114 0E09             7      LD  C,9     ;文字列出力
+000016 0116 CD0500          17      CALL    SYSTEM
+000019 0119 C30000          10      JP  0
+       011C                     NOT_FD:
+00001C 011C 11D101          10      LD  DE,ERRMES
+00001F 011F 18F3            12      JR  SHOW_MESSAGE
+       0121                     MAIN:
+000021 0121 0E6F             7      LD  C,$6F       ;MSX-DOS のバージョン番号の獲得(_DOSVER)
+000023 0123 CD0500          17      CALL    SYSTEM
+000026 0126 38E9            12      JR  C,USAGE
+000028 0128 211D01          10      LD  HL,$011D    ;LSX-Dodgersか判別
+00002B 012B ED42            15      SBC HL,BC
+00002D 012D 20E2            12      JR  NZ,USAGE
+                                
+00002F 012F 3A5C00          13      LD  A,(FCB1)
+000032 0132 3D               4      DEC A
+000033 0133 5F               4      LD  E,A
+000034 0134 0E1F             7      LD  C,$1F       ;ディスク装置のパラメータの読み出し
+000036 0136 CD0500          17      CALL    SYSTEM
+000039 0139 B7               4      OR  A
+00003A 013A 28E0            12      JR  Z,NOT_FD
+00003C 013C DD7E12          19      LD  A,(IX+$12)  ;デバイス情報(DPB_12_DEVICE)
+00003F 013F E60F             7      AND $0F
+000041 0141 FE07             7      CP  7
+000043 0143 20D7            12      JR  NZ,NOT_FD
+                                
+000045 0145 DDCB126E        20      BIT 5,(IX+$12)  ;デバイス情報(DPB_12_DEVICE)
+000049 0149 2854            12      JR  Z,TOBPB
+                                
+00004B 014B 2AF801          16      LD  HL,(M2D)
+00004E 014E DD7500          19      LD  (IX+0),L    ;FAT領域のセクタ単位でのサイズ(DPB_00_FATLN)
+000051 0151 DD7401          19      LD  (IX+1),H    ;
+000054 0154 2AFA01          16      LD  HL,(M2D+2)
+000057 0157 DD7506          19      LD  (IX+6),L    ;メディアバイト(DPB_06_FATID)
+00005A 015A DD7407          19      LD  (IX+7),H    ;1クラスタの論理セクタ数(DPB_07_SECPCL)
+00005D 015D 2AFC01          16      LD  HL,(M2D+4)
+000060 0160 DD7508          19      LD  (IX+8),L    ;総クラスタ数(DPB_08_MAXCL)
+000063 0163 DD7409          19      LD  (IX+9),H    ;
+000066 0166 2AFE01          16      LD  HL,(M2D+6)
+000069 0169 DD750A          19      LD  (IX+$0A),L  ;フロッピーディスクのモード(DPB_0A_FDMODE)
+00006C 016C DD740B          19      LD  (IX+$0B),H  ;ルートディレクトリ領域の論理セクタ数(DPB_0B_DIRSCNT)
+00006F 016F 2A0002          16      LD  HL,(M2D+8)
+000072 0172 DD750C          19      LD  (IX+$0C),L  ;フロッピーディスクのシリンダ数(DPB_0C_MAXCYL)
+000075 0175 DD740D          19      LD  (IX+$0D),H  ;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+000078 0178 2A0202          16      LD  HL,(M2D+10)
+00007B 017B DD750E          19      LD  (IX+$0E),L  ;FAT領域の先頭論理セクタ番号(DPB_0E_FATPS)
+00007E 017E DD740F          19      LD  (IX+$0F),H  ;
+000081 0181 2A0402          16      LD  HL,(M2D+12)
+000084 0184 DD7510          19      LD  (IX+$10),L  ;ルートディレクトリ領域の先頭論理セクタ番号(DPB_10_DIRPS)
+000087 0187 DD7411          19      LD  (IX+$11),H  ;
+00008A 018A 3A0602          13      LD  A,(M2D+14)
+00008D 018D DD7512          19      LD  (IX+$12),L  ;デバイス情報(DPB_12_DEVICE)
+000090 0190 2A0802          16      LD  HL,(M2D+16)
+000093 0193 DD7514          19      LD  (IX+$14),L  ;データ格納領域の先頭論理セクタ番号(DPB_14_ADDCL16)
+000096 0196 DD7415          19      LD  (IX+$15),H  ;
+                                
+000099 0199 11DC01          10      LD  DE,MES2D
+00009C 019C C31401          10      JP  SHOW_MESSAGE
+       019F                     TOBPB:
+00009F 019F DDCB12EE        23      SET 5,(IX+$12)  ;デバイス情報(DPB_12_DEVICE)
+0000A3 01A3 11E501          10      LD  DE,MESAUTO
+0000A6 01A6 C31401          10      JP  SHOW_MESSAGE
+                                
+       01A9                     TITLE:
+0000A9 01A9 6669786664326420        DB  "fixfd2d v1.00"
+            76312E3030          
+       01B6                     CRLF:
+0000B6 01B6 0D0A                    DB  $0D,$0A
+0000B8 01B8 24                      DB  '$'
+       01B9                     MUSAGE:
+0000B9 01B9 75736167653A2046        DB  "usage: FIXFD2D drive:",$0D,$0A
+            4958464432442064    
+            726976653A0D0A      
+0000D0 01D0 24                      DB  '$'
+       01D1                     ERRMES:
+0000D1 01D1 074E6F7420464444        DB  7,"Not FDD",$0D,$0A,'$'
+            0D0A24              
+       01DC                     MES2D:
+0000DC 01DC 6669782032440D0A        DB  "fix 2D",$0D,$0A,'$'
+            24                  
+       01E5                     MESAUTO:
+0000E5 01E5 6175746F20646574        DB  "auto detect mode",$0D,$0A,'$'
+            656374206D6F6465    
+            0D0A24              
+                                ;
+                                ;   DPB Data
+                                ;
+       01F8                     M2D:
+0000F8 01F8 0200                    DW  2
+0000FA 01FA FD02                    DB  $FD,2
+0000FC 01FC 6401                    DW  356
+0000FE 01FE FF0728090182            DB  $FF,7,40,9,1,$82
+000104 0204 050007000800            DW  5,7,8
+[EOF:FIXFD2D.ASM:SHIFT_JIS]

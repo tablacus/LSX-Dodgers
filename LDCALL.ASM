@@ -44,9 +44,7 @@ CTRLTB:
 	DW	CTRL00,CTRL00,CTRL0C,CTRL1B	;X,Y,Z,ESC
 	DW	CTRL1C,CTRL1D,CTRL1E,CTRL1F	;→,←,↑,↓
 
-DEMES:	DB	3,7
-	DB	"Device I/O Error",5,3
-	DB	"Abort Retry Ignore?",5,3,0
+	DS	02AH
 
 SDDATA:	DB	22,23		;(FCB)ファイルを最後に変更した時刻
 	DB	20,21		;(FCB)ファイルを最後に変更した日付

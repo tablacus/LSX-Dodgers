@@ -128,5 +128,5 @@ DEVICE:
 	DS	32
 
 ;	H:
-	DS	31
+	DS	3
 	DB	0

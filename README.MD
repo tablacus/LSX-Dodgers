@@ -26,8 +26,10 @@ FD0にセットしたらIPLからキーボードでF→0→0(X1turbo実機ROM)/F
 2. FD1に`ldsys.d88`をセット
 3. CMTに`LD.MZT`をセットする
 
-FD1にフロッピーをセットしていなくても起動できますが、autoexec.bat/autoexec.comを読もうとして「Device I/O Error」が出ます。
-
+# PC-8801mkIISR版の起動方法
+1. N88-V2 modeにする(すでにV2モードの場合はここは省略可)
+2. FD1に`ldsys.d88`をセット
+3. 起動しない場合はリセットする
 
 # 手引書
 
@@ -61,7 +63,7 @@ MIT License のオープンソースです。
 
 # エミュレータ
 
-X1/turbo/Z、MZ-700/1500共に互換BIOS(ROM)及び互換フォントが存在するために実機を持っていなくてもエミュレータで楽しめます。
+X1/turbo/Z、MZ-700/1500、PC-8801mkIISR、どれも互換BIOS(ROM)及び互換フォントが存在するために実機を持っていなくてもエミュレータで楽しめます。
 
 ## X1/turbo/Z
 
@@ -129,6 +131,45 @@ MZ-700WIN /EmuZ-700フォントデータの作成
 http://mzakd.cool.coocan.jp/starthp/subpage15.html
 
 
+## PC-8801mkIISR
+
+### エミュレータ
+
+project m88  
+http://retropc.net/cisc/m88/
+
+2D/2DD/2HDの読み書きが可能でした。
+
+Common Source Code Project  
+http://takeda-toshiya.my.coocan.jp/common/index.html
+
+10/14/2022版では実機の2HD対応ROMで無い場合は2D以外に正しくアクセスできないように制限をかけているようです。
+
+Manuke Station : Project X88000  
+https://quagma.sakura.ne.jp/manuke/x88000.html
+
+### 互換BIOS(ROM)
+
+project m88  
+http://retropc.net/cisc/m88/
+
+project m88にある`Pseudo BIOS`がエミュレータ用擬似BIOSになります。
+
+
+### 互換フォント
+
+Manuke Station : Project X88000  
+https://quagma.sakura.ne.jp/manuke/x88000.html
+
+Gen88Font  
+PC-8801エミュレータ用フォントジェネレータ
+
+project m88  
+http://retropc.net/cisc/m88/
+
+漢字 ROM 作成キット
+
+
 # イメージファイル
 
 X1のエミュレータではだいたい以下のイメージファイルが扱える様です。  
@@ -152,18 +193,19 @@ MS-DOS系のフォーマットがなさそうなので今のところLSX-Dodgers
 
 # Windows等とのファイルのやり取り
 
+## L3ディスクエクスプローラ(L3 Disk Explorer) 
+http://s-sasaji.ddo.jp/bml3mk5/
+
+2D/2DD/2HDのD88/DSK/XDF/IMG形式のイメージファイルが扱えます。  
+他にもいろんな機種のフォーマットに対応しています。
+
 ## X1DiskExplorer
 https://ceeezet.syuriken.jp/
 
 2D/(2DD/2HD)のD88形式のイメージファイルが扱えます。  
 LAバイナリを自動変換してくれる機能があるのでL-os Angelesも使用する場合に便利です。  
 ※2DD/2HDは一覧だけ利用できます。
-
-## L3ディスクエクスプローラ(L3 Disk Explorer) 
-http://s-sasaji.ddo.jp/bml3mk5/
-
-2D/2DD/2HDのD88/DSK/XDF/IMG形式のイメージファイルが扱えます。  
-他にもいろんな機種のフォーマットに対応しています。
+※PC-8801mkSRのブート対応ディスクは変則フォーマットの為にアクセスできなくなりました。
 
 ## DiskExplorer
 http://hp.vector.co.jp/authors/VA013937/editdisk/
@@ -235,6 +277,7 @@ https://github.com/AILight/AILZ80ASM/releases/tag/v1.0.0
 ```BAT
 ASM_AILZ80ASM_X1.BAT
 ASM_AILZ80ASM_M7.BAT
+ASM_AILZ80ASM_88.BAT
 ```
 ## AASM
 https://www.vector.co.jp/soft/dos/prog/se010314.html
