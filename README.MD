@@ -1,11 +1,11 @@
-LSX-Dodgers for X1/turbo/Z and MZ-700/1500 Gaku
+LSX-Dodgers for X1/turbo/Z, MZ-700/1500 and PC-8801mkIISR Gaku
 
 A>■
 
 
 # 機能概略
 
- このソフトはX1/turbo/ZやMZ-700/1500でCP/M80やMSX-DOSのソフトを実行するためのOSです。  
+ このソフトはX1/turbo/ZやMZ-700/1500やPC-8801mkIISRでCP/M80やMSX-DOSのソフトを実行するためのOSです。  
 MS-DOS互換のファイルフォーマットを持ちCP/M80やMSX-DOSと互換のシステムコールを持っています。  
 また、階層ディレクトリにも対応しています。  
 
