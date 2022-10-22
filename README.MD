@@ -198,6 +198,7 @@ http://s-sasaji.ddo.jp/bml3mk5/
 
 2D/2DD/2HDのD88/DSK/XDF/IMG形式のイメージファイルが扱えます。  
 他にもいろんな機種のフォーマットに対応しています。
+空の仮想ディスクを作成することもできます。https://github.com/tablacus/LSX-Dodgers/issues/11
 
 ## X1DiskExplorer
 https://ceeezet.syuriken.jp/
