@@ -363,12 +363,8 @@ RDFAT0X:
 	RET
 
 BPB2DPB:
-	LD	A,(IY+0)	;BS_JmpBoot
-	CP	0EBH		;Short jump
-	JR	Z,BPBOK
-	CP	0E9H		;Near jump
-	JR	Z,BPBOK
-	CP	060H		;X68k
+	LD	A,(IY+11)	;BPB_BytsPerSec
+	OR	A
 	SCF
 	RET	NZ
 BPBOK:
@@ -397,6 +393,9 @@ BPBDP2:
 	LD	L,(IY+17)	;BPB_RootEntCnt
 	LD	H,(IY+18)
 	LD	A,(IY+12)	;BPB_BytsPerSec
+	OR	A
+	SCF
+	RET	Z
 	LD	B,6
 BPBBPS1:
 	DEC	B
@@ -477,13 +476,19 @@ NOT_FD:
 	LD	A,(IY+16)	;BPB_NumFATs
 	CP	2		;>2:NC
 	LD	A,(IY+12)	;BPB_BytsPerSec
+	LD	L,A
 	JR	C,BPBFAT1
 	OR	080H
 BPBFAT1:
 	LD	(IX+00FH),A	;DPB_0F_BPS
-
-	AND	07FH		;セクタバッファが1KBしかないので1KBを超える場合はCF=1でエラーにする
-	ADD	A,0-5		;0-4:CF=0 5以上:CF=1
+	LD	A,L		;セクタバッファが1KBしかないので1KBを超える場合はCF=1でエラーにする
+	CP	2		;1セクタ512バイト
+	RET	Z
+	CP	4		;1セクタ1024バイト
+	RET	Z
+	CP	1		;1セクタ256バイト
+	RET	Z
+	SCF
 	RET
 
 RDFATS:

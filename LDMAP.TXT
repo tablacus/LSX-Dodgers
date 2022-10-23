@@ -89,10 +89,12 @@ $000Bは$0002と同じになります。
 2: PC-8801mkIISR
 
 
-※X1turboのBIOS-ROM呼び出し
+※BIOS-ROM呼び出し(X1turbo/PC-8801mkIISR)
 
  BCレジスタにBIOS-ROMのコールアドレスを入れてコール(RST 18H)する。
- turboBASICやturboSWORD等と同じ。実機ROMがある場合にのみ使えます。
+
+X1の場合の注意点
+ turboBASICやturboSWORD等と同じ。X1turboは実機ROMがある場合にのみ使えます。
  互換BIOSやノンターボのROMの場合は$18に$FFが格納されています。
 
 

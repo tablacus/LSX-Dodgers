@@ -3,41 +3,66 @@
 ;	PC-8801mkIISR
 
 ;	FLOPPY DISK DRIVER
-
+;
+;	コマンド送信
 PUTCOM:
-	PUSH	BC
-	LD	BC,037CCH
-	CALL	CALLROM
-	POP	BC
-	RET
-
+	PUSH	AF
+	LD	A,00FH
+	OUT	(0FFH),A	;ディスクサブシステムI/F 8255 コントロール
+	POP	AF
+;	通常ハンドシェイク（ホストが送信）
 PUTDAT:
-	PUSH	BC
-	LD	BC,037D2H
-	CALL	CALLROM
-	POP	BC
+	PUSH	AF
+PUTDAT1:
+	IN	A,(0FEH)	;ディスクサブシステムI/F 8255 ポートC
+	AND	2		;RFD
+	JR	Z,PUTDAT1
+	LD	A,00EH		;ATN=0
+	OUT	(0FFH),A	;ディスクサブシステムI/F 8255 コントロール
+	POP	AF
+	OUT	(0FDH),A	;標準状態ではサブシステムへのデータ送信ポート
+	PUSH	AF
+	LD	A,9		;DAV=1
+	OUT	(0FFH),A
+PUTDAT2:
+	IN	A,(0FEH)	;ディスクサブシステムI/F 8255 ポートC
+	AND	4		;DAC
+	JR	Z,PUTDAT2
+
+	LD	A,8		;DAV=0
+	OUT	(0FFH),A
+PUTDAT3:
+	IN	A,(0FEH)	;ディスクサブシステムI/F 8255 ポートC
+	AND	4		;DAC
+	JR	NZ,PUTDAT3
+	POP	AF
 	RET
 
+;	通常ハンドシェイク（ホストが受信）
 GETDAT:
-	PUSH	BC
-	LD	BC,03847H
-	CALL	CALLROM
-	POP	BC
-	RET
+	LD	A,00BH		;RFD=1
+	OUT	(0FFH),A	;ディスクサブシステムI/F 8255 コントロール
+GETDAT1:
+	IN	A,(0FEH)	;ディスクサブシステムI/F 8255 ポートC
+	RRCA			;DAV
+	JR	NC,GETDAT1
+	
+	LD	A,00AH		;RFD=0
+	OUT	(0FFH),A	;ディスクサブシステムI/F 8255 コントロール
+	
+	IN	A,(0FCH)	;標準状態ではサブシステムからのデータ受信ポート
+	PUSH	AF
+	LD	A,00DH		;DAC=1
+	OUT	(0FFH),A	;ディスクサブシステムI/F 8255 コントロール
 
-CALLROM:
-	DI
-	PUSH	AF
-	LD	A,(WK31)
-	RES	1,A
-	OUT	(031H),A
+GETDAT2:
+	IN	A,(0FEH)	;ディスクサブシステムI/F 8255 ポートC
+	RRCA			;DAV
+	JR	C,GETDAT2
+
+	LD	A,00CH		;DAC=0
+	OUT	(0FFH),A
 	POP	AF
-	CALL	JP_BC
-	PUSH	AF
-	LD	A,(WK31)
-	OUT	(031H),A
-	POP	AF
-	EI
 	RET
 
 ;	高速ハンドシェイク（ホストが送信）

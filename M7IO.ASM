@@ -173,15 +173,19 @@ CONSTX:
 	RET
 
 _SYS2A:		;(BDOS)“ú•t‚ÌŠl“¾
-	LD	HL,0
-	LD	DE,0
 	XOR	A
+	LD	D,A
+	LD	E,A
+	LD	H,A
+	LD	L,A
 	RET
 
 _SYS2C:		;(BDOS)Žž‚ÌŠl“¾
-	LD	HL,0
-	LD	DE,0
 	XOR	A
+	LD	D,A
+	LD	E,A
+	LD	H,A
+	LD	L,A
 	RET
 
 ESC1:
