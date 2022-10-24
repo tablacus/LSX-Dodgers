@@ -424,6 +424,25 @@ BPBDE1:
 	POP	DE		;DE=DPB_0B_MAXDIR
 	LD	L,(IY+19)	;BPB_TotSec16
 	LD	H,(IY+20)
+
+	BIT	7,(IX+00AH)	;DPB_0A_FDMODE
+	JR	Z,NOT_FD
+	PUSH	HL
+	LD	C,(IY+24)	;BPB_SecPerTr
+	LD	(IX+00DH),C	;DPB_0D_MAXSEC
+	XOR	A
+	LD	B,A
+	SLA	C		;両面なのでセクタ数を２倍
+	DEC	HL
+CNTSEC:				;MAXCYL = BPB_TotSec16 / (BPB_SecPerTr * 2)
+	INC	A
+	JR	Z,CNTSECE
+	SBC	HL,BC
+	JR	NC,CNTSEC
+CNTSECE:
+	LD	(IX+00CH),A	;DPB_0C_MAXCYL
+	POP	HL	;ここまでフロッピー専用
+NOT_FD:
 	LD	A,H
 	OR	L
 	LD	A,0		;LDでフラグは変化しない。BPB_TotSec16を AHL で扱う為、Aに0を入れる
@@ -459,35 +478,21 @@ BPBTC2:
 	LD	A,(IY+21)	;BPB_Media
 	LD	(IX+6),A	;DPB_06_FATID
 
-	BIT	7,(IX+00AH)	;DPB_0A_FDMODE
-	JR	Z,NOT_FD
-	LD	L,40		;MAXCYLの設定（要検討）ここから下はフロッピーのみ書き換える
-	CP	0FDH	;2D
-	JR	Z,SETCYL
-	LD	L,77
-	CP	0FEH	;2HD
-	JR	Z,SETCYL
-	LD	L,80	;その他2DD等
-SETCYL:
-	LD	(IX+00CH),L	;DPB_0C_MAXCYL
-	LD	A,(IY+24)	;BPB_SecPerTr
-	LD	(IX+00DH),A	;DPB_0D_MAXSEC	;ここまでフロッピー専用
-NOT_FD:
 	LD	A,(IY+16)	;BPB_NumFATs
-	CP	2		;>2:NC
+	ADD	A,0-2		;>2:CF=1
 	LD	A,(IY+12)	;BPB_BytsPerSec
 	LD	L,A
-	JR	C,BPBFAT1
+	JR	NC,BPBFAT1
 	OR	080H
 BPBFAT1:
 	LD	(IX+00FH),A	;DPB_0F_BPS
-	LD	A,L		;セクタバッファが1KBしかないので1KBを超える場合はCF=1でエラーにする
-	CP	2		;1セクタ512バイト
-	RET	Z
-	CP	4		;1セクタ1024バイト
-	RET	Z
-	CP	1		;1セクタ256バイト
-	RET	Z
+	DEC	L		;以下のセクタサイズに合致しない場合はCF=1でエラーにする
+	RET	Z		;1セクタ256バイト
+	DEC	L
+	RET	Z		;1セクタ512バイト
+	DEC	L
+	DEC	L
+	RET	Z		;1セクタ1024バイト
 	SCF
 	RET
 
