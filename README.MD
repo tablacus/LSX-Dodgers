@@ -143,7 +143,7 @@ http://retropc.net/cisc/m88/
 Common Source Code Project  
 http://takeda-toshiya.my.coocan.jp/common/index.html
 
-10/14/2022版では実機の2HD対応ROMで無い場合は2D以外に正しくアクセスできないように制限をかけているようです。  
+10/14/2022版では実機の2HD対応ROMで無い場合は2D以外には制限をかけているようです。  
 ePC-8801MAで2DD/2HDを使う方法→ https://github.com/tablacus/LSX-Dodgers/issues/13
 
 Manuke Station : Project X88000  
