@@ -360,12 +360,6 @@ RBXEND1:
 	EX	DE,HL		;HL=Read byte
 	RET
 
-GET_RR_AHL:
-	LD	L,(IY+33)	;(FCB)Random record
-	LD	H,(IY+34)	;
-	LD	A,(IY+35)	;
-	RET
-
 GET_RR_BCDE:			;BCDE=Random record
 	LD	E,(IY+33)	;(FCB)ランダムレコード
 	LD	D,(IY+34)

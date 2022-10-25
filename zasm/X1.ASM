@@ -23,11 +23,6 @@ LINE	EQU	24
 COLORF	EQU	7
 COMS	EQU	9
 
-;DRDC	EQU	DRD24
-;DWTC	EQU	DWT24
-;DRDF	EQU	DRDF0
-;DWTF	EQU	DWTF0
-
 
 ;LDDEF.ASM
 
@@ -35,7 +30,7 @@ COMS	EQU	9
 
 VER_1   EQU	1
 VER_2   EQU	4
-VER_3   EQU	7
+VER_3   EQU	8
 MACW	EQU	MAC + 01D00H	;ã@éÌÉtÉâÉOÇ∆LDîªï ÉtÉâÉO
 MACD	EQU	MAC + DEV * 256	;ã@éÌÉtÉâÉOÇ∆ÉfÉoÉCÉXÉtÉâÉO
 VER	EQU	VER_1 * 256 + VER_2 * 16 + VER_3
@@ -372,6 +367,12 @@ BANK:
 	LD	BC,00B00H
 	LD	HL,07F00H
 	DI
+	OUT	(C),L
+	LD	A,(0)
+	CP	0EBH
+	JR	NZ,BANK1
+	LD	A,02BH
+	LD	(BANKDV),A
 BANK1:
 	OUT	(C),L
 	LD	E,(HL)
@@ -434,7 +435,11 @@ ECHECK2:
 	CALL	EADR0
 	POP	AF
 	OUT	(C),A
-
+	CP	0EBH
+	JR	NZ,EMM_BPB
+	LD	A,026H
+	LD	(EMMDV),A
+EMM_BPB:
 	LD	HL,0-9
 	ADD	HL,DE
 	JR	NC,NOEMM
@@ -603,6 +608,7 @@ AUTODV:	DB	"A:",0
 INIMES:	DB	"LSX-Dodgers for X1/turbo version "
 	DB	030H + VER_1, '.'
 	DB	030H + VER_2 ,030H + VER_3
+;	DB	"PR3"
 	DB	' Gaku',0DH,0AH
 	DB	0
 
@@ -2270,14 +2276,9 @@ FEND13:
 
 _SYS14:		;(BDOS)ÉVÅ[ÉPÉìÉVÉÉÉãÇ»ì«Ç›èoÇµ
 	CALL	SETDRV
-	CALL	PUSHRR
-	CALL	GETSEQ
-
-	CALL	RB_READ
-	PUSH	HL
-	CALL	SETSEQ
+	CALL	INIT_SEQ
 SREAD:
-	POP	HL
+	CALL	RB_READ
 
 	ADD	A,001H
 	JR	C,FEND
@@ -2292,14 +2293,9 @@ FENDX:
 
 _SYS15:		;(BDOS)ÉVÅ[ÉPÉìÉVÉÉÉãÇ»èëÇ´çûÇ›
 	CALL	SETDRV
-	CALL	PUSHRR
-	CALL	GETSEQ
-
-	CALL	RB_WRITE
-	PUSH	HL
-	CALL	SETSEQ
+	CALL	INIT_SEQ
 SWRITE:
-	POP	HL
+	CALL	RB_WRITE
 
 	ADD	A,0FFH
 	JR	FENDX
@@ -2341,25 +2337,14 @@ _S16X1:
 	JP	_S16XX
 
 _SYS21:		;(BDOS)ÉâÉìÉ_ÉÄÇ»ì«Ç›èoÇµ
-
 	CALL	SETDRV
-	CALL	PUSHRR
-	CALL	GET_RR_AHL
-
-	CALL	RB_READ
-	PUSH	HL
-	CALL	POPRR
+	CALL	INIT_RND
 	JR	SREAD
 
 _SYS22:		;(BDOS)ÉâÉìÉ_ÉÄÇ»èëÇ´çûÇ›
 _SYS28:		;(BDOS)ÉâÉìÉ_ÉÄÇ»èëÇ´çûÇ›ÅEÇªÇÃ2
 	CALL	SETDRV
-	CALL	PUSHRR
-	CALL	GET_RR_AHL
-
-	CALL	RB_WRITE
-	PUSH	HL
-	CALL	POPRR
+	CALL	INIT_RND
 	JR	SWRITE
 
 _SYS18:		;(BDOS)ÉçÉOÉCÉìÉxÉNÉgÉãÇÃälìæ
@@ -2426,9 +2411,7 @@ _SYS23:		;(BDOS)ÉtÉ@ÉCÉãÉTÉCÉYÇÃälìæ
 	CALL	GET_CPM_R_SIZE
 	POP	BC
 _S24X1:
-	LD	(IY+33),L	;(FCB)Random record
-	LD	(IY+34),H
-	LD	(IY+35),A
+	CALL	SET_RR_AHL
 ;	POP	DE		;^^^^^^^^^^^^^^^^^^^^^^^^
 ;	PUSH	DE		;EX DE,IY
 	EX	(SP),IY		;
@@ -2648,8 +2631,6 @@ KEYS10E:
 
 KEYSET:
 	LD	A,L
-	BIT	7,H
-	RET	Z
 	BIT	6,H
 	RET	NZ
 KEYBS:
@@ -4508,41 +4489,12 @@ SETTMSX:			;FCBÇ…ì˙ïtéûçèÇÉZÉbÉgÇ∑ÇÈ
 	RET
 
 PUSHRR:
-	CALL	SUBRR
-POPRR1:
-	LDIR
+	LD	(SETSEQ_SWC_RND),A
+	LD	(SETSEQ_SWC_SEQ_RR),HL
+	CALL	GET_RR_AHL
+	LD	(HLBUF),HL
+	LD	(HLBUF+2),A
 	RET
-
-SUBRR:
-	PUSH	IY
-	POP	HL
-	LD	DE,33
-	ADD	HL,DE
-	LD	DE,HLBUF
-	LD	BC,3
-	RET
-
-SETSEQ:
-	PUSH	AF		;AHL=Random record
-	PUSH	BC
-	LD	A,(IY+33)	;(FCB)ÉâÉìÉ_ÉÄÉåÉRÅ[Éh
-	LD	L,(IY+34)
-	LD	H,(IY+35)
-	LD	B,0
-
-	CALL	GET_CPM_R_SIZE
-
-	ADD	HL,HL
-	SRL	L		;L=L/2
-	LD	(IY+32),L	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
-	LD	(IY+12),H	;(FCB)ÉJÉåÉìÉgÉuÉçÉbÉN
-	POP	BC
-	POP	AF
-
-POPRR:
-	CALL	SUBRR
-	EX	DE,HL
-	JR	POPRR1
 
 GET_CPM_R_SIZE:		;ÉoÉCÉgíPà Ç©ÇÁCP/MÇÃÉåÉRÅ[ÉhíPà ÇãÅÇﬂÇÈÅi1ÉåÉRÅ[Éh=128ÉoÉCÉgÅj
 	ADD	A,A		;in BHLA => out AHL
@@ -4558,6 +4510,24 @@ GET_CPM_R_SIZE:		;ÉoÉCÉgíPà Ç©ÇÁCP/MÇÃÉåÉRÅ[ÉhíPà ÇãÅÇﬂÇÈÅi1ÉåÉRÅ[Éh=128ÉoÉCÉgÅ
 	INC	A		;
 	RET
 
+INIT_RND:
+	LD	A,0CDH		;CALL ????
+	LD	HL,POPRR
+	CALL	PUSHRR
+GET_RR_AHL:
+	LD	L,(IY+33)	;(FCB)Random record
+	LD	H,(IY+34)	;
+	LD	A,(IY+35)	;
+	RET
+SET_RR_AHL:
+	LD	(IY+33),L	;(FCB)Random record
+	LD	(IY+34),H
+	LD	(IY+35),A
+	RET
+INIT_SEQ:
+	LD	A,1		;LD BC,????
+	LD	HL,SETSEQ
+	CALL	PUSHRR
 GETSEQ:
 	LD	L,(IY+32)	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
 	LD	H,(IY+12)	;(FCB)ÉJÉåÉìÉgÉuÉçÉbÉN
@@ -4567,6 +4537,35 @@ GETSEQ:
 
 	SRL	H	;HL=HL/2
 	RR	L	;
+	RET
+
+SETSEQ1:
+	PUSH	AF		
+	PUSH	HL		;AHL=Random record
+	LD	A,(IY+33)	;(FCB)ÉâÉìÉ_ÉÄÉåÉRÅ[Éh
+	LD	L,(IY+34)
+	LD	H,(IY+35)
+	LD	B,0
+
+	CALL	GET_CPM_R_SIZE
+
+	ADD	HL,HL
+	SRL	L		;L=L/2
+	LD	(IY+32),L	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
+	LD	(IY+12),H	;(FCB)ÉJÉåÉìÉgÉuÉçÉbÉN
+	POP	HL
+	POP	AF
+	RET
+SETSEQ:
+	CALL	SETSEQ1
+POPRR:
+	PUSH	AF
+	PUSH	HL
+	LD	HL,(HLBUF)
+	LD	A,(HLBUF+2)
+	CALL	SET_RR_AHL
+	POP	HL
+	POP	AF
 	RET
 
 RB_WRITE:
@@ -4585,16 +4584,22 @@ RBRW:
 	LD	(IY+33),A	;(FCB)ÉâÉìÉ_ÉÄÉåÉRÅ[Éh
 	LD	(IY+34),L
 	LD	(IY+35),H
-	SET	7,(IY+32)	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
 	LD	HL,128
-
+	PUSH	BC
+SETSEQ_SWC_RND:
+	CALL	SETSEQ1
+	POP	BC
+	SET	7,(IY+32)	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
 	PUSH	IY
 	POP	DE
 	PUSH	DE
 	CALL	JP_BC
 	POP	IY
-	POP	BC
+SETSEQ_SWC_SEQ_RR	EQU $+1
+	CALL	SETSEQ
 	RES	7,(IY+32)	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
+
+	POP	BC
 	RET
 JP_BC:
 	PUSH	BC
@@ -4968,12 +4973,6 @@ LEFT:	LD	DE,0
 	INC	(IY+36)
 RBXEND1:
 	EX	DE,HL		;HL=Read byte
-	RET
-
-GET_RR_AHL:
-	LD	L,(IY+33)	;(FCB)Random record
-	LD	H,(IY+34)	;
-	LD	A,(IY+35)	;
 	RET
 
 GET_RR_BCDE:			;BCDE=Random record
@@ -5431,12 +5430,8 @@ RDFAT0X:
 	RET
 
 BPB2DPB:
-	LD	A,(IY+0)	;BS_JmpBoot
-	CP	0EBH		;Short jump
-	JR	Z,BPBOK
-	CP	0E9H		;Near jump
-	JR	Z,BPBOK
-	CP	060H		;X68k
+	LD	A,(IY+11)	;BPB_BytsPerSec
+	OR	A
 	SCF
 	RET	NZ
 BPBOK:
@@ -5465,6 +5460,9 @@ BPBDP2:
 	LD	L,(IY+17)	;BPB_RootEntCnt
 	LD	H,(IY+18)
 	LD	A,(IY+12)	;BPB_BytsPerSec
+	OR	A
+	SCF
+	RET	Z
 	LD	B,6
 BPBBPS1:
 	DEC	B
@@ -5493,6 +5491,25 @@ BPBDE1:
 	POP	DE		;DE=DPB_0B_MAXDIR
 	LD	L,(IY+19)	;BPB_TotSec16
 	LD	H,(IY+20)
+
+	BIT	7,(IX+00AH)	;DPB_0A_FDMODE
+	JR	Z,NOT_FD
+	PUSH	HL
+	LD	C,(IY+24)	;BPB_SecPerTr
+	LD	(IX+00DH),C	;DPB_0D_MAXSEC
+	XOR	A
+	LD	B,A
+	SLA	C		;óºñ Ç»ÇÃÇ≈ÉZÉNÉ^êîÇÇQî{
+	DEC	HL
+CNTSEC:				;MAXCYL = BPB_TotSec16 / (BPB_SecPerTr * 2)
+	INC	A
+	JR	Z,CNTSECE
+	SBC	HL,BC
+	JR	NC,CNTSEC
+CNTSECE:
+	LD	(IX+00CH),A	;DPB_0C_MAXCYL
+	POP	HL	;Ç±Ç±Ç‹Ç≈ÉtÉçÉbÉsÅ[êÍóp
+NOT_FD:
 	LD	A,H
 	OR	L
 	LD	A,0		;LDÇ≈ÉtÉâÉOÇÕïœâªÇµÇ»Ç¢ÅBBPB_TotSec16Ç AHL Ç≈àµÇ§à◊ÅAAÇ…0Çì¸ÇÍÇÈ
@@ -5528,30 +5545,22 @@ BPBTC2:
 	LD	A,(IY+21)	;BPB_Media
 	LD	(IX+6),A	;DPB_06_FATID
 
-	BIT	7,(IX+00AH)	;DPB_0A_FDMODE
-	JR	Z,NOT_FD
-	LD	L,40		;MAXCYLÇÃê›íËÅióvåüì¢ÅjÇ±Ç±Ç©ÇÁâ∫ÇÕÉtÉçÉbÉsÅ[ÇÃÇ›èëÇ´ä∑Ç¶ÇÈ
-	CP	0FDH	;2D
-	JR	Z,SETCYL
-	LD	L,77
-	CP	0FEH	;2HD
-	JR	Z,SETCYL
-	LD	L,80	;ÇªÇÃëº2DDìô
-SETCYL:
-	LD	(IX+00CH),L	;DPB_0C_MAXCYL
-	LD	A,(IY+24)	;BPB_SecPerTr
-	LD	(IX+00DH),A	;DPB_0D_MAXSEC	;Ç±Ç±Ç‹Ç≈ÉtÉçÉbÉsÅ[êÍóp
-NOT_FD:
 	LD	A,(IY+16)	;BPB_NumFATs
-	CP	2		;>2:NC
+	ADD	A,0-2		;>2:CF=1
 	LD	A,(IY+12)	;BPB_BytsPerSec
-	JR	C,BPBFAT1
+	LD	L,A
+	JR	NC,BPBFAT1
 	OR	080H
 BPBFAT1:
 	LD	(IX+00FH),A	;DPB_0F_BPS
-
-	AND	07FH		;ÉZÉNÉ^ÉoÉbÉtÉ@Ç™1KBÇµÇ©Ç»Ç¢ÇÃÇ≈1KBÇí¥Ç¶ÇÈèÍçáÇÕCF=1Ç≈ÉGÉâÅ[Ç…Ç∑ÇÈ
-	ADD	A,0-5		;0-4:CF=0 5à»è„:CF=1
+	DEC	L		;à»â∫ÇÃÉZÉNÉ^ÉTÉCÉYÇ…çáívÇµÇ»Ç¢èÍçáÇÕCF=1Ç≈ÉGÉâÅ[Ç…Ç∑ÇÈ
+	RET	Z		;1ÉZÉNÉ^256ÉoÉCÉg
+	DEC	L
+	RET	Z		;1ÉZÉNÉ^512ÉoÉCÉg
+	DEC	L
+	DEC	L
+	RET	Z		;1ÉZÉNÉ^1024ÉoÉCÉg
+	SCF
 	RET
 
 RDFATS:
@@ -5848,7 +5857,7 @@ FFLUSH:
 
 SEEK:
 	LD	B,16
-MAXSEC:	LD	C,(IX+0DH)	;DPB_0D_MAXSEC
+	LD	C,(IX+0DH)	;DPB_0D_MAXSEC
 	XOR	A
 	EX	DE,HL
 DIV1:
@@ -6439,7 +6448,7 @@ EMMCL:	DW	0	;DPB_08_MAXCL
 	DB	2	;DPB_0E_FATPS
 	DB	2	;DPB_0F_BPS
 	DW	10	;DPB_10_DIRPS
-	DB	6	;DPB_12_DEVICE
+EMMDV:	DB	6	;DPB_12_DEVICE
 	DB	0	;DPB_13_UNITNO
 	DW	18	;DPB_14_ADDCL16
 	DW	0	;DPB_16
@@ -6462,7 +6471,7 @@ BANKCL:	DW	0	;DPB_08_MAXCL
 	DB	0	;DPB_0E_FATPS
 	DB	2	;DPB_0F_BPS
 	DW	2	;DPB_10_DIRPS
-	DB	00BH	;DPB_12_DEVICE
+BANKDV:	DB	00BH	;DPB_12_DEVICE
 	DB	0	;DPB_13_UNITNO
 	DW	6	;DPB_14_ADDCL16
 	DW	0	;DPB_16

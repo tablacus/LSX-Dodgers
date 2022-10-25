@@ -593,7 +593,7 @@ $2C	時刻の獲得(_GTIME)	*1 MSX-DOS
   H←時  L←分  D←秒  E←1/100秒
 
   備考:
-  X1/turbo/Z:仕様によりE←0
+  X1/turbo/Z PC-8801mkIISR:仕様によりE←0
   MZ-700/1500:サポートしていない
 
 
