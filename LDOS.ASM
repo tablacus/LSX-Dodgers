@@ -2,20 +2,6 @@
 ;	LSX-Dodgers OS
 
 BDOS0:
-	LD	(BDSP+1),SP
-	PUSH	AF
-	LD	A,(BDSP+2)
-	CP	EXTSP/256
-	JR	Z,BDOS1X
-BDOS2:
-	POP	AF
-	LD	SP,EXTSP
-	CALL	BDOS1
-BDSP:	LD	SP,0
-	RET
-BDOS1X:
-	POP	AF
-BDOS1:
 	PUSH	HL
 	LD	A,C
 	CP	03CH
@@ -31,6 +17,8 @@ DOS1:
 	LD	L,A
 	EX	(SP),HL
 	LD	A,C
+;確認用
+;	LD	(0050H),A
 	RET
 _DOS2:
 	CP	05AH		;(BDOS)カレントディレクトリの変更(_CHDIR)

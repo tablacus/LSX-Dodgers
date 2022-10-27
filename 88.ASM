@@ -1,4 +1,4 @@
-;	LSX-Dodgers for X1/turbo/Z
+;	LSX-Dodgers for PC-8801mkIISR
 ;	Programmed by
 ;	Gaku (Lovers/Tablacus)
 

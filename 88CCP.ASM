@@ -7,6 +7,16 @@ WBOOT1:
 	IN	A,(032H)
 	OR	10H		;高速RAMアクセスモードOFF
 	OUT	(032H),A
+
+	LD	A,IVRTC/256
+	LD	I,A
+	LD	A,(WKE6)
+	OR	2		;VRTC割り込みマスク
+	OUT	(0E6H),A	;割り込みマスク
+	LD	(WKE6),A
+	LD	A,(WKE4)
+	OUT	(0E4H),A	;割り込みレベル設定 
+
 	EI
 	LD	HL,_KEYD
 	LD	(HL),0

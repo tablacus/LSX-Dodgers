@@ -64,8 +64,8 @@ INIDMA:
 	LD	I,A
 
 	LD	BC,(_CTC)
-	DEC	BC
-	DEC	BC
+	DEC	C
+	DEC	C
 
 	DB	0EDH,071H	;OUT (C),0	Z80–¢’è‹`–½—ß
 	LD	A,CTC0
@@ -504,8 +504,8 @@ INICTC1:
 	IN	A,(C)
 	CP	D
 	RET	NZ
-	INC	BC
-	INC	BC
+	INC	C
+	INC	C
 	LD	(_CTC),BC
 	RET
 
