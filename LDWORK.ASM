@@ -62,15 +62,15 @@ _CTC:	DW	0
 _TXADR:	DW	0
 _KEYPS:	DW	0
 _KEYD:	DW	0FF00H	;キーデータ
-_KEYSP:	DW	010C2H
+_KEYSP:	DB	KEYSP_L,KEYSP_H	;オートリピートの速度
 _COLORF:DB	COLORF	;色
 _LINE:	DB	LINE
 
-_FCB:	DW	0
-_FBPS:	DW	0	;SEARCH FILES
+_FCB:	DW	0	;SEARCH FILES
+_FBPS:	DW	0	;    //
 _FBAD:	DW	0	;    //
 _FBCNT:	DB	0	;    //
-_FILEN:	DB	0
+_FILEN:	DB	0	;    //
 _DIRF:	DB	0	;bit7:ディレクトリ bit0-6:セクタインデックス
 	DS	1
 _WTFATF:DB	0	;FATバッファの更新フラグ

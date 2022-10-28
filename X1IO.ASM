@@ -102,20 +102,18 @@ KEYS10E:
 	OR	A
 	RET	Z
 
-	PUSH	HL
-	LD	HL,(_KEYSP)
 	LD	A,0A7H
 	OUT	(C),A
-	OUT	(C),L
+	LD	A,(_KEYSP)
+	OUT	(C),A
 	LD	A,C
 	AND	0FCH
 	LD	C,A
 	DB	0EDH,071H	;OUT (C),0	Z80–¢’è‹`–½—ß
 	LD	A,CTC0
 	OUT	(C),A
-	LD	A,H
+	LD	A,(_KEYSP+1)
 	LD	(INTCPAT+1),A
-	POP	HL
 
 KEYSET:
 	LD	A,L

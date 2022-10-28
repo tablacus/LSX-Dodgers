@@ -192,7 +192,7 @@ INITINT:
 	LD	(HL),2
 	LD	(HL),0
 	DEC	L		;0E005H 8253 Ch.1 カウンタ
-	LD	(HL),131
+	LD	(HL),A
 	LD	(HL),0
 	LD	A,5
 	LD	(0E003H),A	;8255 コントロールポートでポートC(0E002H)のINTMSKを1にする
