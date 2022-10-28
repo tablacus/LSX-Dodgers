@@ -119,7 +119,9 @@ SET_WKF4:
 	LD	A,B		;T=4
 	OR	C		;T=4
 	OUT	(0F4H),A	;ドライブ制御
-	LD	(S_WKF4),A
+	LD	A,B		;T=4
+	LD	(S_WKF4),A	;T=13
+	OUT	(0F4H),A	;ドライブ制御(CLK=0)
 
 	LD	BC,(S_PARAMS)
 	LD	DE,(S_PARAMS+2)

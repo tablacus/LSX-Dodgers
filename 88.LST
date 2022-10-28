@@ -181,7 +181,7 @@
 0000A7 CCA0 CD81EB          17      CALL    PUTDAT
 0000AA CCA3 AF               4      XOR A       ;開始アドレスL
 0000AB CCA4 CD81EB          17      CALL    PUTDAT
-0000AE CCA7 01FC01          10      LD  BC,AT_DSSE-AT_DSS
+0000AE CCA7 01FF01          10      LD  BC,AT_DSSE-AT_DSS
 0000B1 CCAA CB41             8      BIT 0,C
 0000B3 CCAC 2801            12      JR  Z,SUBPG1
 0000B5 CCAE 03               6      INC BC      ;偶数にする
@@ -329,12 +329,12 @@
 0001BF 7C00 CD707C          17      CALL    GETPARAMS
 0001C2 7C03 AF               4      XOR A
 0001C3 7C04 32347C          13      LD  (RETRY_RDDISK),A
-0001C6 7C07 2AF37D          16      LD  HL,(S_PARAMS+2)
+0001C6 7C07 2AF67D          16      LD  HL,(S_PARAMS+2)
 0001C9 7C0A 7D               4      LD  A,L
 0001CA 7C0B 3D               4      DEC A
 0001CB 7C0C B4               4      OR  H
 0001CC 7C0D 200C            12      JR  NZ,RDDISK0
-0001CE 7C0F 2AF67D          16      LD  HL,(S_PARAMS+5)
+0001CE 7C0F 2AF97D          16      LD  HL,(S_PARAMS+5)
 0001D1 7C12 7C               4      LD  A,H
 0001D2 7C13 BD               4      CP  L
 0001D3 7C14 2005            12      JR  NZ,RDDISK0
@@ -344,15 +344,15 @@
 0001DA 7C1B 3E46             7      LD  A,46H       ;READ DATA
 0001DC 7C1D CD7D7C          17      CALL    FDCOMMAND
 0001DF 7C20 3834            12      JR  C,FINISH_DISK
-0001E1 7C22 CD257D          17      CALL    RDDISK1
+0001E1 7C22 CD287D          17      CALL    RDDISK1
        7C25                     WRDISK3:
 0001E4 7C25 78               4      LD  A,B
 0001E5 7C26 B2               4      OR  D
-0001E6 7C27 32FA7D          13      LD  (S_LEFT),A
+0001E6 7C27 32FD7D          13      LD  (S_LEFT),A
 0001E9 7C2A DBF8            11      IN  A,(0F8H)    ;FDC μPD765A TC入力
 0001EB 7C2C FB               4      EI
 0001EC 7C2D 76               4      HALT
-0001ED 7C2E CDC07D          17      CALL    CHECKRESULT
+0001ED 7C2E CDC37D          17      CALL    CHECKRESULT
 0001F0 7C31 301D            12      JR  NC,FINISH_DISK0
        7C34                     RETRY_RDDISK    EQU $+1
 0001F2 7C33 3E00             7      LD  A,0
@@ -360,7 +360,7 @@
 0001F5 7C36 2818            12      JR  Z,FINISH_DISK0
 0001F7 7C38 3D               4      DEC A
 0001F8 7C39 32347C          13      LD  (RETRY_RDDISK),A
-0001FB 7C3C 3AF67D          13      LD  A,(S_PARAMS+5)
+0001FB 7C3C 3AF97D          13      LD  A,(S_PARAMS+5)
 0001FE 7C3F FE04             7      CP  4
 000200 7C41 3003            12      JR  NC,RETRY_RDDISK1
 000202 7C43 87               4      ADD A,A
@@ -370,15 +370,15 @@
        7C48                     RETRY_RDDISK2:
 000207 7C48 67               4      LD  H,A
 000208 7C49 6F               4      LD  L,A
-000209 7C4A 22F67D          16      LD  (S_PARAMS+5),HL
+000209 7C4A 22F97D          16      LD  (S_PARAMS+5),HL
 00020C 7C4D C31B7C          10      JP  RDDISK0
        7C50                     FINISH_DISK0:
-00020F 7C50 3AFA7D          13      LD  A,(S_LEFT)
+00020F 7C50 3AFD7D          13      LD  A,(S_LEFT)
 000212 7C53 D601             7      SUB 1
 000214 7C55 3F               4      CCF
        7C56                     FINISH_DISK:
 000215 7C56 9F               4      SBC A,A
-000216 7C57 32F97D          13      LD  (S_CMD_STATUS),A
+000216 7C57 32FC7D          13      LD  (S_CMD_STATUS),A
 000219 7C5A C32A00          10      JP  MAIN
                                 
        7C5D                     WRITEDISKEX:
@@ -388,13 +388,13 @@
 000223 7C64 3E45             7      LD  A,45H       ;WRITE DATA
 000225 7C66 CD7D7C          17      CALL    FDCOMMAND
 000228 7C69 38EB            12      JR  C,FINISH_DISK
-00022A 7C6B CD6C7D          17      CALL    WRDISK1
+00022A 7C6B CD6F7D          17      CALL    WRDISK1
 00022D 7C6E 18B5            12      JR  WRDISK3
                                 
        7C70                     GETPARAMS:
 00022F 7C70 0608             7      LD  B,8
 000231 7C72 E5              11      PUSH    HL
-000232 7C73 21F17D          10      LD  HL,S_PARAMS
+000232 7C73 21F47D          10      LD  HL,S_PARAMS
        7C76                     GETPARAMS1:
 000235 7C76 D7              12      RST 10H
 000236 7C77 77               7      LD  (HL),A
@@ -405,27 +405,27 @@
                                 
        7C7D                     FDCOMMAND:
 00023C 7C7D F5              11      PUSH    AF
-00023D 7C7E 3AF57D          13      LD  A,(S_PARAMS+4)  ;MFMモード切り替え $FF:2D/2DD $FE:2HD
+00023D 7C7E 3AF87D          13      LD  A,(S_PARAMS+4)  ;MFMモード切り替え $FF:2D/2DD $FE:2HD
 000240 7C81 1F               4      RRA
 000241 7C82 3F               4      CCF
 000242 7C83 9F               4      SBC A,A
 000243 7C84 F5              11      PUSH    AF
 000244 7C85 E605             7      AND 5
 000246 7C87 4F               4      LD  C,A
-000247 7C88 3AF87D          13      LD  A,(S_PARAMS+7)  ;シリンダ数
+000247 7C88 3AFB7D          13      LD  A,(S_PARAMS+7)  ;シリンダ数
 00024A 7C8B C6D3             7      ADD A,0-45      ;オーバートラックを考慮して40+α
 00024C 7C8D 9F               4      SBC A,A
 00024D 7C8E E604             7      AND 4
 00024F 7C90 B1               4      OR  C
 000250 7C91 0EFA             7      LD  C,0FFH-5    ;マスク
 000252 7C93 47               4      LD  B,A
-000253 7C94 3AF17D          13      LD  A,(S_PARAMS)    ;0:ドライブA 1:ドライブB
+000253 7C94 3AF47D          13      LD  A,(S_PARAMS)    ;0:ドライブA 1:ドライブB
 000256 7C97 B7               4      OR  A
 000257 7C98 2804            12      JR  Z,SET_WKF4
 000259 7C9A CB20             8      SLA B
 00025B 7C9C CB01             4      RLC C
        7C9E                     SET_WKF4:
-00025D 7C9E 3AFB7D          13      LD  A,(S_WKF4)
+00025D 7C9E 3AFE7D          13      LD  A,(S_WKF4)
 000260 7CA1 A1               4      AND C
 000261 7CA2 B0               4      OR  B
 000262 7CA3 E6DF             7      AND 0FFH-020H   ;CLKの分は抜いておく
@@ -433,276 +433,278 @@
 000265 7CA6 F1              10      POP AF
 000266 7CA7 E620             7      AND 020H        ;bit5:CLK
 000268 7CA9 4F               4      LD  C,A
-000269 7CAA 3AFB7D          13      LD  A,(S_WKF4)
+000269 7CAA 3AFE7D          13      LD  A,(S_WKF4)
 00026C 7CAD E6DF             7      AND 0FFH-020H   ;020Hのマスク
 00026E 7CAF B1               4      OR  C
 00026F 7CB0 D3F4            11      OUT (0F4H),A    ;ドライブ制御(TPIが1になる場合はTPIを切り替える前(8ステート以上)にCLKを設定しておく必要がある)
 000271 7CB2 78               4      LD  A,B     ;T=4
 000272 7CB3 B1               4      OR  C       ;T=4
 000273 7CB4 D3F4            11      OUT (0F4H),A    ;ドライブ制御
-000275 7CB6 32FB7D          13      LD  (S_WKF4),A
+000275 7CB6 78               4      LD  A,B     ;T=4
+000276 7CB7 32FE7D          13      LD  (S_WKF4),A  ;T=13
+000279 7CBA D3F4            11      OUT (0F4H),A    ;ドライブ制御(CLK=0)
                                 
-000278 7CB9 ED4BF17D        20      LD  BC,(S_PARAMS)
-00027C 7CBD ED5BF37D        20      LD  DE,(S_PARAMS+2)
-000280 7CC1 7A               4      LD  A,D     ;TRACK
-000281 7CC2 CB3F             8      SRL A       ;CYLINDER
-000283 7CC4 3E0F             7      LD  A,00FH      ;SEEK
-000285 7CC6 2002            12      JR  NZ,SEEK1    ;0シリンダの場合はRECALIBRATE、それ以外はSEEKを使う
-000287 7CC8 3E07             7      LD  A,7     ;RECALIBRATE
-       7CCA                     SEEK1:
-000289 7CCA E7              12      RST 20H
-00028A 7CCB 79               4      LD  A,C     ;DR/HD
-00028B 7CCC E7              12      RST 20H
-00028C 7CCD 7A               4      LD  A,D     ;TRACK
-00028D 7CCE CB3F             8      SRL A       ;CYLINDER
-00028F 7CD0 C42000          17      CALL    NZ,20H      ;SEEKの場合だけ呼ぶ(0シリンダの場合はRECALIBRATEを使うのでシリンダの設定は不要)
-000292 7CD3 FB               4      EI
-000293 7CD4 76               4      HALT
-000294 7CD5 3E08             7      LD  A,8     ;SENSE
-000296 7CD7 E7              12      RST 20H
-000297 7CD8 CDE77D          17      CALL    RDFDC       ;ST0
-00029A 7CDB CDE77D          17      CALL    RDFDC       ;PCN(CYLINDER)
-00029D 7CDE E5              11      PUSH    HL
-00029E 7CDF 210040          10      LD  HL,04000H
-       7CE2                     WAIT_SEEK:
-0002A1 7CE2 CDE27D          17      CALL    GETDEVSTAT
-0002A4 7CE5 E608             7      AND 8
-0002A6 7CE7 2009            12      JR  NZ,SEEK_OK
-0002A8 7CE9 2B               6      DEC HL
-0002A9 7CEA 7C               4      LD  A,H
-0002AA 7CEB B5               4      OR  L
-0002AB 7CEC 20F4            12      JR  NZ,WAIT_SEEK
-0002AD 7CEE E1              10      POP HL
-0002AE 7CEF F1              10      POP AF
-0002AF 7CF0 37               4      SCF
-0002B0 7CF1 C9              10      RET
-       7CF2                     SEEK_OK:
-0002B1 7CF2 E1              10      POP HL
-0002B2 7CF3 F1              10      POP AF
-0002B3 7CF4 E7              12      RST 20H
-0002B4 7CF5 7A               4      LD  A,D     ;HD US1 US0
-0002B5 7CF6 E601             7      AND 1
-0002B7 7CF8 87               4      ADD A,A
-0002B8 7CF9 87               4      ADD A,A
-0002B9 7CFA B1               4      OR  C
-0002BA 7CFB E7              12      RST 20H
-0002BB 7CFC 7A               4      LD  A,D     ;C
-0002BC 7CFD CB3F             8      SRL A
-0002BE 7CFF E7              12      RST 20H
-0002BF 7D00 7A               4      LD  A,D     ;H
-0002C0 7D01 E601             7      AND 1
-0002C2 7D03 E7              12      RST 20H
-0002C3 7D04 7B               4      LD  A,E     ;R
-0002C4 7D05 E7              12      RST 20H
-0002C5 7D06 3AF67D          13      LD  A,(S_PARAMS+5)  ;N
-0002C8 7D09 FE04             7      CP  4
-0002CA 7D0B 3802            12      JR  C,FDCOMMAND2
+00027B 7CBC ED4BF47D        20      LD  BC,(S_PARAMS)
+00027F 7CC0 ED5BF67D        20      LD  DE,(S_PARAMS+2)
+000283 7CC4 7A               4      LD  A,D     ;TRACK
+000284 7CC5 CB3F             8      SRL A       ;CYLINDER
+000286 7CC7 3E0F             7      LD  A,00FH      ;SEEK
+000288 7CC9 2002            12      JR  NZ,SEEK1    ;0シリンダの場合はRECALIBRATE、それ以外はSEEKを使う
+00028A 7CCB 3E07             7      LD  A,7     ;RECALIBRATE
+       7CCD                     SEEK1:
+00028C 7CCD E7              12      RST 20H
+00028D 7CCE 79               4      LD  A,C     ;DR/HD
+00028E 7CCF E7              12      RST 20H
+00028F 7CD0 7A               4      LD  A,D     ;TRACK
+000290 7CD1 CB3F             8      SRL A       ;CYLINDER
+000292 7CD3 C42000          17      CALL    NZ,20H      ;SEEKの場合だけ呼ぶ(0シリンダの場合はRECALIBRATEを使うのでシリンダの設定は不要)
+000295 7CD6 FB               4      EI
+000296 7CD7 76               4      HALT
+000297 7CD8 3E08             7      LD  A,8     ;SENSE
+000299 7CDA E7              12      RST 20H
+00029A 7CDB CDEA7D          17      CALL    RDFDC       ;ST0
+00029D 7CDE CDEA7D          17      CALL    RDFDC       ;PCN(CYLINDER)
+0002A0 7CE1 E5              11      PUSH    HL
+0002A1 7CE2 210040          10      LD  HL,04000H
+       7CE5                     WAIT_SEEK:
+0002A4 7CE5 CDE57D          17      CALL    GETDEVSTAT
+0002A7 7CE8 E608             7      AND 8
+0002A9 7CEA 2009            12      JR  NZ,SEEK_OK
+0002AB 7CEC 2B               6      DEC HL
+0002AC 7CED 7C               4      LD  A,H
+0002AD 7CEE B5               4      OR  L
+0002AE 7CEF 20F4            12      JR  NZ,WAIT_SEEK
+0002B0 7CF1 E1              10      POP HL
+0002B1 7CF2 F1              10      POP AF
+0002B2 7CF3 37               4      SCF
+0002B3 7CF4 C9              10      RET
+       7CF5                     SEEK_OK:
+0002B4 7CF5 E1              10      POP HL
+0002B5 7CF6 F1              10      POP AF
+0002B6 7CF7 E7              12      RST 20H
+0002B7 7CF8 7A               4      LD  A,D     ;HD US1 US0
+0002B8 7CF9 E601             7      AND 1
+0002BA 7CFB 87               4      ADD A,A
+0002BB 7CFC 87               4      ADD A,A
+0002BC 7CFD B1               4      OR  C
+0002BD 7CFE E7              12      RST 20H
+0002BE 7CFF 7A               4      LD  A,D     ;C
+0002BF 7D00 CB3F             8      SRL A
+0002C1 7D02 E7              12      RST 20H
+0002C2 7D03 7A               4      LD  A,D     ;H
+0002C3 7D04 E601             7      AND 1
+0002C5 7D06 E7              12      RST 20H
+0002C6 7D07 7B               4      LD  A,E     ;R
+0002C7 7D08 E7              12      RST 20H
+0002C8 7D09 3AF97D          13      LD  A,(S_PARAMS+5)  ;N
+0002CB 7D0C FE04             7      CP  4
+0002CD 7D0E 3802            12      JR  C,FDCOMMAND2
                                 
-0002CC 7D0D 3E03             7      LD  A,3
-       7D0F                     FDCOMMAND2:
-0002CE 7D0F 1E20             7      LD  E,020H      ;NO SERVICE
-0002D0 7D11 E7              12      RST 20H
+0002CF 7D10 3E03             7      LD  A,3
+       7D12                     FDCOMMAND2:
+0002D1 7D12 1E20             7      LD  E,020H      ;NO SERVICE
+0002D3 7D14 E7              12      RST 20H
                                 
-0002D1 7D12 210040          10      LD  HL,DSS_DATA ;開始アドレス
-0002D4 7D15 78               4      LD  A,B     ;EOT
-0002D5 7D16 E7              12      RST 20H
+0002D4 7D15 210040          10      LD  HL,DSS_DATA ;開始アドレス
+0002D7 7D18 78               4      LD  A,B     ;EOT
+0002D8 7D19 E7              12      RST 20H
                                 
-0002D6 7D17 01FB00          10      LD  BC,000FBH   ;B:バイト数L C:FDC μPD765A データレジスタ
-0002D9 7D1A 3E54             7      LD  A,054H      ;GSL
-0002DB 7D1C E7              12      RST 20H
+0002D9 7D1A 01FB00          10      LD  BC,000FBH   ;B:バイト数L C:FDC μPD765A データレジスタ
+0002DC 7D1D 3E54             7      LD  A,054H      ;GSL
+0002DE 7D1F E7              12      RST 20H
                                 
-0002DC 7D1D 3AF77D          13      LD  A,(S_PARAMS+6)
-0002DF 7D20 57               4      LD  D,A     ;バイト数H
+0002DF 7D20 3AFA7D          13      LD  A,(S_PARAMS+6)
+0002E2 7D23 57               4      LD  D,A     ;バイト数H
                                 
-0002E0 7D21 AF               4      XOR A       ;DTL
-0002E1 7D22 E7              12      RST 20H
-0002E2 7D23 A7               4      AND A
-0002E3 7D24 C9              10      RET
+0002E3 7D24 AF               4      XOR A       ;DTL
+0002E4 7D25 E7              12      RST 20H
+0002E5 7D26 A7               4      AND A
+0002E6 7D27 C9              10      RET
                                 
-       7D25                     RDDISK1:            ;高速化の為にループ展開x8
-0002E4 7D25 FB               4      EI
-0002E5 7D26 76               4      HALT
-0002E6 7D27 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
-0002E8 7D29 A3               4      AND E       ;NO SERVICE
-0002E9 7D2A C8              11      RET Z
-0002EA 7D2B EDA2            16      INI
+       7D28                     RDDISK1:            ;高速化の為にループ展開x8
+0002E7 7D28 FB               4      EI
+0002E8 7D29 76               4      HALT
+0002E9 7D2A DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
+0002EB 7D2C A3               4      AND E       ;NO SERVICE
+0002EC 7D2D C8              11      RET Z
+0002ED 7D2E EDA2            16      INI
                                 
-0002EC 7D2D FB               4      EI
-0002ED 7D2E 76               4      HALT
-0002EE 7D2F DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
-0002F0 7D31 A3               4      AND E       ;NO SERVICE
-0002F1 7D32 C8              11      RET Z
-0002F2 7D33 EDA2            16      INI
+0002EF 7D30 FB               4      EI
+0002F0 7D31 76               4      HALT
+0002F1 7D32 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
+0002F3 7D34 A3               4      AND E       ;NO SERVICE
+0002F4 7D35 C8              11      RET Z
+0002F5 7D36 EDA2            16      INI
                                 
-0002F4 7D35 FB               4      EI
-0002F5 7D36 76               4      HALT
-0002F6 7D37 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
-0002F8 7D39 A3               4      AND E       ;NO SERVICE
-0002F9 7D3A C8              11      RET Z
-0002FA 7D3B EDA2            16      INI
+0002F7 7D38 FB               4      EI
+0002F8 7D39 76               4      HALT
+0002F9 7D3A DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
+0002FB 7D3C A3               4      AND E       ;NO SERVICE
+0002FC 7D3D C8              11      RET Z
+0002FD 7D3E EDA2            16      INI
                                 
-0002FC 7D3D FB               4      EI
-0002FD 7D3E 76               4      HALT
-0002FE 7D3F DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
-000300 7D41 A3               4      AND E       ;NO SERVICE
-000301 7D42 C8              11      RET Z
-000302 7D43 EDA2            16      INI
+0002FF 7D40 FB               4      EI
+000300 7D41 76               4      HALT
+000301 7D42 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
+000303 7D44 A3               4      AND E       ;NO SERVICE
+000304 7D45 C8              11      RET Z
+000305 7D46 EDA2            16      INI
                                 
-000304 7D45 FB               4      EI
-000305 7D46 76               4      HALT
-000306 7D47 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
-000308 7D49 A3               4      AND E       ;NO SERVICE
-000309 7D4A C8              11      RET Z
-00030A 7D4B EDA2            16      INI
+000307 7D48 FB               4      EI
+000308 7D49 76               4      HALT
+000309 7D4A DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
+00030B 7D4C A3               4      AND E       ;NO SERVICE
+00030C 7D4D C8              11      RET Z
+00030D 7D4E EDA2            16      INI
                                 
-00030C 7D4D FB               4      EI
-00030D 7D4E 76               4      HALT
-00030E 7D4F DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
-000310 7D51 A3               4      AND E       ;NO SERVICE
-000311 7D52 C8              11      RET Z
-000312 7D53 EDA2            16      INI
+00030F 7D50 FB               4      EI
+000310 7D51 76               4      HALT
+000311 7D52 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
+000313 7D54 A3               4      AND E       ;NO SERVICE
+000314 7D55 C8              11      RET Z
+000315 7D56 EDA2            16      INI
                                 
-000314 7D55 FB               4      EI
-000315 7D56 76               4      HALT
-000316 7D57 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
-000318 7D59 A3               4      AND E       ;NO SERVICE
-000319 7D5A C8              11      RET Z
-00031A 7D5B EDA2            16      INI
+000317 7D58 FB               4      EI
+000318 7D59 76               4      HALT
+000319 7D5A DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
+00031B 7D5C A3               4      AND E       ;NO SERVICE
+00031C 7D5D C8              11      RET Z
+00031D 7D5E EDA2            16      INI
                                 
-00031C 7D5D FB               4      EI
-00031D 7D5E 76               4      HALT
-00031E 7D5F DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
-000320 7D61 A3               4      AND E       ;NO SERVICE
-000321 7D62 C8              11      RET Z
-000322 7D63 EDA2            16      INI
+00031F 7D60 FB               4      EI
+000320 7D61 76               4      HALT
+000321 7D62 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
+000323 7D64 A3               4      AND E       ;NO SERVICE
+000324 7D65 C8              11      RET Z
+000325 7D66 EDA2            16      INI
                                 
-000324 7D65 20BE            12      JR  NZ,RDDISK1
-000326 7D67 15               4      DEC D
-000327 7D68 C2257D          10      JP  NZ,RDDISK1
-00032A 7D6B C9              10      RET
+000327 7D68 20BE            12      JR  NZ,RDDISK1
+000329 7D6A 15               4      DEC D
+00032A 7D6B C2287D          10      JP  NZ,RDDISK1
+00032D 7D6E C9              10      RET
                                 
-       7D6C                     WRDISK1:            ;高速化の為にループ展開x8
-00032B 7D6C FB               4      EI
-00032C 7D6D 76               4      HALT
-00032D 7D6E DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
-00032F 7D70 A3               4      AND E
-000330 7D71 C8              11      RET Z
-000331 7D72 EDA3            16      OUTI
+       7D6F                     WRDISK1:            ;高速化の為にループ展開x8
+00032E 7D6F FB               4      EI
+00032F 7D70 76               4      HALT
+000330 7D71 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
+000332 7D73 A3               4      AND E
+000333 7D74 C8              11      RET Z
+000334 7D75 EDA3            16      OUTI
                                 
-000333 7D74 FB               4      EI
-000334 7D75 76               4      HALT
-000335 7D76 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
-000337 7D78 A3               4      AND E
-000338 7D79 C8              11      RET Z
-000339 7D7A EDA3            16      OUTI
+000336 7D77 FB               4      EI
+000337 7D78 76               4      HALT
+000338 7D79 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
+00033A 7D7B A3               4      AND E
+00033B 7D7C C8              11      RET Z
+00033C 7D7D EDA3            16      OUTI
                                 
-00033B 7D7C FB               4      EI
-00033C 7D7D 76               4      HALT
-00033D 7D7E DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
-00033F 7D80 A3               4      AND E
-000340 7D81 C8              11      RET Z
-000341 7D82 EDA3            16      OUTI
+00033E 7D7F FB               4      EI
+00033F 7D80 76               4      HALT
+000340 7D81 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
+000342 7D83 A3               4      AND E
+000343 7D84 C8              11      RET Z
+000344 7D85 EDA3            16      OUTI
                                 
-000343 7D84 FB               4      EI
-000344 7D85 76               4      HALT
-000345 7D86 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
-000347 7D88 A3               4      AND E
-000348 7D89 C8              11      RET Z
-000349 7D8A EDA3            16      OUTI
+000346 7D87 FB               4      EI
+000347 7D88 76               4      HALT
+000348 7D89 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
+00034A 7D8B A3               4      AND E
+00034B 7D8C C8              11      RET Z
+00034C 7D8D EDA3            16      OUTI
                                 
-00034B 7D8C FB               4      EI
-00034C 7D8D 76               4      HALT
-00034D 7D8E DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
-00034F 7D90 A3               4      AND E
-000350 7D91 C8              11      RET Z
-000351 7D92 EDA3            16      OUTI
+00034E 7D8F FB               4      EI
+00034F 7D90 76               4      HALT
+000350 7D91 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
+000352 7D93 A3               4      AND E
+000353 7D94 C8              11      RET Z
+000354 7D95 EDA3            16      OUTI
                                 
-000353 7D94 FB               4      EI
-000354 7D95 76               4      HALT
-000355 7D96 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
-000357 7D98 A3               4      AND E
-000358 7D99 C8              11      RET Z
-000359 7D9A EDA3            16      OUTI
+000356 7D97 FB               4      EI
+000357 7D98 76               4      HALT
+000358 7D99 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
+00035A 7D9B A3               4      AND E
+00035B 7D9C C8              11      RET Z
+00035C 7D9D EDA3            16      OUTI
                                 
-00035B 7D9C FB               4      EI
-00035C 7D9D 76               4      HALT
-00035D 7D9E DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
-00035F 7DA0 A3               4      AND E
-000360 7DA1 C8              11      RET Z
-000361 7DA2 EDA3            16      OUTI
+00035E 7D9F FB               4      EI
+00035F 7DA0 76               4      HALT
+000360 7DA1 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
+000362 7DA3 A3               4      AND E
+000363 7DA4 C8              11      RET Z
+000364 7DA5 EDA3            16      OUTI
                                 
-000363 7DA4 FB               4      EI
-000364 7DA5 76               4      HALT
-000365 7DA6 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
-000367 7DA8 A3               4      AND E
-000368 7DA9 C8              11      RET Z
-000369 7DAA EDA3            16      OUTI
+000366 7DA7 FB               4      EI
+000367 7DA8 76               4      HALT
+000368 7DA9 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
+00036A 7DAB A3               4      AND E
+00036B 7DAC C8              11      RET Z
+00036C 7DAD EDA3            16      OUTI
                                 
-00036B 7DAC 20BE            12      JR  NZ,WRDISK1
-00036D 7DAE 15               4      DEC D
-00036E 7DAF C26C7D          10      JP  NZ,WRDISK1
-000371 7DB2 C9              10      RET
+00036E 7DAF 20BE            12      JR  NZ,WRDISK1
+000370 7DB1 15               4      DEC D
+000371 7DB2 C26F7D          10      JP  NZ,WRDISK1
+000374 7DB5 C9              10      RET
                                 
-       7DB3                     RESULTEX:
-000372 7DB3 3AF97D          13      LD  A,(S_CMD_STATUS)
-000375 7DB6 3C               4      INC A
-000376 7DB7 2803            12      JR  Z,RESULTEX1
-000378 7DB9 3AF77D          13      LD  A,(S_PARAMS+6)  ;バイト数H
-       7DBC                     RESULTEX1:
-00037B 7DBC DF              12      RST 18H
-00037C 7DBD C32A00          10      JP  MAIN
+       7DB6                     RESULTEX:
+000375 7DB6 3AFC7D          13      LD  A,(S_CMD_STATUS)
+000378 7DB9 3C               4      INC A
+000379 7DBA 2803            12      JR  Z,RESULTEX1
+00037B 7DBC 3AFA7D          13      LD  A,(S_PARAMS+6)  ;バイト数H
+       7DBF                     RESULTEX1:
+00037E 7DBF DF              12      RST 18H
+00037F 7DC0 C32A00          10      JP  MAIN
                                 
-       7DC0                     CHECKRESULT:
-00037F 7DC0 C5              11      PUSH    BC
-000380 7DC1 CDE77D          17      CALL    RDFDC       ;ST0
-000383 7DC4 E6D8             7      AND 0D8H
-000385 7DC6 4F               4      LD  C,A
-000386 7DC7 CDE77D          17      CALL    RDFDC       ;ST1
-000389 7DCA E6B7             7      AND 0B7H
-00038B 7DCC B1               4      OR  C
-00038C 7DCD 4F               4      LD  C,A
-00038D 7DCE CDE77D          17      CALL    RDFDC       ;ST2
-000390 7DD1 E673             7      AND 073H
-000392 7DD3 B1               4      OR  C
-000393 7DD4 4F               4      LD  C,A
-000394 7DD5 0604             7      LD  B,4
-       7DD7                     CHECKRESULT1:           ;C H R N
-000396 7DD7 CDE77D          17      CALL    RDFDC
-000399 7DDA 10FB            13      DJNZ    CHECKRESULT1
-00039B 7DDC 79               4      LD  A,C
-00039C 7DDD A7               4      AND A
-00039D 7DDE C1              10      POP BC
-00039E 7DDF C8              11      RET Z
-00039F 7DE0 37               4      SCF
-0003A0 7DE1 C9              10      RET
+       7DC3                     CHECKRESULT:
+000382 7DC3 C5              11      PUSH    BC
+000383 7DC4 CDEA7D          17      CALL    RDFDC       ;ST0
+000386 7DC7 E6D8             7      AND 0D8H
+000388 7DC9 4F               4      LD  C,A
+000389 7DCA CDEA7D          17      CALL    RDFDC       ;ST1
+00038C 7DCD E6B7             7      AND 0B7H
+00038E 7DCF B1               4      OR  C
+00038F 7DD0 4F               4      LD  C,A
+000390 7DD1 CDEA7D          17      CALL    RDFDC       ;ST2
+000393 7DD4 E673             7      AND 073H
+000395 7DD6 B1               4      OR  C
+000396 7DD7 4F               4      LD  C,A
+000397 7DD8 0604             7      LD  B,4
+       7DDA                     CHECKRESULT1:           ;C H R N
+000399 7DDA CDEA7D          17      CALL    RDFDC
+00039C 7DDD 10FB            13      DJNZ    CHECKRESULT1
+00039E 7DDF 79               4      LD  A,C
+00039F 7DE0 A7               4      AND A
+0003A0 7DE1 C1              10      POP BC
+0003A1 7DE2 C8              11      RET Z
+0003A2 7DE3 37               4      SCF
+0003A3 7DE4 C9              10      RET
                                 
-       7DE2                     GETDEVSTAT:
-0003A1 7DE2 3E04             7      LD  A,4
-0003A3 7DE4 E7              12      RST 20H
-0003A4 7DE5 79               4      LD  A,C
-0003A5 7DE6 E7              12      RST 20H
+       7DE5                     GETDEVSTAT:
+0003A4 7DE5 3E04             7      LD  A,4
+0003A6 7DE7 E7              12      RST 20H
+0003A7 7DE8 79               4      LD  A,C
+0003A8 7DE9 E7              12      RST 20H
                                 
-       7DE7                     RDFDC:
-0003A6 7DE7 DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
-0003A8 7DE9 2F               4      CPL
-0003A9 7DEA E6C0             7      AND 0C0H        ;RQMとDIOが両方1になるまで待つ
-0003AB 7DEC 20F9            12      JR  NZ,RDFDC
-0003AD 7DEE DBFB            11      IN  A,(0FBH)    ;FDC μPD765A データレジスタリード
-0003AF 7DF0 C9              10      RET
+       7DEA                     RDFDC:
+0003A9 7DEA DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
+0003AB 7DEC 2F               4      CPL
+0003AC 7DED E6C0             7      AND 0C0H        ;RQMとDIOが両方1になるまで待つ
+0003AE 7DEF 20F9            12      JR  NZ,RDFDC
+0003B0 7DF1 DBFB            11      IN  A,(0FBH)    ;FDC μPD765A データレジスタリード
+0003B2 7DF3 C9              10      RET
                                 
-       7DF1                     S_PARAMS:
-0003B0 7DF1                         DS  8
-       7DF9                     S_CMD_STATUS:
-0003B8 7DF9 00                      DB  0
-       7DFA                     S_LEFT:
-0003B9 7DFA 00                      DB  0
-       7DFB                     S_WKF4:
-0003BA 7DFB 00                      DB  0
+       7DF4                     S_PARAMS:
+0003B3 7DF4                         DS  8
+       7DFC                     S_CMD_STATUS:
+0003BB 7DFC 00                      DB  0
+       7DFD                     S_LEFT:
+0003BC 7DFD 00                      DB  0
+       7DFE                     S_WKF4:
+0003BD 7DFE 00                      DB  0
                                 
-0003BB CFB4                         ORG $$+OFFSET   ;$DEPHASE
-       CFB4                     AT_DSSE:
-       CFB4                     INITE:
-0003BB CFB4                         DS  BDOS-INITE
+0003BE CFB7                         ORG $$+OFFSET   ;$DEPHASE
+       CFB7                     AT_DSSE:
+       CFB7                     INITE:
+0003BE CFB7                         DS  BDOS-INITE
 00040D D006 C3BBD8          10      JP  BDOS_RF
 [EOF:88SUB.ASM:SHIFT_JIS]
                                     INCLUDE "88CCP.ASM"
@@ -5648,7 +5650,7 @@
 0020BA ECB3 CD7BEB          17      CALL    PUTCOM
 0020BD ECB6 3E7D             7      LD  A,RESULTEX/256
 0020BF ECB8 CD81EB          17      CALL    PUTDAT
-0020C2 ECBB 3EB3             7      LD  A,RESULTEX%256
+0020C2 ECBB 3EB6             7      LD  A,RESULTEX%256
 0020C4 ECBD CD81EB          17      CALL    PUTDAT
                                 
 0020C7 ECC0 CDA6EB          17      CALL    GETDAT
@@ -5710,7 +5712,7 @@
 002128 ED21 CD7BEB          17      CALL    PUTCOM
 00212B ED24 3E7D             7      LD  A,RESULTEX/256
 00212D ED26 CD81EB          17      CALL    PUTDAT
-002130 ED29 3EB3             7      LD  A,RESULTEX%256
+002130 ED29 3EB6             7      LD  A,RESULTEX%256
 002132 ED2B CD81EB          17      CALL    PUTDAT
                                 
 002135 ED2E CDA6EB          17      CALL    GETDAT
