@@ -18,27 +18,27 @@ CD20 bank             	CD35 bank1            	CD45 bank2
 CD60 nobank           	CD60 emm              	CD6D echeck1          	
 CD93 echeck2          	CDA2 emm_bpb          	CDB1 noemm            	
 CDB1 keyrep           	CDBD keyr1            	CDFD init0            	
-CE05 init1            	CE37 eadr2            	CE53 eadr0            	
-CE5C chkctc           	CE60 inictc1          	CE83 setcrtc          	
-CE87 setcrt1          	CEA2 calc_fatln       	CEB2 autod            	
-CEBB autodv           	CEBE inimes           	CEEB _c8025h          	
-CEFB textdt           	CF02 siodata          	CF0E at_trap38        	
-CF1D prhx             	CF26 prhx2            	CF35 at_trape         	
-CF35 at_scr1          	CF44 at_scrup1        	CF5B at_scrcl         	
-CF66 at_upsub         	CF6A at_upsub1        	CF76 diskc            	
-CF7C diskd            	CF87 at_delp          	CF8F at_errz          	
-CF90 at_err           	CF93 errw             	CF9A errdw            	
-CFA5 errdr            	CFB0 at_wttrk         	CFB7 at_scrn          	
-CFBA at_scre          	CFBA at_dwt           	CFBC at_wttrk1        	
-CFBF dwtbl            	CFC8 dwt0             	CFDA dwt1             	
-CFDB dwt2             	CFE4 dwt3             	CFE9 dwt4             	
-CFFE diskok_wt        	CFFE at_wtb           	D003 at_drd           	
-D008 drdbl            	D011 drd0             	D023 drd1             	
-D031 drd3             	D043 diskok_rd        	D043 at_rdb           	
-D048 at_cpue          	D048 at_edwt          	D04B at_edwt0         	
-D04D at_edwt1         	D05C at_edrd          	D05F at_edrd0         	
-D061 at_edrd1         	D070 at_eadr          	D08E at_emme          	
-30CB*at_rt            	D08E inite            	D109 wboot1           	
+CE05 init1            	CE3A eadr2            	CE56 eadr0            	
+CE5F chkctc           	CE63 inictc1          	CE86 setcrtc          	
+CE8A setcrt1          	CEA5 calc_fatln       	CEB5 autod            	
+CEBE autodv           	CEC1 inimes           	CEEF _c8025h          	
+CEFF textdt           	CF06 siodata          	CF12 at_trap38        	
+CF21 prhx             	CF2A prhx2            	CF39 at_trape         	
+CF39 at_scr1          	CF48 at_scrup1        	CF5F at_scrcl         	
+CF6A at_upsub         	CF6E at_upsub1        	CF7A diskc            	
+CF80 diskd            	CF8B at_delp          	CF93 at_errz          	
+CF94 at_err           	CF97 errw             	CF9E errdw            	
+CFA9 errdr            	CFB4 at_wttrk         	CFBB at_scrn          	
+CFBE at_scre          	CFBE at_dwt           	CFC0 at_wttrk1        	
+CFC3 dwtbl            	CFCC dwt0             	CFDE dwt1             	
+CFDF dwt2             	CFE8 dwt3             	CFED dwt4             	
+D002 diskok_wt        	D002 at_wtb           	D007 at_drd           	
+D00C drdbl            	D015 drd0             	D027 drd1             	
+D035 drd3             	D047 diskok_rd        	D047 at_rdb           	
+D04C at_cpue          	D04C at_edwt          	D04F at_edwt0         	
+D051 at_edwt1         	D060 at_edrd          	D063 at_edrd0         	
+D065 at_edrd1         	D074 at_eadr          	D092 at_emme          	
+30C7*at_rt            	D092 inite            	D109 wboot1           	
 D120 setcrt2          	D12D setcrt3          	D14D command          	
 D175 comanl           	D197 comb             	D19B comb2            	
 D1B2 cex1             	D1CC sdvsw            	D1D6 open1            	
@@ -83,7 +83,7 @@ D743 brw2             	D751 banksp           	D756 btfr
 D758 btfr1            	D76C edwt             	D770 edrd             	
 D772 edwt1            	D7A3 dma_add_sec      	D7A8 edmad            	
 D7AC dmalen           	D7B4 dmab             	D7B7 emme             	
-0724*at_re            	D7B7 bdos0            	D7BF dos1             	
+0720*at_re            	D7B7 bdos0            	D7BF dos1             	
 D7CA _dos2            	D7E6 c_rem            	D7E7 _error           	
 D7E9 _sys09           	D7EA _sx09            	D7F5 msx1             	
 D7F8 msx              	D7FE _sys0c           	D803 _sys0d           	
@@ -152,7 +152,7 @@ DF4A scrcl            	DF55 scrn             	DF7A scrn1
 DF7C scrn2            	DF7F scrne            	DF7F pos              	
 DF88 pos1             	DF93 getl             	DF9C getl1            	
 DFAB getl1v           	DFD9 getl2            	DFE2 getl3            	
-DFED inkey            	DFFF inkey1           	0FB6*at_rs            	
+DFED inkey            	DFFF inkey1           	0FB2*at_rs            	
 E002 filec            	E005 filec2           	E00D file             	
 E030 devi1            	E03E noroot           	E03E setdir           	
 E046 setdir1          	E06A filed            	E072 file2            	
@@ -268,7 +268,7 @@ EE4E disk             	EE51 disk1            	EE58 diskr
 EE5D disk2            	EE64 dmapat           	EE9C diske2           	
 EEA6 errf             	EEA7 delp             	EEAF err              	
 EEB2 dmad             	EEBD dmahl            	EEC2 dmae             	
-1E79*at_r             	EEC2 at_table         	EEC2 at_work          	
+1E75*at_r             	EEC2 at_table         	EEC2 at_work          	
 EF00 cpm_boot         	EF03 _sys00           	EF03 cpm_wboot        	
 EF06 cpm_const        	EF09 _sys07           	EF09 cpm_conin        	
 EF0C cpm_conout       	EF0F decbf            	EF14 fdrv             	
