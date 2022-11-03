@@ -109,8 +109,10 @@ FDCRES:
 	JR	FDCCMD2
 
 FDMOFF:
+	PUSH	AF
 	XOR	A		;Motor off(ドライブセレクト無効)
 	OUT	(0DCH),A
+	POP	AF
 	RET
 
 SECSET:

@@ -106,7 +106,7 @@ AUTODV:	DB	"A:",0
 INIMES:	DB	00CH,"LSX-Dodgers for MZ-700/1500 v"
 	DB	030H + VER_1, '.'
 	DB	030H + VER_2 ,030H + VER_3
-	DB	"a"
+;	DB	""
 	DB	' Gaku',0DH,0AH
 	DB	0
 

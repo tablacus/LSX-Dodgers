@@ -65,9 +65,7 @@ CDWT:
 	LD	C,(IX+013H)	;DPB_13_UNITNO
 	IN	B,(C)		;アドレスカウンタを0000にリセット
 	OUT	(C),E		;W)アドレスカウンタ上位
-	INC	C		;C=F9
-	INC	C		;C=FA
-	LD	B,0
+	LD	BC,000FAH
 CDWT1:
 	OTIR			;W)データ書き込み・アドレスカウンタ+1
 	INC	DE
@@ -81,8 +79,7 @@ CDRD:
 	LD	C,(IX+013H)	;DPB_13_UNITNO
 	IN	B,(C)		;アドレスカウンタを0000にリセット
 	OUT	(C),E		;W)アドレスカウンタ上位
-	INC	C		;C=F9
-	LD	B,0
+	LD	BC,000F9H
 CDRD1:
 	INIR			;R)データ読み出し・アドレスカウンタ+1
 	INC	DE
@@ -95,31 +92,23 @@ CDRD1:
 ;	1セクタ256
 
 RDWT:
-	LD	A,B
-	LD	B,E		;B=アドレスカウンタ上位
-	LD	C,0EBH
-	OUT	(C),0		;0=アドレスカウンタ下位
-	DEC	C		;EA(W)データ書き込み・アドレスカウンタ+1
-	LD	B,0
-RDWT1:
-	OTIR
-	INC	DE
-	DEC	A
-	JR	NZ,RDWT1
-	AND	A
-	RET
-
+	LD	A,0B3H		;OTIR
+	JR	RDRW
 RDRD:
+	LD	A,0B2H		;INIR
+RDRW:
+	LD	(RDRW1+1),A
+
 	LD	A,B
-	LD	B,E		;B=アドレスカウンタ上位
+	LD	B,E		;B=アドレスカウンタ上位(X1の様な16bitのI/Oアクセス)
 	LD	C,0EBH
 	OUT	(C),0		;0=アドレスカウンタ下位
 	DEC	C		;EA(R)データ読み出し・アドレスカウンタ+1
 	LD	B,0
-RDRD1:
-	INIR
+RDRW1:
+	INIR			;自己書き換え(INIR/OTIR)
 	INC	DE
 	DEC	A
-	JR	NZ,RDRD1
+	JR	NZ,RDRW1
 	AND	A
 	RET

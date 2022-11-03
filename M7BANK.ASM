@@ -185,7 +185,7 @@ C_MON:
 
 INITINT:
 	OUT	(0E3H),A	;VRAM/KEY/TIMER(D000H-FFFFH)
-				;HL=0E007H 8253 コントロール
+	LD	HL,0E007H	;HL=0E007H 8253 コントロール
 	LD	(HL),0B0H	;Ch.2 カウンタの下位バイト→上位バイトの順に連続してアクセス Mode 0 16ビットバイナリ
 	LD	(HL),074H	;Ch.1 カウンタの下位バイト→上位バイトの順に連続してアクセス Mode 2 16ビットバイナリ
 	DEC	L		;0E006H 8253 Ch.2 カウンタ
