@@ -1,0 +1,15 @@
+
+;	LSX-Dodgers CCP WORK
+
+PATHX	EQU	64
+PATHD:	DS	PATHX
+PATHE:	DB	0
+
+DTA_CCP:
+	DS	37
+
+FCB_BAT:
+	DS	37
+
+
+FREE:	DB	" bytes free",9,'$'

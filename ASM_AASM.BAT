@@ -8,6 +8,6 @@ set ASM=\tool\aasm\aasm.exe
 set H2B=\tool\aasm\hex_ut.exe
 
 %ASM% -t10 -E -l -s X1.ASZ
-%H2B% X1.HEX -CAF9 LD.TMP
+%H2B% X1.HEX -CBF9 LD.TMP
 %H2B% LD.TMP -IB LD.BIN,00
 del LD.TMP

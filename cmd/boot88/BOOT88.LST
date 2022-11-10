@@ -3,9 +3,9 @@
                                 ;   PC-8801mkSR ブート
                                 ;
                                 
-       CC00                     RUN     EQU 0CC00H
+       CD00                     RUN     EQU 0CD00H
        2600                     SIZE        EQU 9728
-       CC07                     EXEC        EQU RUN+7
+       CD07                     EXEC        EQU RUN+7
        C000                     MAINADDR    EQU 0C000H
        5000                     SUBADDR     EQU 05000H
                                 
@@ -28,15 +28,15 @@
                                 
        7F14                     CMD_STATUS  EQU 07F14H
                                 
-                                ;   
+                                ;
                                 ;   メイン
 000000 C000                         ORG MAINADDR
 000000 C000 EB               4      EX  DE,HL   ;EB BS_JmpBoot
 000001 C001 FE90             7      CP  090H    ;FE 90
 000003 C003 37               4      SCF     ;37 BS_OEMName
 000004 C004 3824            12      JR  C,START ;38 20
-000006 C006 49504C3838              DB  "IPL88" 
-00000B C00B 0002                    DW  512 ;BPB_BytsPerSec 
+000006 C006 49504C3838              DB  "IPL88"
+00000B C00B 0002                    DW  512 ;BPB_BytsPerSec
 00000D C00D 02                      DB  2   ;BPB_SecPerClus
 00000E C00E 0100                    DW  1   ;BPB_RsvdSecCnt
 000010 C010 02                      DB  2   ;BPB_NumFATs
@@ -92,13 +92,13 @@
 000070 C070 DB32            11      IN  A,(032H)
 000072 C072 F610             7      OR  010H        ;高速RAMアクセスモードOFF
 000074 C074 D332            11      OUT (032H),A
-000076 C076 2100CC          10      LD  HL,RUN
+000076 C076 2100CD          10      LD  HL,RUN
        C079                     TRANS1:
 000079 C079 CD4738          17      CALL    GETDAT
 00007C C07C 77               7      LD  (HL),A
 00007D C07D EDA1            16      CPI         ;HL=HL+1 BC=BC-1 BCが0の場合にP/V=0
 00007F C07F EA79C0          10      JP  PE,TRANS1
-000082 C082 C307CC          10      JP  EXEC
+000082 C082 C307CD          10      JP  EXEC
        C085                     ERROR:
 000085 C085 76               4      HALT
 000086 C086 18FD            12      JR  ERROR

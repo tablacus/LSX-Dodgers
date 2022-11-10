@@ -82,7 +82,6 @@ _SYS0E:		;(BDOS)カレントドライブの設定
 	LD	A,E
 	LD	(_DVSW),A
 SX0E2:
-	LD	A,8
 	POP	DE
 	RET
 
