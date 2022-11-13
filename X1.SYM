@@ -4,8 +4,8 @@ FB00*dtbuf            	FF00*keybf            	FF20*kbuf
 FFCA*extsp            	FFD9*trap38           	0050*width            	
 0018*line             	0007*colorf           	0010*keysp_h          	
 00C2*keysp_l          	0009*coms             	0001*ver_1            	
-0005*ver_2            	0003*ver_3            	1D00*macw             	
-0000*macd             	0153*ver              	0005*system           	
+0005*ver_2            	0002*ver_3            	1D00*macw             	
+0000*macd             	0152*ver              	0005*system           	
 000F*jp_hl            	005C*fcb1             	006C*fcb2             	
 005D*fcb1fn           	006D*fcb2fn           	0080*dta1             	
 FFCA*extbio           	CC07 start            	CC1B init             	
@@ -216,61 +216,61 @@ E7F6 rbrc             	E80C rbrend           	E80F rbrend0
 E815 rbrap            	E818 rbrdir           	E82A rbx0             	
 E839 rbx1             	E859 rbx2             	E86A rbx3             	
 E878 rbxa             	E88E secsz            	E8A3 rbxa1            	
-E8AE rbxb             	E8BE rbxb1            	E8C5 rbxb2            	
-E8C8 rbxc             	E8D4 rbxend           	E8D4 left             	
-E8F5 rbxend1          	E8F7 get_rr_bcde      	E90B dwtc             	
-E911 drdc             	E915 dwtc1            	E91F save_drwc        	
-E92E drdc1            	E94E inc_hl_drwc      	E954 drdc2            	
-E955 drdc3            	E95B drw_flush        	E95E*drwf_c           	
-E95F*drwf_b           	E965*drwf_e           	E966*drwf_d           	
-E968*drwf_hl          	E96F*drwf_mode        	E971 drdf1            	
-E974 drdx             	E98C pop_de_bc_hl_ret 	E990 drdn             	
-E991 drdn1            	E994 drdnx            	E998 drdx1            	
-E9AD drdne            	E9B2 drdy             	E9C6 pop_hl_ret       	
-E9C8 dwtx             	E9DA _dbs24           	E9E6 pop_de_bc_hl_ret2	
-E9E8 rdfatx           	EA08 rdfate2          	EA0E pop_ix_de_bc_hl_ret	
-EA12 wtfatx           	EA31 ncl1             	EA4F ncl2             	
-EA58 nclpat           	EA64 ncl3             	EA81 ncl3x1           	
-EA8A gncl             	EA9E gnc1             	EAA3 gnc1l            	
-EAAD sncl             	EAC3 snc1             	EAC7 snc11            	
-EACD fat_changed      	EAD3 n16cl3           	EAE1 gncl16           	
-EAEE sncl16           	EB00 nextx            	EB00 _secps           	
-EB03 ncpat            	EB09 gnclx            	EB10 rdfat            	
-EB15 rdfat1           	EB57 getbpb           	EB78 setfdmode        	
-EB88 getbpbok         	EB8E rdfat0x          	EB97*devswc           	
-EB9D bpb2dpb          	EBA3 bpbok            	EBC7 bpbdp1           	
-EBCA bpbdp2           	EBDF bpbbps1          	EBE3 bpbde1           	
-EC1B divsec           	EC22 divsec1          	EC28 not_fd           	
-EC3E bpb16bit         	EC45 bpbtc1           	EC51 bpbtc2           	
-EC6F bpbfat1          	EC7B rdfats           	EC87 drd16            	
-EC89 drd24            	EC8B drd24b           	EC91 drdpat           	
-EC94 pop_ix_ret       	EC97 dwt16            	EC99 dwt24            	
-EC9B dwt24b           	ECA1 dwtpat           	ECA6 wtfat            	
-ECC1 fatsetup         	ECC8 fats2            	ECCC fatsx            	
-ECDC fat_skp          	ECE4 fat1             	ECE9 fat2             	
-ECF5 fatsetup12       	ED02 fatsetup16       	ED0F chgdrv           	
-ED16 chgdrv1          	ED20 chgdrve          	ED22 chgdrv0          	
-ED2F chgdrv2          	ED85 sppat2           	EDAB setfat16         	
-EDB8 extra1           	EDC7 getdpbd          	EDD0 chgdrvr          	
-EDD7 getdpb1          	EDDA getdpb           	EDF7 _sys5f           	
-EDF8 fflush           	EE13 seek             	EE1A div1             	
-EE21 div2             	EE60 setm2            	EE6A fdccmd2          	
-EE6D fspat            	EE70 fdccmd           	EE73 fdcpat           	
-EE78 sst              	EE7A sst1             	EE84 setmode          	
-EE85 fdmode           	EE8F ready            	EE96 ready2           	
-EE98 waita            	EEA4 readye           	EEA6 fdcres           	
-EEAC fdmoff           	EEB1 mopat            	EEB8 secset           	
-EEBD comset           	EEC1 delay0           	EEC3 delay            	
-EEC7 drive            	EED0 rnf              	EED6 retry            	
-EED7 wttrk            	EEDD fdwt             	EEDF wttrk1           	
-EEE6 diskok           	EEE6 fdcnt            	EEEB fdrd             	
-EEF2 disk             	EEF5 disk1            	EEFC diskr            	
-EF01 disk2            	EF08 dmapat           	EF40 diske2           	
-EF4A errf             	EF4B delp             	EF53 err              	
-EF56 dmad             	EF61 dmahl            	EF66 dmae             	
-1E36*at_r             	EF66 at_table         	0040*pathx            	
-EF66 pathd            	EFA6 pathe            	EFA7 dta_ccp          	
-EFCC fcb_bat          	EFF1 free             	EFFE at_work          	
+E8AE rbxb             	E8BC rbxb1            	E8C3 rbxb2            	
+E8C6 rbxc             	E8D2 rbxend           	E8D2 left             	
+E8F3 rbxend1          	E8F5 get_rr_bcde      	E909 dwtc             	
+E90F drdc             	E913 dwtc1            	E91D save_drwc        	
+E92C drdc1            	E94C inc_hl_drwc      	E952 drdc2            	
+E953 drdc3            	E959 drw_flush        	E95C*drwf_c           	
+E95D*drwf_b           	E963*drwf_e           	E964*drwf_d           	
+E966*drwf_hl          	E96D*drwf_mode        	E96F drdf1            	
+E972 drdx             	E98A pop_de_bc_hl_ret 	E98E drdn             	
+E98F drdn1            	E992 drdnx            	E996 drdx1            	
+E9AB drdne            	E9B0 drdy             	E9C4 pop_hl_ret       	
+E9C6 dwtx             	E9D8 _dbs24           	E9E4 pop_de_bc_hl_ret2	
+E9E6 rdfatx           	EA06 rdfate2          	EA0C pop_ix_de_bc_hl_ret	
+EA10 wtfatx           	EA2F ncl1             	EA4D ncl2             	
+EA56 nclpat           	EA62 ncl3             	EA7F ncl3x1           	
+EA88 gncl             	EA9C gnc1             	EAA1 gnc1l            	
+EAAB sncl             	EAC1 snc1             	EAC5 snc11            	
+EACB fat_changed      	EAD1 n16cl3           	EADF gncl16           	
+EAEC sncl16           	EAFE nextx            	EAFE _secps           	
+EB01 ncpat            	EB07 gnclx            	EB0E rdfat            	
+EB13 rdfat1           	EB55 getbpb           	EB76 setfdmode        	
+EB86 getbpbok         	EB8C rdfat0x          	EB95*devswc           	
+EB9B bpb2dpb          	EBA1 bpbok            	EBC5 bpbdp1           	
+EBC8 bpbdp2           	EBDD bpbbps1          	EBE1 bpbde1           	
+EC19 divsec           	EC20 divsec1          	EC26 not_fd           	
+EC3C bpb16bit         	EC43 bpbtc1           	EC4F bpbtc2           	
+EC6D bpbfat1          	EC79 rdfats           	EC85 drd16            	
+EC87 drd24            	EC89 drd24b           	EC8F drdpat           	
+EC92 pop_ix_ret       	EC95 dwt16            	EC97 dwt24            	
+EC99 dwt24b           	EC9F dwtpat           	ECA4 wtfat            	
+ECBF fatsetup         	ECC6 fats2            	ECCA fatsx            	
+ECDA fat_skp          	ECE2 fat1             	ECE7 fat2             	
+ECF3 fatsetup12       	ED00 fatsetup16       	ED0D chgdrv           	
+ED14 chgdrv1          	ED1E chgdrve          	ED20 chgdrv0          	
+ED2D chgdrv2          	ED83 sppat2           	EDA9 setfat16         	
+EDB6 extra1           	EDC5 getdpbd          	EDCE chgdrvr          	
+EDD5 getdpb1          	EDD8 getdpb           	EDF5 _sys5f           	
+EDF6 fflush           	EE11 seek             	EE18 div1             	
+EE1F div2             	EE5E setm2            	EE68 fdccmd2          	
+EE6B fspat            	EE6E fdccmd           	EE71 fdcpat           	
+EE76 sst              	EE78 sst1             	EE82 setmode          	
+EE83 fdmode           	EE8D ready            	EE94 ready2           	
+EE96 waita            	EEA2 readye           	EEA4 fdcres           	
+EEAA fdmoff           	EEAF mopat            	EEB6 secset           	
+EEBB comset           	EEBF delay0           	EEC1 delay            	
+EEC5 drive            	EECE rnf              	EED4 retry            	
+EED5 wttrk            	EEDB fdwt             	EEDD wttrk1           	
+EEE4 diskok           	EEE4 fdcnt            	EEE9 fdrd             	
+EEF0 disk             	EEF3 disk1            	EEFA diskr            	
+EEFF disk2            	EF06 dmapat           	EF3E diske2           	
+EF48 errf             	EF49 delp             	EF51 err              	
+EF54 dmad             	EF5F dmahl            	EF64 dmae             	
+1E34*at_r             	EF64 at_table         	0040*pathx            	
+EF64 pathd            	EFA4 pathe            	EFA5 dta_ccp          	
+EFCA fcb_bat          	EFEF free             	EFFC at_work          	
 F000 cpm_boot         	F003 _sys00           	F003 cpm_wboot        	
 F006 cpm_const        	F009 _sys07           	F009 cpm_conin        	
 F00C cpm_conout       	F00F decbf            	F014 fdrv             	
