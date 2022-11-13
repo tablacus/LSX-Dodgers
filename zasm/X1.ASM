@@ -32,7 +32,7 @@ COMS	EQU	9
 
 VER_1   EQU	1
 VER_2   EQU	5
-VER_3   EQU	2
+VER_3   EQU	3
 MACW	EQU	MAC + 01D00H	;機種フラグとLD判別フラグ
 MACD	EQU	MAC + DEV * 256	;機種フラグとデバイスフラグ
 VER	EQU	VER_1 * 256 + VER_2 * 16 + VER_3
@@ -4866,7 +4866,8 @@ RBXA1:
 
 RBXB:
 	LD	HL,(DTAX)
-	LD	DE,(_CLPS)
+	LD	E,(IY+26)	;(FCB)ファイルの先頭クラスタ
+	LD	D,(IY+27)
 	LD	A,(LEFTX+1)
 	LD	B,A
 	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1

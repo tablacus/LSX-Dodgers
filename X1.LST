@@ -32,10 +32,10 @@
 0000                
 0000 00 00 00 01    VER_1   EQU	1
 0000 00 00 00 05    VER_2   EQU	5
-0000 00 00 00 02    VER_3   EQU	2
+0000 00 00 00 03    VER_3   EQU	3
 0000 00 00 1D 00    MACW	EQU	MAC + 01D00H	;機種フラグとLD判別フラグ
 0000 00 00 00 00    MACD	EQU	MAC + DEV * 256	;機種フラグとデバイスフラグ
-0000 00 00 01 52    VER	EQU	VER_1 * 256 + VER_2 * 16 + VER_3
+0000 00 00 01 53    VER	EQU	VER_1 * 256 + VER_2 * 16 + VER_3
 0000                
 0000 00 00 00 05    SYSTEM	EQU	00005H
 0000 00 00 00 0F    JP_HL	EQU	0000FH
@@ -66,7 +66,7 @@ CC00                ;	X1/turbo/Z
 CC00                
 CC00 C3 07 CC       	JP	START
 CC03 00 1D          	DW	MACW
-CC05 52 01          	DW	VER
+CC05 53 01          	DW	VER
 CC07                
 CC07                START:
 CC07 F3             	DI
@@ -272,7 +272,7 @@ CD5F 01 85 00       	LD	BC,AT_SCRE-AT_SCR1
 CD62 ED B0          	LDIR
 CD64                
 CD64 21 A1 D0       	LD	HL,AT_DWT
-CD67 11 D5 EE       	LD	DE,WTTRK
+CD67 11 D7 EE       	LD	DE,WTTRK
 CD6A 01 8F 00       	LD	BC,DMAE-WTTRK	;転送先のサイズ確認用
 CD6D 01 8E 00       	LD	BC,AT_CPUE-AT_DWT
 CD70 ED B0          	LDIR
@@ -285,9 +285,9 @@ CD7E ED B0          	LDIR
 CD80                
 CD80 21 DE DF       	LD	HL,AT_WTTRK+AT_RS
 CD83 22 E9 F0       	LD	(_WTTRK+1),HL
-CD86 21 1E EF       	LD	HL,AT_DRD+AT_R
+CD86 21 20 EF       	LD	HL,AT_DRD+AT_R
 CD89 22 EC F0       	LD	(_FDRD+1),HL
-CD8C 21 D5 EE       	LD	HL,AT_DWT+AT_R
+CD8C 21 D7 EE       	LD	HL,AT_DWT+AT_R
 CD8F 22 EF F0       	LD	(_FDWT+1),HL
 CD92 21 F8 D7       	LD	HL,AT_EDRD+AT_RE
 CD95 22 82 F2       	LD	(EMMRD),HL
@@ -606,7 +606,7 @@ CFBD 20 76 65 72
 CFC1 73 69 6F 6E
 CFC5 20
 CFC6 31 2E          	DB	030H + VER_1, '.'
-CFC8 35 32          	DB	030H + VER_2 ,030H + VER_3
+CFC8 35 33          	DB	030H + VER_2 ,030H + VER_3
 CFCA                ;	DB	""
 CFCA 20 47 61 6B    	DB	' Gaku',0DH,0AH
 CFCE 75 0D 0A
@@ -721,10 +721,10 @@ D05D
 D05D                DISKC:
 D05D 1B             	DEC	DE
 D05E CB 5F          	BIT	3,A
-D060 C4 CE EE       	CALL	NZ,RNF
+D060 C4 D0 EE       	CALL	NZ,RNF
 D063                DISKD:
 D063 E5             	PUSH	HL
-D064 21 D4 EE       	LD	HL,RETRY
+D064 21 D6 EE       	LD	HL,RETRY
 D067 35             	DEC	(HL)
 D068 E1             	POP	HL
 D069 20 0C          	JR	NZ,AT_ERR		;Retry
@@ -732,8 +732,8 @@ D06B B7             	OR	A
 D06C 28 09          	JR	Z,AT_ERR		;Error
 D06E                
 D06E                AT_DELP:
-D06E CD CE EE       	CALL	RNF
-D071 CD AA EE       	CALL	FDMOFF
+D06E CD D0 EE       	CALL	RNF
+D071 CD AC EE       	CALL	FDMOFF
 D074 3E FF          	LD	A,0FFH
 D076                AT_ERRZ:
 D076 BF             	CP	A
@@ -744,12 +744,12 @@ D07A                ERRW:
 D07A 3E FF          	LD	A,0FFH
 D07C BF             	CP	A
 D07D 37             	SCF
-D07E C3 AA EE       	JP	FDMOFF
+D07E C3 AC EE       	JP	FDMOFF
 D081                
 D081                ERRDW:
 D081 D1             	POP	DE
 D082 CD B5 DF       	CALL	AT_DELP+AT_RS
-D085 C2 E3 EE       	JP	NZ,DWT0+AT_R
+D085 C2 E5 EE       	JP	NZ,DWT0+AT_R
 D088 B7             	OR	A
 D089 20 EF          	JR	NZ,ERRW
 D08B C9             	RET
@@ -757,7 +757,7 @@ D08C
 D08C                ERRDR:
 D08C D1             	POP	DE
 D08D CD B5 DF       	CALL	AT_DELP+AT_RS
-D090 C2 2C EF       	JP	NZ,DRD0+AT_R
+D090 C2 2E EF       	JP	NZ,DRD0+AT_R
 D093 B7             	OR	A
 D094 20 E4          	JR	NZ,ERRW
 D096 C9             	RET
@@ -765,7 +765,7 @@ D097
 D097                AT_WTTRK:
 D097 06 01          	LD	B,1
 D099 3E F4          	LD	A,0F4H
-D09B C3 D7 EE       	JP	AT_WTTRK1+AT_R
+D09B C3 D9 EE       	JP	AT_WTTRK1+AT_R
 D09E                
 D09E                AT_SCRN:
 D09E ED 78          	IN	A,(C)
@@ -775,22 +775,22 @@ D0A1
 D0A1                AT_DWT:
 D0A1 3E A0          	LD	A,0A0H
 D0A3                AT_WTTRK1:
-D0A3 32 72 EE       	LD	(FDCPAT+1),A
+D0A3 32 74 EE       	LD	(FDCPAT+1),A
 D0A6                DWTBL:
 D0A6 78             	LD	A,B
-D0A7 32 1A EF       	LD	(AT_WTB+1+AT_R),A
+D0A7 32 1C EF       	LD	(AT_WTB+1+AT_R),A
 D0AA 3E 02          	LD	A,2		;Retry count
-D0AC 32 D4 EE       	LD	(RETRY),A
+D0AC 32 D6 EE       	LD	(RETRY),A
 D0AF                
 D0AF                DWT0:
 D0AF D5             	PUSH	DE
 D0B0 E5             	PUSH	HL
-D0B1 CD 11 EE       	CALL	SEEK		;Write disk
+D0B1 CD 13 EE       	CALL	SEEK		;Write disk
 D0B4 E1             	POP	HL
 D0B5 DA C8 DF       	JP	C,ERRDW+AT_RS
 D0B8 F3             	DI
-D0B9 3A 72 EE       	LD	A,(FDCPAT+1)
-D0BC CD B6 EE       	CALL	SECSET
+D0B9 3A 74 EE       	LD	A,(FDCPAT+1)
+D0BC CD B8 EE       	CALL	SECSET
 D0BF 0E FB          	LD	C,0FBH
 D0C1                
 D0C1                DWT1:
@@ -814,7 +814,7 @@ D0D3 3C             	INC	A
 D0D4 FB             	EI
 D0D5 D1             	POP	DE
 D0D6 13             	INC	DE
-D0D7 CD AA EE       	CALL	FDMOFF
+D0D7 CD AC EE       	CALL	FDMOFF
 D0DA 28 09          	JR	Z,DISKOK_WT
 D0DC CD A4 DF       	CALL	DISKC+AT_RS
 D0DF 20 CE          	JR	NZ,DWT0
@@ -828,21 +828,21 @@ D0E9 C9             	RET
 D0EA                
 D0EA                AT_DRD:
 D0EA 3E 80          	LD	A,080H
-D0EC 32 72 EE       	LD	(FDCPAT+1),A
+D0EC 32 74 EE       	LD	(FDCPAT+1),A
 D0EF                DRDBL:
 D0EF 78             	LD	A,B
-D0F0 32 5F EF       	LD	(AT_RDB+1+AT_R),A
+D0F0 32 61 EF       	LD	(AT_RDB+1+AT_R),A
 D0F3 3E 02          	LD	A,2		;Retry count
-D0F5 32 D4 EE       	LD	(RETRY),A
+D0F5 32 D6 EE       	LD	(RETRY),A
 D0F8                DRD0:
 D0F8 D5             	PUSH	DE
 D0F9 E5             	PUSH	HL
-D0FA CD 11 EE       	CALL	SEEK		;Read disk
+D0FA CD 13 EE       	CALL	SEEK		;Read disk
 D0FD E1             	POP	HL
 D0FE DA D3 DF       	JP	C,ERRDR+AT_RS
 D101 F3             	DI
-D102 3A 72 EE       	LD	A,(FDCPAT+1)
-D105 CD B6 EE       	CALL	SECSET
+D102 3A 74 EE       	LD	A,(FDCPAT+1)
+D105 CD B8 EE       	CALL	SECSET
 D108 0E FB          	LD	C,0FBH
 D10A                DRD1:
 D10A 78             	LD	A,B
@@ -860,7 +860,7 @@ D118 B7             	OR	A
 D119 FB             	EI
 D11A D1             	POP	DE
 D11B 13             	INC	DE
-D11C CD AA EE       	CALL	FDMOFF
+D11C CD AC EE       	CALL	FDMOFF
 D11F 28 09          	JR	Z,DISKOK_RD
 D121 CD A4 DF       	CALL	DISKC+AT_RS
 D124 20 D2          	JR	NZ,DRD0
@@ -991,7 +991,7 @@ D24D
 D24D                ;	LSX-Dodgers CCP
 D24D                
 D24D                COMMAND:
-D24D 3A CA EF       	LD	A,(FCB_BAT)
+D24D 3A CC EF       	LD	A,(FCB_BAT)
 D250 B7             	OR	A
 D251 C2 92 D3       	JP	NZ,C_BAT1
 D254 CD 07 D3       	CALL	SETDTA1
@@ -1044,7 +1044,7 @@ D2AB 21 15 F0       	LD	HL,FNAME
 D2AE 11 6D 00       	LD	DE,FCB2+1	;COMMAND NAME
 D2B1 01 0B 00       	LD	BC,11
 D2B4 ED B0          	LDIR
-D2B6 11 64 EF       	LD	DE,PATHD
+D2B6 11 66 EF       	LD	DE,PATHD
 D2B9                CEX1:
 D2B9 1A             	LD	A,(DE)
 D2BA FE 20          	CP	020H
@@ -1074,7 +1074,7 @@ D2E0                OPEN:
 D2E0 0E 11          	LD	C,011H		;(BDOS)ファイルの検索
 D2E2                OPEN3:
 D2E2 D5             	PUSH	DE
-D2E3 11 A5 EF       	LD	DE,DTA_CCP
+D2E3 11 A7 EF       	LD	DE,DTA_CCP
 D2E6 CD 04 D3       	CALL	SETDTA
 D2E9 EB             	EX	DE,HL
 D2EA CD 0E D3       	CALL	SYSTEM0
@@ -1086,10 +1086,10 @@ D2EF 0E 12          	LD	C,012H
 D2F1 18 EF          	JR	OPEN3
 D2F3                
 D2F3                DEFCB:				;Z=Ok NZ=Error
-D2F3 11 A5 EF       	LD	DE,DTA_CCP
+D2F3 11 A7 EF       	LD	DE,DTA_CCP
 D2F6 CD 0C D3       	CALL	SYSC0F
 D2F9                
-D2F9 11 C6 EF       	LD	DE,DTA_CCP+33	;(FCB)ランダムレコード
+D2F9 11 C8 EF       	LD	DE,DTA_CCP+33	;(FCB)ランダムレコード
 D2FC 06 04          	LD	B,4
 D2FE CD D3 D5       	CALL	ZERO_MEMORY_DE
 D301                SETDTA100:
@@ -1119,7 +1119,7 @@ D31B E6 F8          	AND	0F8H
 D31D 67             	LD	H,A
 D31E 2E 00          	LD	L,0
 D320                S27DTA:
-D320 11 A5 EF       	LD	DE,DTA_CCP
+D320 11 A7 EF       	LD	DE,DTA_CCP
 D323                S27:
 D323 0E 27          	LD	C,027H		;(BDOS)ランダムブロック読み込み
 D325 18 E7          	JR	SYSTEM0
@@ -1139,14 +1139,14 @@ D336                CEXE7:
 D336 CD DD D2       	CALL	OPEN1
 D339                CEXE5:
 D339 C0             	RET	NZ
-D33A 2A AF EF       	LD	HL,(DTA_CCP+1+9)
+D33A 2A B1 EF       	LD	HL,(DTA_CCP+1+9)
 D33D 7C             	LD	A,H
 D33E CD 93 E3       	CALL	CAP
 D341 67             	LD	H,A
 D342 7D             	LD	A,L
 D343 CD 93 E3       	CALL	CAP
 D346 6F             	LD	L,A
-D347 3A AE EF       	LD	A,(DTA_CCP+1+8)
+D347 3A B0 EF       	LD	A,(DTA_CCP+1+8)
 D34A CD 93 E3       	CALL	CAP
 D34D D6 42          	SUB	'B'
 D34F 28 2C          	JR	Z,C_BAT
@@ -1187,8 +1187,8 @@ D382 20 D0          	JR	NZ,CEXE6
 D384                
 D384 CD F3 D2       	CALL	DEFCB
 D387                
-D387 21 A5 EF       	LD	HL,DTA_CCP
-D38A 11 CA EF       	LD	DE,FCB_BAT
+D387 21 A7 EF       	LD	HL,DTA_CCP
+D38A 11 CC EF       	LD	DE,FCB_BAT
 D38D 01 25 00       	LD	BC,37
 D390 ED B0          	LDIR
 D392                C_BAT1:
@@ -1220,11 +1220,11 @@ D3BD 36 00          	LD	(HL),0
 D3BF C3 6D D2       	JP	COMMAND2
 D3C2                END_BATCH:
 D3C2 AF             	XOR	A		;バッチファイルを閉じる
-D3C3 32 CA EF       	LD	(FCB_BAT),A
+D3C3 32 CC EF       	LD	(FCB_BAT),A
 D3C6 C3 00 F0       	JP	CPM_BOOT
 D3C9                
 D3C9                FGETC_BAT:
-D3C9 11 CA EF       	LD	DE,FCB_BAT
+D3C9 11 CC EF       	LD	DE,FCB_BAT
 D3CC                FGETC:				;1文字ずつ読み込む
 D3CC E5             	PUSH	HL		;Z:成功
 D3CD 21 01 00       	LD	HL,1
@@ -1293,7 +1293,7 @@ D432 EB             	EX	DE,HL
 D433 10 F9          	DJNZ	PDS3
 D435                PDSKF1:
 D435 CD CD D4       	CALL	PRDEC_DEHL
-D438 11 EF EF       	LD	DE,FREE
+D438 11 F1 EF       	LD	DE,FREE
 D43B CD 61 D8       	CALL	_SYS09		;(BDOS)文字列出力
 D43E CD BC D4       	CALL	PUTDRV
 D441 3E 5C          	LD	A,05CH		;\
@@ -1307,12 +1307,12 @@ D44F DC C9 D4       	CALL	C,PRDEC_HL
 D452 18 41          	JR	LTNL
 D454                
 D454                P_NAME:
-D454 3A A6 EF       	LD	A,(DTA_CCP+1)
+D454 3A A8 EF       	LD	A,(DTA_CCP+1)
 D457 FE 2E          	CP	'.'
 D459 C8             	RET	Z
 D45A 11 FF D6       	LD	DE,DIRHD
 D45D CD 61 D8       	CALL	_SYS09		;(BDOS)文字列出力
-D460 3A B1 EF       	LD	A,(DTA_CCP+1+00BH)
+D460 3A B3 EF       	LD	A,(DTA_CCP+1+00BH)
 D463 F5             	PUSH	AF
 D464 0F             	RRCA
 D465 9F             	SBC	A,A
@@ -1320,7 +1320,7 @@ D466 E6 0A          	AND	'*'-020H
 D468 C6 20          	ADD	A,020H
 D46A CD B6 DB       	CALL	MSG_A
 D46D CD BC D4       	CALL	PUTDRV
-D470 21 A6 EF       	LD	HL,DTA_CCP+1
+D470 21 A8 EF       	LD	HL,DTA_CCP+1
 D473 CD 0D D5       	CALL	FPRNT
 D476                
 D476 F1             	POP	AF
@@ -1330,8 +1330,8 @@ D47B 11 F4 D6       	LD	DE,DIRMES
 D47E CD 61 D8       	CALL	_SYS09		;(BDOS)文字列出力
 D481 18 0A          	JR	DIR6
 D483                DIR3:
-D483 ED 5B C4 EF    	LD	DE,(DTA_CCP+1+01EH)
-D487 2A C2 EF       	LD	HL,(DTA_CCP+1+01CH)
+D483 ED 5B C6 EF    	LD	DE,(DTA_CCP+1+01EH)
+D487 2A C4 EF       	LD	HL,(DTA_CCP+1+01CH)
 D48A CD CD D4       	CALL	PRDEC_DEHL
 D48D                DIR6:
 D48D 3A B1 F0       	LD	A,(_WIDTH)
@@ -1344,7 +1344,7 @@ D497 C3 CD F0       	JP	_PRINT
 D49A                
 D49A                C_PATH:
 D49A CD 5E E1       	CALL	SPCUT
-D49D 21 64 EF       	LD	HL,PATHD
+D49D 21 66 EF       	LD	HL,PATHD
 D4A0 FE 21          	CP	021H
 D4A2 30 0C          	JR	NC,CPATH0
 D4A4                CPATHP:
@@ -1452,7 +1452,7 @@ D52F                PRTTMS:
 D52F 3E 20          	LD	A,020H
 D531 CD B6 DB       	CALL	MSG_A
 D534                
-D534 2A BE EF       	LD	HL,(DTA_CCP+1+24)
+D534 2A C0 EF       	LD	HL,(DTA_CCP+1+24)
 D537 7D             	LD	A,L
 D538 B7             	OR	A
 D539 C8             	RET	Z
@@ -1476,7 +1476,7 @@ D557 7D             	LD	A,L
 D558 E6 1F          	AND	01FH
 D55A CD 89 D5       	CALL	PRDEC_A
 D55D                
-D55D 2A BC EF       	LD	HL,(DTA_CCP+1+22)
+D55D 2A BE EF       	LD	HL,(DTA_CCP+1+22)
 D560                
 D560 3E 20          	LD	A,020H
 D562 CD B6 DB       	CALL	MSG_A
@@ -1583,7 +1583,7 @@ D5FD                COPY1:
 D5FD C0             	RET	NZ
 D5FE CD F3 D2       	CALL	DEFCB
 D601                
-D601 3A B2 EF       	LD	A,(DTA_CCP+13)
+D601 3A B4 EF       	LD	A,(DTA_CCP+13)
 D604 CB 67          	BIT	4,A
 D606 28 21          	JR	Z,COPY1A
 D608                
@@ -1593,7 +1593,7 @@ D60E 38 14          	JR	C,COPY9
 D610                
 D610 3E 20          	LD	A,020H
 D612 32 5D 00       	LD	(FCB1+1),A
-D615 2A BF EF       	LD	HL,(DTA_CCP+26)
+D615 2A C1 EF       	LD	HL,(DTA_CCP+26)
 D618 23             	INC	HL
 D619 22 6A 00       	LD	(FCB1+14),HL
 D61C 18 D5          	JR	COPY0
@@ -1608,7 +1608,7 @@ D629
 D629                COPY1A:
 D629 21 6C 00       	LD	HL,FCB2
 D62C 11 14 F0       	LD	DE,FDRV
-D62F 01 A7 EF       	LD	BC,DTA_CCP+2
+D62F 01 A9 EF       	LD	BC,DTA_CCP+2
 D632 ED A0          	LDI
 D634 3E 0B          	LD	A,11
 D636                COPY2:
@@ -1658,9 +1658,9 @@ D67F CD 0E D3       	CALL	SYSTEM0
 D682 20 23          	JR	NZ,COPYE
 D684 10 E9          	DJNZ	COPY6
 D686                COPY7:
-D686 3A B2 EF       	LD	A,(DTA_CCP+13)	;(FCB)属性
+D686 3A B4 EF       	LD	A,(DTA_CCP+13)	;(FCB)属性
 D689 32 21 F0       	LD	(FDRV+13),A
-D68C 21 B9 EF       	LD	HL,DTA_CCP+20	;(FCB)タイムスタンプ
+D68C 21 BB EF       	LD	HL,DTA_CCP+20	;(FCB)タイムスタンプ
 D68F 11 28 F0       	LD	DE,FDRV+20
 D692 01 04 00       	LD	BC,4
 D695 ED B0          	LDIR
@@ -1992,11 +1992,11 @@ D844 CA E3 DA       	JP	Z,_SYS5A
 D847 FE 5C          	CP	05CH		;(BDOS)ファイル名の解析(_PFILE)
 D849 CA 9F DA       	JP	Z,_SYS5C
 D84C FE 5F          	CP	05FH		;(BDOS)ディスクバッファのフラッシュ(_FLUSH)
-D84E CA F5 ED       	JP	Z,_SYS5F
+D84E CA F7 ED       	JP	Z,_SYS5F
 D851 FE 6F          	CP	06FH		;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
 D853 20 0A          	JR	NZ,_ERROR
 D855 01 1D 01       	LD	BC,011DH
-D858 11 52 01       	LD	DE,VER
+D858 11 53 01       	LD	DE,VER
 D85B 21 00 00       	LD	HL,MACD
 D85E                C_REM:
 D85E AF             	XOR	A
@@ -2118,7 +2118,7 @@ D907
 D907 FD 7E 1D       	LD	A,(IY+29)	;(FCB)ディレクトリモード
 D90A 32 A0 F0       	LD	(_DIRF),A
 D90D E6 7F          	AND	07FH
-D90F 32 FF EA       	LD	(_SECPS+1),A
+D90F 32 01 EB       	LD	(_SECPS+1),A
 D912 FD 5E 1E       	LD	E,(IY+30)	;(FCB)ディレクトリポジション
 D915 FD 56 1F       	LD	D,(IY+31)
 D918 CD C4 E2       	CALL	READ_DIR
@@ -2164,7 +2164,7 @@ D960 2A 9F F0       	LD	HL,(_FILEN)
 D963 7C             	LD	A,H
 D964 B7             	OR	A
 D965 28 06          	JR	Z,_S12DIR
-D967 3A FF EA       	LD	A,(_SECPS+1)
+D967 3A 01 EB       	LD	A,(_SECPS+1)
 D96A F6 80          	OR	080H
 D96C 67             	LD	H,A
 D96D                _S12DIR:
@@ -2418,11 +2418,11 @@ DABB C9             	RET
 DABC                
 DABC                _SYS30:		;(BDOS)論理セクタを用いた書き込み
 DABC C5             	PUSH	BC
-DABD 01 99 EC       	LD	BC,DWT24B
+DABD 01 9B EC       	LD	BC,DWT24B
 DAC0 18 04          	JR	S2FX
 DAC2                _SYS2F:
 DAC2 C5             	PUSH	BC
-DAC3 01 89 EC       	LD	BC,DRD24B
+DAC3 01 8B EC       	LD	BC,DRD24B
 DAC6                S2FX:
 DAC6 ED 43 DC DA    	LD	(S2FPAT+1),BC
 DACA CD DF F0       	CALL	_FFLUSH
@@ -2436,7 +2436,7 @@ DAD5 44             	LD	B,H		;Number of clusters
 DAD6 2A 8A F0       	LD	HL,(_DTA)
 DAD9                
 DAD9 0E 00          	LD	C,0
-DADB CD 89 EC       S2FPAT:	CALL	DRD24B
+DADB CD 8B EC       S2FPAT:	CALL	DRD24B
 DADE                S30X2:
 DADE E1             	POP	HL
 DADF D1             	POP	DE
@@ -3743,7 +3743,7 @@ E20D E1             	POP	HL
 E20E 20 DD          	JR	NZ,SOPEN1
 E210 18 07          	JR	SOPEN6
 E212                SOPEN5:
-E212 CD 07 EB       	CALL	GNCLX		;END DIR
+E212 CD 09 EB       	CALL	GNCLX		;END DIR
 E215 D8             	RET	C
 E216 CD 8B E3       	CALL	ENDCL
 E219                SOPEN6:
@@ -3813,7 +3813,7 @@ E285 D8             	RET	C
 E286 ED 5B FE F1    	LD	DE,(_CLPS)
 E28A D5             	PUSH	DE
 E28B CD 54 E3       	CALL	DCPAT
-E28E CD 92 E9       	CALL	DRDNX
+E28E CD 94 E9       	CALL	DRDNX
 E291 2A 7E F1       	LD	HL,(_DTBUF)	;ディレクトリエントリを0クリア
 E294 3A 90 E8       	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
 E297 47             	LD	B,A
@@ -3828,7 +3828,7 @@ E2A0 3A 72 E3       	LD	A,(SPCPAT+1)	;1クラスタの論理セクタ数
 E2A3 3D             	DEC	A
 E2A4 28 19          	JR	Z,COPENE
 E2A6 3E 01          	LD	A,1		;1セクタ辺りのセクタ数が2以上の場合
-E2A8 32 FF EA       	LD	(_SECPS+1),A
+E2A8 32 01 EB       	LD	(_SECPS+1),A
 E2AB D1             	POP	DE		;DE=(_CLPS)
 E2AC D5             	PUSH	DE
 E2AD                COPEN1:
@@ -3836,10 +3836,10 @@ E2AD D5             	PUSH	DE		;データバッファに入らないセクタもゼロクリア
 E2AE C5             	PUSH	BC
 E2AF 2A 7E F1       	LD	HL,(_DTBUF)
 E2B2 CD 6E E3       	CALL	CLUSTX
-E2B5 CD 97 EC       	CALL	DWT24
+E2B5 CD 99 EC       	CALL	DWT24
 E2B8 C1             	POP	BC
 E2B9 D1             	POP	DE
-E2BA CD FE EA       	CALL	NEXTX
+E2BA CD 00 EB       	CALL	NEXTX
 E2BD 20 EE          	JR	NZ,COPEN1
 E2BF                COPENE:
 E2BF 2A 7E F1       	LD	HL,(_DTBUF)
@@ -3851,7 +3851,7 @@ E2C4 ED 53 FE F1    	LD	(_CLPS),DE
 E2C8 C5             	PUSH	BC
 E2C9 D5             	PUSH	DE
 E2CA CD 54 E3       	CALL	DCPAT
-E2CD CD 72 E9       	CALL	DRDX
+E2CD CD 74 E9       	CALL	DRDX
 E2D0 D1             	POP	DE
 E2D1 C1             	POP	BC
 E2D2 C9             	RET
@@ -3970,7 +3970,7 @@ E35C B7             	OR	A
 E35D C8             	RET	Z		;ルートディレクトリの場合はCレジスタを0にしておく(CDEがセクタ番号)
 E35E 3A 72 E3       	LD	A,(SPCPAT+1)
 E361 4F             	LD	C,A
-E362 3A FF EA       	LD	A,(_SECPS+1)
+E362 3A 01 EB       	LD	A,(_SECPS+1)
 E365 B9             	CP	C
 E366 38 01          	JR	C,DC1
 E368 AF             	XOR	A
@@ -3990,7 +3990,7 @@ E378 8F             	ADC	A,A
 E379 18 F8          	JR	L_CLDBL
 E37B                E_CLDBL:
 E37B 4F             	LD	C,A
-E37C 3A FF EA       	LD	A,(_SECPS+1)
+E37C 3A 01 EB       	LD	A,(_SECPS+1)
 E37F B5             	OR	L
 E380 6F             	LD	L,A
 E381 11 08 00       CLSPAT:	LD	DE,8	;+8 (2D)  !ADDCL (self-modifying code)
@@ -4032,14 +4032,14 @@ E3AB 3E E5          	LD	A,0E5H
 E3AD C9             	RET
 E3AE                
 E3AE                CHDIR:
-E3AE CD C5 ED       	CALL	GETDPBD
+E3AE CD C7 ED       	CALL	GETDPBD
 E3B1 38 1D          	JR	C,CHDIR2
 E3B3 DD 75 1A       	LD	(IX+01AH),L		;_SDIR_
 E3B6 DD 74 1B       	LD	(IX+01BH),H		;_SDIR_+1
 E3B9 18 15          	JR	CHDIR2		;POP_IX_RET
 E3BB                
 E3BB                LDDIR:
-E3BB CD C5 ED       	CALL	GETDPBD
+E3BB CD C7 ED       	CALL	GETDPBD
 E3BE DD 5E 1A       	LD	E,(IX+01AH)		;_SDIR_
 E3C1 DD 56 1B       	LD	D,(IX+01BH)		;_SDIR_+1
 E3C4 13             	INC	DE
@@ -4056,7 +4056,7 @@ E3D3                LDDIRX:
 E3D3 3A A0 F0       	LD	A,(_DIRF)	;(FCB)アクセスするディレクトリのセクタインデックス
 E3D6 E6 7F          	AND	07FH
 E3D8                LDDIRX1:
-E3D8 32 FF EA       	LD	(_SECPS+1),A
+E3D8 32 01 EB       	LD	(_SECPS+1),A
 E3DB FD 5E 0E       	LD	E,(IY+14)	;(FCB)アクセスするディレクトリのクラスタ番号+1
 E3DE FD 56 0F       	LD	D,(IY+15)
 E3E1 1B             	DEC	DE
@@ -4278,12 +4278,12 @@ E515                E_WRFX:
 E515 44             	LD	B,H
 E516 04             	INC	B
 E517 3E 37          	LD	A,037H		;SCF
-E519 32 8F E9       	LD	(DRDN1),A
+E519 32 91 E9       	LD	(DRDN1),A
 E51C                
 E51C                WRDF:				;Bクラスタ分FATを確保する
 E51C 11 02 00       	LD	DE,2
 E51F AF             	XOR	A
-E520 32 FF EA       	LD	(_SECPS+1),A
+E520 32 01 EB       	LD	(_SECPS+1),A
 E523                WRDF1:
 E523 C5             	PUSH	BC
 E524 D5             	PUSH	DE
@@ -4336,7 +4336,7 @@ E56D                E_RWX:
 E56D FD 5E 1A       	LD	E,(IY+26)	;(FCB)ファイルの先頭クラスタ
 E570 FD 56 1B       	LD	D,(IY+27)
 E573 AF             	XOR	A
-E574 32 FF EA       	LD	(_SECPS+1),A
+E574 32 01 EB       	LD	(_SECPS+1),A
 E577                RWX1:
 E577 ED 53 FE F1    	LD	(_CLPS),DE
 E57B 7A             	LD	A,D
@@ -4348,7 +4348,7 @@ E580 B1             	OR	C
 E581 B4             	OR	H
 E582 C8             	RET	Z		;RET BCH==0 => CF=0
 E583                
-E583 CD 07 EB       	CALL	GNCLX
+E583 CD 09 EB       	CALL	GNCLX
 E586 D8             	RET	C
 E587 7C             	LD	A,H		;
 E588 25             	DEC	H		;
@@ -4558,8 +4558,8 @@ E6A3
 E6A3                				;Write random block
 E6A3                _SYS26:		;(BDOS)ランダムブロック書き込み
 E6A3 AF             	XOR	A
-E6A4 32 8F E9       	LD	(DRDN1),A	;NOP
-E6A7 22 D3 E8       	LD	(LEFT+1),HL	;HL←書き込むレコード数
+E6A4 32 91 E9       	LD	(DRDN1),A	;NOP
+E6A7 22 D5 E8       	LD	(LEFT+1),HL	;HL←書き込むレコード数
 E6AA 22 5D F0       	LD	(LEFTX),HL
 E6AD CD 70 E1       	CALL	SETDRV
 E6B0                
@@ -4573,7 +4573,7 @@ E6BE CA 46 E7       	JP	Z,RBW1
 E6C1                
 E6C1 2B             	DEC	HL
 E6C2                
-E6C2 CD F5 E8       	CALL	GET_RR_BCDE	;BCDE=Random record
+E6C2 CD F7 E8       	CALL	GET_RR_BCDE	;BCDE=Random record
 E6C5                
 E6C5 19             	ADD	HL,DE		;BCHL=HL+BCDE
 E6C6 30 01          	JR	NC,S26X1	;
@@ -4607,31 +4607,31 @@ E6F6                RBWB1:
 E6F6 C5             	PUSH	BC
 E6F7 D5             	PUSH	DE
 E6F8 CD 6E E3       	CALL	CLUSTX
-E6FB CD 09 E9       	CALL	DWTC
+E6FB CD 0B E9       	CALL	DWTC
 E6FE D1             	POP	DE
 E6FF C1             	POP	BC
 E700 38 4B          	JR	C,RBWERR
-E702 CD 07 EB       	CALL	GNCLX
+E702 CD 09 EB       	CALL	GNCLX
 E705 38 46          	JR	C,RBWERR
 E707 10 ED          	DJNZ	RBWB1
-E709 CD 59 E9       	CALL	DRW_FLUSH
+E709 CD 5B E9       	CALL	DRW_FLUSH
 E70C                RBWC:
-E70C CD C6 E8       	CALL	RBXC
+E70C CD C8 E8       	CALL	RBXC
 E70F 28 13          	JR	Z,RBWEND
 E711 C5             	PUSH	BC
 E712 CD 6E E3       	CALL	CLUSTX
-E715 CD 8E E9       	CALL	DRDN
+E715 CD 90 E9       	CALL	DRDN
 E718 C1             	POP	BC
 E719 38 32          	JR	C,RBWERR
 E71B ED 5B 7E F1    	LD	DE,(_DTBUF)
 E71F ED B0          	LDIR
 E721 CD 9D E4       	CALL	SWTDBF		;バッファデータは更新された
 E724                RBWEND:
-E724 CD D2 E8       	CALL	RBXEND
+E724 CD D4 E8       	CALL	RBXEND
 E727                
 E727 CD 39 E8       	CALL	RBX1
 E72A 30 1A          	JR	NC,RBW1
-E72C 2A D3 E8       	LD	HL,(LEFT+1)
+E72C 2A D5 E8       	LD	HL,(LEFT+1)
 E72F FD 5E 10       	LD	E,(IY+16)	;(FCB)ファイルのサイズ(バイト単位)
 E732 FD 56 11       	LD	D,(IY+17)	;DE=File size
 E735 19             	ADD	HL,DE
@@ -4724,7 +4724,7 @@ E7B4 7C             	LD	A,H
 E7B5 B5             	OR	L
 E7B6 28 57          	JR	Z,RBREND0
 E7B8                
-E7B8 22 D3 E8       	LD	(LEFT+1),HL	;Read record byte
+E7B8 22 D5 E8       	LD	(LEFT+1),HL	;Read record byte
 E7BB 22 5D F0       	LD	(LEFTX),HL
 E7BE                
 E7BE CD 59 E8       	CALL	RBX2
@@ -4748,26 +4748,26 @@ E7E1                RBRB1:
 E7E1 C5             	PUSH	BC
 E7E2 D5             	PUSH	DE
 E7E3 CD 6E E3       	CALL	CLUSTX
-E7E6 CD 0F E9       	CALL	DRDC
+E7E6 CD 11 E9       	CALL	DRDC
 E7E9 D1             	POP	DE
 E7EA C1             	POP	BC
-E7EB D4 07 EB       	CALL	NC,GNCLX
+E7EB D4 09 EB       	CALL	NC,GNCLX
 E7EE DA 62 E7       	JP	C,RBRERR
 E7F1 10 EE          	DJNZ	RBRB1
-E7F3 CD 59 E9       	CALL	DRW_FLUSH
+E7F3 CD 5B E9       	CALL	DRW_FLUSH
 E7F6                RBRC:
-E7F6 CD C6 E8       	CALL	RBXC
+E7F6 CD C8 E8       	CALL	RBXC
 E7F9 28 11          	JR	Z,RBREND
 E7FB C5             	PUSH	BC
 E7FC CD 6E E3       	CALL	CLUSTX
-E7FF CD 72 E9       	CALL	DRDX
+E7FF CD 74 E9       	CALL	DRDX
 E802 C1             	POP	BC
 E803 DA 62 E7       	JP	C,RBRERR
 E806 EB             	EX	DE,HL
 E807 2A 7E F1       	LD	HL,(_DTBUF)
 E80A ED B0          	LDIR
 E80C                RBREND:
-E80C CD D2 E8       	CALL	RBXEND
+E80C CD D4 E8       	CALL	RBXEND
 E80F                RBREND0:
 E80F FD E1          	POP	IY
 E811 C1             	POP	BC
@@ -4803,7 +4803,7 @@ E83A FD 6E 10       	LD	L,(IY+16)	;ファイルのサイズ(バイト単位)
 E83D FD 66 11       	LD	H,(IY+17)	;
 E840 FD 7E 12       	LD	A,(IY+18)	;
 E843                
-E843 CD F5 E8       	CALL	GET_RR_BCDE	;BCDE=Random record
+E843 CD F7 E8       	CALL	GET_RR_BCDE	;BCDE=Random record
 E846                
 E846 A7             	AND	A
 E847 ED 52          	SBC	HL,DE
@@ -4842,11 +4842,11 @@ E878                RBXA:
 E878 C5             	PUSH	BC
 E879 D5             	PUSH	DE
 E87A CD 6E E3       	CALL	CLUSTX
-E87D CD 72 E9       	CALL	DRDX
+E87D CD 74 E9       	CALL	DRDX
 E880 D1             	POP	DE
 E881 C1             	POP	BC
 E882 D8             	RET	C
-E883 CD 07 EB       	CALL	GNCLX
+E883 CD 09 EB       	CALL	GNCLX
 E886 D8             	RET	C
 E887 ED 53 FE F1    	LD	(_CLPS),DE
 E88B                
@@ -4873,1243 +4873,1244 @@ E8AD C9             	RET
 E8AE                
 E8AE                RBXB:
 E8AE 2A 5F F0       	LD	HL,(DTAX)
-E8B1 ED 5B FE F1    	LD	DE,(_CLPS)
-E8B5 3A 5E F0       	LD	A,(LEFTX+1)
-E8B8 47             	LD	B,A
-E8B9 3A 90 E8       	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
-E8BC                RBXB1:
-E8BC 1F             	RRA		;->CF
-E8BD 38 04          	JR	C,RBXB2
-E8BF CB 38          	SRL	B	;B=B/2
-E8C1 18 F9          	JR	RBXB1
-E8C3                RBXB2:
-E8C3 78             	LD	A,B
-E8C4 B7             	OR	A
-E8C5 C9             	RET
-E8C6                
-E8C6                RBXC:
-E8C6 ED 4B 5D F0    	LD	BC,(LEFTX)
-E8CA 3A 90 E8       	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
-E8CD 3D             	DEC	A
-E8CE A0             	AND	B
-E8CF 47             	LD	B,A		;1セクタ以下の端数がない場合はZ
-E8D0 B1             	OR	C
-E8D1 C9             	RET
-E8D2                
-E8D2                RBXEND:
-E8D2 11 00 00       LEFT:	LD	DE,0
-E8D5 AF             	XOR	A
-E8D6 FD 6E 21       	LD	L,(IY+33)	;(FCB)ランダムレコード
-E8D9 FD 66 22       	LD	H,(IY+34)
-E8DC 19             	ADD	HL,DE
-E8DD FD 75 21       	LD	(IY+33),L	;(FCB)ランダムレコード
-E8E0 FD 74 22       	LD	(IY+34),H
-E8E3 30 0E          	JR	NC,RBXEND1
-E8E5 FD 34 23       	INC	(IY+35)
-E8E8 20 09          	JR	NZ,RBXEND1
-E8EA FD CB 20 7E    	BIT	7,(IY+32)	;(FCB)カレントレコード
-E8EE 20 03          	JR	NZ,RBXEND1
-E8F0 FD 34 24       	INC	(IY+36)
-E8F3                RBXEND1:
-E8F3 EB             	EX	DE,HL		;HL=Read byte
-E8F4 C9             	RET
-E8F5                
-E8F5                GET_RR_BCDE:			;BCDE=Random record
-E8F5 FD 5E 21       	LD	E,(IY+33)	;(FCB)ランダムレコード
-E8F8 FD 56 22       	LD	D,(IY+34)
-E8FB FD 4E 23       	LD	C,(IY+35)
-E8FE FD 46 24       	LD	B,(IY+36)
-E901 FD CB 20 7E    	BIT	7,(IY+32)	;(FCB)カレントレコード
-E905 C8             	RET	Z
-E906 06 00          	LD	B,0		;CP/M互換のアクセスの場合はFCBは36バイト
-E908 C9             	RET
-E909                
-E909                ;	ランダムブロックアクセスの連続したセクタをまとめる
-E909                
-E909                DWTC:
-E909 E5             	PUSH	HL
-E90A 21 99 EC       	LD	HL,DWT24B
-E90D 18 04          	JR	DWTC1
-E90F                DRDC:
-E90F E5             	PUSH	HL
-E910 21 89 EC       	LD	HL,DRD24B
-E913                DWTC1:
-E913 22 6D E9       	LD	(DRWF_MODE),HL
-E916 E1             	POP	HL
-E917 3A 5D E9       	LD	A,(DRWF_B)
-E91A B7             	OR	A
-E91B 20 0F          	JR	NZ,DRDC1
-E91D                SAVE_DRWC:
-E91D 06 01          	LD	B,1
-E91F ED 43 5C E9    	LD	(DRWF_C),BC
-E923 ED 53 63 E9    	LD	(DRWF_E),DE
-E927 22 66 E9       	LD	(DRWF_HL),HL
-E92A 18 20          	JR	INC_HL_DRWC
-E92C                DRDC1:
-E92C E5             	PUSH	HL
-E92D 21 63 E9       	LD	HL,DRWF_E
-E930 86             	ADD	A,(HL)
-E931 F5             	PUSH	AF
-E932 BB             	CP	E
-E933 20 1D          	JR	NZ,DRDC2
-E935 F1             	POP	AF
-E936 23             	INC	HL
-E937 7E             	LD	A,(HL)
-E938 CE 00          	ADC	A,0
-E93A F5             	PUSH	AF
-E93B BA             	CP	D
-E93C 20 14          	JR	NZ,DRDC2
-E93E F1             	POP	AF
-E93F 3A 5C E9       	LD	A,(DRWF_C)
-E942 CE 00          	ADC	A,0
-E944 B9             	CP	C
-E945 20 0C          	JR	NZ,DRDC3
-E947 21 5D E9       	LD	HL,DRWF_B
-E94A 34             	INC	(HL)
-E94B E1             	POP	HL
-E94C                INC_HL_DRWC:
-E94C 3A 90 E8       	LD	A,(SECSZ+2)		;1セクタのサイズの上位1バイト
-E94F 84             	ADD	A,H
-E950 67             	LD	H,A
-E951 C9             	RET
-E952                DRDC2:
-E952 F1             	POP	AF
-E953                DRDC3:
-E953 CD 59 E9       	CALL	DRW_FLUSH
-E956 E1             	POP	HL
-E957 18 C4          	JR	SAVE_DRWC
-E959                
-E959                ;	ランダムブロックアクセスの連続したセクタをまとめたものをフラッシュする
-E959                DRW_FLUSH:
-E959 C5             	PUSH	BC
-E95A D5             	PUSH	DE
-E95B 00 00 E9 5C    DRWF_C	EQU	$+1
-E95B 00 00 E9 5D    DRWF_B	EQU	$+2
-E95B 01 00 00       	LD	BC,0
-E95E 78             	LD	A,B
-E95F B7             	OR	A
-E960 28 0D          	JR	Z,DRDF1
-E962 00 00 E9 63    DRWF_E	EQU	$+1
-E962 00 00 E9 64    DRWF_D	EQU	$+2
-E962 11 00 00       	LD	DE,0
-E965 00 00 E9 66    DRWF_HL	EQU	$+1
-E965 21 00 00       	LD	HL,0
-E968 AF             	XOR	A
-E969 32 5D E9       	LD	(DRWF_B),A
-E96C 00 00 E9 6D    DRWF_MODE	EQU	$+1
-E96C CD 89 EC       	CALL	DRD24B
-E96F                DRDF1:
-E96F D1             	POP	DE
-E970 C1             	POP	BC
-E971 C9             	RET
-E972                	INCLUDE	"LDDIO.ASM"
-E972                
-E972                ;	LSX-Dodgers DIO
-E972                
-E972                DRDX:
-E972 CD B0 E9       	CALL	DRDY
-E975 C8             	RET	Z
-E976 CD 96 E9       	CALL	DRDX1		;データバッファの情報を保存
-E979 D8             	RET	C
-E97A E5             	PUSH	HL
-E97B C5             	PUSH	BC
-E97C D5             	PUSH	DE
-E97D 2A 7E F1       	LD	HL,(_DTBUF)
-E980 3A D9 E9       	LD	A,(_DBS24+1)
-E983 4F             	LD	C,A
-E984 CD 87 EC       	CALL	DRD24
-E987 DC AB E9       	CALL	C,DRDNE
-E98A                POP_DE_BC_HL_RET:
-E98A D1             	POP	DE
-E98B C1             	POP	BC
-E98C E1             	POP	HL
-E98D C9             	RET
-E98E                
-E98E                ;	CDE:セクタ番号
-E98E                DRDN:
-E98E AF             	XOR	A
-E98F 00             DRDN1:	NOP			;自己書き換え NOP / SCF
-E990 30 E0          	JR	NC,DRDX
-E992                DRDNX:
-E992 CD B0 E9       	CALL	DRDY
-E995 C8             	RET	Z
-E996                DRDX1:
-E996 CD C6 E9       	CALL	DWTX
-E999                				;データバッファの読み込んだドライブ・セクタ情報を保存
-E999 ED 53 A6 F0    	LD	(_DBSEC),DE
-E99D 79             	LD	A,C
-E99E 32 D9 E9       	LD	(_DBS24+1),A
-E9A1                
-E9A1 3A 88 F0       	LD	A,(_DRV)
-E9A4 32 A5 F0       	LD	(_DBDRV),A
-E9A7 CD D9 F0       	CALL	_CHGDRV
-E9AA D0             	RET	NC
-E9AB                DRDNE:
-E9AB 9F             	SBC	A,A		;CF=1ならばA=0FFH
-E9AC 32 A5 F0       	LD	(_DBDRV),A
-E9AF C9             	RET
-E9B0                
-E9B0                ;	CDE:セクタ番号
-E9B0                DRDY:
-E9B0 3A D9 E9       	LD	A,(_DBS24+1)
-E9B3 B9             	CP	C
-E9B4 C0             	RET	NZ
-E9B5                
-E9B5 E5             	PUSH	HL
-E9B6 3A 88 F0       	LD	A,(_DRV)
-E9B9 21 A5 F0       	LD	HL,_DBDRV
-E9BC AE             	XOR	(HL)
-E9BD 20 05          	JR	NZ,POP_HL_RET
-E9BF                
-E9BF 2A A6 F0       	LD	HL,(_DBSEC)
-E9C2 ED 52          	SBC	HL,DE		;CF=0
-E9C4                POP_HL_RET:
-E9C4 E1             	POP	HL
-E9C5 C9             	RET
-E9C6                
-E9C6                DWTX:
-E9C6 3A A4 F0       	LD	A,(_WTDBF)
-E9C9 B7             	OR	A
-E9CA C8             	RET	Z
-E9CB AF             	XOR	A
-E9CC 32 A4 F0       	LD	(_WTDBF),A
-E9CF                
-E9CF E5             	PUSH	HL
-E9D0 C5             	PUSH	BC
-E9D1 D5             	PUSH	DE
-E9D2 3A A5 F0       	LD	A,(_DBDRV)
-E9D5 CD D9 F0       	CALL	_CHGDRV
-E9D8 0E 00          _DBS24:	LD	C,0
-E9DA ED 5B A6 F0    	LD	DE,(_DBSEC)
-E9DE 2A 7E F1       	LD	HL,(_DTBUF)
-E9E1 D4 97 EC       	CALL	NC,DWT24
-E9E4                POP_DE_BC_HL_RET2:
-E9E4 18 A4          	JR	POP_DE_BC_HL_RET
-E9E6                
-E9E6                RDFATX:
-E9E6 E5             	PUSH	HL
-E9E7 3A 88 F0       	LD	A,(_DRV)
-E9EA 21 AA F0       	LD	HL,_FATDRV
-E9ED AE             	XOR	(HL)
-E9EE 28 D4          	JR	Z,POP_HL_RET
-E9F0                
-E9F0 C5             	PUSH	BC
-E9F1 D5             	PUSH	DE
-E9F2 DD E5          	PUSH	IX
-E9F4 CD 10 EA       	CALL	WTFATX
-E9F7 38 13          	JR	C,POP_IX_DE_BC_HL_RET
-E9F9                
-E9F9 AF             	XOR	A
-E9FA 32 AB F0       	LD	(_FATIX),A
-E9FD 3A 88 F0       	LD	A,(_DRV)
-EA00 32 AA F0       	LD	(_FATDRV),A
-EA03 CD E5 F0       	CALL	_RDFAT
-EA06                RDFATE2:
-EA06 30 04          	JR	NC,POP_IX_DE_BC_HL_RET
-EA08 9F             	SBC	A,A		;A=0xFF
-EA09 32 AA F0       	LD	(_FATDRV),A
-EA0C                POP_IX_DE_BC_HL_RET:
-EA0C DD E1          	POP	IX
-EA0E 18 D4          	JR	POP_DE_BC_HL_RET2
-EA10                
-EA10                WTFATX:
-EA10 3A A2 F0       	LD	A,(_WTFATF)
-EA13 B7             	OR	A
-EA14 C8             	RET	Z
-EA15 E5             	PUSH	HL
-EA16 3A AA F0       	LD	A,(_FATDRV)
-EA19 21 A5 F0       	LD	HL,_DBDRV
-EA1C AE             	XOR	(HL)
-EA1D CC C6 E9       	CALL	Z,DWTX
-EA20 38 A2          	JR	C,POP_HL_RET
-EA22 C5             	PUSH	BC
-EA23 D5             	PUSH	DE
-EA24 DD E5          	PUSH	IX
-EA26 CD A4 EC       	CALL	WTFAT
-EA29 AF             	XOR	A
-EA2A 32 A2 F0       	LD	(_WTFATF),A
-EA2D 18 DD          	JR	POP_IX_DE_BC_HL_RET
-EA2F                
-EA2F                NCL1:
-EA2F 7A             	LD	A,D
-EA30 B3             	OR	E
-EA31 37             	SCF
-EA32 C8             	RET	Z
-EA33                
-EA33 7A             	LD	A,D
-EA34 CB 3F          	SRL	A	;/2
+E8B1 FD 5E 1A       	LD	E,(IY+26)	;(FCB)ファイルの先頭クラスタ
+E8B4 FD 56 1B       	LD	D,(IY+27)
+E8B7 3A 5E F0       	LD	A,(LEFTX+1)
+E8BA 47             	LD	B,A
+E8BB 3A 90 E8       	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
+E8BE                RBXB1:
+E8BE 1F             	RRA		;->CF
+E8BF 38 04          	JR	C,RBXB2
+E8C1 CB 38          	SRL	B	;B=B/2
+E8C3 18 F9          	JR	RBXB1
+E8C5                RBXB2:
+E8C5 78             	LD	A,B
+E8C6 B7             	OR	A
+E8C7 C9             	RET
+E8C8                
+E8C8                RBXC:
+E8C8 ED 4B 5D F0    	LD	BC,(LEFTX)
+E8CC 3A 90 E8       	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
+E8CF 3D             	DEC	A
+E8D0 A0             	AND	B
+E8D1 47             	LD	B,A		;1セクタ以下の端数がない場合はZ
+E8D2 B1             	OR	C
+E8D3 C9             	RET
+E8D4                
+E8D4                RBXEND:
+E8D4 11 00 00       LEFT:	LD	DE,0
+E8D7 AF             	XOR	A
+E8D8 FD 6E 21       	LD	L,(IY+33)	;(FCB)ランダムレコード
+E8DB FD 66 22       	LD	H,(IY+34)
+E8DE 19             	ADD	HL,DE
+E8DF FD 75 21       	LD	(IY+33),L	;(FCB)ランダムレコード
+E8E2 FD 74 22       	LD	(IY+34),H
+E8E5 30 0E          	JR	NC,RBXEND1
+E8E7 FD 34 23       	INC	(IY+35)
+E8EA 20 09          	JR	NZ,RBXEND1
+E8EC FD CB 20 7E    	BIT	7,(IY+32)	;(FCB)カレントレコード
+E8F0 20 03          	JR	NZ,RBXEND1
+E8F2 FD 34 24       	INC	(IY+36)
+E8F5                RBXEND1:
+E8F5 EB             	EX	DE,HL		;HL=Read byte
+E8F6 C9             	RET
+E8F7                
+E8F7                GET_RR_BCDE:			;BCDE=Random record
+E8F7 FD 5E 21       	LD	E,(IY+33)	;(FCB)ランダムレコード
+E8FA FD 56 22       	LD	D,(IY+34)
+E8FD FD 4E 23       	LD	C,(IY+35)
+E900 FD 46 24       	LD	B,(IY+36)
+E903 FD CB 20 7E    	BIT	7,(IY+32)	;(FCB)カレントレコード
+E907 C8             	RET	Z
+E908 06 00          	LD	B,0		;CP/M互換のアクセスの場合はFCBは36バイト
+E90A C9             	RET
+E90B                
+E90B                ;	ランダムブロックアクセスの連続したセクタをまとめる
+E90B                
+E90B                DWTC:
+E90B E5             	PUSH	HL
+E90C 21 9B EC       	LD	HL,DWT24B
+E90F 18 04          	JR	DWTC1
+E911                DRDC:
+E911 E5             	PUSH	HL
+E912 21 8B EC       	LD	HL,DRD24B
+E915                DWTC1:
+E915 22 6F E9       	LD	(DRWF_MODE),HL
+E918 E1             	POP	HL
+E919 3A 5F E9       	LD	A,(DRWF_B)
+E91C B7             	OR	A
+E91D 20 0F          	JR	NZ,DRDC1
+E91F                SAVE_DRWC:
+E91F 06 01          	LD	B,1
+E921 ED 43 5E E9    	LD	(DRWF_C),BC
+E925 ED 53 65 E9    	LD	(DRWF_E),DE
+E929 22 68 E9       	LD	(DRWF_HL),HL
+E92C 18 20          	JR	INC_HL_DRWC
+E92E                DRDC1:
+E92E E5             	PUSH	HL
+E92F 21 65 E9       	LD	HL,DRWF_E
+E932 86             	ADD	A,(HL)
+E933 F5             	PUSH	AF
+E934 BB             	CP	E
+E935 20 1D          	JR	NZ,DRDC2
+E937 F1             	POP	AF
+E938 23             	INC	HL
+E939 7E             	LD	A,(HL)
+E93A CE 00          	ADC	A,0
+E93C F5             	PUSH	AF
+E93D BA             	CP	D
+E93E 20 14          	JR	NZ,DRDC2
+E940 F1             	POP	AF
+E941 3A 5E E9       	LD	A,(DRWF_C)
+E944 CE 00          	ADC	A,0
+E946 B9             	CP	C
+E947 20 0C          	JR	NZ,DRDC3
+E949 21 5F E9       	LD	HL,DRWF_B
+E94C 34             	INC	(HL)
+E94D E1             	POP	HL
+E94E                INC_HL_DRWC:
+E94E 3A 90 E8       	LD	A,(SECSZ+2)		;1セクタのサイズの上位1バイト
+E951 84             	ADD	A,H
+E952 67             	LD	H,A
+E953 C9             	RET
+E954                DRDC2:
+E954 F1             	POP	AF
+E955                DRDC3:
+E955 CD 5B E9       	CALL	DRW_FLUSH
+E958 E1             	POP	HL
+E959 18 C4          	JR	SAVE_DRWC
+E95B                
+E95B                ;	ランダムブロックアクセスの連続したセクタをまとめたものをフラッシュする
+E95B                DRW_FLUSH:
+E95B C5             	PUSH	BC
+E95C D5             	PUSH	DE
+E95D 00 00 E9 5E    DRWF_C	EQU	$+1
+E95D 00 00 E9 5F    DRWF_B	EQU	$+2
+E95D 01 00 00       	LD	BC,0
+E960 78             	LD	A,B
+E961 B7             	OR	A
+E962 28 0D          	JR	Z,DRDF1
+E964 00 00 E9 65    DRWF_E	EQU	$+1
+E964 00 00 E9 66    DRWF_D	EQU	$+2
+E964 11 00 00       	LD	DE,0
+E967 00 00 E9 68    DRWF_HL	EQU	$+1
+E967 21 00 00       	LD	HL,0
+E96A AF             	XOR	A
+E96B 32 5F E9       	LD	(DRWF_B),A
+E96E 00 00 E9 6F    DRWF_MODE	EQU	$+1
+E96E CD 8B EC       	CALL	DRD24B
+E971                DRDF1:
+E971 D1             	POP	DE
+E972 C1             	POP	BC
+E973 C9             	RET
+E974                	INCLUDE	"LDDIO.ASM"
+E974                
+E974                ;	LSX-Dodgers DIO
+E974                
+E974                DRDX:
+E974 CD B2 E9       	CALL	DRDY
+E977 C8             	RET	Z
+E978 CD 98 E9       	CALL	DRDX1		;データバッファの情報を保存
+E97B D8             	RET	C
+E97C E5             	PUSH	HL
+E97D C5             	PUSH	BC
+E97E D5             	PUSH	DE
+E97F 2A 7E F1       	LD	HL,(_DTBUF)
+E982 3A DB E9       	LD	A,(_DBS24+1)
+E985 4F             	LD	C,A
+E986 CD 89 EC       	CALL	DRD24
+E989 DC AD E9       	CALL	C,DRDNE
+E98C                POP_DE_BC_HL_RET:
+E98C D1             	POP	DE
+E98D C1             	POP	BC
+E98E E1             	POP	HL
+E98F C9             	RET
+E990                
+E990                ;	CDE:セクタ番号
+E990                DRDN:
+E990 AF             	XOR	A
+E991 00             DRDN1:	NOP			;自己書き換え NOP / SCF
+E992 30 E0          	JR	NC,DRDX
+E994                DRDNX:
+E994 CD B2 E9       	CALL	DRDY
+E997 C8             	RET	Z
+E998                DRDX1:
+E998 CD C8 E9       	CALL	DWTX
+E99B                				;データバッファの読み込んだドライブ・セクタ情報を保存
+E99B ED 53 A6 F0    	LD	(_DBSEC),DE
+E99F 79             	LD	A,C
+E9A0 32 DB E9       	LD	(_DBS24+1),A
+E9A3                
+E9A3 3A 88 F0       	LD	A,(_DRV)
+E9A6 32 A5 F0       	LD	(_DBDRV),A
+E9A9 CD D9 F0       	CALL	_CHGDRV
+E9AC D0             	RET	NC
+E9AD                DRDNE:
+E9AD 9F             	SBC	A,A		;CF=1ならばA=0FFH
+E9AE 32 A5 F0       	LD	(_DBDRV),A
+E9B1 C9             	RET
+E9B2                
+E9B2                ;	CDE:セクタ番号
+E9B2                DRDY:
+E9B2 3A DB E9       	LD	A,(_DBS24+1)
+E9B5 B9             	CP	C
+E9B6 C0             	RET	NZ
+E9B7                
+E9B7 E5             	PUSH	HL
+E9B8 3A 88 F0       	LD	A,(_DRV)
+E9BB 21 A5 F0       	LD	HL,_DBDRV
+E9BE AE             	XOR	(HL)
+E9BF 20 05          	JR	NZ,POP_HL_RET
+E9C1                
+E9C1 2A A6 F0       	LD	HL,(_DBSEC)
+E9C4 ED 52          	SBC	HL,DE		;CF=0
+E9C6                POP_HL_RET:
+E9C6 E1             	POP	HL
+E9C7 C9             	RET
+E9C8                
+E9C8                DWTX:
+E9C8 3A A4 F0       	LD	A,(_WTDBF)
+E9CB B7             	OR	A
+E9CC C8             	RET	Z
+E9CD AF             	XOR	A
+E9CE 32 A4 F0       	LD	(_WTDBF),A
+E9D1                
+E9D1 E5             	PUSH	HL
+E9D2 C5             	PUSH	BC
+E9D3 D5             	PUSH	DE
+E9D4 3A A5 F0       	LD	A,(_DBDRV)
+E9D7 CD D9 F0       	CALL	_CHGDRV
+E9DA 0E 00          _DBS24:	LD	C,0
+E9DC ED 5B A6 F0    	LD	DE,(_DBSEC)
+E9E0 2A 7E F1       	LD	HL,(_DTBUF)
+E9E3 D4 99 EC       	CALL	NC,DWT24
+E9E6                POP_DE_BC_HL_RET2:
+E9E6 18 A4          	JR	POP_DE_BC_HL_RET
+E9E8                
+E9E8                RDFATX:
+E9E8 E5             	PUSH	HL
+E9E9 3A 88 F0       	LD	A,(_DRV)
+E9EC 21 AA F0       	LD	HL,_FATDRV
+E9EF AE             	XOR	(HL)
+E9F0 28 D4          	JR	Z,POP_HL_RET
+E9F2                
+E9F2 C5             	PUSH	BC
+E9F3 D5             	PUSH	DE
+E9F4 DD E5          	PUSH	IX
+E9F6 CD 12 EA       	CALL	WTFATX
+E9F9 38 13          	JR	C,POP_IX_DE_BC_HL_RET
+E9FB                
+E9FB AF             	XOR	A
+E9FC 32 AB F0       	LD	(_FATIX),A
+E9FF 3A 88 F0       	LD	A,(_DRV)
+EA02 32 AA F0       	LD	(_FATDRV),A
+EA05 CD E5 F0       	CALL	_RDFAT
+EA08                RDFATE2:
+EA08 30 04          	JR	NC,POP_IX_DE_BC_HL_RET
+EA0A 9F             	SBC	A,A		;A=0xFF
+EA0B 32 AA F0       	LD	(_FATDRV),A
+EA0E                POP_IX_DE_BC_HL_RET:
+EA0E DD E1          	POP	IX
+EA10 18 D4          	JR	POP_DE_BC_HL_RET2
+EA12                
+EA12                WTFATX:
+EA12 3A A2 F0       	LD	A,(_WTFATF)
+EA15 B7             	OR	A
+EA16 C8             	RET	Z
+EA17 E5             	PUSH	HL
+EA18 3A AA F0       	LD	A,(_FATDRV)
+EA1B 21 A5 F0       	LD	HL,_DBDRV
+EA1E AE             	XOR	(HL)
+EA1F CC C8 E9       	CALL	Z,DWTX
+EA22 38 A2          	JR	C,POP_HL_RET
+EA24 C5             	PUSH	BC
+EA25 D5             	PUSH	DE
+EA26 DD E5          	PUSH	IX
+EA28 CD A6 EC       	CALL	WTFAT
+EA2B AF             	XOR	A
+EA2C 32 A2 F0       	LD	(_WTFATF),A
+EA2F 18 DD          	JR	POP_IX_DE_BC_HL_RET
+EA31                
+EA31                NCL1:
+EA31 7A             	LD	A,D
+EA32 B3             	OR	E
+EA33 37             	SCF
+EA34 C8             	RET	Z
+EA35                
+EA35 7A             	LD	A,D
 EA36 CB 3F          	SRL	A	;/2
-EA38                
-EA38 E5             	PUSH	HL
-EA39 32 58 EA       	LD	(NCLPAT+2),A	;_FATIX
-EA3C 2A AA F0       	LD	HL,(_FATDRV)	;L=_FATDRV H=_FATIX
-EA3F BC             	CP	H
-EA40 3A 88 F0       	LD	A,(_DRV)	;この間でフラグは変化しない
-EA43 32 57 EA       	LD	(NCLPAT+1),A	;_FATDRV
-EA46 20 05          	JR	NZ,NCL2		;FATIXが違う
-EA48 BD             	CP	L
-EA49 20 02          	JR	NZ,NCL2		;ドライブが違う
-EA4B E1             	POP	HL
-EA4C C9             	RET
-EA4D                NCL2:
-EA4D C5             	PUSH	BC
-EA4E D5             	PUSH	DE
-EA4F DD E5          	PUSH	IX
-EA51 CD 10 EA       	CALL	WTFATX
-EA54 38 B6          	JR	C,POP_IX_DE_BC_HL_RET
-EA56 01 00 00       NCLPAT:	LD	BC,0		;自己書き換え C=_FATDRV B=_FATIX
-EA59 ED 43 AA F0    	LD	(_FATDRV),BC
-EA5D CD 79 EC       	CALL	RDFATS
-EA60 18 A4          	JR	RDFATE2
-EA62                
-EA62                NCL3:
-EA62 CB 9A          	RES	3,D
-EA64 CB 92          	RES	2,D
-EA66 6B             	LD	L,E
-EA67 62             	LD	H,D
-EA68 CB 3C          	SRL	H	;
-EA6A CB 1D          	RR	L	;HLA=HLA/2
-EA6C 1F             	RRA		;
-EA6D F5             	PUSH	AF
-EA6E 3A AB F0       	LD	A,(_FATIX)
-EA71 0F             	RRCA
-EA72 30 0B          	JR	NC,NCL3X1
-EA74 3A 90 E8       	LD	A,(SECSZ+2)
-EA77 FE 04          	CP	4		;1セクタ1024バイトの場合は奇数インデックスの場合に先頭を512バイトずらす
-EA79 20 04          	JR	NZ,NCL3X1
-EA7B 01 00 02       	LD	BC,512
-EA7E 09             	ADD	HL,BC
-EA7F                NCL3X1:
-EA7F F1             	POP	AF
-EA80 ED 4B 7C F1    	LD	BC,(_FATBF)
-EA84 19             	ADD	HL,DE
-EA85 09             	ADD	HL,BC
-EA86 17             	RLA
-EA87 C9             	RET
-EA88                
-EA88                GNCL:
-EA88 CD 2F EA       	CALL	NCL1		;GET NEXT CLUSTER
-EA8B D8             	RET	C
-EA8C C5             	PUSH	BC
-EA8D E5             	PUSH	HL
-EA8E CD 62 EA       	CALL	NCL3
-EA91 38 09          	JR	C,GNC1
-EA93 5E             	LD	E,(HL)
-EA94 23             	INC	HL
-EA95 7E             	LD	A,(HL)
-EA96 E6 0F          	AND	00FH
-EA98 57             	LD	D,A
-EA99 E1             	POP	HL
-EA9A C1             	POP	BC
-EA9B C9             	RET
-EA9C                GNC1:
-EA9C 7E             	LD	A,(HL)
-EA9D 23             	INC	HL
-EA9E 56             	LD	D,(HL)
-EA9F 06 04          	LD	B,4
-EAA1                GNC1L:
-EAA1 CB 3A          	SRL	D	;DA=DA/2
-EAA3 1F             	RRA		;
-EAA4 10 FB          	DJNZ	GNC1L
-EAA6                
-EAA6 5F             	LD	E,A
-EAA7 E1             	POP	HL
-EAA8 C1             	POP	BC
-EAA9 A7             	AND	A
-EAAA C9             	RET
-EAAB                
-EAAB                SNCL:
-EAAB CD 2F EA       	CALL	NCL1
-EAAE D8             	RET	C
-EAAF                ;				SET NEXT CLUSTER
-EAAF E5             	PUSH	HL
-EAB0 C5             	PUSH	BC
-EAB1 D5             	PUSH	DE
-EAB2 E5             	PUSH	HL
-EAB3 CD 62 EA       	CALL	NCL3
-EAB6 D1             	POP	DE
-EAB7                ;CF=ODD
-EAB7 7E             	LD	A,(HL)
-EAB8 73             	LD	(HL),E
-EAB9 38 06          	JR	C,SNC1
-EABB                ;EVEN
-EABB                ;M[0] = E
-EABB                ;M[1] = (M[1] & 0xF0) | (D & 0x0F)
-EABB 23             	INC	HL
-EABC ED 67          	RRD		;M={A[3:0],E[3:0]}
-EABE 7A             	LD	A,D
-EABF 18 04          	JR	SNC11
-EAC1                SNC1:
-EAC1                ;ODD
-EAC1                ;HL[0] = (HL[0]&0x0F) | (E<<4)
-EAC1                ;HL[1] = DE>>4
-EAC1 ED 6F          	RLD		;M={D[3:0],E[7:4]}
-EAC3 23             	INC	HL
-EAC4 72             	LD	(HL),D	;M={D[3:0],E[7:4]}
-EAC5                SNC11:
-EAC5 ED 6F          	RLD		;M={M[7:4],D[3:0]}
-EAC7 B7             	OR	A
-EAC8 D1             	POP	DE
-EAC9 C1             	POP	BC
-EACA E1             	POP	HL
-EACB                FAT_CHANGED:
-EACB 3E 01          	LD	A,1
-EACD 32 A2 F0       	LD	(_WTFATF),A
-EAD0 C9             	RET
-EAD1                
-EAD1                N16CL3:
-EAD1 C5             	PUSH	BC
-EAD2 6B             	LD	L,E
-EAD3 7A             	LD	A,D
-EAD4 E6 03          	AND	3
-EAD6 67             	LD	H,A
-EAD7 29             	ADD	HL,HL
-EAD8 ED 4B 7C F1    	LD	BC,(_FATBF)
-EADC 09             	ADD	HL,BC
-EADD C1             	POP	BC
-EADE C9             	RET
-EADF                
-EADF                GNCL16:
-EADF CD 2F EA       	CALL	NCL1		;GET NEXT CLUSTER for FAT16
-EAE2 D8             	RET	C
-EAE3 E5             	PUSH	HL
-EAE4 CD D1 EA       	CALL	N16CL3
-EAE7 5E             	LD	E,(HL)
-EAE8 23             	INC	HL
-EAE9 56             	LD	D,(HL)
-EAEA E1             	POP	HL
-EAEB C9             	RET
-EAEC                
-EAEC                SNCL16:
-EAEC CD 2F EA       	CALL	NCL1		;GET NEXT CLUSTER for FAT16
-EAEF D8             	RET	C
-EAF0 D5             	PUSH	DE
-EAF1 E5             	PUSH	HL
-EAF2 CD D1 EA       	CALL	N16CL3
-EAF5 D1             	POP	DE		;HL
-EAF6 73             	LD	(HL),E
-EAF7 23             	INC	HL
-EAF8 72             	LD	(HL),D
-EAF9 6B             	LD	L,E
-EAFA 62             	LD	H,D
-EAFB D1             	POP	DE
-EAFC 18 CD          	JR	FAT_CHANGED
-EAFE                
-EAFE                ;------------------------
-EAFE                ;次のセクタを探す際に_SECPSの値をチェック
-EAFE                ;in
-EAFE                ;	DE : セクタ番号
-EAFE                ;out
-EAFE                ;	DE : 次のセクタ番号
-EAFE                ;note
-EAFE                ;
-EAFE                ;------------------------
-EAFE                NEXTX:
-EAFE 3E 00          _SECPS:	LD	A,0	;自己書き換え
-EB00 3C             	INC	A
-EB01 E6 00          NCPAT:	AND	0	;自己書き換え　1クラスタの論理セクタ数-1
-EB03 32 FF EA       	LD	(_SECPS+1),A
-EB06 C9             	RET
-EB07                
-EB07                GNCLX:
-EB07 CD FE EA       	CALL	NEXTX
-EB0A C0             	RET	NZ	;1クラスタのセクタ未満の場合は戻る
-EB0B C3 F7 F0       	JP	_GNCL	;次のクラスタを探す
-EB0E                
-EB0E                RDFAT:
-EB0E 3E 80          	LD	A,080H
-EB10 32 70 F0       	LD	(CHECK),A
-EB13                RDFAT1:
-EB13 3A 88 F0       	LD	A,(_DRV)
-EB16 CD CE ED       	CALL	CHGDRVR
-EB19 D8             	RET	C
-EB1A DD 7E 12       	LD	A,(IX+012H)	;DPB_12_DEVICE
-EB1D CB 6F          	BIT	5,A
-EB1F 28 6B          	JR	Z,RDFAT0X
-EB21 21 70 F0       	LD	HL,CHECK
-EB24 A6             	AND	(HL)
-EB25 77             	LD	(HL),A
-EB26 11 00 00       	LD	DE,0		;BPB
-EB29 2A 7C F1       	LD	HL,(_FATBF)
-EB2C CD 85 EC       	CALL	DRD16
-EB2F 30 24          	JR	NC,GETBPB
-EB31 21 70 F0       	LD	HL,CHECK
-EB34 CB 06          	RLC	(HL)
-EB36 3F             	CCF
-EB37 D8             	RET	C
-EB38 DD CB 0A 1E    	RR	(IX+00AH)	;DPB_0A_FDMODE
-EB3C 3F             	CCF			;フロッピーディスクのFDモードを切り替える
-EB3D DD CB 0A 16    	RL	(IX+00AH)	;DPB_0A_FDMODE
-EB41 3E FF          	LD	A,0FFH
-EB43 32 89 F0       	LD	(_DSK),A
-EB46 3A 84 F0       	LD	A,(_DRIVE)
-EB49 E6 03          	AND	3
-EB4B F6 80          	OR	080H
-EB4D 6F             	LD	L,A
-EB4E 26 F0          	LD	H,_CYL0/256
-EB50 3E FF          	LD	A,0FFH
-EB52 77             	LD	(HL),A
-EB53 18 BE          	JR	RDFAT1
-EB55                GETBPB:
-EB55 FD E5          	PUSH	IY
-EB57 FD 2A 7C F1    	LD	IY,(_FATBF)	;BPB
-EB5B CD F1 F0       	CALL	_BPB2DPB
-EB5E FD E1          	POP	IY
-EB60 DD 7E 12       	LD	A,(IX+012H)	;DPB_12_DEVICE
-EB63 30 21          	JR	NC,GETBPBOK
-EB65 E6 0F          	AND	00FH
-EB67 FE 07          	CP	7
-EB69 37             	SCF
-EB6A C0             	RET	NZ
-EB6B DD CB 0A 46    	BIT	0,(IX+00AH)	;DPB_0A_FDMODE
-EB6F 21 C0 F1       	LD	HL,M2D
-EB72 20 02          	JR	NZ,SETFDMODE
-EB74 2E D2          	LD	L,M2HD-STABLE
-EB76                SETFDMODE:
-EB76 DD E5          	PUSH	IX
-EB78 D1             	POP	DE
-EB79 ED A0          	LDI
+EA38 CB 3F          	SRL	A	;/2
+EA3A                
+EA3A E5             	PUSH	HL
+EA3B 32 5A EA       	LD	(NCLPAT+2),A	;_FATIX
+EA3E 2A AA F0       	LD	HL,(_FATDRV)	;L=_FATDRV H=_FATIX
+EA41 BC             	CP	H
+EA42 3A 88 F0       	LD	A,(_DRV)	;この間でフラグは変化しない
+EA45 32 59 EA       	LD	(NCLPAT+1),A	;_FATDRV
+EA48 20 05          	JR	NZ,NCL2		;FATIXが違う
+EA4A BD             	CP	L
+EA4B 20 02          	JR	NZ,NCL2		;ドライブが違う
+EA4D E1             	POP	HL
+EA4E C9             	RET
+EA4F                NCL2:
+EA4F C5             	PUSH	BC
+EA50 D5             	PUSH	DE
+EA51 DD E5          	PUSH	IX
+EA53 CD 12 EA       	CALL	WTFATX
+EA56 38 B6          	JR	C,POP_IX_DE_BC_HL_RET
+EA58 01 00 00       NCLPAT:	LD	BC,0		;自己書き換え C=_FATDRV B=_FATIX
+EA5B ED 43 AA F0    	LD	(_FATDRV),BC
+EA5F CD 7B EC       	CALL	RDFATS
+EA62 18 A4          	JR	RDFATE2
+EA64                
+EA64                NCL3:
+EA64 CB 9A          	RES	3,D
+EA66 CB 92          	RES	2,D
+EA68 6B             	LD	L,E
+EA69 62             	LD	H,D
+EA6A CB 3C          	SRL	H	;
+EA6C CB 1D          	RR	L	;HLA=HLA/2
+EA6E 1F             	RRA		;
+EA6F F5             	PUSH	AF
+EA70 3A AB F0       	LD	A,(_FATIX)
+EA73 0F             	RRCA
+EA74 30 0B          	JR	NC,NCL3X1
+EA76 3A 90 E8       	LD	A,(SECSZ+2)
+EA79 FE 04          	CP	4		;1セクタ1024バイトの場合は奇数インデックスの場合に先頭を512バイトずらす
+EA7B 20 04          	JR	NZ,NCL3X1
+EA7D 01 00 02       	LD	BC,512
+EA80 09             	ADD	HL,BC
+EA81                NCL3X1:
+EA81 F1             	POP	AF
+EA82 ED 4B 7C F1    	LD	BC,(_FATBF)
+EA86 19             	ADD	HL,DE
+EA87 09             	ADD	HL,BC
+EA88 17             	RLA
+EA89 C9             	RET
+EA8A                
+EA8A                GNCL:
+EA8A CD 31 EA       	CALL	NCL1		;GET NEXT CLUSTER
+EA8D D8             	RET	C
+EA8E C5             	PUSH	BC
+EA8F E5             	PUSH	HL
+EA90 CD 64 EA       	CALL	NCL3
+EA93 38 09          	JR	C,GNC1
+EA95 5E             	LD	E,(HL)
+EA96 23             	INC	HL
+EA97 7E             	LD	A,(HL)
+EA98 E6 0F          	AND	00FH
+EA9A 57             	LD	D,A
+EA9B E1             	POP	HL
+EA9C C1             	POP	BC
+EA9D C9             	RET
+EA9E                GNC1:
+EA9E 7E             	LD	A,(HL)
+EA9F 23             	INC	HL
+EAA0 56             	LD	D,(HL)
+EAA1 06 04          	LD	B,4
+EAA3                GNC1L:
+EAA3 CB 3A          	SRL	D	;DA=DA/2
+EAA5 1F             	RRA		;
+EAA6 10 FB          	DJNZ	GNC1L
+EAA8                
+EAA8 5F             	LD	E,A
+EAA9 E1             	POP	HL
+EAAA C1             	POP	BC
+EAAB A7             	AND	A
+EAAC C9             	RET
+EAAD                
+EAAD                SNCL:
+EAAD CD 31 EA       	CALL	NCL1
+EAB0 D8             	RET	C
+EAB1                ;				SET NEXT CLUSTER
+EAB1 E5             	PUSH	HL
+EAB2 C5             	PUSH	BC
+EAB3 D5             	PUSH	DE
+EAB4 E5             	PUSH	HL
+EAB5 CD 64 EA       	CALL	NCL3
+EAB8 D1             	POP	DE
+EAB9                ;CF=ODD
+EAB9 7E             	LD	A,(HL)
+EABA 73             	LD	(HL),E
+EABB 38 06          	JR	C,SNC1
+EABD                ;EVEN
+EABD                ;M[0] = E
+EABD                ;M[1] = (M[1] & 0xF0) | (D & 0x0F)
+EABD 23             	INC	HL
+EABE ED 67          	RRD		;M={A[3:0],E[3:0]}
+EAC0 7A             	LD	A,D
+EAC1 18 04          	JR	SNC11
+EAC3                SNC1:
+EAC3                ;ODD
+EAC3                ;HL[0] = (HL[0]&0x0F) | (E<<4)
+EAC3                ;HL[1] = DE>>4
+EAC3 ED 6F          	RLD		;M={D[3:0],E[7:4]}
+EAC5 23             	INC	HL
+EAC6 72             	LD	(HL),D	;M={D[3:0],E[7:4]}
+EAC7                SNC11:
+EAC7 ED 6F          	RLD		;M={M[7:4],D[3:0]}
+EAC9 B7             	OR	A
+EACA D1             	POP	DE
+EACB C1             	POP	BC
+EACC E1             	POP	HL
+EACD                FAT_CHANGED:
+EACD 3E 01          	LD	A,1
+EACF 32 A2 F0       	LD	(_WTFATF),A
+EAD2 C9             	RET
+EAD3                
+EAD3                N16CL3:
+EAD3 C5             	PUSH	BC
+EAD4 6B             	LD	L,E
+EAD5 7A             	LD	A,D
+EAD6 E6 03          	AND	3
+EAD8 67             	LD	H,A
+EAD9 29             	ADD	HL,HL
+EADA ED 4B 7C F1    	LD	BC,(_FATBF)
+EADE 09             	ADD	HL,BC
+EADF C1             	POP	BC
+EAE0 C9             	RET
+EAE1                
+EAE1                GNCL16:
+EAE1 CD 31 EA       	CALL	NCL1		;GET NEXT CLUSTER for FAT16
+EAE4 D8             	RET	C
+EAE5 E5             	PUSH	HL
+EAE6 CD D3 EA       	CALL	N16CL3
+EAE9 5E             	LD	E,(HL)
+EAEA 23             	INC	HL
+EAEB 56             	LD	D,(HL)
+EAEC E1             	POP	HL
+EAED C9             	RET
+EAEE                
+EAEE                SNCL16:
+EAEE CD 31 EA       	CALL	NCL1		;GET NEXT CLUSTER for FAT16
+EAF1 D8             	RET	C
+EAF2 D5             	PUSH	DE
+EAF3 E5             	PUSH	HL
+EAF4 CD D3 EA       	CALL	N16CL3
+EAF7 D1             	POP	DE		;HL
+EAF8 73             	LD	(HL),E
+EAF9 23             	INC	HL
+EAFA 72             	LD	(HL),D
+EAFB 6B             	LD	L,E
+EAFC 62             	LD	H,D
+EAFD D1             	POP	DE
+EAFE 18 CD          	JR	FAT_CHANGED
+EB00                
+EB00                ;------------------------
+EB00                ;次のセクタを探す際に_SECPSの値をチェック
+EB00                ;in
+EB00                ;	DE : セクタ番号
+EB00                ;out
+EB00                ;	DE : 次のセクタ番号
+EB00                ;note
+EB00                ;
+EB00                ;------------------------
+EB00                NEXTX:
+EB00 3E 00          _SECPS:	LD	A,0	;自己書き換え
+EB02 3C             	INC	A
+EB03 E6 00          NCPAT:	AND	0	;自己書き換え　1クラスタの論理セクタ数-1
+EB05 32 01 EB       	LD	(_SECPS+1),A
+EB08 C9             	RET
+EB09                
+EB09                GNCLX:
+EB09 CD 00 EB       	CALL	NEXTX
+EB0C C0             	RET	NZ	;1クラスタのセクタ未満の場合は戻る
+EB0D C3 F7 F0       	JP	_GNCL	;次のクラスタを探す
+EB10                
+EB10                RDFAT:
+EB10 3E 80          	LD	A,080H
+EB12 32 70 F0       	LD	(CHECK),A
+EB15                RDFAT1:
+EB15 3A 88 F0       	LD	A,(_DRV)
+EB18 CD D0 ED       	CALL	CHGDRVR
+EB1B D8             	RET	C
+EB1C DD 7E 12       	LD	A,(IX+012H)	;DPB_12_DEVICE
+EB1F CB 6F          	BIT	5,A
+EB21 28 6B          	JR	Z,RDFAT0X
+EB23 21 70 F0       	LD	HL,CHECK
+EB26 A6             	AND	(HL)
+EB27 77             	LD	(HL),A
+EB28 11 00 00       	LD	DE,0		;BPB
+EB2B 2A 7C F1       	LD	HL,(_FATBF)
+EB2E CD 87 EC       	CALL	DRD16
+EB31 30 24          	JR	NC,GETBPB
+EB33 21 70 F0       	LD	HL,CHECK
+EB36 CB 06          	RLC	(HL)
+EB38 3F             	CCF
+EB39 D8             	RET	C
+EB3A DD CB 0A 1E    	RR	(IX+00AH)	;DPB_0A_FDMODE
+EB3E 3F             	CCF			;フロッピーディスクのFDモードを切り替える
+EB3F DD CB 0A 16    	RL	(IX+00AH)	;DPB_0A_FDMODE
+EB43 3E FF          	LD	A,0FFH
+EB45 32 89 F0       	LD	(_DSK),A
+EB48 3A 84 F0       	LD	A,(_DRIVE)
+EB4B E6 03          	AND	3
+EB4D F6 80          	OR	080H
+EB4F 6F             	LD	L,A
+EB50 26 F0          	LD	H,_CYL0/256
+EB52 3E FF          	LD	A,0FFH
+EB54 77             	LD	(HL),A
+EB55 18 BE          	JR	RDFAT1
+EB57                GETBPB:
+EB57 FD E5          	PUSH	IY
+EB59 FD 2A 7C F1    	LD	IY,(_FATBF)	;BPB
+EB5D CD F1 F0       	CALL	_BPB2DPB
+EB60 FD E1          	POP	IY
+EB62 DD 7E 12       	LD	A,(IX+012H)	;DPB_12_DEVICE
+EB65 30 21          	JR	NC,GETBPBOK
+EB67 E6 0F          	AND	00FH
+EB69 FE 07          	CP	7
+EB6B 37             	SCF
+EB6C C0             	RET	NZ
+EB6D DD CB 0A 46    	BIT	0,(IX+00AH)	;DPB_0A_FDMODE
+EB71 21 C0 F1       	LD	HL,M2D
+EB74 20 02          	JR	NZ,SETFDMODE
+EB76 2E D2          	LD	L,M2HD-STABLE
+EB78                SETFDMODE:
+EB78 DD E5          	PUSH	IX
+EB7A D1             	POP	DE
 EB7B ED A0          	LDI
-EB7D 13             	INC	DE
-EB7E 13             	INC	DE
+EB7D ED A0          	LDI
 EB7F 13             	INC	DE
 EB80 13             	INC	DE
-EB81 01 0C 00       	LD	BC,12
-EB84 ED B0          	LDIR
-EB86                GETBPBOK:
-EB86 32 95 EB       	LD	(DEVSWC),A
-EB89 CD 2D ED       	CALL	CHGDRV2
-EB8C                RDFAT0X:
-EB8C CD 79 EC       	CALL	RDFATS
-EB8F D8             	RET	C
-EB90 DD AE 06       	XOR	(IX+6)		;DPB_06_FATID
-EB93 C8             	RET	Z
-EB94 00 00 EB 95    DEVSWC	EQU	$+1
-EB94 3E 00          	LD	A,0		;DPB_12_DEVICE
-EB96 CB 6F          	BIT	5,A
-EB98 C0             	RET	NZ		;BPBを取得している場合はFATIDをチェックしない
-EB99 37             	SCF
-EB9A C9             	RET
-EB9B                
-EB9B                BPB2DPB:
-EB9B FD 7E 0B       	LD	A,(IY+11)	;BPB_BytsPerSec
-EB9E B7             	OR	A
-EB9F 37             	SCF
-EBA0 C0             	RET	NZ
-EBA1                BPBOK:
-EBA1 FD 7E 0D       	LD	A,(IY+13)	;BPB_SecPerClus
-EBA4 DD 77 07       	LD	(IX+7),A	;DPB_07_SECPCL
-EBA7                
-EBA7 FD 7E 16       	LD	A,(IY+22)	;BPB_FATSz16
-EBAA DD 77 00       	LD	(IX+0),A	;DPB_00_FATLN
-EBAD FD 7E 17       	LD	A,(IY+23)	;BPB_FATSz16
-EBB0 DD 77 01       	LD	(IX+1),A	;DPB_00_FATLN
-EBB3                
-EBB3 FD 6E 0E       	LD	L,(IY+14)	;BPB_RsvdSecCnt
-EBB6 FD 66 0F       	LD	H,(IY+15)
-EBB9 DD 75 0E       	LD	(IX+00EH),L	;DPB_0E_FATPS
-EBBC FD 5E 16       	LD	E,(IY+22)	;BPB_FATSz16
-EBBF FD 56 17       	LD	D,(IY+23)
-EBC2 FD 46 10       	LD	B,(IY+16)	;BPB_NumFATs
-EBC5                BPBDP1:				;BPB_FATSz16 * BPB_NumFATs
-EBC5 19             	ADD	HL,DE
-EBC6 10 FD          	DJNZ	BPBDP1
-EBC8                BPBDP2:
-EBC8 DD 75 10       	LD	(IX+010H),L	;DPB_10_DIRPS
-EBCB DD 74 11       	LD	(IX+011H),H
-EBCE E5             	PUSH	HL
-EBCF                
-EBCF FD 6E 11       	LD	L,(IY+17)	;BPB_RootEntCnt
-EBD2 FD 66 12       	LD	H,(IY+18)
-EBD5 FD 7E 0C       	LD	A,(IY+12)	;BPB_BytsPerSec
-EBD8 B7             	OR	A
-EBD9 37             	SCF
-EBDA C8             	RET	Z
-EBDB 06 06          	LD	B,6
-EBDD                BPBBPS1:
-EBDD 05             	DEC	B
-EBDE 0F             	RRCA
-EBDF 30 FC          	JR	NC,BPBBPS1
-EBE1                BPBDE1:
-EBE1 29             	ADD	HL,HL
-EBE2 10 FD          	DJNZ	BPBDE1
-EBE4                
-EBE4 7C             	LD	A,H
-EBE5 DD 77 0B       	LD	(IX+00BH),A	;DPB_0B_DIRSCNT
-EBE8                
-EBE8 D1             	POP	DE		;DPB_10_DIRPS
-EBE9 6C             	LD	L,H
-EBEA 26 00          	LD	H,0
-EBEC 19             	ADD	HL,DE		;MAXDIR
-EBED E5             	PUSH	HL
-EBEE FD 4E 0D       	LD	C,(IY+13)	;BPB_SecPerClus
-EBF1 CB 21          	SLA	C		;*2
-EBF3 AF             	XOR	A
-EBF4 47             	LD	B,A
-EBF5 ED 42          	SBC	HL,BC
-EBF7 DD 75 14       	LD	(IX+014H),L	;DPB_14_ADDCL16
-EBFA DD 74 15       	LD	(IX+015H),H
-EBFD                
-EBFD D1             	POP	DE		;DE=DPB_0B_MAXDIR
-EBFE FD 6E 13       	LD	L,(IY+19)	;BPB_TotSec16
-EC01 FD 66 14       	LD	H,(IY+20)
-EC04                
-EC04 DD 7E 12       	LD	A,(IX+012H)	;DPB_12_DEVICE
-EC07 E6 0F          	AND	00FH
-EC09 FE 07          	CP	7		;フロッピー
-EC0B 20 19          	JR	NZ,NOT_FD
-EC0D E5             	PUSH	HL
-EC0E FD 4E 18       	LD	C,(IY+24)	;BPB_SecPerTr
-EC11 DD 71 0D       	LD	(IX+00DH),C	;DPB_0D_MAXSEC
-EC14 AF             	XOR	A
-EC15 CB 21          	SLA	C		;両面なのでセクタ数を２倍
-EC17 06 10          	LD	B,16
-EC19                DIVSEC:				;MAXCYL = BPB_TotSec16 / (BPB_SecPerTr * 2)
-EC19 29             	ADD	HL,HL
-EC1A 17             	RLA
-EC1B B9             	CP	C
-EC1C 38 02             	JR	C,DIVSEC1
-EC1E 91                	SUB	C
-EC1F 2C             	INC	L
-EC20                DIVSEC1:
-EC20 10 F7           	DJNZ	DIVSEC
-EC22 DD 75 0C       	LD	(IX+00CH),L	;DPB_0C_MAXCYL
-EC25 E1             	POP	HL	;ここまでフロッピー専用
-EC26                NOT_FD:
-EC26 7C             	LD	A,H
-EC27 B5             	OR	L
-EC28 3E 00          	LD	A,0		;LDでフラグは変化しない。BPB_TotSec16を AHL で扱う為、Aに0を入れる
-EC2A 20 10          	JR	NZ,BPB16BIT	;BPB_TotSec16が「0」の場合はBPB_TotSec32で計算
-EC2C FD 7E 23       	LD	A,(IY+35)	;念のために総セクタ数が24ビットを超える場合はエラーを返す
-EC2F B7             	OR	A
-EC30 37             	SCF
-EC31 C0             	RET	NZ
-EC32 FD 6E 20       	LD	L,(IY+32)	;BPB_TotSec32 は AHL の24ビットで扱う
-EC35 FD 66 21       	LD	H,(IY+33)	;1クラスタの論理セクタ数(DPB_07_SECPCL)が最大128なので
-EC38 FD 7E 22       	LD	A,(IY+34)	;24ビットを超えると必ずクラスタ数が16ビットを超えてしまうのでこれで十分
-EC3B A7             	AND	A		;CF=0
-EC3C                BPB16BIT:
-EC3C ED 52          	SBC	HL,DE
-EC3E DE 00          	SBC	A,0
-EC40 FD 46 0D       	LD	B,(IY+13)	;BPB_SecPerClus
-EC43                BPBTC1:				;総クラスタ数(AHL) = 総セクタ数(AHL) / セクタサイズ(B)
-EC43 CB 18          	RR	B		;->CY
-EC45 38 08          	JR	C,BPBTC2
-EC47 CB 3F          	SRL	A
-EC49 CB 1C          	RR	H		;AHL=AHL/2
-EC4B CB 1D          	RR	L
-EC4D 18 F4          	JR	BPBTC1
-EC4F                BPBTC2:
-EC4F B7             	OR	A
-EC50 37             	SCF
-EC51 C0             	RET	NZ		;念のため(クラスタ数が16ビットを超える場合)
-EC52 23             	INC	HL
-EC53 23             	INC	HL
-EC54 DD 75 08       	LD	(IX+8),L	;DPB_08_MAXCL
-EC57 DD 74 09       	LD	(IX+9),H
-EC5A                
-EC5A FD 7E 15       	LD	A,(IY+21)	;BPB_Media
-EC5D DD 77 06       	LD	(IX+6),A	;DPB_06_FATID
-EC60                
-EC60 FD 7E 10       	LD	A,(IY+16)	;BPB_NumFATs
-EC63 C6 FE          	ADD	A,0-2		;>2:CF=1
-EC65 FD 7E 0C       	LD	A,(IY+12)	;BPB_BytsPerSec
-EC68 6F             	LD	L,A
-EC69 30 02          	JR	NC,BPBFAT1
-EC6B F6 80          	OR	080H
-EC6D                BPBFAT1:
-EC6D DD 77 0F       	LD	(IX+00FH),A	;DPB_0F_BPS
-EC70 2D             	DEC	L		;以下のセクタサイズに合致しない場合はCF=1でエラーにする
-EC71 C8             	RET	Z		;1セクタ256バイト
-EC72 2D             	DEC	L
-EC73 C8             	RET	Z		;1セクタ512バイト
+EB81 13             	INC	DE
+EB82 13             	INC	DE
+EB83 01 0C 00       	LD	BC,12
+EB86 ED B0          	LDIR
+EB88                GETBPBOK:
+EB88 32 97 EB       	LD	(DEVSWC),A
+EB8B CD 2F ED       	CALL	CHGDRV2
+EB8E                RDFAT0X:
+EB8E CD 7B EC       	CALL	RDFATS
+EB91 D8             	RET	C
+EB92 DD AE 06       	XOR	(IX+6)		;DPB_06_FATID
+EB95 C8             	RET	Z
+EB96 00 00 EB 97    DEVSWC	EQU	$+1
+EB96 3E 00          	LD	A,0		;DPB_12_DEVICE
+EB98 CB 6F          	BIT	5,A
+EB9A C0             	RET	NZ		;BPBを取得している場合はFATIDをチェックしない
+EB9B 37             	SCF
+EB9C C9             	RET
+EB9D                
+EB9D                BPB2DPB:
+EB9D FD 7E 0B       	LD	A,(IY+11)	;BPB_BytsPerSec
+EBA0 B7             	OR	A
+EBA1 37             	SCF
+EBA2 C0             	RET	NZ
+EBA3                BPBOK:
+EBA3 FD 7E 0D       	LD	A,(IY+13)	;BPB_SecPerClus
+EBA6 DD 77 07       	LD	(IX+7),A	;DPB_07_SECPCL
+EBA9                
+EBA9 FD 7E 16       	LD	A,(IY+22)	;BPB_FATSz16
+EBAC DD 77 00       	LD	(IX+0),A	;DPB_00_FATLN
+EBAF FD 7E 17       	LD	A,(IY+23)	;BPB_FATSz16
+EBB2 DD 77 01       	LD	(IX+1),A	;DPB_00_FATLN
+EBB5                
+EBB5 FD 6E 0E       	LD	L,(IY+14)	;BPB_RsvdSecCnt
+EBB8 FD 66 0F       	LD	H,(IY+15)
+EBBB DD 75 0E       	LD	(IX+00EH),L	;DPB_0E_FATPS
+EBBE FD 5E 16       	LD	E,(IY+22)	;BPB_FATSz16
+EBC1 FD 56 17       	LD	D,(IY+23)
+EBC4 FD 46 10       	LD	B,(IY+16)	;BPB_NumFATs
+EBC7                BPBDP1:				;BPB_FATSz16 * BPB_NumFATs
+EBC7 19             	ADD	HL,DE
+EBC8 10 FD          	DJNZ	BPBDP1
+EBCA                BPBDP2:
+EBCA DD 75 10       	LD	(IX+010H),L	;DPB_10_DIRPS
+EBCD DD 74 11       	LD	(IX+011H),H
+EBD0 E5             	PUSH	HL
+EBD1                
+EBD1 FD 6E 11       	LD	L,(IY+17)	;BPB_RootEntCnt
+EBD4 FD 66 12       	LD	H,(IY+18)
+EBD7 FD 7E 0C       	LD	A,(IY+12)	;BPB_BytsPerSec
+EBDA B7             	OR	A
+EBDB 37             	SCF
+EBDC C8             	RET	Z
+EBDD 06 06          	LD	B,6
+EBDF                BPBBPS1:
+EBDF 05             	DEC	B
+EBE0 0F             	RRCA
+EBE1 30 FC          	JR	NC,BPBBPS1
+EBE3                BPBDE1:
+EBE3 29             	ADD	HL,HL
+EBE4 10 FD          	DJNZ	BPBDE1
+EBE6                
+EBE6 7C             	LD	A,H
+EBE7 DD 77 0B       	LD	(IX+00BH),A	;DPB_0B_DIRSCNT
+EBEA                
+EBEA D1             	POP	DE		;DPB_10_DIRPS
+EBEB 6C             	LD	L,H
+EBEC 26 00          	LD	H,0
+EBEE 19             	ADD	HL,DE		;MAXDIR
+EBEF E5             	PUSH	HL
+EBF0 FD 4E 0D       	LD	C,(IY+13)	;BPB_SecPerClus
+EBF3 CB 21          	SLA	C		;*2
+EBF5 AF             	XOR	A
+EBF6 47             	LD	B,A
+EBF7 ED 42          	SBC	HL,BC
+EBF9 DD 75 14       	LD	(IX+014H),L	;DPB_14_ADDCL16
+EBFC DD 74 15       	LD	(IX+015H),H
+EBFF                
+EBFF D1             	POP	DE		;DE=DPB_0B_MAXDIR
+EC00 FD 6E 13       	LD	L,(IY+19)	;BPB_TotSec16
+EC03 FD 66 14       	LD	H,(IY+20)
+EC06                
+EC06 DD 7E 12       	LD	A,(IX+012H)	;DPB_12_DEVICE
+EC09 E6 0F          	AND	00FH
+EC0B FE 07          	CP	7		;フロッピー
+EC0D 20 19          	JR	NZ,NOT_FD
+EC0F E5             	PUSH	HL
+EC10 FD 4E 18       	LD	C,(IY+24)	;BPB_SecPerTr
+EC13 DD 71 0D       	LD	(IX+00DH),C	;DPB_0D_MAXSEC
+EC16 AF             	XOR	A
+EC17 CB 21          	SLA	C		;両面なのでセクタ数を２倍
+EC19 06 10          	LD	B,16
+EC1B                DIVSEC:				;MAXCYL = BPB_TotSec16 / (BPB_SecPerTr * 2)
+EC1B 29             	ADD	HL,HL
+EC1C 17             	RLA
+EC1D B9             	CP	C
+EC1E 38 02             	JR	C,DIVSEC1
+EC20 91                	SUB	C
+EC21 2C             	INC	L
+EC22                DIVSEC1:
+EC22 10 F7           	DJNZ	DIVSEC
+EC24 DD 75 0C       	LD	(IX+00CH),L	;DPB_0C_MAXCYL
+EC27 E1             	POP	HL	;ここまでフロッピー専用
+EC28                NOT_FD:
+EC28 7C             	LD	A,H
+EC29 B5             	OR	L
+EC2A 3E 00          	LD	A,0		;LDでフラグは変化しない。BPB_TotSec16を AHL で扱う為、Aに0を入れる
+EC2C 20 10          	JR	NZ,BPB16BIT	;BPB_TotSec16が「0」の場合はBPB_TotSec32で計算
+EC2E FD 7E 23       	LD	A,(IY+35)	;念のために総セクタ数が24ビットを超える場合はエラーを返す
+EC31 B7             	OR	A
+EC32 37             	SCF
+EC33 C0             	RET	NZ
+EC34 FD 6E 20       	LD	L,(IY+32)	;BPB_TotSec32 は AHL の24ビットで扱う
+EC37 FD 66 21       	LD	H,(IY+33)	;1クラスタの論理セクタ数(DPB_07_SECPCL)が最大128なので
+EC3A FD 7E 22       	LD	A,(IY+34)	;24ビットを超えると必ずクラスタ数が16ビットを超えてしまうのでこれで十分
+EC3D A7             	AND	A		;CF=0
+EC3E                BPB16BIT:
+EC3E ED 52          	SBC	HL,DE
+EC40 DE 00          	SBC	A,0
+EC42 FD 46 0D       	LD	B,(IY+13)	;BPB_SecPerClus
+EC45                BPBTC1:				;総クラスタ数(AHL) = 総セクタ数(AHL) / セクタサイズ(B)
+EC45 CB 18          	RR	B		;->CY
+EC47 38 08          	JR	C,BPBTC2
+EC49 CB 3F          	SRL	A
+EC4B CB 1C          	RR	H		;AHL=AHL/2
+EC4D CB 1D          	RR	L
+EC4F 18 F4          	JR	BPBTC1
+EC51                BPBTC2:
+EC51 B7             	OR	A
+EC52 37             	SCF
+EC53 C0             	RET	NZ		;念のため(クラスタ数が16ビットを超える場合)
+EC54 23             	INC	HL
+EC55 23             	INC	HL
+EC56 DD 75 08       	LD	(IX+8),L	;DPB_08_MAXCL
+EC59 DD 74 09       	LD	(IX+9),H
+EC5C                
+EC5C FD 7E 15       	LD	A,(IY+21)	;BPB_Media
+EC5F DD 77 06       	LD	(IX+6),A	;DPB_06_FATID
+EC62                
+EC62 FD 7E 10       	LD	A,(IY+16)	;BPB_NumFATs
+EC65 C6 FE          	ADD	A,0-2		;>2:CF=1
+EC67 FD 7E 0C       	LD	A,(IY+12)	;BPB_BytsPerSec
+EC6A 6F             	LD	L,A
+EC6B 30 02          	JR	NC,BPBFAT1
+EC6D F6 80          	OR	080H
+EC6F                BPBFAT1:
+EC6F DD 77 0F       	LD	(IX+00FH),A	;DPB_0F_BPS
+EC72 2D             	DEC	L		;以下のセクタサイズに合致しない場合はCF=1でエラーにする
+EC73 C8             	RET	Z		;1セクタ256バイト
 EC74 2D             	DEC	L
-EC75 2D             	DEC	L
-EC76 C8             	RET	Z		;1セクタ1024バイト
-EC77 37             	SCF
-EC78 C9             	RET
-EC79                
-EC79                RDFATS:
-EC79 CD BF EC       	CALL	FATSETUP
-EC7C D8             	RET	C
-EC7D CD 89 EC       	CALL	DRD24B
-EC80 2A 7C F1       	LD	HL,(_FATBF)
-EC83 7E             	LD	A,(HL)
-EC84 C9             	RET
-EC85                
-EC85                DRD16:
-EC85 0E 00          	LD	C,0
-EC87                DRD24:
-EC87 06 01          	LD	B,1
-EC89                DRD24B:
-EC89 DD E5          	PUSH	IX
-EC8B DD 2A A8 F0    	LD	IX,(_DPB)
-EC8F CD E9 EE       DRDPAT:	CALL	FDRD		;自己書き換え（ディスク読み込み）
-EC92                POP_IX_RET:
-EC92 DD E1          	POP	IX
-EC94 C9             	RET
-EC95                
-EC95                DWT16:
-EC95 0E 00          	LD	C,0
-EC97                DWT24:
-EC97 06 01          	LD	B,1
-EC99                DWT24B:
-EC99 DD E5          	PUSH	IX
-EC9B DD 2A A8 F0    	LD	IX,(_DPB)
-EC9F CD DB EE       DWTPAT:	CALL	FDWT		;自己書き換え（ディスク書き込み）
-ECA2 18 EE          	JR	POP_IX_RET
-ECA4                
-ECA4                WTFAT:
-ECA4 CD BF EC       	CALL	FATSETUP
-ECA7 D4 99 EC       	CALL	NC,DWT24B
-ECAA D8             	RET	C
-ECAB DD CB 0F 7E    	BIT	7,(IX+00FH)	;DPB_0F_BPS
-ECAF C8             	RET	Z		;予備FATが無い
-ECB0 CD C6 EC       	CALL	FATS2
-ECB3 E5             	PUSH	HL		;予備FAT
-ECB4 DD 6E 00       	LD	L,(IX+0)	;DPB_00_FATLN
-ECB7 DD 66 01       	LD	H,(IX+1)
-ECBA 19             	ADD	HL,DE
-ECBB EB             	EX	DE,HL
-ECBC E1             	POP	HL
-ECBD 18 DA          	JR	DWT24B
-ECBF                ;------------------------
-ECBF                ;FATのセットアップ
-ECBF                ;out
-ECBF                ;	B  : FATセクタ数
-ECBF                ;	DE : FAT先頭セクタ番号
-ECBF                ;	HL : FATバッファポインタ
-ECBF                ;	CF : 1=ドライブ切り替えエラー
-ECBF                ;note
-ECBF                ;	FATサイズがFATバッファを超える場合は
-ECBF                ;	対象クラスタ領域==(_FATIX)によって
-ECBF                ;	FAT12:対象クラスタ1024毎に1.5KBを切り替える
-ECBF                ;	FAT16:対象クラスタ1024毎に2KBを切り替える
-ECBF                ;------------------------
-ECBF                FATSETUP:
-ECBF 3A AA F0       	LD	A,(_FATDRV)
-ECC2 CD CE ED       	CALL	CHGDRVR		;ドライブ切り替え
-ECC5 D8             	RET	C
-ECC6                FATS2:
-ECC6 DD 7E 0F       	LD	A,(IX+00FH)	;DPB_0F_BPS 512=2 1024=4
-ECC9 0F             	RRCA
-ECCA CD F3 EC       FATSX:	CALL	FATSETUP12	;自己書き換え
-ECCD 21 00 00       	LD	HL,0
-ECD0 4A             	LD	C,D
-ECD1 54             	LD	D,H
-ECD2 3A AB F0       	LD	A,(_FATIX)	;範囲FAT12:0-3/FAT16:0-63(0-03FH):65535*2/2048
-ECD5 47             	LD	B,A
-ECD6 04             	INC	B
-ECD7 DD 7E 00       	LD	A,(IX+0)	;DPB_00_FATLN
-ECDA                FAT_SKP:
-ECDA 05             	DEC	B
-ECDB 28 05          	JR	Z,FAT1
-ECDD 19             	ADD	HL,DE
-ECDE 93             	SUB	E
-ECDF 30 F9          	JR	NC,FAT_SKP
-ECE1 C9             	RET
-ECE2                FAT1:
-ECE2 EB             	EX	DE,HL
-ECE3 B9             	CP	C		;C=FATバッファに読み込めるセクタ数
-ECE4 38 01          	JR	C,FAT2
-ECE6 79             	LD	A,C
-ECE7                FAT2:
-ECE7 47             	LD	B,A
-ECE8                
-ECE8 2A FA F1       	LD	HL,(_FATPS)	;fat sector pos
-ECEB 19             	ADD	HL,DE
-ECEC EB             	EX	DE,HL
-ECED 2A 7C F1       	LD	HL,(_FATBF)
-ECF0 AF             	XOR	A		;CF=0
-ECF1 4F             	LD	C,A
-ECF2 C9             	RET
-ECF3                ;
-ECF3                ;	FATバッファに読み込める最大のセクタ数と_FATIXで進めるセクタ数
-ECF3                ;	FATSETUP* (FAT12/FAT16)
-ECF3                ;out
-ECF3                ;	D : FATバッファに読み込める最大のセクタ数
-ECF3                ;	E : _FATIXで進めるセクタ数
-ECF3                FATSETUP12:
-ECF3 11 06 06       	LD	DE,0606H	;256
-ECF6 D8             	RET	C
-ECF7 11 03 03       	LD	DE,0303H	;512
-ECFA 0F             	RRCA
-ECFB D8             	RET	C
-ECFC 11 01 02       	LD	DE,0201H	;1024
-ECFF C9             	RET
-ED00                
-ED00                FATSETUP16:
-ED00 11 08 08       	LD	DE,0808H	;256
-ED03 D8             	RET	C
-ED04 11 04 04       	LD	DE,0404H
-ED07 0F             	RRCA			;512
-ED08 D8             	RET	C
-ED09 11 02 02       	LD	DE,0202H	;1024
-ED0C C9             	RET
-ED0D                
-ED0D                CHGDRV:
-ED0D E5             	PUSH	HL
-ED0E 21 89 F0       	LD	HL,_DSK
-ED11 BE             	CP	(HL)
-ED12 28 0A          	JR	Z,CHGDRVE
-ED14                CHGDRV1:
-ED14 DD E5          	PUSH	IX
-ED16 CD 20 ED       	CALL	CHGDRV0
-ED19 3A 89 F0       	LD	A,(_DSK)
-ED1C DD E1          	POP	IX
-ED1E                CHGDRVE:
-ED1E E1             	POP	HL
-ED1F C9             	RET
-ED20                
-ED20                CHGDRV0:
-ED20 6F             	LD	L,A
-ED21 CD DC F0       	CALL	_GETDPB
-ED24 D8             	RET	C
-ED25 DD 22 A8 F0    	LD	(_DPB),IX
-ED29 7D             	LD	A,L
-ED2A 32 89 F0       	LD	(_DSK),A
-ED2D                CHGDRV2:
-ED2D C5             	PUSH	BC
-ED2E D5             	PUSH	DE
-ED2F ED 73 84 ED    	LD	(SPPAT2+1),SP
-ED33 F3             	DI
-ED34 DD F9          	LD	SP,IX
-ED36                
-ED36 E1             	POP	HL		;DPB_00_FATLN
-ED37 E1             	POP	HL		;DPB_02_DRD
-ED38 22 90 EC       	LD	(DRDPAT+1),HL
-ED3B                
-ED3B E1             	POP	HL
-ED3C 22 A0 EC       	LD	(DWTPAT+1),HL	;DPB_04_DWT
-ED3F                
-ED3F E1             	POP	HL		;L=DPB_06_FATID H=DPB_07_SECPCL
-ED40 7C             	LD	A,H
-ED41 32 72 E3       	LD	(SPCPAT+1),A	;1クラスタの論理セクタ数
-ED44 3D             	DEC	A
-ED45 32 02 EB       	LD	(NCPAT+1),A
-ED48                
-ED48 E1             	POP	HL		;DPB_08_MAXCL
-ED49 7D             	LD	A,L
-ED4A 32 91 E3       	LD	(CLPAT2+1),A
-ED4D 7C             	LD	A,H
-ED4E 32 8D E3       	LD	(CLPAT1+1),A
-ED51 2B             	DEC	HL
-ED52 22 95 E5       	LD	(MAXCLP+1),HL
-ED55                
-ED55 E1             	POP	HL		;L=DPB_0A_FDMODE H=DPB_0B_DIRSCNT
-ED56 7D             	LD	A,L
-ED57 F6 FE          	OR	0FEH
-ED59 32 84 EE       	LD	(FDMODE+1),A
-ED5C 07             	RLCA
-ED5D E6 03          	AND	3
-ED5F 32 6C EE       	LD	(FSPAT+1),A
-ED62 4C             	LD	C,H
-ED63                
-ED63 E1             	POP	HL		;L=DPB_0C_MAXCYL H=DPB_0D_MAXSEC
-ED64                
-ED64 E1             	POP	HL		;L=DPB_0E_FATPS H=DPB_0F_BPS
-ED65 7C             	LD	A,H		;DPB_0F_BPS
-ED66 E6 07          	AND	7
-ED68 32 90 E8       	LD	(SECSZ+2),A	;1セクタのサイズの上位1バイト 0x400 - 0x200 - 0x100
-ED6B                				;1セクタ512 2D/2DD/2HC/2HQ(2HD1.44MB)/EMM/BRAM/EMEM等
-ED6B                				;1セクタ1024 2HD/2HDE98
-ED6B                				;1セクタ256 GRAM/RAMF/CMOS/等
-ED6B                				;1024	512	256
-ED6B                				;4	2	1
-ED6B 87             	ADD	A,A		;8	4	2
-ED6C 87             	ADD	A,A		;010H	8	4
-ED6D 87             	ADD	A,A		;020H	010H	8
-ED6E 32 EE E1       	LD	(SDECPAT+1),A	;1セクタ辺りのディレクトリエントリ数
-ED71                
-ED71 26 00          	LD	H,0
-ED73 22 FA F1       	LD	(_FATPS),HL
-ED76                
-ED76 E1             	POP	HL		;DPB_10_DIRPS
-ED77 22 FC F1       	LD	(_DIRPS),HL
-ED7A                
-ED7A E1             	POP	HL		;L=DPB_12_DEVICE H=DPB_13_UNITNO
-ED7B 7C             	LD	A,H
-ED7C 32 84 F0       	LD	(_DRIVE),A
-ED7F                
-ED7F E1             	POP	HL		;DPB_14_ADDCL16
-ED80 22 82 E3       	LD	(CLSPAT+1),HL
-ED83                
-ED83 31 00 00       SPPAT2:	LD	SP,0		;元のSPを復元
-ED86 FB             	EI
-ED87 2A FC F1       	LD	HL,(_DIRPS)
-ED8A 06 00          	LD	B,0
-ED8C 09             	ADD	HL,BC		;C=DPB_0B_DIRSCNT
-ED8D 22 09 E2       	LD	(MD_PAT+1),HL
-ED90                
-ED90 2A 95 E5       	LD	HL,(MAXCLP+1);
-ED93 11 F6 0F       	LD	DE,4086		;クラスタ数が4086未満:FAT12 4086以上:FAT16
-ED96 ED 52          	SBC	HL,DE		;CF=0のはず
-ED98 30 0F          	JR	NC,SETFAT16
-ED9A 21 88 EA       	LD	HL,GNCL		;FAT12
-ED9D 11 AB EA       	LD	DE,SNCL
-EDA0 01 F3 EC       	LD	BC,FATSETUP12
-EDA3 DD CB 0F AE    	RES	5,(IX+00FH)	;DPB_0F_BPS(FAT12)
-EDA7 18 0D          	JR	EXTRA1
-EDA9                SETFAT16:
-EDA9 21 DF EA       	LD	HL,GNCL16	;FAT16
-EDAC 11 EC EA       	LD	DE,SNCL16
-EDAF 01 00 ED       	LD	BC,FATSETUP16
-EDB2 DD CB 0F EE    	SET	5,(IX+00FH)	;DPB_0F_BPS(FAT16)
-EDB6                EXTRA1:
-EDB6 22 F8 F0       	LD	(GNCPAT+1),HL
-EDB9 ED 53 FB F0    	LD	(SNCPAT+1),DE
-EDBD ED 43 CB EC    	LD	(FATSX+1),BC
-EDC1 D1             	POP	DE
-EDC2 C1             	POP	BC
-EDC3 AF             	XOR	A
-EDC4 C9             	RET
-EDC5                
-EDC5                GETDPBD:
-EDC5 DD E3          	EX	(SP),IX
-EDC7 DD E5          	PUSH	IX
-EDC9 3A 88 F0       	LD	A,(_DRV)
-EDCC 18 07          	JR	GETDPB1
-EDCE                
-EDCE                CHGDRVR:
-EDCE CD D9 F0       	CALL	_CHGDRV
-EDD1 D8             	RET	C
-EDD2 3A 89 F0       	LD	A,(_DSK)
-EDD5                GETDPB1:
-EDD5 C3 DC F0       	JP	_GETDPB
-EDD8                
-EDD8                GETDPB:
-EDD8 FE 08          	CP	8
-EDDA 3F             	CCF
-EDDB D8             	RET	C
-EDDC 0F             	RRCA
-EDDD 0F             	RRCA
+EC75 C8             	RET	Z		;1セクタ512バイト
+EC76 2D             	DEC	L
+EC77 2D             	DEC	L
+EC78 C8             	RET	Z		;1セクタ1024バイト
+EC79 37             	SCF
+EC7A C9             	RET
+EC7B                
+EC7B                RDFATS:
+EC7B CD C1 EC       	CALL	FATSETUP
+EC7E D8             	RET	C
+EC7F CD 8B EC       	CALL	DRD24B
+EC82 2A 7C F1       	LD	HL,(_FATBF)
+EC85 7E             	LD	A,(HL)
+EC86 C9             	RET
+EC87                
+EC87                DRD16:
+EC87 0E 00          	LD	C,0
+EC89                DRD24:
+EC89 06 01          	LD	B,1
+EC8B                DRD24B:
+EC8B DD E5          	PUSH	IX
+EC8D DD 2A A8 F0    	LD	IX,(_DPB)
+EC91 CD EB EE       DRDPAT:	CALL	FDRD		;自己書き換え（ディスク読み込み）
+EC94                POP_IX_RET:
+EC94 DD E1          	POP	IX
+EC96 C9             	RET
+EC97                
+EC97                DWT16:
+EC97 0E 00          	LD	C,0
+EC99                DWT24:
+EC99 06 01          	LD	B,1
+EC9B                DWT24B:
+EC9B DD E5          	PUSH	IX
+EC9D DD 2A A8 F0    	LD	IX,(_DPB)
+ECA1 CD DD EE       DWTPAT:	CALL	FDWT		;自己書き換え（ディスク書き込み）
+ECA4 18 EE          	JR	POP_IX_RET
+ECA6                
+ECA6                WTFAT:
+ECA6 CD C1 EC       	CALL	FATSETUP
+ECA9 D4 9B EC       	CALL	NC,DWT24B
+ECAC D8             	RET	C
+ECAD DD CB 0F 7E    	BIT	7,(IX+00FH)	;DPB_0F_BPS
+ECB1 C8             	RET	Z		;予備FATが無い
+ECB2 CD C8 EC       	CALL	FATS2
+ECB5 E5             	PUSH	HL		;予備FAT
+ECB6 DD 6E 00       	LD	L,(IX+0)	;DPB_00_FATLN
+ECB9 DD 66 01       	LD	H,(IX+1)
+ECBC 19             	ADD	HL,DE
+ECBD EB             	EX	DE,HL
+ECBE E1             	POP	HL
+ECBF 18 DA          	JR	DWT24B
+ECC1                ;------------------------
+ECC1                ;FATのセットアップ
+ECC1                ;out
+ECC1                ;	B  : FATセクタ数
+ECC1                ;	DE : FAT先頭セクタ番号
+ECC1                ;	HL : FATバッファポインタ
+ECC1                ;	CF : 1=ドライブ切り替えエラー
+ECC1                ;note
+ECC1                ;	FATサイズがFATバッファを超える場合は
+ECC1                ;	対象クラスタ領域==(_FATIX)によって
+ECC1                ;	FAT12:対象クラスタ1024毎に1.5KBを切り替える
+ECC1                ;	FAT16:対象クラスタ1024毎に2KBを切り替える
+ECC1                ;------------------------
+ECC1                FATSETUP:
+ECC1 3A AA F0       	LD	A,(_FATDRV)
+ECC4 CD D0 ED       	CALL	CHGDRVR		;ドライブ切り替え
+ECC7 D8             	RET	C
+ECC8                FATS2:
+ECC8 DD 7E 0F       	LD	A,(IX+00FH)	;DPB_0F_BPS 512=2 1024=4
+ECCB 0F             	RRCA
+ECCC CD F5 EC       FATSX:	CALL	FATSETUP12	;自己書き換え
+ECCF 21 00 00       	LD	HL,0
+ECD2 4A             	LD	C,D
+ECD3 54             	LD	D,H
+ECD4 3A AB F0       	LD	A,(_FATIX)	;範囲FAT12:0-3/FAT16:0-63(0-03FH):65535*2/2048
+ECD7 47             	LD	B,A
+ECD8 04             	INC	B
+ECD9 DD 7E 00       	LD	A,(IX+0)	;DPB_00_FATLN
+ECDC                FAT_SKP:
+ECDC 05             	DEC	B
+ECDD 28 05          	JR	Z,FAT1
+ECDF 19             	ADD	HL,DE
+ECE0 93             	SUB	E
+ECE1 30 F9          	JR	NC,FAT_SKP
+ECE3 C9             	RET
+ECE4                FAT1:
+ECE4 EB             	EX	DE,HL
+ECE5 B9             	CP	C		;C=FATバッファに読み込めるセクタ数
+ECE6 38 01          	JR	C,FAT2
+ECE8 79             	LD	A,C
+ECE9                FAT2:
+ECE9 47             	LD	B,A
+ECEA                
+ECEA 2A FA F1       	LD	HL,(_FATPS)	;fat sector pos
+ECED 19             	ADD	HL,DE
+ECEE EB             	EX	DE,HL
+ECEF 2A 7C F1       	LD	HL,(_FATBF)
+ECF2 AF             	XOR	A		;CF=0
+ECF3 4F             	LD	C,A
+ECF4 C9             	RET
+ECF5                ;
+ECF5                ;	FATバッファに読み込める最大のセクタ数と_FATIXで進めるセクタ数
+ECF5                ;	FATSETUP* (FAT12/FAT16)
+ECF5                ;out
+ECF5                ;	D : FATバッファに読み込める最大のセクタ数
+ECF5                ;	E : _FATIXで進めるセクタ数
+ECF5                FATSETUP12:
+ECF5 11 06 06       	LD	DE,0606H	;256
+ECF8 D8             	RET	C
+ECF9 11 03 03       	LD	DE,0303H	;512
+ECFC 0F             	RRCA
+ECFD D8             	RET	C
+ECFE 11 01 02       	LD	DE,0201H	;1024
+ED01 C9             	RET
+ED02                
+ED02                FATSETUP16:
+ED02 11 08 08       	LD	DE,0808H	;256
+ED05 D8             	RET	C
+ED06 11 04 04       	LD	DE,0404H
+ED09 0F             	RRCA			;512
+ED0A D8             	RET	C
+ED0B 11 02 02       	LD	DE,0202H	;1024
+ED0E C9             	RET
+ED0F                
+ED0F                CHGDRV:
+ED0F E5             	PUSH	HL
+ED10 21 89 F0       	LD	HL,_DSK
+ED13 BE             	CP	(HL)
+ED14 28 0A          	JR	Z,CHGDRVE
+ED16                CHGDRV1:
+ED16 DD E5          	PUSH	IX
+ED18 CD 22 ED       	CALL	CHGDRV0
+ED1B 3A 89 F0       	LD	A,(_DSK)
+ED1E DD E1          	POP	IX
+ED20                CHGDRVE:
+ED20 E1             	POP	HL
+ED21 C9             	RET
+ED22                
+ED22                CHGDRV0:
+ED22 6F             	LD	L,A
+ED23 CD DC F0       	CALL	_GETDPB
+ED26 D8             	RET	C
+ED27 DD 22 A8 F0    	LD	(_DPB),IX
+ED2B 7D             	LD	A,L
+ED2C 32 89 F0       	LD	(_DSK),A
+ED2F                CHGDRV2:
+ED2F C5             	PUSH	BC
+ED30 D5             	PUSH	DE
+ED31 ED 73 86 ED    	LD	(SPPAT2+1),SP
+ED35 F3             	DI
+ED36 DD F9          	LD	SP,IX
+ED38                
+ED38 E1             	POP	HL		;DPB_00_FATLN
+ED39 E1             	POP	HL		;DPB_02_DRD
+ED3A 22 92 EC       	LD	(DRDPAT+1),HL
+ED3D                
+ED3D E1             	POP	HL
+ED3E 22 A2 EC       	LD	(DWTPAT+1),HL	;DPB_04_DWT
+ED41                
+ED41 E1             	POP	HL		;L=DPB_06_FATID H=DPB_07_SECPCL
+ED42 7C             	LD	A,H
+ED43 32 72 E3       	LD	(SPCPAT+1),A	;1クラスタの論理セクタ数
+ED46 3D             	DEC	A
+ED47 32 04 EB       	LD	(NCPAT+1),A
+ED4A                
+ED4A E1             	POP	HL		;DPB_08_MAXCL
+ED4B 7D             	LD	A,L
+ED4C 32 91 E3       	LD	(CLPAT2+1),A
+ED4F 7C             	LD	A,H
+ED50 32 8D E3       	LD	(CLPAT1+1),A
+ED53 2B             	DEC	HL
+ED54 22 95 E5       	LD	(MAXCLP+1),HL
+ED57                
+ED57 E1             	POP	HL		;L=DPB_0A_FDMODE H=DPB_0B_DIRSCNT
+ED58 7D             	LD	A,L
+ED59 F6 FE          	OR	0FEH
+ED5B 32 86 EE       	LD	(FDMODE+1),A
+ED5E 07             	RLCA
+ED5F E6 03          	AND	3
+ED61 32 6E EE       	LD	(FSPAT+1),A
+ED64 4C             	LD	C,H
+ED65                
+ED65 E1             	POP	HL		;L=DPB_0C_MAXCYL H=DPB_0D_MAXSEC
+ED66                
+ED66 E1             	POP	HL		;L=DPB_0E_FATPS H=DPB_0F_BPS
+ED67 7C             	LD	A,H		;DPB_0F_BPS
+ED68 E6 07          	AND	7
+ED6A 32 90 E8       	LD	(SECSZ+2),A	;1セクタのサイズの上位1バイト 0x400 - 0x200 - 0x100
+ED6D                				;1セクタ512 2D/2DD/2HC/2HQ(2HD1.44MB)/EMM/BRAM/EMEM等
+ED6D                				;1セクタ1024 2HD/2HDE98
+ED6D                				;1セクタ256 GRAM/RAMF/CMOS/等
+ED6D                				;1024	512	256
+ED6D                				;4	2	1
+ED6D 87             	ADD	A,A		;8	4	2
+ED6E 87             	ADD	A,A		;010H	8	4
+ED6F 87             	ADD	A,A		;020H	010H	8
+ED70 32 EE E1       	LD	(SDECPAT+1),A	;1セクタ辺りのディレクトリエントリ数
+ED73                
+ED73 26 00          	LD	H,0
+ED75 22 FA F1       	LD	(_FATPS),HL
+ED78                
+ED78 E1             	POP	HL		;DPB_10_DIRPS
+ED79 22 FC F1       	LD	(_DIRPS),HL
+ED7C                
+ED7C E1             	POP	HL		;L=DPB_12_DEVICE H=DPB_13_UNITNO
+ED7D 7C             	LD	A,H
+ED7E 32 84 F0       	LD	(_DRIVE),A
+ED81                
+ED81 E1             	POP	HL		;DPB_14_ADDCL16
+ED82 22 82 E3       	LD	(CLSPAT+1),HL
+ED85                
+ED85 31 00 00       SPPAT2:	LD	SP,0		;元のSPを復元
+ED88 FB             	EI
+ED89 2A FC F1       	LD	HL,(_DIRPS)
+ED8C 06 00          	LD	B,0
+ED8E 09             	ADD	HL,BC		;C=DPB_0B_DIRSCNT
+ED8F 22 09 E2       	LD	(MD_PAT+1),HL
+ED92                
+ED92 2A 95 E5       	LD	HL,(MAXCLP+1);
+ED95 11 F6 0F       	LD	DE,4086		;クラスタ数が4086未満:FAT12 4086以上:FAT16
+ED98 ED 52          	SBC	HL,DE		;CF=0のはず
+ED9A 30 0F          	JR	NC,SETFAT16
+ED9C 21 8A EA       	LD	HL,GNCL		;FAT12
+ED9F 11 AD EA       	LD	DE,SNCL
+EDA2 01 F5 EC       	LD	BC,FATSETUP12
+EDA5 DD CB 0F AE    	RES	5,(IX+00FH)	;DPB_0F_BPS(FAT12)
+EDA9 18 0D          	JR	EXTRA1
+EDAB                SETFAT16:
+EDAB 21 E1 EA       	LD	HL,GNCL16	;FAT16
+EDAE 11 EE EA       	LD	DE,SNCL16
+EDB1 01 02 ED       	LD	BC,FATSETUP16
+EDB4 DD CB 0F EE    	SET	5,(IX+00FH)	;DPB_0F_BPS(FAT16)
+EDB8                EXTRA1:
+EDB8 22 F8 F0       	LD	(GNCPAT+1),HL
+EDBB ED 53 FB F0    	LD	(SNCPAT+1),DE
+EDBF ED 43 CD EC    	LD	(FATSX+1),BC
+EDC3 D1             	POP	DE
+EDC4 C1             	POP	BC
+EDC5 AF             	XOR	A
+EDC6 C9             	RET
+EDC7                
+EDC7                GETDPBD:
+EDC7 DD E3          	EX	(SP),IX
+EDC9 DD E5          	PUSH	IX
+EDCB 3A 88 F0       	LD	A,(_DRV)
+EDCE 18 07          	JR	GETDPB1
+EDD0                
+EDD0                CHGDRVR:
+EDD0 CD D9 F0       	CALL	_CHGDRV
+EDD3 D8             	RET	C
+EDD4 3A 89 F0       	LD	A,(_DSK)
+EDD7                GETDPB1:
+EDD7 C3 DC F0       	JP	_GETDPB
+EDDA                
+EDDA                GETDPB:
+EDDA FE 08          	CP	8
+EDDC 3F             	CCF
+EDDD D8             	RET	C
 EDDE 0F             	RRCA
-EDDF DD             	DB	0DDH		;Z80未定義命令
-EDE0 6F             	LD	L,A		;LD	IXL,A
+EDDF 0F             	RRCA
+EDE0 0F             	RRCA
 EDE1 DD             	DB	0DDH		;Z80未定義命令
-EDE2 26 F2          	LD	H,DEVICE/256	;LD	IXH,DEVICE/256
-EDE4 DD 7E 00       	LD	A,(IX+0)	;DPB_00_FATLN
-EDE7 A7             	AND	A		;CF=0の為
-EDE8 DD CB 0F 6E    	BIT	5,(IX+00FH)	;DPB_0F_BPS
-EDEC C0             	RET	NZ		;FAT16
-EDED DD CB 12 6E    	BIT	5,(IX+012H)	;DPB_12_DEVICE
-EDF1 C0             	RET	NZ		;BPB
-EDF2 FE 01          	CP	001H		;A=0 THEN CF=1
-EDF4 C9             	RET
-EDF5                
-EDF5                _SYS5F:
-EDF5 AF             	XOR	A
-EDF6                FFLUSH:
-EDF6 F5             	PUSH	AF
-EDF7 3E FF          	LD	A,0FFH
-EDF9 32 39 F0       	LD	(SFILE),A
-EDFC CD C6 E9       	CALL	DWTX
-EDFF 3E FF          	LD	A,0FFH
-EE01 32 A5 F0       	LD	(_DBDRV),A
-EE04 CD 10 EA       	CALL	WTFATX
-EE07 AF             	XOR	A
-EE08 32 AB F0       	LD	(_FATIX),A
-EE0B 2F             	CPL			;0FFH
-EE0C 32 AA F0       	LD	(_FATDRV),A
-EE0F F1             	POP	AF
-EE10 C9             	RET
-EE11                
-EE11                	INCLUDE	"X1DISK.ASM"
-EE11                
-EE11                ;	LSX-Dodgers DISK
-EE11                ;	X1/turbo/Z
-EE11                
-EE11                SEEK:
-EE11 06 10          	LD	B,16
-EE13 DD 4E 0D       	LD	C,(IX+0DH)	;DPB_0D_MAXSEC
-EE16 AF             	XOR	A
-EE17 EB             	EX	DE,HL
-EE18                DIV1:
-EE18 29             	ADD	HL,HL
-EE19 8F             	ADC	A,A
-EE1A B9             	CP	C
-EE1B 38 02          	JR	C,DIV2
-EE1D 91             	SUB	C
-EE1E 2C             	INC	L
-EE1F                DIV2:
-EE1F 10 F7          	DJNZ	DIV1
-EE21                
-EE21 3C             	INC	A	;最小のセクタは１固定
-EE22 55             	LD	D,L	;TRACK
-EE23 5F             	LD	E,A	;SECTOR
-EE24 CB 3A          	SRL	D	;CYLINDER
-EE26 9F             	SBC	A,A
-EE27 E6 10          	AND	010H	;SIDE
-EE29 4F             	LD	C,A
-EE2A                
-EE2A 3A 84 F0       	LD	A,(_DRIVE)
-EE2D FE 04          	CP	4
-EE2F 3F             	CCF
-EE30 D8             	RET	C
-EE31 B1             	OR	C
-EE32 32 B0 EE       	LD	(MOPAT+1),A	;Motor off data
-EE35 01 FC 0F       	LD	BC,00FFCH
-EE38 F6 80          	OR	080H		;Motor on
-EE3A ED 79          	OUT	(C),A
-EE3C                
-EE3C CD 82 EE       	CALL	SETMODE
-EE3F D8             	RET	C
-EE40                
-EE40 CD C5 EE       	CALL	DRIVE
-EE43 FE FF          	CP	0FFH		;A=0FFH Unknown CYLINDER
-EE45 CC A4 EE       	CALL	Z,FDCRES	;Restore
-EE48 0E F9          	LD	C,0F9H
-EE4A ED 79          	OUT	(C),A		;Currrent CYLINDER
-EE4C 92             	SUB	D
-EE4D C8             	RET	Z		;No seek
-EE4E                
-EE4E 3A 86 F0       	LD	A,(_ISEEK)
-EE51 4F             	LD	C,A
-EE52                
-EE52 DD 7E 0C       	LD	A,(IX+00CH)	;DPB_0C_MAXCYL
-EE55 3D             	DEC	A
-EE56 BA             	CP	D		;Over CYLINDER
-EE57 D8             	RET	C
-EE58                
-EE58 B9             	CP	C		;for Built-in 2DD
-EE59 38 03          	JR	C,SETM2
-EE5B 78             	LD	A,B		;B=00FH
-EE5C DB FE          	IN	A,(0FEH)		;2HD mode for 2DD seek
-EE5E                SETM2:
-EE5E 78             	LD	A,B
-EE5F DB FD          	IN	A,(0FDH)		;MFM mode
-EE61                
-EE61 0E FB          	LD	C,0FBH
-EE63 ED 51          	OUT	(C),D
-EE65 72             	LD	(HL),D
-EE66 0E 18          	LD	C,018H		;Seek
-EE68                FDCCMD2:
-EE68 3A 85 F0       	LD	A,(_SEEKSP)
-EE6B E6 FF          FSPAT:	AND	0FFH
-EE6D B1             	OR	C
-EE6E                
-EE6E                FDCCMD:
-EE6E CD BB EE       	CALL	COMSET
-EE71                
-EE71 3E 80          FDCPAT:	LD	A,080H		;FDC COMMAND(Self-modifying code)
-EE73 E6 20          	AND	020H		;Write data Write track
-EE75 3C             	INC	A
-EE76                
-EE76                SST:
-EE76 0E 00          	LD	C,0
-EE78                SST1:
-EE78 0D             	DEC	C		; 4
-EE79 20 FD          	JR	NZ,SST1		;12 * 256 / 4 = About 1ms
-EE7B 3D             	DEC	A
-EE7C 20 FA          	JR	NZ,SST1
-EE7E                
-EE7E 3C             	INC	A		;A=1
-EE7F CD 8D EE       	CALL	READY
-EE82                SETMODE:
-EE82 78             	LD	A,B		;B=00FH
-EE83 DB FF          FDMODE:	IN	A,(0FFH)	;Floppy mode(2D/2HD) (Self-modifying code)
-EE85                
-EE85 78             	LD	A,B
-EE86 DB FD          	IN	A,(0FDH)	;MFM mode
-EE88                
-EE88 CD BF EE       	CALL	DELAY0		;Head select time
-EE8B 3E 81          	LD	A,081H
-EE8D                READY:
-EE8D 32 97 EE       	LD	(WAITA+1),A
-EE90 E5             	PUSH	HL
-EE91 0E F8          	LD	C,0F8H
-EE93 61             	LD	H,C
-EE94                READY2:
-EE94 ED 78          	IN	A,(C)
-EE96 E6 81          WAITA:	AND	081H		;NOT READY,BUSY
-EE98 28 08          	JR	Z,READYE
-EE9A E3             	EX	(SP),HL		;wait 19clock
-EE9B E3             	EX	(SP),HL		; //
-EE9C 2B             	DEC	HL
-EE9D 7C             	LD	A,H
-EE9E B5             	OR	L
-EE9F 20 F3          	JR	NZ,READY2
-EEA1 37             	SCF
-EEA2                READYE:
-EEA2 E1             	POP	HL
-EEA3 C9             	RET
-EEA4                
-EEA4                FDCRES:
-EEA4 36 00          	LD	(HL),0
-EEA6 0E 08          	LD	C,8
-EEA8 18 BE          	JR	FDCCMD2
-EEAA                
-EEAA                FDMOFF:
-EEAA F5             	PUSH	AF
-EEAB C5             	PUSH	BC
-EEAC 01 FC 0F       	LD	BC,00FFCH	;Motor off
-EEAF 3E 00          MOPAT:	LD	A,000H		;(Self-rewriting)
-EEB1 ED 79          	OUT	(C),A
-EEB3 C1             	POP	BC
-EEB4 F1             	POP	AF
-EEB5 C9             	RET
-EEB6                
-EEB6                SECSET:
-EEB6 01 FA 0F       	LD	BC,00FFAH
-EEB9 ED 59          	OUT	(C),E
-EEBB                COMSET:
-EEBB 0E F8          	LD	C,0F8H
-EEBD ED 79          	OUT	(C),A
-EEBF                DELAY0:
-EEBF 3E 1A          	LD	A,26
-EEC1                DELAY:
-EEC1 3D             	DEC	A
-EEC2 20 FD          	JR	NZ,DELAY
-EEC4 C9             	RET
-EEC5                
-EEC5                DRIVE:
-EEC5 2A 84 F0       	LD	HL,(_DRIVE)
-EEC8 26 F0          	LD	H,_CYL0/256
-EECA CB FD          	SET	7,L
-EECC 7E             	LD	A,(HL)
-EECD C9             	RET
-EECE                
-EECE                RNF:
-EECE CD C5 EE       	CALL	DRIVE
-EED1 36 FF          	LD	(HL),0FFH
-EED3 C9             	RET
-EED4                
-EED4 02             RETRY:	DB	2
-EED5                
-EED5                
-EED5                ;	FLOPPY DISK DRIVER(DMA)
-EED5                
-EED5                
-EED5                WTTRK:
-EED5 06 01          	LD	B,1
-EED7 3E F4          	LD	A,0F4H
-EED9 18 02          	JR	WTTRK1
-EEDB                FDWT:
-EEDB 3E A0          	LD	A,0A0H
-EEDD                WTTRK1:
-EEDD 32 72 EE       	LD	(FDCPAT+1),A
-EEE0 3E 10          	LD	A,16
-EEE2 18 0C          	JR	DISK
-EEE4                
-EEE4                DISKOK:
-EEE4 06 01          FDCNT:	LD	B,1
-EEE6 10 0B          	DJNZ	DISK1
-EEE8 C9             	RET
-EEE9                
-EEE9                FDRD:
-EEE9 3E 80          	LD	A,080H
-EEEB 32 72 EE       	LD	(FDCPAT+1),A
-EEEE 3E 0E          	LD	A,14
-EEF0                
-EEF0                DISK:
-EEF0 32 07 EF       	LD	(DMAPAT+1),A
-EEF3                DISK1:
-EEF3 78             	LD	A,B
-EEF4 32 E5 EE       	LD	(FDCNT+1),A
-EEF7 22 5F EF       	LD	(DMAD+11),HL
-EEFA                DISKR:
-EEFA 3E 02          	LD	A,2		;Retry count
-EEFC 32 D4 EE       	LD	(RETRY),A
-EEFF                DISK2:
-EEFF D5             	PUSH	DE
-EF00 CD 11 EE       	CALL	SEEK
-EF03 38 43          	JR	C,ERRF
-EF05 F3             	DI
-EF06                
-EF06 3E 0E          DMAPAT:	LD	A,14		;自己書き換え
-EF08 21 54 EF       	LD	HL,DMAD
-EF0B CD 8F DF       	CALL	SETDMA
-EF0E ED 49          	OUT	(C),C		;OUT 01F87H,087H WR6 イネーブル
-EF10 3A 72 EE       	LD	A,(FDCPAT+1)
-EF13 C5             	PUSH	BC
-EF14 CD B6 EE       	CALL	SECSET
-EF17 2A 5F EF       	LD	HL,(DMAHL)
-EF1A 23             	INC	HL
-EF1B 11 06 BB       	LD	DE,0BB06H	;READ DMA
-EF1E                
-EF1E 3E 03          	LD	A,3
-EF20 CD 8D EE       	CALL	READY
-EF23 ED 78          	IN	A,(C)
-EF25                
-EF25 C1             	POP	BC
-EF26 ED 51          	OUT	(C),D		;読み出しマスク設定
-EF28 ED 59          	OUT	(C),E		;バイトカウンタ(LH)
-EF2A ED 58          	IN	E,(C)
-EF2C ED 50          	IN	D,(C)
-EF2E 19             	ADD	HL,DE
-EF2F D1             	POP	DE
-EF30 13             	INC	DE
-EF31 FB             	EI
-EF32 CD AA EE       	CALL	FDMOFF
-EF35 B7             	OR	A
-EF36 28 AC          	JR	Z,DISKOK
-EF38 1B             	DEC	DE
-EF39 CB 67          	BIT	4,A
-EF3B C4 CE EE       	CALL	NZ,RNF
-EF3E                DISKE2:
-EF3E 21 D4 EE       	LD	HL,RETRY
-EF41 35             	DEC	(HL)
-EF42 20 BB          	JR	NZ,DISK2
-EF44 B7             	OR	A
-EF45 28 0A          	JR	Z,ERR
-EF47 D5             	PUSH	DE
-EF48                ERRF:
-EF48 D1             	POP	DE
-EF49                DELP:
-EF49 CD CE EE       	CALL	RNF
-EF4C CD AA EE       	CALL	FDMOFF
-EF4F 3E FF          	LD	A,0FFH
-EF51                ERR:
-EF51 BF             	CP	A
-EF52 37             	SCF
-EF53 C9             	RET
-EF54                
-EF54                			;X1turbo DISK DMA
-EF54 C3             DMAD:	DB	0C3H	;WR6 リセット
-EF55 7D             	DB	07DH	;WR0 ポートA→ポートB 転送
-EF56 FB 0F          	DW	00FFBH	;ポートA開始アドレス FDC データレジスタ
-EF58 FF FF          	DW	0FFFFH	;ブロック長(転送サイズ-1)
-EF5A 2C             	DB	02CH	;WR1 ポートAアドレス固定 I/O
-EF5B 10             	DB	010H	;WR2 ポートBインクリメント
-EF5C 80             	DB	080H	;WR3
-EF5D 92             	DB	092H	;WR5 WAIT RDY:LOW
-EF5E 8D             	DB	08DH	;WR4 バイト ポートB開始アドレス(LH)
-EF5F 00 00          DMAHL:	DW	0	;ポートB開始アドレス
-EF61 CF             	DB	0CFH	;WR6 ロード
-EF62 01             	DB	001H	;WR0 ポートB←ポートB 転送
+EDE2 6F             	LD	L,A		;LD	IXL,A
+EDE3 DD             	DB	0DDH		;Z80未定義命令
+EDE4 26 F2          	LD	H,DEVICE/256	;LD	IXH,DEVICE/256
+EDE6 DD 7E 00       	LD	A,(IX+0)	;DPB_00_FATLN
+EDE9 A7             	AND	A		;CF=0の為
+EDEA DD CB 0F 6E    	BIT	5,(IX+00FH)	;DPB_0F_BPS
+EDEE C0             	RET	NZ		;FAT16
+EDEF DD CB 12 6E    	BIT	5,(IX+012H)	;DPB_12_DEVICE
+EDF3 C0             	RET	NZ		;BPB
+EDF4 FE 01          	CP	001H		;A=0 THEN CF=1
+EDF6 C9             	RET
+EDF7                
+EDF7                _SYS5F:
+EDF7 AF             	XOR	A
+EDF8                FFLUSH:
+EDF8 F5             	PUSH	AF
+EDF9 3E FF          	LD	A,0FFH
+EDFB 32 39 F0       	LD	(SFILE),A
+EDFE CD C8 E9       	CALL	DWTX
+EE01 3E FF          	LD	A,0FFH
+EE03 32 A5 F0       	LD	(_DBDRV),A
+EE06 CD 12 EA       	CALL	WTFATX
+EE09 AF             	XOR	A
+EE0A 32 AB F0       	LD	(_FATIX),A
+EE0D 2F             	CPL			;0FFH
+EE0E 32 AA F0       	LD	(_FATDRV),A
+EE11 F1             	POP	AF
+EE12 C9             	RET
+EE13                
+EE13                	INCLUDE	"X1DISK.ASM"
+EE13                
+EE13                ;	LSX-Dodgers DISK
+EE13                ;	X1/turbo/Z
+EE13                
+EE13                SEEK:
+EE13 06 10          	LD	B,16
+EE15 DD 4E 0D       	LD	C,(IX+0DH)	;DPB_0D_MAXSEC
+EE18 AF             	XOR	A
+EE19 EB             	EX	DE,HL
+EE1A                DIV1:
+EE1A 29             	ADD	HL,HL
+EE1B 8F             	ADC	A,A
+EE1C B9             	CP	C
+EE1D 38 02          	JR	C,DIV2
+EE1F 91             	SUB	C
+EE20 2C             	INC	L
+EE21                DIV2:
+EE21 10 F7          	DJNZ	DIV1
+EE23                
+EE23 3C             	INC	A	;最小のセクタは１固定
+EE24 55             	LD	D,L	;TRACK
+EE25 5F             	LD	E,A	;SECTOR
+EE26 CB 3A          	SRL	D	;CYLINDER
+EE28 9F             	SBC	A,A
+EE29 E6 10          	AND	010H	;SIDE
+EE2B 4F             	LD	C,A
+EE2C                
+EE2C 3A 84 F0       	LD	A,(_DRIVE)
+EE2F FE 04          	CP	4
+EE31 3F             	CCF
+EE32 D8             	RET	C
+EE33 B1             	OR	C
+EE34 32 B2 EE       	LD	(MOPAT+1),A	;Motor off data
+EE37 01 FC 0F       	LD	BC,00FFCH
+EE3A F6 80          	OR	080H		;Motor on
+EE3C ED 79          	OUT	(C),A
+EE3E                
+EE3E CD 84 EE       	CALL	SETMODE
+EE41 D8             	RET	C
+EE42                
+EE42 CD C7 EE       	CALL	DRIVE
+EE45 FE FF          	CP	0FFH		;A=0FFH Unknown CYLINDER
+EE47 CC A6 EE       	CALL	Z,FDCRES	;Restore
+EE4A 0E F9          	LD	C,0F9H
+EE4C ED 79          	OUT	(C),A		;Currrent CYLINDER
+EE4E 92             	SUB	D
+EE4F C8             	RET	Z		;No seek
+EE50                
+EE50 3A 86 F0       	LD	A,(_ISEEK)
+EE53 4F             	LD	C,A
+EE54                
+EE54 DD 7E 0C       	LD	A,(IX+00CH)	;DPB_0C_MAXCYL
+EE57 3D             	DEC	A
+EE58 BA             	CP	D		;Over CYLINDER
+EE59 D8             	RET	C
+EE5A                
+EE5A B9             	CP	C		;for Built-in 2DD
+EE5B 38 03          	JR	C,SETM2
+EE5D 78             	LD	A,B		;B=00FH
+EE5E DB FE          	IN	A,(0FEH)		;2HD mode for 2DD seek
+EE60                SETM2:
+EE60 78             	LD	A,B
+EE61 DB FD          	IN	A,(0FDH)		;MFM mode
+EE63                
+EE63 0E FB          	LD	C,0FBH
+EE65 ED 51          	OUT	(C),D
+EE67 72             	LD	(HL),D
+EE68 0E 18          	LD	C,018H		;Seek
+EE6A                FDCCMD2:
+EE6A 3A 85 F0       	LD	A,(_SEEKSP)
+EE6D E6 FF          FSPAT:	AND	0FFH
+EE6F B1             	OR	C
+EE70                
+EE70                FDCCMD:
+EE70 CD BD EE       	CALL	COMSET
+EE73                
+EE73 3E 80          FDCPAT:	LD	A,080H		;FDC COMMAND(Self-modifying code)
+EE75 E6 20          	AND	020H		;Write data Write track
+EE77 3C             	INC	A
+EE78                
+EE78                SST:
+EE78 0E 00          	LD	C,0
+EE7A                SST1:
+EE7A 0D             	DEC	C		; 4
+EE7B 20 FD          	JR	NZ,SST1		;12 * 256 / 4 = About 1ms
+EE7D 3D             	DEC	A
+EE7E 20 FA          	JR	NZ,SST1
+EE80                
+EE80 3C             	INC	A		;A=1
+EE81 CD 8F EE       	CALL	READY
+EE84                SETMODE:
+EE84 78             	LD	A,B		;B=00FH
+EE85 DB FF          FDMODE:	IN	A,(0FFH)	;Floppy mode(2D/2HD) (Self-modifying code)
+EE87                
+EE87 78             	LD	A,B
+EE88 DB FD          	IN	A,(0FDH)	;MFM mode
+EE8A                
+EE8A CD C1 EE       	CALL	DELAY0		;Head select time
+EE8D 3E 81          	LD	A,081H
+EE8F                READY:
+EE8F 32 99 EE       	LD	(WAITA+1),A
+EE92 E5             	PUSH	HL
+EE93 0E F8          	LD	C,0F8H
+EE95 61             	LD	H,C
+EE96                READY2:
+EE96 ED 78          	IN	A,(C)
+EE98 E6 81          WAITA:	AND	081H		;NOT READY,BUSY
+EE9A 28 08          	JR	Z,READYE
+EE9C E3             	EX	(SP),HL		;wait 19clock
+EE9D E3             	EX	(SP),HL		; //
+EE9E 2B             	DEC	HL
+EE9F 7C             	LD	A,H
+EEA0 B5             	OR	L
+EEA1 20 F3          	JR	NZ,READY2
+EEA3 37             	SCF
+EEA4                READYE:
+EEA4 E1             	POP	HL
+EEA5 C9             	RET
+EEA6                
+EEA6                FDCRES:
+EEA6 36 00          	LD	(HL),0
+EEA8 0E 08          	LD	C,8
+EEAA 18 BE          	JR	FDCCMD2
+EEAC                
+EEAC                FDMOFF:
+EEAC F5             	PUSH	AF
+EEAD C5             	PUSH	BC
+EEAE 01 FC 0F       	LD	BC,00FFCH	;Motor off
+EEB1 3E 00          MOPAT:	LD	A,000H		;(Self-rewriting)
+EEB3 ED 79          	OUT	(C),A
+EEB5 C1             	POP	BC
+EEB6 F1             	POP	AF
+EEB7 C9             	RET
+EEB8                
+EEB8                SECSET:
+EEB8 01 FA 0F       	LD	BC,00FFAH
+EEBB ED 59          	OUT	(C),E
+EEBD                COMSET:
+EEBD 0E F8          	LD	C,0F8H
+EEBF ED 79          	OUT	(C),A
+EEC1                DELAY0:
+EEC1 3E 1A          	LD	A,26
+EEC3                DELAY:
+EEC3 3D             	DEC	A
+EEC4 20 FD          	JR	NZ,DELAY
+EEC6 C9             	RET
+EEC7                
+EEC7                DRIVE:
+EEC7 2A 84 F0       	LD	HL,(_DRIVE)
+EECA 26 F0          	LD	H,_CYL0/256
+EECC CB FD          	SET	7,L
+EECE 7E             	LD	A,(HL)
+EECF C9             	RET
+EED0                
+EED0                RNF:
+EED0 CD C7 EE       	CALL	DRIVE
+EED3 36 FF          	LD	(HL),0FFH
+EED5 C9             	RET
+EED6                
+EED6 02             RETRY:	DB	2
+EED7                
+EED7                
+EED7                ;	FLOPPY DISK DRIVER(DMA)
+EED7                
+EED7                
+EED7                WTTRK:
+EED7 06 01          	LD	B,1
+EED9 3E F4          	LD	A,0F4H
+EEDB 18 02          	JR	WTTRK1
+EEDD                FDWT:
+EEDD 3E A0          	LD	A,0A0H
+EEDF                WTTRK1:
+EEDF 32 74 EE       	LD	(FDCPAT+1),A
+EEE2 3E 10          	LD	A,16
+EEE4 18 0C          	JR	DISK
+EEE6                
+EEE6                DISKOK:
+EEE6 06 01          FDCNT:	LD	B,1
+EEE8 10 0B          	DJNZ	DISK1
+EEEA C9             	RET
+EEEB                
+EEEB                FDRD:
+EEEB 3E 80          	LD	A,080H
+EEED 32 74 EE       	LD	(FDCPAT+1),A
+EEF0 3E 0E          	LD	A,14
+EEF2                
+EEF2                DISK:
+EEF2 32 09 EF       	LD	(DMAPAT+1),A
+EEF5                DISK1:
+EEF5 78             	LD	A,B
+EEF6 32 E7 EE       	LD	(FDCNT+1),A
+EEF9 22 61 EF       	LD	(DMAD+11),HL
+EEFC                DISKR:
+EEFC 3E 02          	LD	A,2		;Retry count
+EEFE 32 D6 EE       	LD	(RETRY),A
+EF01                DISK2:
+EF01 D5             	PUSH	DE
+EF02 CD 13 EE       	CALL	SEEK
+EF05 38 43          	JR	C,ERRF
+EF07 F3             	DI
+EF08                
+EF08 3E 0E          DMAPAT:	LD	A,14		;自己書き換え
+EF0A 21 56 EF       	LD	HL,DMAD
+EF0D CD 8F DF       	CALL	SETDMA
+EF10 ED 49          	OUT	(C),C		;OUT 01F87H,087H WR6 イネーブル
+EF12 3A 74 EE       	LD	A,(FDCPAT+1)
+EF15 C5             	PUSH	BC
+EF16 CD B8 EE       	CALL	SECSET
+EF19 2A 61 EF       	LD	HL,(DMAHL)
+EF1C 23             	INC	HL
+EF1D 11 06 BB       	LD	DE,0BB06H	;READ DMA
+EF20                
+EF20 3E 03          	LD	A,3
+EF22 CD 8F EE       	CALL	READY
+EF25 ED 78          	IN	A,(C)
+EF27                
+EF27 C1             	POP	BC
+EF28 ED 51          	OUT	(C),D		;読み出しマスク設定
+EF2A ED 59          	OUT	(C),E		;バイトカウンタ(LH)
+EF2C ED 58          	IN	E,(C)
+EF2E ED 50          	IN	D,(C)
+EF30 19             	ADD	HL,DE
+EF31 D1             	POP	DE
+EF32 13             	INC	DE
+EF33 FB             	EI
+EF34 CD AC EE       	CALL	FDMOFF
+EF37 B7             	OR	A
+EF38 28 AC          	JR	Z,DISKOK
+EF3A 1B             	DEC	DE
+EF3B CB 67          	BIT	4,A
+EF3D C4 D0 EE       	CALL	NZ,RNF
+EF40                DISKE2:
+EF40 21 D6 EE       	LD	HL,RETRY
+EF43 35             	DEC	(HL)
+EF44 20 BB          	JR	NZ,DISK2
+EF46 B7             	OR	A
+EF47 28 0A          	JR	Z,ERR
+EF49 D5             	PUSH	DE
+EF4A                ERRF:
+EF4A D1             	POP	DE
+EF4B                DELP:
+EF4B CD D0 EE       	CALL	RNF
+EF4E CD AC EE       	CALL	FDMOFF
+EF51 3E FF          	LD	A,0FFH
+EF53                ERR:
+EF53 BF             	CP	A
+EF54 37             	SCF
+EF55 C9             	RET
+EF56                
+EF56                			;X1turbo DISK DMA
+EF56 C3             DMAD:	DB	0C3H	;WR6 リセット
+EF57 7D             	DB	07DH	;WR0 ポートA→ポートB 転送
+EF58 FB 0F          	DW	00FFBH	;ポートA開始アドレス FDC データレジスタ
+EF5A FF FF          	DW	0FFFFH	;ブロック長(転送サイズ-1)
+EF5C 2C             	DB	02CH	;WR1 ポートAアドレス固定 I/O
+EF5D 10             	DB	010H	;WR2 ポートBインクリメント
+EF5E 80             	DB	080H	;WR3
+EF5F 92             	DB	092H	;WR5 WAIT RDY:LOW
+EF60 8D             	DB	08DH	;WR4 バイト ポートB開始アドレス(LH)
+EF61 00 00          DMAHL:	DW	0	;ポートB開始アドレス
 EF63 CF             	DB	0CFH	;WR6 ロード
-EF64                
-EF64                DMAE:
-EF64                
-EF64 00 00 1E 34    AT_R	EQU	WTTRK-AT_DWT
-EF64                AT_TABLE:
-EF64                	INCLUDE	"LDCCPWK.ASM"
-EF64                
-EF64                ;	LSX-Dodgers CCP WORK
-EF64                
-EF64 00 00 00 40    PATHX	EQU	64
-EF64                PATHD:	DS	PATHX
-EFA4 00             PATHE:	DB	0
-EFA5                
-EFA5                DTA_CCP:
-EFA5                	DS	37
-EFCA                
-EFCA                FCB_BAT:
-EFCA                	DS	37
-EFEF                
-EFEF                
-EFEF 20 62 79 74    FREE:	DB	" bytes free",9,'$'
-EFF3 65 73 20 66
-EFF7 72 65 65 09
-EFFB 24
-EFFC                	INCLUDE	"LDWORK.ASM"
-EFFC                
-EFFC                ;	LSX-Dodgers WORK0
-EFFC                ;
-EFFC                ;	CP/M互換BIOS
-EFFC                ;	BOOT:アドレス下位1バイトが0になるように
-EFFC                AT_WORK:
-EFFC                	DS	WORKAD-AT_WORK
+EF64 01             	DB	001H	;WR0 ポートB←ポートB 転送
+EF65 CF             	DB	0CFH	;WR6 ロード
+EF66                
+EF66                DMAE:
+EF66                
+EF66 00 00 1E 36    AT_R	EQU	WTTRK-AT_DWT
+EF66                AT_TABLE:
+EF66                	INCLUDE	"LDCCPWK.ASM"
+EF66                
+EF66                ;	LSX-Dodgers CCP WORK
+EF66                
+EF66 00 00 00 40    PATHX	EQU	64
+EF66                PATHD:	DS	PATHX
+EFA6 00             PATHE:	DB	0
+EFA7                
+EFA7                DTA_CCP:
+EFA7                	DS	37
+EFCC                
+EFCC                FCB_BAT:
+EFCC                	DS	37
+EFF1                
+EFF1                
+EFF1 20 62 79 74    FREE:	DB	" bytes free",9,'$'
+EFF5 65 73 20 66
+EFF9 72 65 65 09
+EFFD 24
+EFFE                	INCLUDE	"LDWORK.ASM"
+EFFE                
+EFFE                ;	LSX-Dodgers WORK0
+EFFE                ;
+EFFE                ;	CP/M互換BIOS
+EFFE                ;	BOOT:アドレス下位1バイトが0になるように
+EFFE                AT_WORK:
+EFFE                	DS	WORKAD-AT_WORK
 F000                
 F000                CPM_BOOT:
 F000 C3 00 00       	JP	0
@@ -6234,25 +6235,25 @@ F0D0 C3 CD DF       _SCRN:	JP	SCRN
 F0D3 C3 F7 DF       _POS:	JP	POS
 F0D6 C3 49 DE       _LOC:	JP	LOC
 F0D9                _CHGDRV:
-F0D9 C3 0D ED       	JP	CHGDRV
+F0D9 C3 0F ED       	JP	CHGDRV
 F0DC                _GETDPB:
-F0DC C3 D8 ED       	JP	GETDPB
+F0DC C3 DA ED       	JP	GETDPB
 F0DF                _FFLUSH:
-F0DF C3 F6 ED       	JP	FFLUSH
+F0DF C3 F8 ED       	JP	FFLUSH
 F0E2                _RDFATX:
-F0E2 C3 E6 E9       	JP	RDFATX
-F0E5 C3 0E EB       _RDFAT:	JP	RDFAT
-F0E8 C3 D5 EE       _WTTRK:	JP	WTTRK
-F0EB C3 E9 EE       _FDRD:	JP	FDRD
-F0EE C3 DB EE       _FDWT:	JP	FDWT
+F0E2 C3 E8 E9       	JP	RDFATX
+F0E5 C3 10 EB       _RDFAT:	JP	RDFAT
+F0E8 C3 D7 EE       _WTTRK:	JP	WTTRK
+F0EB C3 EB EE       _FDRD:	JP	FDRD
+F0EE C3 DD EE       _FDWT:	JP	FDWT
 F0F1                _BPB2DPB:
-F0F1 C3 9B EB       	JP	BPB2DPB
+F0F1 C3 9D EB       	JP	BPB2DPB
 F0F4                _BREAK:
 F0F4 C3 C2 D3       	JP	END_BATCH
 F0F7                _GNCL:
-F0F7 C3 88 EA       GNCPAT:	JP	GNCL		; self-modifying code
+F0F7 C3 8A EA       GNCPAT:	JP	GNCL		; self-modifying code
 F0FA                _SNCL:
-F0FA C3 AB EA       SNCPAT:	JP	SNCL		; self-modifying code
+F0FA C3 AD EA       SNCPAT:	JP	SNCL		; self-modifying code
 F0FD C3 7C D2       _COMANL:JP	COMANL
 F100                
 F100                _WE:
