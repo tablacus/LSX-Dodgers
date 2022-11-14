@@ -240,27 +240,35 @@ CLS2:
 
 BANK:
 	CALL	G1FD0
-
+	EXX
+	LD	BC,$1FD0
 	SET	4,A
 	LD	E,A	;BANK1
 	RES	4,A
 	LD	D,A	;BANK0
-	CALL	S1FD0
-	LD	BC,$4000
+	EXX
 BANK1:
+	LD	C,0
+BANK2:
+	LD	B,$40
+BANK3:
 	IN	H,(C)	;BANK0
-	LD	A,E
-	CALL	S1FD0	;BANK1
+	EXX
+	OUT	(C),E	;BANK1
+	EXX
 	IN	L,(C)
 	OUT	(C),H
-	LD	A,D
-	CALL	S1FD0	;BANK0
+	EXX
+	OUT	(C),D	;BANK0
+	EXX
 	OUT	(C),L
-	INC	BC
-	LD	A,B
-	OR	C
-	JR	NZ,BANK1
-	RET
+	INC	B
+	JR	NZ,BANK3
+	INC	C
+	INC	C
+	INC	C
+	JR	NZ,BANK2
+	JP	S1FD0
 
 ANALOG:
 	CP	2
@@ -407,7 +415,7 @@ CAP:
 	RET
 
 TITLE:
-	DB	"X1 screen controler v1.03"
+	DB	"X1 screen controler v1.04"
 	DB	$0D,$0A
 	DB	"$"
 USAGE:
