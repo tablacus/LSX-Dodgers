@@ -1,0 +1,76 @@
+﻿                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.0.0, LST:Full:4
+                                ;
+                                ;   pause
+                                ;
+       0005                     SYSTEM  EQU $0005
+       000F                     JP_HL   EQU $000F
+       0080                     DTA EQU $0080
+                                
+000000 0100                         ORG $0100
+000000 0100 C30301          10      JP  START
+       0103                     START:
+000003 0103 118100          10      LD  DE,DTA+1
+000006 0106 CD4001          17      CALL    SPCUT
+000009 0109 CD4601          17      CALL    TOZERO
+00000C 010C EB               4      EX  DE,HL
+00000D 010D 7E               7      LD  A,(HL)
+00000E 010E B7               4      OR  A
+00000F 010F 2003            12      JR  NZ,PAUSE1
+000011 0111 215301          10      LD  HL,PAUSE
+       0114                     PAUSE1:
+000014 0114 CD3901          17      CALL    MSX
+000017 0117 0E08             7      LD  C,8     ;(BDOS)????????????(_INNOE)
+000019 0119 CD0500          17      CALL    SYSTEM
+00001C 011C 1E0D             7      LD  E,00DH
+00001E 011E 0E06             7      LD  C,6     ;(BDOS)??????????(_DIRIO)
+000020 0120 CD0500          17      CALL    SYSTEM
+000023 0123 1E0A             7      LD  E,00AH
+000025 0125 0E06             7      LD  C,6     ;(BDOS)??????????(_DIRIO)
+000027 0127 CD0500          17      CALL    SYSTEM
+00002A 012A C30000          10      JP  0
+                                
+       012D                     MSX1:
+00002D 012D C5              11      PUSH    BC
+00002E 012E D5              11      PUSH    DE
+00002F 012F E5              11      PUSH    HL
+000030 0130 5F               4      LD  E,A
+000031 0131 0E06             7      LD  C,6     ;(BDOS)??????????(_DIRIO)
+000033 0133 CD0500          17      CALL    SYSTEM
+000036 0136 E1              10      POP HL
+000037 0137 D1              10      POP DE
+000038 0138 C1              10      POP BC
+       0139                     MSX:
+000039 0139 7E               7      LD  A,(HL)
+00003A 013A 23               6      INC HL
+00003B 013B B7               4      OR  A
+00003C 013C 20EF            12      JR  NZ,MSX1
+00003E 013E C9              10      RET
+                                
+       013F                     SS1:
+00003F 013F 13               6      INC DE
+       0140                     SPCUT:              ;????????
+000040 0140 1A               7      LD  A,(DE)
+000041 0141 FE20             7      CP  020H
+000043 0143 28FA            12      JR  Z,SS1
+000045 0145 C9              10      RET
+                                
+       0146                     TOZERO:
+000046 0146 D5              11      PUSH    DE
+       0147                     TZ1:
+000047 0147 1A               7      LD  A,(DE)
+000048 0148 FE20             7      CP  20H
+00004A 014A 3803            12      JR  C,TZ2
+00004C 014C 13               6      INC DE
+00004D 014D 18F8            12      JR  TZ1
+       014F                     TZ2:
+00004F 014F AF               4      XOR A
+000050 0150 12               7      LD  (DE),A
+000051 0151 D1              10      POP DE
+000052 0152 C9              10      RET
+                                
+       0153                     PAUSE:
+000053 0153 537472696B652061        DB  "Strike any key when ready ",0
+            6E79206B65792077    
+            68656E2072656164    
+            792000              
+[EOF:PAUSE.ASM:UTF_8]

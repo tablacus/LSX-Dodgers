@@ -1,0 +1,71 @@
+;
+;	pause
+;
+SYSTEM	EQU	$0005
+JP_HL	EQU	$000F
+DTA	EQU	$0080
+
+	ORG	$0100
+	JP	START
+START:
+	LD	DE,DTA+1
+	CALL	SPCUT
+	CALL	TOZERO
+	EX	DE,HL
+	LD	A,(HL)
+	OR	A
+	JR	NZ,PAUSE1
+	LD	HL,PAUSE
+PAUSE1:
+	CALL	MSX
+	LD	C,8		;(BDOS)????????????(_INNOE)
+	CALL	SYSTEM
+	LD	E,00DH
+	LD	C,6		;(BDOS)??????????(_DIRIO)
+	CALL	SYSTEM
+	LD	E,00AH
+	LD	C,6		;(BDOS)??????????(_DIRIO)
+	CALL	SYSTEM
+	JP	0
+
+MSX1:
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	LD	E,A
+	LD	C,6		;(BDOS)??????????(_DIRIO)
+	CALL	SYSTEM
+	POP	HL
+	POP	DE
+	POP	BC
+MSX:
+	LD	A,(HL)
+	INC	HL
+	OR	A
+	JR	NZ,MSX1
+	RET
+
+SS1:
+	INC	DE
+SPCUT:				;????????
+	LD	A,(DE)
+	CP	020H
+	JR	Z,SS1
+	RET
+
+TOZERO:
+	PUSH	DE
+TZ1:
+	LD	A,(DE)
+	CP	20H
+	JR	C,TZ2
+	INC	DE
+	JR	TZ1
+TZ2:
+	XOR	A
+	LD	(DE),A
+	POP	DE
+	RET
+
+PAUSE:
+	DB	"Strike any key when ready ",0
