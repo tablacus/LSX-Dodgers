@@ -17,17 +17,17 @@
 000006 0106 0E11             7      LD  C,011H      ;SFIRST FCB ファイル検索 初回 CP/M
 000008 0108 CD0500          17      CALL    SYSTEM
 00000B 010B B7               4      OR  A
-00000C 010C CADB01          10      JP  Z,SHOW_EXISTS   ;すでに存在する場合はエラー
+00000C 010C CAE201          10      JP  Z,SHOW_EXISTS   ;すでに存在する場合はエラー
                                 
 00000F 010F 115C00          10      LD  DE,FCB1
 000012 0112 3A5D00          13      LD  A,(FCB1+1)
 000015 0115 FE20             7      CP  020H
-000017 0117 CAB301          10      JP  Z,SHOW_TITLE
+000017 0117 CABA01          10      JP  Z,SHOW_TITLE
                                 
 00001A 011A 0E16             7      LD  C,016H      ;FMAKE FCB ファイル作成 CP/M
 00001C 011C CD0500          17      CALL    SYSTEM
 00001F 011F B7               4      OR  A
-000020 0120 C2D601          10      JP  NZ,SHOW_NOT_CREATE  ;作成に失敗する場合はエラー
+000020 0120 C2DD01          10      JP  NZ,SHOW_NOT_CREATE  ;作成に失敗する場合はエラー
                                 
 000023 0123 3A7900          13      LD  A,(FCB1+29) ;ディレクトリ・モード
 000026 0126 B7               4      OR  A
@@ -38,139 +38,142 @@
 00002D 012D B5               4      OR  L
 00002E 012E 2804            12      JR  Z,ROOT
 000030 0130 2B               6      DEC HL
-000031 0131 226F02          16      LD  (PARENTCL),HL
+000031 0131 227602          16      LD  (PARENTCL),HL
        0134                     ROOT:
 000034 0134 215C00          10      LD  HL,FCB1
 000037 0137 5E               7      LD  E,(HL)
 000038 0138 0E1B             7      LD  C,01BH      ;ALLOC ディスク情報の獲得
 00003A 013A CD0500          17      CALL    SYSTEM
 00003D 013D FEFF             7      CP  0FFH
-00003F 013F CAD601          10      JP  Z,SHOW_NOT_CREATE   ;取得できない場合はエラー
+00003F 013F CADD01          10      JP  Z,SHOW_NOT_CREATE   ;取得できない場合はエラー
 000042 0142 F5              11      PUSH    AF      ;A←1クラスタのセクタ数(1,2,4,8,16)
-000043 0143 ED436101        20      LD  (SECPAT+1),BC   ;BC←論理セクタのサイズ
+000043 0143 ED436801        20      LD  (SECPAT+1),BC   ;BC←論理セクタのサイズ
                                 
-000047 0147 217502          10      LD  HL,DIRENT3;
-00004A 014A 117602          10      LD  DE,DIRENT3+1;
+000047 0147 217C02          10      LD  HL,DIRENT3;
+00004A 014A 117D02          10      LD  DE,DIRENT3+1;
 00004D 014D 0B               6      DEC BC
 00004E 014E EDB0                    LDIR            ;0クリア
                                 
-000050 0150 210100          10      LD  HL,1
-000053 0153 226A00          16      LD  (FCB1+14),HL    ;レコード・サイズ
-000056 0156 C1              10      POP BC      ;クラスタのセクタ数(1,2,4,8,16)
+000050 0150 210000          10      LD  HL,0
+000053 0153 227F00          16      LD  (FCB1+35),HL    ;ランダム・レコード
+000056 0156 227D00          16      LD  (FCB1+33),HL    ;ランダム・レコード
+000059 0159 24               4      INC H
+00005A 015A 226A00          16      LD  (FCB1+14),HL    ;レコード・サイズ
+00005D 015D C1              10      POP BC      ;クラスタのセクタ数(1,2,4,8,16)
                                 
-000057 0157 113502          10      LD  DE,SUBD
-       015A                     LOOP1:
-00005A 015A C5              11      PUSH    BC
-00005B 015B 0E1A             7      LD  C,01AH      ;SETDTA ディスク転送アドレスの設定 CP/M
-00005D 015D CD0500          17      CALL    SYSTEM
-000060 0160 210002          10  SECPAT: LD  HL,512      ;論理セクタのサイズ
-000063 0163 115C00          10      LD  DE,FCB1
-000066 0166 0E26             7      LD  C,026H      ;WRBLK FCB ランダムブロック書き込み
-000068 0168 CD0500          17      CALL    SYSTEM
-00006B 016B C1              10      POP BC
-00006C 016C B7               4      OR  A
-00006D 016D 2067            12      JR  NZ,SHOW_NOT_CREATE
-00006F 016F 117502          10      LD  DE,DIRENT3
-000072 0172 10E6            13      DJNZ    LOOP1
+00005E 015E 113C02          10      LD  DE,SUBD
+       0161                     LOOP1:
+000061 0161 C5              11      PUSH    BC
+000062 0162 0E1A             7      LD  C,01AH      ;SETDTA ディスク転送アドレスの設定 CP/M
+000064 0164 CD0500          17      CALL    SYSTEM
+000067 0167 210002          10  SECPAT: LD  HL,512      ;論理セクタのサイズ
+00006A 016A 115C00          10      LD  DE,FCB1
+00006D 016D 0E26             7      LD  C,026H      ;WRBLK FCB ランダムブロック書き込み
+00006F 016F CD0500          17      CALL    SYSTEM
+000072 0172 C1              10      POP BC
+000073 0173 B7               4      OR  A
+000074 0174 2067            12      JR  NZ,SHOW_NOT_CREATE
+000076 0176 117C02          10      LD  DE,DIRENT3
+000079 0179 10E6            13      DJNZ    LOOP1
                                 
-000074 0174 2A7600          16      LD  HL,(FCB1+26)    ;ファイルの先頭クラスタ
-000077 0177 224F02          16      LD  (SELFCL),HL
+00007B 017B 2A7600          16      LD  HL,(FCB1+26)    ;ファイルの先頭クラスタ
+00007E 017E 225602          16      LD  (SELFCL),HL
                                 
-00007A 017A 210000          10      LD  HL,0 
-00007D 017D 227F00          16      LD  (FCB1+35),HL    ;ランダム・レコード
-000080 0180 211A00          10      LD  HL,SELFCL-SUBD 
-000083 0183 227D00          16      LD  (FCB1+33),HL    ;ランダム・レコード
+000081 0181 210000          10      LD  HL,0
+000084 0184 227F00          16      LD  (FCB1+35),HL    ;ランダム・レコード
+000087 0187 211A00          10      LD  HL,SELFCL-SUBD
+00008A 018A 227D00          16      LD  (FCB1+33),HL    ;ランダム・レコード
                                 
-000086 0186 5D               4      LD  E,L
-000087 0187 54               4      LD  D,H
-000088 0188 0E1A             7      LD  C,01AH      ;SETDTA ディスク転送アドレスの設定 CP/M
-00008A 018A CD0500          17      CALL    SYSTEM
+00008D 018D 5D               4      LD  E,L
+00008E 018E 54               4      LD  D,H
+00008F 018F 0E1A             7      LD  C,01AH      ;SETDTA ディスク転送アドレスの設定 CP/M
+000091 0191 CD0500          17      CALL    SYSTEM
                                 
-00008D 018D 115C00          10      LD  DE,FCB1
-000090 0190 210200          10      LD  HL,2
-000093 0193 0E26             7      LD  C,026H      ;WRBLK FCB ランダムブロック書き込み
-000095 0195 CD0500          17      CALL    SYSTEM
-000098 0198 B7               4      OR  A
-000099 0199 203B            12      JR  NZ,SHOW_NOT_CREATE
+000094 0194 115C00          10      LD  DE,FCB1
+000097 0197 210200          10      LD  HL,2
+00009A 019A 0E26             7      LD  C,026H      ;WRBLK FCB ランダムブロック書き込み
+00009C 019C CD0500          17      CALL    SYSTEM
+00009F 019F B7               4      OR  A
+0000A0 01A0 203B            12      JR  NZ,SHOW_NOT_CREATE
                                 
-00009B 019B 3E10             7      LD  A,010H      ;ディレクトリ
-00009D 019D 326900          13      LD  (FCB1+13),A ;属性(アトリビュート)
-0000A0 01A0 210000          10      LD  HL,0
-0000A3 01A3 226C00          16      LD  (FCB1+16),HL    ;ファイルのサイズ
+0000A2 01A2 3E10             7      LD  A,010H      ;ディレクトリ
+0000A4 01A4 326900          13      LD  (FCB1+13),A ;属性(アトリビュート)
+0000A7 01A7 210000          10      LD  HL,0
+0000AA 01AA 226C00          16      LD  (FCB1+16),HL    ;ファイルのサイズ
                                 
-0000A6 01A6 115C00          10      LD  DE,FCB1
-0000A9 01A9 0E10             7      LD  C,010H      ;FCLOSE FCB ファイルクローズ CP/M
-0000AB 01AB CD0500          17      CALL    SYSTEM
+0000AD 01AD 115C00          10      LD  DE,FCB1
+0000B0 01B0 0E10             7      LD  C,010H      ;FCLOSE FCB ファイルクローズ CP/M
+0000B2 01B2 CD0500          17      CALL    SYSTEM
                                 
-0000AE 01AE 110C02          10      LD  DE,OKMES
-0000B1 01B1 180B            12      JR  EXITMES
+0000B5 01B5 111302          10      LD  DE,OKMES
+0000B8 01B8 180B            12      JR  EXITMES
                                 
-       01B3                     SHOW_TITLE:
-0000B3 01B3 11E001          10      LD  DE,MES_TITLE
-0000B6 01B6 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-0000B8 01B8 CD0500          17      CALL    SYSTEM
-0000BB 01BB 11F301          10      LD  DE,ERRMES1
-       01BE                     EXITMES:
-0000BE 01BE 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-0000C0 01C0 CD0500          17      CALL    SYSTEM
-0000C3 01C3 C30000          10      JP  0
-       01C6                     SHOW_MESSAGE:
-0000C6 01C6 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-0000C8 01C8 CD0500          17      CALL    SYSTEM
-0000CB 01CB 110E02          10      LD  DE,CRLF
-0000CE 01CE 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-0000D0 01D0 CD0500          17      CALL    SYSTEM
-0000D3 01D3 C30000          10      JP  0
-       01D6                     SHOW_NOT_CREATE:
-0000D6 01D6 111D02          10      LD  DE,MES_NOT_CREATE
-0000D9 01D9 18EB            12      JR  SHOW_MESSAGE 
-       01DB                     SHOW_EXISTS:
-0000DB 01DB 111102          10      LD  DE,MES_EXISTS
-0000DE 01DE 18E6            12      JR  SHOW_MESSAGE 
+       01BA                     SHOW_TITLE:
+0000BA 01BA 11E701          10      LD  DE,MES_TITLE
+0000BD 01BD 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+0000BF 01BF CD0500          17      CALL    SYSTEM
+0000C2 01C2 11FA01          10      LD  DE,ERRMES1
+       01C5                     EXITMES:
+0000C5 01C5 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+0000C7 01C7 CD0500          17      CALL    SYSTEM
+0000CA 01CA C30000          10      JP  0
+       01CD                     SHOW_MESSAGE:
+0000CD 01CD 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+0000CF 01CF CD0500          17      CALL    SYSTEM
+0000D2 01D2 111502          10      LD  DE,CRLF
+0000D5 01D5 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+0000D7 01D7 CD0500          17      CALL    SYSTEM
+0000DA 01DA C30000          10      JP  0
+       01DD                     SHOW_NOT_CREATE:
+0000DD 01DD 112402          10      LD  DE,MES_NOT_CREATE
+0000E0 01E0 18EB            12      JR  SHOW_MESSAGE
+       01E2                     SHOW_EXISTS:
+0000E2 01E2 111802          10      LD  DE,MES_EXISTS
+0000E5 01E5 18E6            12      JR  SHOW_MESSAGE
                                 
-       01E0                     MES_TITLE:
-0000E0 01E0 6D6B646972207631        DB  "mkdir v1.02 Gaku",00DH,00AH
-            2E30322047616B75    
+       01E7                     MES_TITLE:
+0000E7 01E7 6D6B646972207631        DB  "mkdir v1.03 Gaku",00DH,00AH
+            2E30332047616B75    
             0D0A                
-0000F2 01F2 24                      DB  '$'
-       01F3                     ERRMES1:
-0000F3 01F3 75736167653A204D        DB  "usage: MKDIR directory",00DH,00AH
+0000F9 01F9 24                      DB  '$'
+       01FA                     ERRMES1:
+0000FA 01FA 75736167653A204D        DB  "usage: MKDIR directory",00DH,00AH
             4B44495220646972    
             6563746F72790D0A    
-00010B 020B 24                      DB  '$'
-       020C                     OKMES:
-00010C 020C 4F4B                    DB  "OK"
-00010E 020E 0D0A                CRLF:   DB  00DH,00AH
-000110 0210 24                      DB  '$'
-       0211                     MES_EXISTS:
-000111 0211 46696C6520657869        DB  "File exists$"
+000112 0212 24                      DB  '$'
+       0213                     OKMES:
+000113 0213 4F4B                    DB  "OK"
+000115 0215 0D0A                CRLF:   DB  00DH,00AH
+000117 0217 24                      DB  '$'
+       0218                     MES_EXISTS:
+000118 0218 46696C6520657869        DB  "File exists$"
             73747324            
-       021D                     MES_NOT_CREATE:
-00011D 021D 43616E6E6F742063        DB  "Cannot create directory$"
+       0224                     MES_NOT_CREATE:
+000124 0224 43616E6E6F742063        DB  "Cannot create directory$"
             7265617465206469    
             726563746F727924    
                                 
-       0235                     SUBD:
-000135 0235 2E20202020202020        DB  ".          "
+       023C                     SUBD:
+00013C 023C 2E20202020202020        DB  ".          "
             202020              
-000140 0240 10                      DB  010H
-000141 0241 0000000000000000        DW  0,0,0,0,0
+000147 0247 10                      DB  010H
+000148 0248 0000000000000000        DW  0,0,0,0,0
             0000                
-00014B 024B 0000                TIME1:  DW  0
-00014D 024D 0000                DATE1:  DW  0
-00014F 024F 0000                SELFCL: DW  0
-000151 0251 00000000                DW  0,0
+000152 0252 0000                TIME1:  DW  0
+000154 0254 0000                DATE1:  DW  0
+000156 0256 0000                SELFCL: DW  0
+000158 0258 00000000                DW  0,0
                                 
-000155 0255 2E2E202020202020        DB  "..         "
+00015C 025C 2E2E202020202020        DB  "..         "
             202020              
-000160 0260 10                      DB  010H
-000161 0261 0000000000000000        DW  0,0,0,0,0
+000167 0267 10                      DB  010H
+000168 0268 0000000000000000        DW  0,0,0,0,0
             0000                
-00016B 026B 0000                TIME2:  DW  0
-00016D 026D 0000                DATE2:  DW  0
-       026F                     PARENTCL:
-00016F 026F 0000                    DW  0
-000171 0271 00000000                DW  0,0
-       0275                     DIRENT3:
-000175 0275 00                      DB  0
+000172 0272 0000                TIME2:  DW  0
+000174 0274 0000                DATE2:  DW  0
+       0276                     PARENTCL:
+000176 0276 0000                    DW  0
+000178 0278 00000000                DW  0,0
+       027C                     DIRENT3:
+00017C 027C 00                      DB  0
 [EOF:MKDIR.ASM:SHIFT_JIS]

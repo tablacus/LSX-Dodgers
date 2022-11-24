@@ -53,7 +53,10 @@ ROOT:
 	DEC	BC
 	LDIR			;0クリア
 
-	LD	HL,1
+	LD	HL,0
+	LD	(FCB1+35),HL	;ランダム・レコード
+	LD	(FCB1+33),HL	;ランダム・レコード
+	INC	H
 	LD	(FCB1+14),HL	;レコード・サイズ
 	POP	BC		;クラスタのセクタ数(1,2,4,8,16)
 
@@ -75,9 +78,9 @@ SECPAT:	LD	HL,512		;論理セクタのサイズ
 	LD	HL,(FCB1+26)	;ファイルの先頭クラスタ
 	LD	(SELFCL),HL
 
-	LD	HL,0 
+	LD	HL,0
 	LD	(FCB1+35),HL	;ランダム・レコード
-	LD	HL,SELFCL-SUBD 
+	LD	HL,SELFCL-SUBD
 	LD	(FCB1+33),HL	;ランダム・レコード
 
 	LD	E,L
@@ -122,13 +125,13 @@ SHOW_MESSAGE:
 	JP	0
 SHOW_NOT_CREATE:
 	LD	DE,MES_NOT_CREATE
-	JR	SHOW_MESSAGE 
+	JR	SHOW_MESSAGE
 SHOW_EXISTS:
 	LD	DE,MES_EXISTS
-	JR	SHOW_MESSAGE 
+	JR	SHOW_MESSAGE
 
 MES_TITLE:
-	DB	"mkdir v1.02 Gaku",00DH,00AH
+	DB	"mkdir v1.03 Gaku",00DH,00AH
 	DB	'$'
 ERRMES1:
 	DB	"usage: MKDIR directory",00DH,00AH
