@@ -24,7 +24,7 @@ _DOS2:
 	CP	05AH		;(BDOS)カレントディレクトリの変更(_CHDIR)
 	JP	Z,_SYS5A
 	CP	05CH		;(BDOS)ファイル名の解析(_PFILE)
-	JP	Z,_SYS5C
+	JP	Z,_SYS29
 	CP	05FH		;(BDOS)ディスクバッファのフラッシュ(_FLUSH)
 	JP	Z,_SYS5F
 	CP	06FH		;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
@@ -427,7 +427,7 @@ _SYS24:		;(BDOS)ランダムレコードフィールドの設定
 	CALL	GETSEQ
 	JR	_S24X1		;^^^^^^^^^^^^^^^^^^^^^^^^
 
-_SYS5C:		;(BDOS)ファイル名の解析
+_SYS29:		;(BDOS)ファイル名の解析(_PPATH)
 	PUSH	BC
 	PUSH	HL
 	CALL	FILE

@@ -23,7 +23,7 @@
        FFD9                     TRAP38  EQU 0FFD9H
        0028                     WIDTH   EQU 40
        0019                     LINE    EQU 25
-       0071                     COLORF  EQU 071H
+       0070                     COLORF  EQU 070H
        0010                     KEYSP_H EQU 16
        0083                     KEYSP_L EQU 131
        000A                     COMS    EQU 10
@@ -34,10 +34,10 @@
                                 
        0001                     VER_1   EQU 1
        0005                     VER_2   EQU 5
-       0002                     VER_3   EQU 2
+       0004                     VER_3   EQU 4
        1D01                     MACW    EQU MAC + 01D00H    ;機種フラグとLD判別フラグ
        0001                     MACD    EQU MAC + DEV * 256 ;機種フラグとデバイスフラグ
-       0152                     VER EQU VER_1 * 256 + VER_2 * 16 + VER_3
+       0154                     VER EQU VER_1 * 256 + VER_2 * 16 + VER_3
                                 
        0005                     SYSTEM  EQU 00005H
        000F                     JP_HL   EQU 0000FH
@@ -70,7 +70,7 @@
                                 
 000080 8080 C38780          10      JP  START
 000083 8083 011D                    DW  MACW
-000085 8085 5201                    DW  VER
+000085 8085 5401                    DW  VER
                                 
        8087                     START:
 000087 8087 F3               4      DI
@@ -160,7 +160,7 @@
             204D5A2D3730302F    
             313530302076        
 000152 8152 312E                    DB  030H + VER_1, '.'
-000154 8154 3532                    DB  030H + VER_2 ,030H + VER_3
+000154 8154 3534                    DB  030H + VER_2 ,030H + VER_3
                                 ;   DB  ""
 000156 8156 2047616B750D0A          DB  ' Gaku',0DH,0AH
 00015D 815D 00                      DB  0
@@ -980,9 +980,9 @@
 000606 D37F CDE3DC          17      CALL    FILL_MEMORY
 000609 D382 E1              10      POP HL
 00060A D383 D5              11      PUSH    DE
-00060B D384 CD80D7          17      CALL    _SYS5C      ;(BDOS)ファイル名の解析
+00060B D384 CD80D7          17      CALL    _SYS29      ;(BDOS)ファイル名の解析
 00060E D387 216C00          10      LD  HL,FCB2
-000611 D38A CD80D7          17      CALL    _SYS5C      ;(BDOS)ファイル名の解析
+000611 D38A CD80D7          17      CALL    _SYS29      ;(BDOS)ファイル名の解析
 000614 D38D E1              10      POP HL
 000615 D38E 010050          10      LD  BC,05000H
 000618 D391 118100          10      LD  DE,00081H
@@ -1229,13 +1229,13 @@
 0007AA D523 FE5A             7      CP  05AH        ;(BDOS)カレントディレクトリの変更(_CHDIR)
 0007AC D525 CAC4D7          10      JP  Z,_SYS5A
 0007AF D528 FE5C             7      CP  05CH        ;(BDOS)ファイル名の解析(_PFILE)
-0007B1 D52A CA80D7          10      JP  Z,_SYS5C
+0007B1 D52A CA80D7          10      JP  Z,_SYS29
 0007B4 D52D FE5F             7      CP  05FH        ;(BDOS)ディスクバッファのフラッシュ(_FLUSH)
 0007B6 D52F CAA5E9          10      JP  Z,_SYS5F
 0007B9 D532 FE6F             7      CP  06FH        ;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
 0007BB D534 200A            12      JR  NZ,_ERROR
 0007BD D536 011D01          10      LD  BC,011DH
-0007C0 D539 115201          10      LD  DE,VER
+0007C0 D539 115401          10      LD  DE,VER
 0007C3 D53C 210100          10      LD  HL,MACD
        D53F                     C_REM:
 0007C6 D53F AF               4      XOR A
@@ -1632,7 +1632,7 @@
 000A02 D77B CDDAE1          17      CALL    GETSEQ
 000A05 D77E 18EE            12      JR  _S24X1      ;^^^^^^^^^^^^^^^^^^^^^^^^
                                 
-       D780                     _SYS5C:     ;(BDOS)ファイル名の解析
+       D780                     _SYS29:     ;(BDOS)ファイル名の解析(_PPATH)
 000A07 D780 C5              11      PUSH    BC
 000A08 D781 E5              11      PUSH    HL
 000A09 D782 CD37DC          17      CALL    FILE
@@ -1800,7 +1800,7 @@
 000ACC D845 3A92F0          13      LD  A,(_KEYD)
        D848                     BREAK1:
 000ACF D848 FE03             7      CP  3       ;CTRL+C
-000AD1 D84A CCF4F0          17      CALL    Z,_BREAK
+000AD1 D84A CA00F0          10      JP  Z,CPM_BOOT
 000AD4 D84D FE13             7      CP  013H        ;CTRL+S
 000AD6 D84F C0              11      RET NZ
                                 
@@ -3516,7 +3516,7 @@
 00146E E1E7 C9              10      RET
                                 
        E1E8                     SETSEQ1:
-00146F E1E8 F5              11      PUSH    AF      
+00146F E1E8 F5              11      PUSH    AF
 001470 E1E9 E5              11      PUSH    HL      ;AHL=Random record
 001471 E1EA FD7E21          19      LD  A,(IY+33)   ;(FCB)ランダムレコード
 001474 E1ED FD6E22          19      LD  L,(IY+34)
@@ -3571,8 +3571,8 @@
 0014C9 E242 D5              11      PUSH    DE
 0014CA E243 CD51E2          17      CALL    JP_BC
 0014CD E246 FDE1            14      POP IY
-       E249                     SETSEQ_SWC_SEQ_RR   EQU $+1
 0014CF E248 CD04E2          17      CALL    SETSEQ
+       E249                     SETSEQ_SWC_SEQ_RR   EQU $-2
 0014D2 E24B FDCB20BE        23      RES 7,(IY+32)   ;(FCB)カレントレコード
                                 
 0014D6 E24F C1              10      POP BC
@@ -4020,21 +4020,21 @@
        E509                     DRW_FLUSH:
 001790 E509 C5              11      PUSH    BC
 001791 E50A D5              11      PUSH    DE
-       E50C                     DRWF_C  EQU $+1
-       E50D                     DRWF_B  EQU $+2
 001792 E50B 010000          10      LD  BC,0
+       E50C                     DRWF_C  EQU $-2
+       E50D                     DRWF_B  EQU $-1
 001795 E50E 78               4      LD  A,B
 001796 E50F B7               4      OR  A
 001797 E510 280D            12      JR  Z,DRDF1
-       E513                     DRWF_E  EQU $+1
-       E514                     DRWF_D  EQU $+2
 001799 E512 110000          10      LD  DE,0
-       E516                     DRWF_HL EQU $+1
+       E513                     DRWF_E  EQU $-2
+       E514                     DRWF_D  EQU $-1
 00179C E515 210000          10      LD  HL,0
+       E516                     DRWF_HL EQU $-2
 00179F E518 AF               4      XOR A
 0017A0 E519 320DE5          13      LD  (DRWF_B),A
-       E51D                     DRWF_MODE   EQU $+1
 0017A3 E51C CD39E8          17      CALL    DRD24B
+       E51D                     DRWF_MODE   EQU $-2
        E51F                     DRDF1:
 0017A6 E51F D1              10      POP DE
 0017A7 E520 C1              10      POP BC
@@ -4422,8 +4422,8 @@
 0019C6 E73F D8              11      RET C
 0019C7 E740 DDAE06          19      XOR (IX+6)      ;DPB_06_FATID
 0019CA E743 C8              11      RET Z
-       E745                     DEVSWC  EQU $+1
 0019CB E744 3E00             7      LD  A,0     ;DPB_12_DEVICE
+       E745                     DEVSWC  EQU $-1
 0019CD E746 CB6F             8      BIT 5,A
 0019CF E748 C0              11      RET NZ      ;BPBを取得している場合はFATIDをチェックしない
 0019D0 E749 37               4      SCF
@@ -5464,7 +5464,7 @@
 002317 F090 0000                _KEYPS: DW  0
 002319 F092 00FF                _KEYD:  DW  0FF00H  ;キーデータ
 00231B F094 8310                _KEYSP: DB  KEYSP_L,KEYSP_H ;オートリピートの速度
-00231D F096 71                  _COLORF:DB  COLORF  ;色
+00231D F096 70                  _COLORF:DB  COLORF  ;色
 00231E F097 19                  _LINE:  DB  LINE
                                 
 00231F F098 0000                _FCB:   DW  0   ;SEARCH FILES
@@ -5571,7 +5571,7 @@
                                 ;2
 0023C7 F140 40D500D708D751D7        DW  _SYS20,_SYS21,_SYS22,_SYS23
 0023CF F148 77D740D553E238E3        DW  _SYS24,_ERROR,_SYS26,_SYS27
-0023D7 F150 08D780D7CBD8CBDD        DW  _SYS28,_SYS5C,_SYS2A,_SYS2B
+0023D7 F150 08D780D7CBD8CBDD        DW  _SYS28,_SYS29,_SYS2A,_SYS2B
 0023DF F158 D1D8CBDD40D5A3D7        DW  _SYS2C,_SYS2D,_SYS2E,_SYS2F
                                 ;3
 0023E7 F160 9DD740D540D540D5        DW  _SYS30,_ERROR,_ERROR,_ERROR
