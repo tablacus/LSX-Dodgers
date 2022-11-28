@@ -805,12 +805,13 @@ L_WRFX:
 	RR	H		;CH=CH/2
 	JR	L_WRFX
 E_WRFX:
-	LD	B,H
-	INC	B
+	LD	B,C
+	LD	C,H
+	INC	BC
 	LD	A,037H		;SCF
 	LD	(DRDN1),A
 
-WRDF:				;Bクラスタ分FATを確保する
+WRDF:				;BCクラスタ分FATを確保する
 	LD	DE,2
 	XOR	A
 	LD	(_SECPS+1),A
@@ -838,7 +839,10 @@ WRDF3:
 	POP	DE
 	POP	BC
 	RET	C
-	DJNZ	WRDF5		;ここでループカウンタチェック
+	DEC	BC
+	LD	A,B
+	OR	C
+	JR	NZ,WRDF5	;ここでループカウンタチェック
 	LD	DE,(_CLPS)
 	LD	HL,0FFFFH	;FATエントリ終了(EOCマーク)
 	JP	_SNCL
@@ -962,8 +966,8 @@ PUSHRR:
 	LD	(SETSEQ_SWC_RND),A
 	LD	(SETSEQ_SWC_SEQ_RR),HL
 	CALL	GET_RR_AHL
-	LD	(HLBUF),HL
-	LD	(HLBUF+2),A
+	LD	(RR_BUF_HL),HL
+	LD	(RR_BUF_A),A
 	RET
 
 GET_CPM_R_SIZE:		;バイト単位からCP/Mのレコード単位を求める（1レコード=128バイト）
@@ -1012,9 +1016,11 @@ GETSEQ:
 SETSEQ1:
 	PUSH	AF
 	PUSH	HL		;AHL=Random record
-	LD	A,(IY+33)	;(FCB)ランダムレコード
-	LD	L,(IY+34)
-	LD	H,(IY+35)
+	CALL	GET_RR_AHL
+	LD	B,A		;AHL→HLA
+	LD	A,L		;(IY+33)(FCB)ランダムレコード
+	LD	L,H		;(IY+34)
+	LD	H,B		;(IY+35)
 	LD	B,0
 
 	CALL	GET_CPM_R_SIZE
@@ -1031,8 +1037,8 @@ SETSEQ:
 POPRR:
 	PUSH	AF
 	PUSH	HL
-	LD	HL,(HLBUF)
-	LD	A,(HLBUF+2)
+	LD	HL,(RR_BUF_HL)
+	LD	A,(RR_BUF_A)
 	CALL	SET_RR_AHL
 	POP	HL
 	POP	AF
@@ -1046,14 +1052,14 @@ RB_READ:
 	PUSH	BC
 	LD	BC,(STABLE+2*027H)	;(BDOS)ランダムブロック読み込み
 RBRW:
-	SRL	A	;AHLA' = HL*128
-	RR	H	;AHL=AHL/2
-	RR	L	;
-	LD	A,0
-	RRA		;A'HLA
-	LD	(IY+33),A	;(FCB)ランダムレコード
-	LD	(IY+34),L
-	LD	(IY+35),H
+	RRA		;AHL = AHL*128
+	LD	A,H	;AHL = AHL0/2
+	RRA		;A
+	LD	H,L	;
+	RR	H	;H
+	LD	L,0	;
+	RR	L	;L
+	CALL	SET_RR_AHL
 	LD	HL,128
 	PUSH	BC
 SETSEQ_SWC_RND:

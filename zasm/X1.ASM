@@ -32,7 +32,7 @@ COMS	EQU	9
 
 VER_1   EQU	1
 VER_2   EQU	5
-VER_3   EQU	4
+VER_3   EQU	5
 MACW	EQU	MAC + 01D00H	;機種フラグとLD判別フラグ
 MACD	EQU	MAC + DEV * 256	;機種フラグとデバイスフラグ
 VER	EQU	VER_1 * 256 + VER_2 * 16 + VER_3
@@ -4269,12 +4269,13 @@ L_WRFX:
 	RR	H		;CH=CH/2
 	JR	L_WRFX
 E_WRFX:
-	LD	B,H
-	INC	B
+	LD	B,C
+	LD	C,H
+	INC	BC
 	LD	A,037H		;SCF
 	LD	(DRDN1),A
 
-WRDF:				;Bクラスタ分FATを確保する
+WRDF:				;BCクラスタ分FATを確保する
 	LD	DE,2
 	XOR	A
 	LD	(_SECPS+1),A
@@ -4302,7 +4303,10 @@ WRDF3:
 	POP	DE
 	POP	BC
 	RET	C
-	DJNZ	WRDF5		;ここでループカウンタチェック
+	DEC	BC
+	LD	A,B
+	OR	C
+	JR	NZ,WRDF5	;ここでループカウンタチェック
 	LD	DE,(_CLPS)
 	LD	HL,0FFFFH	;FATエントリ終了(EOCマーク)
 	JP	_SNCL
@@ -4426,8 +4430,8 @@ PUSHRR:
 	LD	(SETSEQ_SWC_RND),A
 	LD	(SETSEQ_SWC_SEQ_RR),HL
 	CALL	GET_RR_AHL
-	LD	(HLBUF),HL
-	LD	(HLBUF+2),A
+	LD	(RR_BUF_HL),HL
+	LD	(RR_BUF_A),A
 	RET
 
 GET_CPM_R_SIZE:		;バイト単位からCP/Mのレコード単位を求める（1レコード=128バイト）
@@ -4476,9 +4480,11 @@ GETSEQ:
 SETSEQ1:
 	PUSH	AF
 	PUSH	HL		;AHL=Random record
-	LD	A,(IY+33)	;(FCB)ランダムレコード
-	LD	L,(IY+34)
-	LD	H,(IY+35)
+	CALL	GET_RR_AHL
+	LD	B,A		;AHL→HLA
+	LD	A,L		;(IY+33)(FCB)ランダムレコード
+	LD	L,H		;(IY+34)
+	LD	H,B		;(IY+35)
 	LD	B,0
 
 	CALL	GET_CPM_R_SIZE
@@ -4495,8 +4501,8 @@ SETSEQ:
 POPRR:
 	PUSH	AF
 	PUSH	HL
-	LD	HL,(HLBUF)
-	LD	A,(HLBUF+2)
+	LD	HL,(RR_BUF_HL)
+	LD	A,(RR_BUF_A)
 	CALL	SET_RR_AHL
 	POP	HL
 	POP	AF
@@ -4510,14 +4516,14 @@ RB_READ:
 	PUSH	BC
 	LD	BC,(STABLE+2*027H)	;(BDOS)ランダムブロック読み込み
 RBRW:
-	SRL	A	;AHLA' = HL*128
-	RR	H	;AHL=AHL/2
-	RR	L	;
-	LD	A,0
-	RRA		;A'HLA
-	LD	(IY+33),A	;(FCB)ランダムレコード
-	LD	(IY+34),L
-	LD	(IY+35),H
+	RRA		;AHL = AHL*128
+	LD	A,H	;AHL = AHL0/2
+	RRA		;A
+	LD	H,L	;
+	RR	H	;H
+	LD	L,0	;
+	RR	L	;L
+	CALL	SET_RR_AHL
 	LD	HL,128
 	PUSH	BC
 SETSEQ_SWC_RND:
@@ -4554,7 +4560,7 @@ _SYS3A	EQU	SCF_FF_RET	;(BDOS)サブディレクトリの削除
 _SYS26:		;(BDOS)ランダムブロック書き込み
 	XOR	A
 	LD	(DRDN1),A	;NOP
-	LD	(LEFT+1),HL	;HL←書き込むレコード数
+	LD	(RBSIZE),HL	;HL←書き込むレコード数
 	LD	(LEFTX),HL
 	CALL	SETDRV
 
@@ -4605,8 +4611,7 @@ RBWB1:
 	CALL	DWTC
 	POP	DE
 	POP	BC
-	JR	C,RBWERR
-	CALL	GNCLX
+	CALL	NC,GNCLX
 	JR	C,RBWERR
 	DJNZ	RBWB1
 	CALL	DRW_FLUSH
@@ -4625,17 +4630,12 @@ RBWEND:
 	CALL	RBXEND
 
 	CALL	RBX1
-	JR	NC,RBW1
-	LD	HL,(LEFT+1)
-	LD	E,(IY+16)	;(FCB)ファイルのサイズ(バイト単位)
-	LD	D,(IY+17)	;DE=File size
-	ADD	HL,DE
-	LD	(IY+16),L	;(FCB)ファイルのサイズ(バイト単位)
-	LD	(IY+17),H
-	JR	NC,RBW1
-	INC	(IY+18)
-	JR	NZ,RBW1
-	INC	(IY+19)
+	JR	NC,RBW1		;ランダムレコードの方が大きい場合はサイズを合わせる
+	CALL	GET_RR_BCDE	;BCDE=Random record
+	LD	(IY+16),E	;ファイルのサイズ(バイト単位)
+	LD	(IY+17),D	;
+	LD	(IY+18),C	;
+	LD	(IY+19),B	;
 RBW1:
 	POP	IY
 	POP	BC
@@ -4700,6 +4700,7 @@ _SYS27:		;(BDOS)ランダムブロック読み込み
 	CALL	RBX0
 	JP	C,RBRERR
 	CALL	RBX1
+	CALL	NC,RBX1R
 	JP	C,RBRERR1
 	EX	DE,HL
 	SBC	HL,DE		;CP 00HL,BCDE
@@ -4719,7 +4720,7 @@ RBR1:
 	OR	L
 	JR	Z,RBREND0
 
-	LD	(LEFT+1),HL	;Read record byte
+	LD	(RBSIZE),HL	;HL←読み込むレコード数
 	LD	(LEFTX),HL
 
 	CALL	RBX2
@@ -4791,7 +4792,7 @@ RBX0:
 	SUB	0FDH
 	RET
 
-RBX1:
+RBX1:				;ファイルサイズとランダムレコードを比べる
 	PUSH	HL		;Record byte
 				;AHL=File size
 	LD	L,(IY+16)	;ファイルのサイズ(バイト単位)
@@ -4807,8 +4808,8 @@ RBX1:
 	LD	A,(IY+19)	;ファイルのサイズ
 	SBC	A,B
 	POP	DE
-
-	RET	C
+	RET
+RBX1R:
 	LD	B,A
 	OR	C
 	EX	DE,HL	;BCDE=File byte	HL=Record byte
@@ -4840,8 +4841,7 @@ RBXA:
 	CALL	DRDX
 	POP	DE
 	POP	BC
-	RET	C
-	CALL	GNCLX
+	CALL	NC,GNCLX
 	RET	C
 	LD	(_CLPS),DE
 
@@ -4891,32 +4891,28 @@ RBXC:
 	OR	C
 	RET
 
-RBXEND:
-LEFT:	LD	DE,0
-	XOR	A
-	LD	L,(IY+33)	;(FCB)ランダムレコード
-	LD	H,(IY+34)
+RBXEND:				;レコード数だけランダムレコードを進める
+	LD	DE,0		;進めるレコード数(RBSIZE)
+RBSIZE	EQU	$-2
+	CALL	GET_RR_AHL
 	ADD	HL,DE
-	LD	(IY+33),L	;(FCB)ランダムレコード
-	LD	(IY+34),H
-	JR	NC,RBXEND1
-	INC	(IY+35)
-	JR	NZ,RBXEND1
+	ADC	A,0
+	CALL	SET_RR_AHL
+	EX	DE,HL		;HL=進めるレコード数
+	RET	NC
 	BIT	7,(IY+32)	;(FCB)カレントレコード
-	JR	NZ,RBXEND1
+	RET	NZ
 	INC	(IY+36)
-RBXEND1:
-	EX	DE,HL		;HL=Read byte
 	RET
 
 GET_RR_BCDE:			;BCDE=Random record
 	LD	E,(IY+33)	;(FCB)ランダムレコード
 	LD	D,(IY+34)
 	LD	C,(IY+35)
-	LD	B,(IY+36)
-	BIT	7,(IY+32)	;(FCB)カレントレコード
-	RET	Z
 	LD	B,0		;CP/M互換のアクセスの場合はFCBは36バイト
+	BIT	7,(IY+32)	;(FCB)カレントレコード
+	RET	NZ
+	LD	B,(IY+36)
 	RET
 
 ;	ランダムブロックアクセスの連続したセクタをまとめる
@@ -6122,11 +6118,13 @@ CPM_CONOUT:
 
 DECBF:
 	DS	5
-FDRV	DB	0
-FNAME	DS	36
+FDRV:	DB	0
+FNAME:	DS	36
 SFILE:	DS	33		;DRV FILENAME
-HLBUF:	DS	3		;Random record buffer
-
+RR_BUF_HL:
+	DS	2		;Random record buffer
+RR_BUF_A:			;CP/M互換ファイルアクセスの際のランダムレコードを一時的な保管場所
+	DS	1		;計3バイト
 LEFTX:	DW	0
 DTAX:	DW	0
 

@@ -5,7 +5,7 @@
 _SYS26:		;(BDOS)ランダムブロック書き込み
 	XOR	A
 	LD	(DRDN1),A	;NOP
-	LD	(LEFT+1),HL	;HL←書き込むレコード数
+	LD	(RBSIZE),HL	;HL←書き込むレコード数
 	LD	(LEFTX),HL
 	CALL	SETDRV
 
@@ -56,8 +56,7 @@ RBWB1:
 	CALL	DWTC
 	POP	DE
 	POP	BC
-	JR	C,RBWERR
-	CALL	GNCLX
+	CALL	NC,GNCLX
 	JR	C,RBWERR
 	DJNZ	RBWB1
 	CALL	DRW_FLUSH
@@ -76,17 +75,12 @@ RBWEND:
 	CALL	RBXEND
 
 	CALL	RBX1
-	JR	NC,RBW1
-	LD	HL,(LEFT+1)
-	LD	E,(IY+16)	;(FCB)ファイルのサイズ(バイト単位)
-	LD	D,(IY+17)	;DE=File size
-	ADD	HL,DE
-	LD	(IY+16),L	;(FCB)ファイルのサイズ(バイト単位)
-	LD	(IY+17),H
-	JR	NC,RBW1
-	INC	(IY+18)
-	JR	NZ,RBW1
-	INC	(IY+19)
+	JR	NC,RBW1		;ランダムレコードの方が大きい場合はサイズを合わせる
+	CALL	GET_RR_BCDE	;BCDE=Random record
+	LD	(IY+16),E	;ファイルのサイズ(バイト単位)
+	LD	(IY+17),D	;
+	LD	(IY+18),C	;
+	LD	(IY+19),B	;
 RBW1:
 	POP	IY
 	POP	BC
@@ -151,6 +145,7 @@ _SYS27:		;(BDOS)ランダムブロック読み込み
 	CALL	RBX0
 	JP	C,RBRERR
 	CALL	RBX1
+	CALL	NC,RBX1R
 	JP	C,RBRERR1
 	EX	DE,HL
 	SBC	HL,DE		;CP 00HL,BCDE
@@ -170,7 +165,7 @@ RBR1:
 	OR	L
 	JR	Z,RBREND0
 
-	LD	(LEFT+1),HL	;Read record byte
+	LD	(RBSIZE),HL	;HL←読み込むレコード数
 	LD	(LEFTX),HL
 
 	CALL	RBX2
@@ -242,7 +237,7 @@ RBX0:
 	SUB	0FDH
 	RET
 
-RBX1:
+RBX1:				;ファイルサイズとランダムレコードを比べる
 	PUSH	HL		;Record byte
 				;AHL=File size
 	LD	L,(IY+16)	;ファイルのサイズ(バイト単位)
@@ -258,8 +253,8 @@ RBX1:
 	LD	A,(IY+19)	;ファイルのサイズ
 	SBC	A,B
 	POP	DE
-
-	RET	C
+	RET
+RBX1R:
 	LD	B,A
 	OR	C
 	EX	DE,HL	;BCDE=File byte	HL=Record byte
@@ -291,8 +286,7 @@ RBXA:
 	CALL	DRDX
 	POP	DE
 	POP	BC
-	RET	C
-	CALL	GNCLX
+	CALL	NC,GNCLX
 	RET	C
 	LD	(_CLPS),DE
 
@@ -342,32 +336,28 @@ RBXC:
 	OR	C
 	RET
 
-RBXEND:
-LEFT:	LD	DE,0
-	XOR	A
-	LD	L,(IY+33)	;(FCB)ランダムレコード
-	LD	H,(IY+34)
+RBXEND:				;レコード数だけランダムレコードを進める
+	LD	DE,0		;進めるレコード数(RBSIZE)
+RBSIZE	EQU	$-2
+	CALL	GET_RR_AHL
 	ADD	HL,DE
-	LD	(IY+33),L	;(FCB)ランダムレコード
-	LD	(IY+34),H
-	JR	NC,RBXEND1
-	INC	(IY+35)
-	JR	NZ,RBXEND1
+	ADC	A,0
+	CALL	SET_RR_AHL
+	EX	DE,HL		;HL=進めるレコード数
+	RET	NC
 	BIT	7,(IY+32)	;(FCB)カレントレコード
-	JR	NZ,RBXEND1
+	RET	NZ
 	INC	(IY+36)
-RBXEND1:
-	EX	DE,HL		;HL=Read byte
 	RET
 
 GET_RR_BCDE:			;BCDE=Random record
 	LD	E,(IY+33)	;(FCB)ランダムレコード
 	LD	D,(IY+34)
 	LD	C,(IY+35)
-	LD	B,(IY+36)
-	BIT	7,(IY+32)	;(FCB)カレントレコード
-	RET	Z
 	LD	B,0		;CP/M互換のアクセスの場合はFCBは36バイト
+	BIT	7,(IY+32)	;(FCB)カレントレコード
+	RET	NZ
+	LD	B,(IY+36)
 	RET
 
 ;	ランダムブロックアクセスの連続したセクタをまとめる

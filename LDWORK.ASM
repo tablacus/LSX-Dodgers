@@ -21,11 +21,13 @@ CPM_CONOUT:
 
 DECBF:
 	DS	5
-FDRV	DB	0
-FNAME	DS	36
+FDRV:	DB	0
+FNAME:	DS	36
 SFILE:	DS	33		;DRV FILENAME
-HLBUF:	DS	3		;Random record buffer
-
+RR_BUF_HL:
+	DS	2		;Random record buffer
+RR_BUF_A:			;CP/M互換ファイルアクセスの際のランダムレコードを一時的な保管場所
+	DS	1		;計3バイト
 LEFTX:	DW	0
 DTAX:	DW	0
 

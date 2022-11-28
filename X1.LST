@@ -32,10 +32,10 @@
 0000                
 0000 00 00 00 01    VER_1   EQU	1
 0000 00 00 00 05    VER_2   EQU	5
-0000 00 00 00 04    VER_3   EQU	4
+0000 00 00 00 05    VER_3   EQU	5
 0000 00 00 1D 00    MACW	EQU	MAC + 01D00H	;ã@éÌÉtÉâÉOÇ∆LDîªï ÉtÉâÉO
 0000 00 00 00 00    MACD	EQU	MAC + DEV * 256	;ã@éÌÉtÉâÉOÇ∆ÉfÉoÉCÉXÉtÉâÉO
-0000 00 00 01 54    VER	EQU	VER_1 * 256 + VER_2 * 16 + VER_3
+0000 00 00 01 55    VER	EQU	VER_1 * 256 + VER_2 * 16 + VER_3
 0000                
 0000 00 00 00 05    SYSTEM	EQU	00005H
 0000 00 00 00 0F    JP_HL	EQU	0000FH
@@ -66,7 +66,7 @@ CC00                ;	X1/turbo/Z
 CC00                
 CC00 C3 07 CC       	JP	START
 CC03 00 1D          	DW	MACW
-CC05 54 01          	DW	VER
+CC05 55 01          	DW	VER
 CC07                
 CC07                START:
 CC07 F3             	DI
@@ -272,7 +272,7 @@ CD5F 01 85 00       	LD	BC,AT_SCRE-AT_SCR1
 CD62 ED B0          	LDIR
 CD64                
 CD64 21 A1 D0       	LD	HL,AT_DWT
-CD67 11 D9 EE       	LD	DE,WTTRK
+CD67 11 BF EE       	LD	DE,WTTRK
 CD6A 01 8F 00       	LD	BC,DMAE-WTTRK	;ì]ëóêÊÇÃÉTÉCÉYämîFóp
 CD6D 01 8E 00       	LD	BC,AT_CPUE-AT_DWT
 CD70 ED B0          	LDIR
@@ -285,9 +285,9 @@ CD7E ED B0          	LDIR
 CD80                
 CD80 21 E2 DF       	LD	HL,AT_WTTRK+AT_RS
 CD83 22 E9 F0       	LD	(_WTTRK+1),HL
-CD86 21 22 EF       	LD	HL,AT_DRD+AT_R
+CD86 21 08 EF       	LD	HL,AT_DRD+AT_R
 CD89 22 EC F0       	LD	(_FDRD+1),HL
-CD8C 21 D9 EE       	LD	HL,AT_DWT+AT_R
+CD8C 21 BF EE       	LD	HL,AT_DWT+AT_R
 CD8F 22 EF F0       	LD	(_FDWT+1),HL
 CD92 21 F8 D7       	LD	HL,AT_EDRD+AT_RE
 CD95 22 82 F2       	LD	(EMMRD),HL
@@ -606,7 +606,7 @@ CFBD 20 76 65 72
 CFC1 73 69 6F 6E
 CFC5 20
 CFC6 31 2E          	DB	030H + VER_1, '.'
-CFC8 35 34          	DB	030H + VER_2 ,030H + VER_3
+CFC8 35 35          	DB	030H + VER_2 ,030H + VER_3
 CFCA                ;	DB	""
 CFCA 20 47 61 6B    	DB	' Gaku',0DH,0AH
 CFCE 75 0D 0A
@@ -721,10 +721,10 @@ D05D
 D05D                DISKC:
 D05D 1B             	DEC	DE
 D05E CB 5F          	BIT	3,A
-D060 C4 D2 EE       	CALL	NZ,RNF
+D060 C4 B8 EE       	CALL	NZ,RNF
 D063                DISKD:
 D063 E5             	PUSH	HL
-D064 21 D8 EE       	LD	HL,RETRY
+D064 21 BE EE       	LD	HL,RETRY
 D067 35             	DEC	(HL)
 D068 E1             	POP	HL
 D069 20 0C          	JR	NZ,AT_ERR		;Retry
@@ -732,8 +732,8 @@ D06B B7             	OR	A
 D06C 28 09          	JR	Z,AT_ERR		;Error
 D06E                
 D06E                AT_DELP:
-D06E CD D2 EE       	CALL	RNF
-D071 CD AE EE       	CALL	FDMOFF
+D06E CD B8 EE       	CALL	RNF
+D071 CD 94 EE       	CALL	FDMOFF
 D074 3E FF          	LD	A,0FFH
 D076                AT_ERRZ:
 D076 BF             	CP	A
@@ -744,12 +744,12 @@ D07A                ERRW:
 D07A 3E FF          	LD	A,0FFH
 D07C BF             	CP	A
 D07D 37             	SCF
-D07E C3 AE EE       	JP	FDMOFF
+D07E C3 94 EE       	JP	FDMOFF
 D081                
 D081                ERRDW:
 D081 D1             	POP	DE
 D082 CD B9 DF       	CALL	AT_DELP+AT_RS
-D085 C2 E7 EE       	JP	NZ,DWT0+AT_R
+D085 C2 CD EE       	JP	NZ,DWT0+AT_R
 D088 B7             	OR	A
 D089 20 EF          	JR	NZ,ERRW
 D08B C9             	RET
@@ -757,7 +757,7 @@ D08C
 D08C                ERRDR:
 D08C D1             	POP	DE
 D08D CD B9 DF       	CALL	AT_DELP+AT_RS
-D090 C2 30 EF       	JP	NZ,DRD0+AT_R
+D090 C2 16 EF       	JP	NZ,DRD0+AT_R
 D093 B7             	OR	A
 D094 20 E4          	JR	NZ,ERRW
 D096 C9             	RET
@@ -765,7 +765,7 @@ D097
 D097                AT_WTTRK:
 D097 06 01          	LD	B,1
 D099 3E F4          	LD	A,0F4H
-D09B C3 DB EE       	JP	AT_WTTRK1+AT_R
+D09B C3 C1 EE       	JP	AT_WTTRK1+AT_R
 D09E                
 D09E                AT_SCRN:
 D09E ED 78          	IN	A,(C)
@@ -775,22 +775,22 @@ D0A1
 D0A1                AT_DWT:
 D0A1 3E A0          	LD	A,0A0H
 D0A3                AT_WTTRK1:
-D0A3 32 76 EE       	LD	(FDCPAT+1),A
+D0A3 32 5C EE       	LD	(FDCPAT+1),A
 D0A6                DWTBL:
 D0A6 78             	LD	A,B
-D0A7 32 1E EF       	LD	(AT_WTB+1+AT_R),A
+D0A7 32 04 EF       	LD	(AT_WTB+1+AT_R),A
 D0AA 3E 02          	LD	A,2		;Retry count
-D0AC 32 D8 EE       	LD	(RETRY),A
+D0AC 32 BE EE       	LD	(RETRY),A
 D0AF                
 D0AF                DWT0:
 D0AF D5             	PUSH	DE
 D0B0 E5             	PUSH	HL
-D0B1 CD 15 EE       	CALL	SEEK		;Write disk
+D0B1 CD FB ED       	CALL	SEEK		;Write disk
 D0B4 E1             	POP	HL
 D0B5 DA CC DF       	JP	C,ERRDW+AT_RS
 D0B8 F3             	DI
-D0B9 3A 76 EE       	LD	A,(FDCPAT+1)
-D0BC CD BA EE       	CALL	SECSET
+D0B9 3A 5C EE       	LD	A,(FDCPAT+1)
+D0BC CD A0 EE       	CALL	SECSET
 D0BF 0E FB          	LD	C,0FBH
 D0C1                
 D0C1                DWT1:
@@ -814,7 +814,7 @@ D0D3 3C             	INC	A
 D0D4 FB             	EI
 D0D5 D1             	POP	DE
 D0D6 13             	INC	DE
-D0D7 CD AE EE       	CALL	FDMOFF
+D0D7 CD 94 EE       	CALL	FDMOFF
 D0DA 28 09          	JR	Z,DISKOK_WT
 D0DC CD A8 DF       	CALL	DISKC+AT_RS
 D0DF 20 CE          	JR	NZ,DWT0
@@ -828,21 +828,21 @@ D0E9 C9             	RET
 D0EA                
 D0EA                AT_DRD:
 D0EA 3E 80          	LD	A,080H
-D0EC 32 76 EE       	LD	(FDCPAT+1),A
+D0EC 32 5C EE       	LD	(FDCPAT+1),A
 D0EF                DRDBL:
 D0EF 78             	LD	A,B
-D0F0 32 63 EF       	LD	(AT_RDB+1+AT_R),A
+D0F0 32 49 EF       	LD	(AT_RDB+1+AT_R),A
 D0F3 3E 02          	LD	A,2		;Retry count
-D0F5 32 D8 EE       	LD	(RETRY),A
+D0F5 32 BE EE       	LD	(RETRY),A
 D0F8                DRD0:
 D0F8 D5             	PUSH	DE
 D0F9 E5             	PUSH	HL
-D0FA CD 15 EE       	CALL	SEEK		;Read disk
+D0FA CD FB ED       	CALL	SEEK		;Read disk
 D0FD E1             	POP	HL
 D0FE DA D7 DF       	JP	C,ERRDR+AT_RS
 D101 F3             	DI
-D102 3A 76 EE       	LD	A,(FDCPAT+1)
-D105 CD BA EE       	CALL	SECSET
+D102 3A 5C EE       	LD	A,(FDCPAT+1)
+D105 CD A0 EE       	CALL	SECSET
 D108 0E FB          	LD	C,0FBH
 D10A                DRD1:
 D10A 78             	LD	A,B
@@ -860,7 +860,7 @@ D118 B7             	OR	A
 D119 FB             	EI
 D11A D1             	POP	DE
 D11B 13             	INC	DE
-D11C CD AE EE       	CALL	FDMOFF
+D11C CD 94 EE       	CALL	FDMOFF
 D11F 28 09          	JR	Z,DISKOK_RD
 D121 CD A8 DF       	CALL	DISKC+AT_RS
 D124 20 D2          	JR	NZ,DRD0
@@ -991,7 +991,7 @@ D24D
 D24D                ;	LSX-Dodgers CCP
 D24D                
 D24D                COMMAND:
-D24D 3A CE EF       	LD	A,(FCB_BAT)
+D24D 3A B4 EF       	LD	A,(FCB_BAT)
 D250 B7             	OR	A
 D251 C2 92 D3       	JP	NZ,C_BAT1
 D254 CD 07 D3       	CALL	SETDTA1
@@ -1044,7 +1044,7 @@ D2AB 21 15 F0       	LD	HL,FNAME
 D2AE 11 6D 00       	LD	DE,FCB2+1	;COMMAND NAME
 D2B1 01 0B 00       	LD	BC,11
 D2B4 ED B0          	LDIR
-D2B6 11 68 EF       	LD	DE,PATHD
+D2B6 11 4E EF       	LD	DE,PATHD
 D2B9                CEX1:
 D2B9 1A             	LD	A,(DE)
 D2BA FE 20          	CP	020H
@@ -1074,7 +1074,7 @@ D2E0                OPEN:
 D2E0 0E 11          	LD	C,011H		;(BDOS)ÉtÉ@ÉCÉãÇÃåüçı
 D2E2                OPEN3:
 D2E2 D5             	PUSH	DE
-D2E3 11 A9 EF       	LD	DE,DTA_CCP
+D2E3 11 8F EF       	LD	DE,DTA_CCP
 D2E6 CD 04 D3       	CALL	SETDTA
 D2E9 EB             	EX	DE,HL
 D2EA CD 0E D3       	CALL	SYSTEM0
@@ -1086,10 +1086,10 @@ D2EF 0E 12          	LD	C,012H
 D2F1 18 EF          	JR	OPEN3
 D2F3                
 D2F3                DEFCB:				;Z=Ok NZ=Error
-D2F3 11 A9 EF       	LD	DE,DTA_CCP
+D2F3 11 8F EF       	LD	DE,DTA_CCP
 D2F6 CD 0C D3       	CALL	SYSC0F
 D2F9                
-D2F9 11 CA EF       	LD	DE,DTA_CCP+33	;(FCB)ÉâÉìÉ_ÉÄÉåÉRÅ[Éh
+D2F9 11 B0 EF       	LD	DE,DTA_CCP+33	;(FCB)ÉâÉìÉ_ÉÄÉåÉRÅ[Éh
 D2FC 06 04          	LD	B,4
 D2FE CD D3 D5       	CALL	ZERO_MEMORY_DE
 D301                SETDTA100:
@@ -1119,7 +1119,7 @@ D31B E6 F8          	AND	0F8H
 D31D 67             	LD	H,A
 D31E 2E 00          	LD	L,0
 D320                S27DTA:
-D320 11 A9 EF       	LD	DE,DTA_CCP
+D320 11 8F EF       	LD	DE,DTA_CCP
 D323                S27:
 D323 0E 27          	LD	C,027H		;(BDOS)ÉâÉìÉ_ÉÄÉuÉçÉbÉNì«Ç›çûÇ›
 D325 18 E7          	JR	SYSTEM0
@@ -1139,14 +1139,14 @@ D336                CEXE7:
 D336 CD DD D2       	CALL	OPEN1
 D339                CEXE5:
 D339 C0             	RET	NZ
-D33A 2A B3 EF       	LD	HL,(DTA_CCP+1+9)
+D33A 2A 99 EF       	LD	HL,(DTA_CCP+1+9)
 D33D 7C             	LD	A,H
 D33E CD 97 E3       	CALL	CAP
 D341 67             	LD	H,A
 D342 7D             	LD	A,L
 D343 CD 97 E3       	CALL	CAP
 D346 6F             	LD	L,A
-D347 3A B2 EF       	LD	A,(DTA_CCP+1+8)
+D347 3A 98 EF       	LD	A,(DTA_CCP+1+8)
 D34A CD 97 E3       	CALL	CAP
 D34D D6 42          	SUB	'B'
 D34F 28 2C          	JR	Z,C_BAT
@@ -1187,8 +1187,8 @@ D382 20 D0          	JR	NZ,CEXE6
 D384                
 D384 CD F3 D2       	CALL	DEFCB
 D387                
-D387 21 A9 EF       	LD	HL,DTA_CCP
-D38A 11 CE EF       	LD	DE,FCB_BAT
+D387 21 8F EF       	LD	HL,DTA_CCP
+D38A 11 B4 EF       	LD	DE,FCB_BAT
 D38D 01 25 00       	LD	BC,37
 D390 ED B0          	LDIR
 D392                C_BAT1:
@@ -1220,11 +1220,11 @@ D3BD 36 00          	LD	(HL),0
 D3BF C3 6D D2       	JP	COMMAND2
 D3C2                END_BATCH:
 D3C2 AF             	XOR	A		;ÉoÉbÉ`ÉtÉ@ÉCÉãÇï¬Ç∂ÇÈ
-D3C3 32 CE EF       	LD	(FCB_BAT),A
+D3C3 32 B4 EF       	LD	(FCB_BAT),A
 D3C6 C3 00 F0       	JP	CPM_BOOT
 D3C9                
 D3C9                FGETC_BAT:
-D3C9 11 CE EF       	LD	DE,FCB_BAT
+D3C9 11 B4 EF       	LD	DE,FCB_BAT
 D3CC                FGETC:				;1ï∂éöÇ∏Ç¬ì«Ç›çûÇﬁ
 D3CC E5             	PUSH	HL		;Z:ê¨å˜
 D3CD 21 01 00       	LD	HL,1
@@ -1293,7 +1293,7 @@ D432 EB             	EX	DE,HL
 D433 10 F9          	DJNZ	PDS3
 D435                PDSKF1:
 D435 CD CD D4       	CALL	PRDEC_DEHL
-D438 11 F3 EF       	LD	DE,FREE
+D438 11 D9 EF       	LD	DE,FREE
 D43B CD 61 D8       	CALL	_SYS09		;(BDOS)ï∂éöóÒèoóÕ
 D43E CD BC D4       	CALL	PUTDRV
 D441 3E 5C          	LD	A,05CH		;\
@@ -1307,12 +1307,12 @@ D44F DC C9 D4       	CALL	C,PRDEC_HL
 D452 18 41          	JR	LTNL
 D454                
 D454                P_NAME:
-D454 3A AA EF       	LD	A,(DTA_CCP+1)
+D454 3A 90 EF       	LD	A,(DTA_CCP+1)
 D457 FE 2E          	CP	'.'
 D459 C8             	RET	Z
 D45A 11 FF D6       	LD	DE,DIRHD
 D45D CD 61 D8       	CALL	_SYS09		;(BDOS)ï∂éöóÒèoóÕ
-D460 3A B5 EF       	LD	A,(DTA_CCP+1+00BH)
+D460 3A 9B EF       	LD	A,(DTA_CCP+1+00BH)
 D463 F5             	PUSH	AF
 D464 0F             	RRCA
 D465 9F             	SBC	A,A
@@ -1320,7 +1320,7 @@ D466 E6 0A          	AND	'*'-020H
 D468 C6 20          	ADD	A,020H
 D46A CD BE DB       	CALL	MSG_A
 D46D CD BC D4       	CALL	PUTDRV
-D470 21 AA EF       	LD	HL,DTA_CCP+1
+D470 21 90 EF       	LD	HL,DTA_CCP+1
 D473 CD 0D D5       	CALL	FPRNT
 D476                
 D476 F1             	POP	AF
@@ -1330,8 +1330,8 @@ D47B 11 F4 D6       	LD	DE,DIRMES
 D47E CD 61 D8       	CALL	_SYS09		;(BDOS)ï∂éöóÒèoóÕ
 D481 18 0A          	JR	DIR6
 D483                DIR3:
-D483 ED 5B C8 EF    	LD	DE,(DTA_CCP+1+01EH)
-D487 2A C6 EF       	LD	HL,(DTA_CCP+1+01CH)
+D483 ED 5B AE EF    	LD	DE,(DTA_CCP+1+01EH)
+D487 2A AC EF       	LD	HL,(DTA_CCP+1+01CH)
 D48A CD CD D4       	CALL	PRDEC_DEHL
 D48D                DIR6:
 D48D 3A B1 F0       	LD	A,(_WIDTH)
@@ -1344,7 +1344,7 @@ D497 C3 CD F0       	JP	_PRINT
 D49A                
 D49A                C_PATH:
 D49A CD 62 E1       	CALL	SPCUT
-D49D 21 68 EF       	LD	HL,PATHD
+D49D 21 4E EF       	LD	HL,PATHD
 D4A0 FE 21          	CP	021H
 D4A2 30 0C          	JR	NC,CPATH0
 D4A4                CPATHP:
@@ -1452,7 +1452,7 @@ D52F                PRTTMS:
 D52F 3E 20          	LD	A,020H
 D531 CD BE DB       	CALL	MSG_A
 D534                
-D534 2A C2 EF       	LD	HL,(DTA_CCP+1+24)
+D534 2A A8 EF       	LD	HL,(DTA_CCP+1+24)
 D537 7D             	LD	A,L
 D538 B7             	OR	A
 D539 C8             	RET	Z
@@ -1476,7 +1476,7 @@ D557 7D             	LD	A,L
 D558 E6 1F          	AND	01FH
 D55A CD 89 D5       	CALL	PRDEC_A
 D55D                
-D55D 2A C0 EF       	LD	HL,(DTA_CCP+1+22)
+D55D 2A A6 EF       	LD	HL,(DTA_CCP+1+22)
 D560                
 D560 3E 20          	LD	A,020H
 D562 CD BE DB       	CALL	MSG_A
@@ -1583,7 +1583,7 @@ D5FD                COPY1:
 D5FD C0             	RET	NZ
 D5FE CD F3 D2       	CALL	DEFCB
 D601                
-D601 3A B6 EF       	LD	A,(DTA_CCP+13)
+D601 3A 9C EF       	LD	A,(DTA_CCP+13)
 D604 CB 67          	BIT	4,A
 D606 28 21          	JR	Z,COPY1A
 D608                
@@ -1593,7 +1593,7 @@ D60E 38 14          	JR	C,COPY9
 D610                
 D610 3E 20          	LD	A,020H
 D612 32 5D 00       	LD	(FCB1+1),A
-D615 2A C3 EF       	LD	HL,(DTA_CCP+26)
+D615 2A A9 EF       	LD	HL,(DTA_CCP+26)
 D618 23             	INC	HL
 D619 22 6A 00       	LD	(FCB1+14),HL
 D61C 18 D5          	JR	COPY0
@@ -1608,7 +1608,7 @@ D629
 D629                COPY1A:
 D629 21 6C 00       	LD	HL,FCB2
 D62C 11 14 F0       	LD	DE,FDRV
-D62F 01 AB EF       	LD	BC,DTA_CCP+2
+D62F 01 91 EF       	LD	BC,DTA_CCP+2
 D632 ED A0          	LDI
 D634 3E 0B          	LD	A,11
 D636                COPY2:
@@ -1658,9 +1658,9 @@ D67F CD 0E D3       	CALL	SYSTEM0
 D682 20 23          	JR	NZ,COPYE
 D684 10 E9          	DJNZ	COPY6
 D686                COPY7:
-D686 3A B6 EF       	LD	A,(DTA_CCP+13)	;(FCB)ëÆê´
+D686 3A 9C EF       	LD	A,(DTA_CCP+13)	;(FCB)ëÆê´
 D689 32 21 F0       	LD	(FDRV+13),A
-D68C 21 BD EF       	LD	HL,DTA_CCP+20	;(FCB)É^ÉCÉÄÉXÉ^ÉìÉv
+D68C 21 A3 EF       	LD	HL,DTA_CCP+20	;(FCB)É^ÉCÉÄÉXÉ^ÉìÉv
 D68F 11 28 F0       	LD	DE,FDRV+20
 D692 01 04 00       	LD	BC,4
 D695 ED B0          	LDIR
@@ -1994,11 +1994,11 @@ D844 CA E3 DA       	JP	Z,_SYS5A
 D847 FE 5C          	CP	05CH		;(BDOS)ÉtÉ@ÉCÉãñºÇÃâêÕ(_PFILE)
 D849 CA 9F DA       	JP	Z,_SYS29
 D84C FE 5F          	CP	05FH		;(BDOS)ÉfÉBÉXÉNÉoÉbÉtÉ@ÇÃÉtÉâÉbÉVÉÖ(_FLUSH)
-D84E CA F9 ED       	JP	Z,_SYS5F
+D84E CA DF ED       	JP	Z,_SYS5F
 D851 FE 6F          	CP	06FH		;(BDOS)MSX-DOS ÇÃÉoÅ[ÉWÉáÉìî‘çÜÇÃälìæ(_DOSVER)
 D853 20 0A          	JR	NZ,_ERROR
 D855 01 1D 01       	LD	BC,011DH
-D858 11 54 01       	LD	DE,VER
+D858 11 55 01       	LD	DE,VER
 D85B 21 00 00       	LD	HL,MACD
 D85E                C_REM:
 D85E AF             	XOR	A
@@ -2115,12 +2115,12 @@ D8FB FD 77 0E       	LD	(IY+14),A	;(FCB)ÉåÉRÅ[ÉhÉTÉCÉY/ÉAÉNÉZÉXÇ∑ÇÈÉfÉBÉåÉNÉgÉäÇ
 D8FE FD 77 0F       	LD	(IY+15),A
 D901                
 D901 FD 34 1C       	INC	(IY+28)		;0FEH->0FFH ;ÉIÅ[ÉvÉìÉÇÅ[Éh
-D904 CD BA E5       	CALL	SETTMS
+D904 CD BE E5       	CALL	SETTMS
 D907                
 D907 FD 7E 1D       	LD	A,(IY+29)	;(FCB)ÉfÉBÉåÉNÉgÉäÉÇÅ[Éh
 D90A 32 A0 F0       	LD	(_DIRF),A
 D90D E6 7F          	AND	07FH
-D90F 32 03 EB       	LD	(_SECPS+1),A
+D90F 32 E9 EA       	LD	(_SECPS+1),A
 D912 FD 5E 1E       	LD	E,(IY+30)	;(FCB)ÉfÉBÉåÉNÉgÉäÉ|ÉWÉVÉáÉì
 D915 FD 56 1F       	LD	D,(IY+31)
 D918 CD C8 E2       	CALL	READ_DIR
@@ -2166,7 +2166,7 @@ D960 2A 9F F0       	LD	HL,(_FILEN)
 D963 7C             	LD	A,H
 D964 B7             	OR	A
 D965 28 06          	JR	Z,_S12DIR
-D967 3A 03 EB       	LD	A,(_SECPS+1)
+D967 3A E9 EA       	LD	A,(_SECPS+1)
 D96A F6 80          	OR	080H
 D96C 67             	LD	H,A
 D96D                _S12DIR:
@@ -2240,9 +2240,9 @@ D9BB 18 BB          	JR	FEND
 D9BD                
 D9BD                _SYS14:		;(BDOS)ÉVÅ[ÉPÉìÉVÉÉÉãÇ»ì«Ç›èoÇµ
 D9BD CD 74 E1       	CALL	SETDRV
-D9C0 CD 26 E6       	CALL	INIT_SEQ
+D9C0 CD 2A E6       	CALL	INIT_SEQ
 D9C3                SREAD:
-D9C3 CD 70 E6       	CALL	RB_READ
+D9C3 CD 72 E6       	CALL	RB_READ
 D9C6                
 D9C6 C6 01          	ADD	A,001H
 D9C8 38 AE          	JR	C,FEND
@@ -2257,9 +2257,9 @@ D9D1 18 A6          	JR	FENDE
 D9D3                
 D9D3                _SYS15:		;(BDOS)ÉVÅ[ÉPÉìÉVÉÉÉãÇ»èëÇ´çûÇ›
 D9D3 CD 74 E1       	CALL	SETDRV
-D9D6 CD 26 E6       	CALL	INIT_SEQ
+D9D6 CD 2A E6       	CALL	INIT_SEQ
 D9D9                SWRITE:
-D9D9 CD 69 E6       	CALL	RB_WRITE
+D9D9 CD 6B E6       	CALL	RB_WRITE
 D9DC                
 D9DC C6 FF          	ADD	A,0FFH
 D9DE 18 ED          	JR	FENDX
@@ -2291,7 +2291,7 @@ DA04 23             	INC	HL
 DA05 0D             	DEC	C
 DA06 20 FB          	JR	NZ,_S16X1
 DA08                
-DA08 CD BF E5       	CALL	SETTMSX
+DA08 CD C3 E5       	CALL	SETTMSX
 DA0B FD 36 0D FF    	LD	(IY+13),0FFH	;(FCB)Attribute
 DA0F CD 94 E1       	CALL	SOPENX
 DA12 3F             	CCF
@@ -2302,13 +2302,13 @@ DA1C C3 AB D8       	JP	_S16XX
 DA1F                
 DA1F                _SYS21:		;(BDOS)ÉâÉìÉ_ÉÄÇ»ì«Ç›èoÇµ
 DA1F CD 74 E1       	CALL	SETDRV
-DA22 CD 0A E6       	CALL	INIT_RND
+DA22 CD 0E E6       	CALL	INIT_RND
 DA25 18 9C          	JR	SREAD
 DA27                
 DA27                _SYS22:		;(BDOS)ÉâÉìÉ_ÉÄÇ»èëÇ´çûÇ›
 DA27                _SYS28:		;(BDOS)ÉâÉìÉ_ÉÄÇ»èëÇ´çûÇ›ÅEÇªÇÃ2
 DA27 CD 74 E1       	CALL	SETDRV
-DA2A CD 0A E6       	CALL	INIT_RND
+DA2A CD 0E E6       	CALL	INIT_RND
 DA2D 18 AA          	JR	SWRITE
 DA2F                
 DA2F                _SYS18:		;(BDOS)ÉçÉOÉCÉìÉxÉNÉgÉãÇÃälìæ
@@ -2332,9 +2332,9 @@ DA40 CD 87 E1       	CALL	GETDRV
 DA43 CD DC F0       	CALL	_GETDPB
 DA46 D4 E2 F0       	CALL	NC,_RDFATX
 DA49 21 00 00       	LD	HL,0
-DA4C D4 98 E5       	CALL	NC,DSKF
+DA4C D4 9C E5       	CALL	NC,DSKF
 DA4F                
-DA4F ED 5B 99 E5    	LD	DE,(MAXCLP+1)	;DPB_08_MAXCL-1
+DA4F ED 5B 9D E5    	LD	DE,(MAXCLP+1)	;DPB_08_MAXCL-1
 DA53 1B             	DEC	DE		;DEÅ©ÉNÉâÉXÉ^ÇÃëçêî
 DA54 FD 2A 7C F1    	LD	IY,(_FATBF)	;IYÅ©ÉÅÉÇÉäè„ÇÃFATÇÃêÊì™ÉAÉhÉåÉX
 DA58 9F             	SBC	A,A
@@ -2372,10 +2372,10 @@ DA7F FD 6E 11       	LD	L,(IY+17)	;
 DA82 FD 66 12       	LD	H,(IY+18)	;
 DA85 C5             	PUSH	BC		;
 DA86 FD 46 13       	LD	B,(IY+19)	;
-DA89 CD FC E5       	CALL	GET_CPM_R_SIZE
+DA89 CD 00 E6       	CALL	GET_CPM_R_SIZE
 DA8C C1             	POP	BC
 DA8D                _S24X1:
-DA8D CD 1C E6       	CALL	SET_RR_AHL
+DA8D CD 20 E6       	CALL	SET_RR_AHL
 DA90                ;	POP	DE		;^^^^^^^^^^^^^^^^^^^^^^^^
 DA90                ;	PUSH	DE		;EX DE,IY
 DA90 FD E3          	EX	(SP),IY		;
@@ -2392,7 +2392,7 @@ DA97 D5             	PUSH	DE		;EX DE,IY
 DA98 FD E3          	EX	(SP),IY		;
 DA9A                ;	POP	DE		;
 DA9A                ;	PUSH	DE		;DEÇîjâÛÇµÇ»Ç¢ÇÊÇ§Ç…íçà”vv
-DA9A CD 2E E6       	CALL	GETSEQ
+DA9A CD 32 E6       	CALL	GETSEQ
 DA9D 18 EE          	JR	_S24X1		;^^^^^^^^^^^^^^^^^^^^^^^^
 DA9F                
 DA9F                _SYS29:		;(BDOS)ÉtÉ@ÉCÉãñºÇÃâêÕ(_PPATH)
@@ -2420,11 +2420,11 @@ DABB C9             	RET
 DABC                
 DABC                _SYS30:		;(BDOS)ò_óùÉZÉNÉ^ÇópÇ¢ÇΩèëÇ´çûÇ›
 DABC C5             	PUSH	BC
-DABD 01 9D EC       	LD	BC,DWT24B
+DABD 01 83 EC       	LD	BC,DWT24B
 DAC0 18 04          	JR	S2FX
 DAC2                _SYS2F:
 DAC2 C5             	PUSH	BC
-DAC3 01 8D EC       	LD	BC,DRD24B
+DAC3 01 73 EC       	LD	BC,DRD24B
 DAC6                S2FX:
 DAC6 ED 43 DC DA    	LD	(S2FPAT+1),BC
 DACA CD DF F0       	CALL	_FFLUSH
@@ -2438,7 +2438,7 @@ DAD5 44             	LD	B,H		;Number of clusters
 DAD6 2A 8A F0       	LD	HL,(_DTA)
 DAD9                
 DAD9 0E 00          	LD	C,0
-DADB CD 8D EC       S2FPAT:	CALL	DRD24B
+DADB CD 73 EC       S2FPAT:	CALL	DRD24B
 DADE                S30X2:
 DADE E1             	POP	HL
 DADF D1             	POP	DE
@@ -3745,7 +3745,7 @@ E211 E1             	POP	HL
 E212 20 DD          	JR	NZ,SOPEN1
 E214 18 07          	JR	SOPEN6
 E216                SOPEN5:
-E216 CD 0B EB       	CALL	GNCLX		;END DIR
+E216 CD F1 EA       	CALL	GNCLX		;END DIR
 E219 D8             	RET	C
 E21A CD 8F E3       	CALL	ENDCL
 E21D                SOPEN6:
@@ -3810,14 +3810,14 @@ E281 B7             	OR	A
 E282 37             	SCF
 E283 C8             	RET	Z		;ÉãÅ[ÉgÉfÉBÉåÉNÉgÉä
 E284 06 01          	LD	B,1
-E286 CD 20 E5       	CALL	WRDF
+E286 CD 21 E5       	CALL	WRDF
 E289 D8             	RET	C
 E28A ED 5B FE F1    	LD	DE,(_CLPS)
 E28E D5             	PUSH	DE
 E28F CD 58 E3       	CALL	DCPAT
-E292 CD 96 E9       	CALL	DRDNX
+E292 CD 7C E9       	CALL	DRDNX
 E295 2A 7E F1       	LD	HL,(_DTBUF)	;ÉfÉBÉåÉNÉgÉäÉGÉìÉgÉäÇ0ÉNÉäÉA
-E298 3A 94 E8       	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
+E298 3A 86 E8       	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
 E29B 47             	LD	B,A
 E29C AF             	XOR	A
 E29D 4F             	LD	C,A
@@ -3830,7 +3830,7 @@ E2A4 3A 76 E3       	LD	A,(SPCPAT+1)	;1ÉNÉâÉXÉ^ÇÃò_óùÉZÉNÉ^êî
 E2A7 3D             	DEC	A
 E2A8 28 19          	JR	Z,COPENE
 E2AA 3E 01          	LD	A,1		;1ÉZÉNÉ^ï”ÇËÇÃÉZÉNÉ^êîÇ™2à»è„ÇÃèÍçá
-E2AC 32 03 EB       	LD	(_SECPS+1),A
+E2AC 32 E9 EA       	LD	(_SECPS+1),A
 E2AF D1             	POP	DE		;DE=(_CLPS)
 E2B0 D5             	PUSH	DE
 E2B1                COPEN1:
@@ -3838,10 +3838,10 @@ E2B1 D5             	PUSH	DE		;ÉfÅ[É^ÉoÉbÉtÉ@Ç…ì¸ÇÁÇ»Ç¢ÉZÉNÉ^Ç‡É[ÉçÉNÉäÉA
 E2B2 C5             	PUSH	BC
 E2B3 2A 7E F1       	LD	HL,(_DTBUF)
 E2B6 CD 72 E3       	CALL	CLUSTX
-E2B9 CD 9B EC       	CALL	DWT24
+E2B9 CD 81 EC       	CALL	DWT24
 E2BC C1             	POP	BC
 E2BD D1             	POP	DE
-E2BE CD 02 EB       	CALL	NEXTX
+E2BE CD E8 EA       	CALL	NEXTX
 E2C1 20 EE          	JR	NZ,COPEN1
 E2C3                COPENE:
 E2C3 2A 7E F1       	LD	HL,(_DTBUF)
@@ -3853,7 +3853,7 @@ E2C8 ED 53 FE F1    	LD	(_CLPS),DE
 E2CC C5             	PUSH	BC
 E2CD D5             	PUSH	DE
 E2CE CD 58 E3       	CALL	DCPAT
-E2D1 CD 76 E9       	CALL	DRDX
+E2D1 CD 5C E9       	CALL	DRDX
 E2D4 D1             	POP	DE
 E2D5 C1             	POP	BC
 E2D6 C9             	RET
@@ -3972,7 +3972,7 @@ E360 B7             	OR	A
 E361 C8             	RET	Z		;ÉãÅ[ÉgÉfÉBÉåÉNÉgÉäÇÃèÍçáÇÕCÉåÉWÉXÉ^Ç0Ç…ÇµÇƒÇ®Ç≠(CDEÇ™ÉZÉNÉ^î‘çÜ)
 E362 3A 76 E3       	LD	A,(SPCPAT+1)
 E365 4F             	LD	C,A
-E366 3A 03 EB       	LD	A,(_SECPS+1)
+E366 3A E9 EA       	LD	A,(_SECPS+1)
 E369 B9             	CP	C
 E36A 38 01          	JR	C,DC1
 E36C AF             	XOR	A
@@ -3992,7 +3992,7 @@ E37C 8F             	ADC	A,A
 E37D 18 F8          	JR	L_CLDBL
 E37F                E_CLDBL:
 E37F 4F             	LD	C,A
-E380 3A 03 EB       	LD	A,(_SECPS+1)
+E380 3A E9 EA       	LD	A,(_SECPS+1)
 E383 B5             	OR	L
 E384 6F             	LD	L,A
 E385 11 08 00       CLSPAT:	LD	DE,8	;+8 (2D)  !ADDCL (self-modifying code)
@@ -4034,14 +4034,14 @@ E3AF 3E E5          	LD	A,0E5H
 E3B1 C9             	RET
 E3B2                
 E3B2                CHDIR:
-E3B2 CD C9 ED       	CALL	GETDPBD
+E3B2 CD AF ED       	CALL	GETDPBD
 E3B5 38 1D          	JR	C,CHDIR2
 E3B7 DD 75 1A       	LD	(IX+01AH),L		;_SDIR_
 E3BA DD 74 1B       	LD	(IX+01BH),H		;_SDIR_+1
 E3BD 18 15          	JR	CHDIR2		;POP_IX_RET
 E3BF                
 E3BF                LDDIR:
-E3BF CD C9 ED       	CALL	GETDPBD
+E3BF CD AF ED       	CALL	GETDPBD
 E3C2 DD 5E 1A       	LD	E,(IX+01AH)		;_SDIR_
 E3C5 DD 56 1B       	LD	D,(IX+01BH)		;_SDIR_+1
 E3C8 13             	INC	DE
@@ -4058,7 +4058,7 @@ E3D7                LDDIRX:
 E3D7 3A A0 F0       	LD	A,(_DIRF)	;(FCB)ÉAÉNÉZÉXÇ∑ÇÈÉfÉBÉåÉNÉgÉäÇÃÉZÉNÉ^ÉCÉìÉfÉbÉNÉX
 E3DA E6 7F          	AND	07FH
 E3DC                LDDIRX1:
-E3DC 32 03 EB       	LD	(_SECPS+1),A
+E3DC 32 E9 EA       	LD	(_SECPS+1),A
 E3DF FD 5E 0E       	LD	E,(IY+14)	;(FCB)ÉAÉNÉZÉXÇ∑ÇÈÉfÉBÉåÉNÉgÉäÇÃÉNÉâÉXÉ^î‘çÜ+1
 E3E2 FD 56 0F       	LD	D,(IY+15)
 E3E5 1B             	DEC	DE
@@ -4277,1841 +4277,1837 @@ E513 CB 39          	SRL	C
 E515 CB 1C          	RR	H		;CH=CH/2
 E517 18 F7          	JR	L_WRFX
 E519                E_WRFX:
-E519 44             	LD	B,H
-E51A 04             	INC	B
-E51B 3E 37          	LD	A,037H		;SCF
-E51D 32 93 E9       	LD	(DRDN1),A
-E520                
-E520                WRDF:				;BÉNÉâÉXÉ^ï™FATÇämï€Ç∑ÇÈ
-E520 11 02 00       	LD	DE,2
-E523 AF             	XOR	A
-E524 32 03 EB       	LD	(_SECPS+1),A
-E527                WRDF1:
-E527 C5             	PUSH	BC
-E528 D5             	PUSH	DE
-E529 CD F7 F0       	CALL	_GNCL
-E52C 38 1C          	JR	C,WRDF3
-E52E 7A             	LD	A,D		;ãÛÇ¢ÇƒÇ¢ÇÈÇ©É`ÉFÉbÉN
-E52F B3             	OR	E
-E530 20 27          	JR	NZ,WRDF4
-E532 E1             	POP	HL		;HL=ãÛÇ¢ÇƒÇ¢ÇÈÉNÉâÉXÉ^
-E533 E5             	PUSH	HL
-E534 ED 5B FE F1    	LD	DE,(_CLPS)	;DE=å≥ÇÃ(_CLPS)
-E538 22 FE F1       	LD	(_CLPS),HL
-E53B 7A             	LD	A,D		;å≥ÇÃ(_CLPS)Ç™ 0 Ç©?
-E53C B3             	OR	E
-E53D 20 08          	JR	NZ,WRDF2
-E53F FD 75 1A       	LD	(IY+26),L	;(FCB)ÉtÉ@ÉCÉãÇÃêÊì™ÉNÉâÉXÉ^
-E542 FD 74 1B       	LD	(IY+27),H	;å≥Ç™ãÛÇÃèÍçáÇÕFCBÇ…ÉNÉâÉXÉ^ÇÉZÉbÉgÇ∑ÇÈ
-E545 18 03          	JR	WRDF3
-E547                WRDF2:
-E547 CD FA F0       	CALL	_SNCL
-E54A                WRDF3:
-E54A D1             	POP	DE
-E54B C1             	POP	BC
-E54C D8             	RET	C
-E54D 10 0C          	DJNZ	WRDF5		;Ç±Ç±Ç≈ÉãÅ[ÉvÉJÉEÉìÉ^É`ÉFÉbÉN
-E54F ED 5B FE F1    	LD	DE,(_CLPS)
-E553 21 FF FF       	LD	HL,0FFFFH	;FATÉGÉìÉgÉäèIóπ(EOCÉ}Å[ÉN)
-E556 C3 FA F0       	JP	_SNCL
-E559                
-E559                WRDF4:				;DEÉNÉâÉXÉ^Ç™ãÛÇ∂Ç·Ç»Ç¢ÇÃÇ≈éüÇ…à⁄ìÆÇ∑ÇÈ
-E559 D1             	POP	DE
-E55A C1             	POP	BC
-E55B                WRDF5:
-E55B 13             	INC	DE
-E55C CD 8F E3       	CALL	ENDCL
-E55F 38 C6          	JR	C,WRDF1
-E561 37             	SCF
-E562 C9             	RET
-E563                
-E563                RWXR:
-E563 3A 94 E8       	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
-E566                L_RWX:
-E566 1F             	RRA		;->CF
-E567 38 08          	JR	C,E_RWX
-E569 CB 38          	SRL	B	;BCH=BCH/2
-E56B CB 19          	RR	C	;
-E56D CB 1C          	RR	H	;
-E56F 18 F5          	JR	L_RWX
-E571                E_RWX:
-E571 FD 5E 1A       	LD	E,(IY+26)	;(FCB)ÉtÉ@ÉCÉãÇÃêÊì™ÉNÉâÉXÉ^
-E574 FD 56 1B       	LD	D,(IY+27)
-E577 AF             	XOR	A
-E578 32 03 EB       	LD	(_SECPS+1),A
-E57B                RWX1:
-E57B ED 53 FE F1    	LD	(_CLPS),DE
-E57F 7A             	LD	A,D
-E580 B3             	OR	E
-E581 28 13          	JR	Z,SCF_RET	;RET DE==0 => CF=1
-E583                
-E583 78             	LD	A,B
-E584 B1             	OR	C
-E585 B4             	OR	H
-E586 C8             	RET	Z		;RET BCH==0 => CF=0
+E519 41             	LD	B,C
+E51A 4C             	LD	C,H
+E51B 03             	INC	BC
+E51C 3E 37          	LD	A,037H		;SCF
+E51E 32 79 E9       	LD	(DRDN1),A
+E521                
+E521                WRDF:				;BCÉNÉâÉXÉ^ï™FATÇämï€Ç∑ÇÈ
+E521 11 02 00       	LD	DE,2
+E524 AF             	XOR	A
+E525 32 E9 EA       	LD	(_SECPS+1),A
+E528                WRDF1:
+E528 C5             	PUSH	BC
+E529 D5             	PUSH	DE
+E52A CD F7 F0       	CALL	_GNCL
+E52D 38 1C          	JR	C,WRDF3
+E52F 7A             	LD	A,D		;ãÛÇ¢ÇƒÇ¢ÇÈÇ©É`ÉFÉbÉN
+E530 B3             	OR	E
+E531 20 2A          	JR	NZ,WRDF4
+E533 E1             	POP	HL		;HL=ãÛÇ¢ÇƒÇ¢ÇÈÉNÉâÉXÉ^
+E534 E5             	PUSH	HL
+E535 ED 5B FE F1    	LD	DE,(_CLPS)	;DE=å≥ÇÃ(_CLPS)
+E539 22 FE F1       	LD	(_CLPS),HL
+E53C 7A             	LD	A,D		;å≥ÇÃ(_CLPS)Ç™ 0 Ç©?
+E53D B3             	OR	E
+E53E 20 08          	JR	NZ,WRDF2
+E540 FD 75 1A       	LD	(IY+26),L	;(FCB)ÉtÉ@ÉCÉãÇÃêÊì™ÉNÉâÉXÉ^
+E543 FD 74 1B       	LD	(IY+27),H	;å≥Ç™ãÛÇÃèÍçáÇÕFCBÇ…ÉNÉâÉXÉ^ÇÉZÉbÉgÇ∑ÇÈ
+E546 18 03          	JR	WRDF3
+E548                WRDF2:
+E548 CD FA F0       	CALL	_SNCL
+E54B                WRDF3:
+E54B D1             	POP	DE
+E54C C1             	POP	BC
+E54D D8             	RET	C
+E54E 0B             	DEC	BC
+E54F 78             	LD	A,B
+E550 B1             	OR	C
+E551 20 0C          	JR	NZ,WRDF5	;Ç±Ç±Ç≈ÉãÅ[ÉvÉJÉEÉìÉ^É`ÉFÉbÉN
+E553 ED 5B FE F1    	LD	DE,(_CLPS)
+E557 21 FF FF       	LD	HL,0FFFFH	;FATÉGÉìÉgÉäèIóπ(EOCÉ}Å[ÉN)
+E55A C3 FA F0       	JP	_SNCL
+E55D                
+E55D                WRDF4:				;DEÉNÉâÉXÉ^Ç™ãÛÇ∂Ç·Ç»Ç¢ÇÃÇ≈éüÇ…à⁄ìÆÇ∑ÇÈ
+E55D D1             	POP	DE
+E55E C1             	POP	BC
+E55F                WRDF5:
+E55F 13             	INC	DE
+E560 CD 8F E3       	CALL	ENDCL
+E563 38 C3          	JR	C,WRDF1
+E565 37             	SCF
+E566 C9             	RET
+E567                
+E567                RWXR:
+E567 3A 86 E8       	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
+E56A                L_RWX:
+E56A 1F             	RRA		;->CF
+E56B 38 08          	JR	C,E_RWX
+E56D CB 38          	SRL	B	;BCH=BCH/2
+E56F CB 19          	RR	C	;
+E571 CB 1C          	RR	H	;
+E573 18 F5          	JR	L_RWX
+E575                E_RWX:
+E575 FD 5E 1A       	LD	E,(IY+26)	;(FCB)ÉtÉ@ÉCÉãÇÃêÊì™ÉNÉâÉXÉ^
+E578 FD 56 1B       	LD	D,(IY+27)
+E57B AF             	XOR	A
+E57C 32 E9 EA       	LD	(_SECPS+1),A
+E57F                RWX1:
+E57F ED 53 FE F1    	LD	(_CLPS),DE
+E583 7A             	LD	A,D
+E584 B3             	OR	E
+E585 28 13          	JR	Z,SCF_RET	;RET DE==0 => CF=1
 E587                
-E587 CD 0B EB       	CALL	GNCLX
-E58A D8             	RET	C
-E58B 7C             	LD	A,H		;
-E58C 25             	DEC	H		;
-E58D B7             	OR	A		;DEC BCH
-E58E 20 01          	JR	NZ,RWX2		;
-E590 0B             	DEC	BC		;
-E591                RWX2:
-E591 CD 8F E3       	CALL	ENDCL
-E594 38 E5          	JR	C,RWX1
-E596                SCF_RET:
-E596 37             	SCF
-E597 C9             	RET
-E598                
-E598                DSKF:
-E598 11 00 00       MAXCLP:	LD	DE,0
-E59B 2A AC F0       	LD	HL,(_FAKEFREE)
-E59E 7C             	LD	A,H
-E59F B5             	OR	L
-E5A0 28 03          	JR	Z,DSKF1
-E5A2 11 01 00       	LD	DE,1
-E5A5                DSKF1:
-E5A5 D5             	PUSH	DE
-E5A6 CD F7 F0       	CALL	_GNCL
-E5A9 38 0C          	JR	C,POPSCF
-E5AB 7A             	LD	A,D
-E5AC B3             	OR	E
-E5AD 20 01          	JR	NZ,DSKF2
-E5AF 23             	INC	HL
-E5B0                DSKF2:
-E5B0 D1             	POP	DE
-E5B1 1B             	DEC	DE
-E5B2 7A             	LD	A,D
-E5B3 B3             	OR	E
-E5B4 20 EF          	JR	NZ,DSKF1
-E5B6 C9             	RET
-E5B7                
-E5B7                POPSCF:
-E5B7 F1             	POP	AF
-E5B8 37             	SCF
-E5B9 C9             	RET
-E5BA                
-E5BA                SETTMS:
-E5BA FD 7E 17       	LD	A,(IY+23)	;(FCB)ÉtÉ@ÉCÉãÇç≈å„Ç…ïœçXÇµÇΩéûçè
-E5BD 3C             	INC	A
-E5BE C0             	RET	NZ		;ÉtÉ@ÉCÉãÇ™çXêVÇ≥ÇÍÇƒÇ¢Ç»Ç¢
-E5BF                SETTMSX:			;FCBÇ…ì˙ïtéûçèÇÉZÉbÉgÇ∑ÇÈ
-E5BF CD 72 DC       	CALL	_SYS2C		;(BDOS)éûçèÇÃälìæ
-E5C2                				;HÅ©éû  LÅ©ï™  DÅ©ïb
-E5C2 CB 25          	SLA	L		;   *2
-E5C4 CB 25          	SLA	L		;   *4
-E5C6 29             	ADD	HL,HL		;*2 *8
-E5C7 29             	ADD	HL,HL		;*4 *16
-E5C8 29             	ADD	HL,HL		;*8 *32
-E5C9 7A             	LD	A,D
-E5CA 0F             	RRCA			;bit.0->7->->->0->C
-E5CB E6 1F          	AND	01FH
-E5CD B5             	OR	L
-E5CE FD 77 16       	LD	(IY+22),A	;(FCB)ÉtÉ@ÉCÉãÇç≈å„Ç…ïœçXÇµÇΩéûçè
-E5D1 FD 74 17       	LD	(IY+23),H
-E5D4                
-E5D4 CD 4F DC       	CALL	_SYS2A		;(BDOS)ì˙ïtÇÃälìæ
-E5D7                				;HLÅ©îN  DÅ©åé  EÅ©ì˙
-E5D7 01 44 F8       	LD	BC,0-1980
-E5DA 09             	ADD	HL,BC
-E5DB 65             	LD	H,L
-E5DC                
-E5DC 7A             	LD	A,D
-E5DD 87             	ADD	A,A		;*2
-E5DE 87             	ADD	A,A		;*4
-E5DF 87             	ADD	A,A		;*8
-E5E0 87             	ADD	A,A		;*16
-E5E1 6F             	LD	L,A
-E5E2 29             	ADD	HL,HL		;*32
-E5E3 7D             	LD	A,L
-E5E4 B3             	OR	E
-E5E5 FD 77 14       	LD	(IY+20),A	;(FCB)ÉtÉ@ÉCÉãÇç≈å„Ç…ïœçXÇµÇΩì˙ït
-E5E8 FD 74 15       	LD	(IY+21),H
-E5EB C9             	RET
-E5EC                
-E5EC                PUSHRR:
-E5EC 32 8B E6       	LD	(SETSEQ_SWC_RND),A
-E5EF 22 9D E6       	LD	(SETSEQ_SWC_SEQ_RR),HL
-E5F2 CD 12 E6       	CALL	GET_RR_AHL
-E5F5 22 5A F0       	LD	(HLBUF),HL
-E5F8 32 5C F0       	LD	(HLBUF+2),A
-E5FB C9             	RET
-E5FC                
-E5FC                GET_CPM_R_SIZE:		;ÉoÉCÉgíPà Ç©ÇÁCP/MÇÃÉåÉRÅ[ÉhíPà ÇãÅÇﬂÇÈÅi1ÉåÉRÅ[Éh=128ÉoÉCÉgÅj
-E5FC 87             	ADD	A,A		;in BHLA => out AHL
-E5FD ED 6A          	ADC	HL,HL
-E5FF CB 18          	RR	B
-E601 B7             	OR	A
-E602 78             	LD	A,B		;Ç±Ç±Ç≈ÉtÉâÉOÇÕïœâªÇµÇ»Ç¢
-E603 C8             	RET	Z
-E604 2C             	INC	L		;INC AHL
-E605 C0             	RET	NZ		;
-E606 24             	INC	H		;
-E607 C0             	RET	NZ		;
-E608 3C             	INC	A		;
-E609 C9             	RET
-E60A                
-E60A                INIT_RND:
-E60A 3E CD          	LD	A,0CDH		;CALL ????
-E60C 21 5B E6       	LD	HL,POPRR
-E60F CD EC E5       	CALL	PUSHRR
-E612                GET_RR_AHL:
-E612 FD 6E 21       	LD	L,(IY+33)	;(FCB)Random record
-E615 FD 66 22       	LD	H,(IY+34)	;
-E618 FD 7E 23       	LD	A,(IY+35)	;
-E61B C9             	RET
-E61C                SET_RR_AHL:
-E61C FD 75 21       	LD	(IY+33),L	;(FCB)Random record
-E61F FD 74 22       	LD	(IY+34),H
-E622 FD 77 23       	LD	(IY+35),A
-E625 C9             	RET
-E626                INIT_SEQ:
-E626 3E 01          	LD	A,1		;LD BC,????
-E628 21 58 E6       	LD	HL,SETSEQ
-E62B CD EC E5       	CALL	PUSHRR
-E62E                GETSEQ:
-E62E FD 6E 20       	LD	L,(IY+32)	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
-E631 FD 66 0C       	LD	H,(IY+12)	;(FCB)ÉJÉåÉìÉgÉuÉçÉbÉN
-E634 AF             	XOR	A
-E635                
-E635 CB 25          	SLA	L	;L=L*2
-E637                
-E637 CB 3C          	SRL	H	;HL=HL/2
-E639 CB 1D          	RR	L	;
-E63B C9             	RET
-E63C                
-E63C                SETSEQ1:
-E63C F5             	PUSH	AF
-E63D E5             	PUSH	HL		;AHL=Random record
-E63E FD 7E 21       	LD	A,(IY+33)	;(FCB)ÉâÉìÉ_ÉÄÉåÉRÅ[Éh
-E641 FD 6E 22       	LD	L,(IY+34)
-E644 FD 66 23       	LD	H,(IY+35)
-E647 06 00          	LD	B,0
-E649                
-E649 CD FC E5       	CALL	GET_CPM_R_SIZE
-E64C                
-E64C 29             	ADD	HL,HL
-E64D CB 3D          	SRL	L		;L=L/2
-E64F FD 75 20       	LD	(IY+32),L	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
-E652 FD 74 0C       	LD	(IY+12),H	;(FCB)ÉJÉåÉìÉgÉuÉçÉbÉN
-E655 E1             	POP	HL
-E656 F1             	POP	AF
-E657 C9             	RET
-E658                SETSEQ:
-E658 CD 3C E6       	CALL	SETSEQ1
-E65B                POPRR:
-E65B F5             	PUSH	AF
-E65C E5             	PUSH	HL
-E65D 2A 5A F0       	LD	HL,(HLBUF)
-E660 3A 5C F0       	LD	A,(HLBUF+2)
-E663 CD 1C E6       	CALL	SET_RR_AHL
-E666 E1             	POP	HL
-E667 F1             	POP	AF
-E668 C9             	RET
-E669                
-E669                RB_WRITE:
-E669 C5             	PUSH	BC
-E66A ED 4B 4C F1    	LD	BC,(STABLE+2*026H)	;(BDOS)ÉâÉìÉ_ÉÄÉuÉçÉbÉNèëÇ´çûÇ›
-E66E 18 05          	JR	RBRW
-E670                RB_READ:
-E670 C5             	PUSH	BC
-E671 ED 4B 4E F1    	LD	BC,(STABLE+2*027H)	;(BDOS)ÉâÉìÉ_ÉÄÉuÉçÉbÉNì«Ç›çûÇ›
-E675                RBRW:
-E675 CB 3F          	SRL	A	;AHLA' = HL*128
-E677 CB 1C          	RR	H	;AHL=AHL/2
-E679 CB 1D          	RR	L	;
-E67B 3E 00          	LD	A,0
-E67D 1F             	RRA		;A'HLA
-E67E FD 77 21       	LD	(IY+33),A	;(FCB)ÉâÉìÉ_ÉÄÉåÉRÅ[Éh
-E681 FD 75 22       	LD	(IY+34),L
-E684 FD 74 23       	LD	(IY+35),H
-E687 21 80 00       	LD	HL,128
-E68A C5             	PUSH	BC
-E68B                SETSEQ_SWC_RND:
-E68B CD 3C E6       	CALL	SETSEQ1
-E68E C1             	POP	BC
-E68F FD CB 20 FE    	SET	7,(IY+32)	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
-E693 FD E5          	PUSH	IY
-E695 D1             	POP	DE
-E696 D5             	PUSH	DE
-E697 CD A5 E6       	CALL	JP_BC
-E69A FD E1          	POP	IY
-E69C CD 58 E6       	CALL	SETSEQ
-E69F 00 00 E6 9D    SETSEQ_SWC_SEQ_RR	EQU $-2
-E69F FD CB 20 BE    	RES	7,(IY+32)	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
-E6A3                
-E6A3 C1             	POP	BC
-E6A4 C9             	RET
-E6A5                JP_BC:
-E6A5 C5             	PUSH	BC
-E6A6 C9             	RET
-E6A7                
-E6A7 00 00 E2 1F    _SYS03	EQU	SCF_FF_RET	;(BDOS)äOïîì¸óÕ
-E6A7 00 00 E2 1F    _SYS2B	EQU	SCF_FF_RET	;(BDOS)ì˙ïtÇÃê›íË
-E6A7 00 00 E2 1F    _SYS2D	EQU	SCF_FF_RET	;(BDOS)éûçèÇÃê›íË
-E6A7 00 00 E2 1F    _SYS39	EQU	SCF_FF_RET	;(BDOS)ÉTÉuÉfÉBÉåÉNÉgÉäÇÃçÏê¨
-E6A7 00 00 E2 1F    _SYS3A	EQU	SCF_FF_RET	;(BDOS)ÉTÉuÉfÉBÉåÉNÉgÉäÇÃçÌèú
-E6A7                
-E6A7                	INCLUDE	"LDFILE2.ASM"
-E6A7                
-E6A7                ;	LSX-Dodgers FILE2
-E6A7                
-E6A7                				;Write random block
-E6A7                _SYS26:		;(BDOS)ÉâÉìÉ_ÉÄÉuÉçÉbÉNèëÇ´çûÇ›
-E6A7 AF             	XOR	A
-E6A8 32 93 E9       	LD	(DRDN1),A	;NOP
-E6AB 22 D7 E8       	LD	(LEFT+1),HL	;HLÅ©èëÇ´çûÇﬁÉåÉRÅ[Éhêî
-E6AE 22 5D F0       	LD	(LEFTX),HL
-E6B1 CD 74 E1       	CALL	SETDRV
-E6B4                
-E6B4 CD 2E E8       	CALL	RBX0
-E6B7 DA 51 E7       	JP	C,RBWERR
-E6BA CD FC E4       	CALL	WOPEN
-E6BD DA 51 E7       	JP	C,RBWERR
-E6C0 7C             	LD	A,H
-E6C1 B5             	OR	L
-E6C2 CA 4A E7       	JP	Z,RBW1
-E6C5                
-E6C5 2B             	DEC	HL
+E587 78             	LD	A,B
+E588 B1             	OR	C
+E589 B4             	OR	H
+E58A C8             	RET	Z		;RET BCH==0 => CF=0
+E58B                
+E58B CD F1 EA       	CALL	GNCLX
+E58E D8             	RET	C
+E58F 7C             	LD	A,H		;
+E590 25             	DEC	H		;
+E591 B7             	OR	A		;DEC BCH
+E592 20 01          	JR	NZ,RWX2		;
+E594 0B             	DEC	BC		;
+E595                RWX2:
+E595 CD 8F E3       	CALL	ENDCL
+E598 38 E5          	JR	C,RWX1
+E59A                SCF_RET:
+E59A 37             	SCF
+E59B C9             	RET
+E59C                
+E59C                DSKF:
+E59C 11 00 00       MAXCLP:	LD	DE,0
+E59F 2A AC F0       	LD	HL,(_FAKEFREE)
+E5A2 7C             	LD	A,H
+E5A3 B5             	OR	L
+E5A4 28 03          	JR	Z,DSKF1
+E5A6 11 01 00       	LD	DE,1
+E5A9                DSKF1:
+E5A9 D5             	PUSH	DE
+E5AA CD F7 F0       	CALL	_GNCL
+E5AD 38 0C          	JR	C,POPSCF
+E5AF 7A             	LD	A,D
+E5B0 B3             	OR	E
+E5B1 20 01          	JR	NZ,DSKF2
+E5B3 23             	INC	HL
+E5B4                DSKF2:
+E5B4 D1             	POP	DE
+E5B5 1B             	DEC	DE
+E5B6 7A             	LD	A,D
+E5B7 B3             	OR	E
+E5B8 20 EF          	JR	NZ,DSKF1
+E5BA C9             	RET
+E5BB                
+E5BB                POPSCF:
+E5BB F1             	POP	AF
+E5BC 37             	SCF
+E5BD C9             	RET
+E5BE                
+E5BE                SETTMS:
+E5BE FD 7E 17       	LD	A,(IY+23)	;(FCB)ÉtÉ@ÉCÉãÇç≈å„Ç…ïœçXÇµÇΩéûçè
+E5C1 3C             	INC	A
+E5C2 C0             	RET	NZ		;ÉtÉ@ÉCÉãÇ™çXêVÇ≥ÇÍÇƒÇ¢Ç»Ç¢
+E5C3                SETTMSX:			;FCBÇ…ì˙ïtéûçèÇÉZÉbÉgÇ∑ÇÈ
+E5C3 CD 72 DC       	CALL	_SYS2C		;(BDOS)éûçèÇÃälìæ
+E5C6                				;HÅ©éû  LÅ©ï™  DÅ©ïb
+E5C6 CB 25          	SLA	L		;   *2
+E5C8 CB 25          	SLA	L		;   *4
+E5CA 29             	ADD	HL,HL		;*2 *8
+E5CB 29             	ADD	HL,HL		;*4 *16
+E5CC 29             	ADD	HL,HL		;*8 *32
+E5CD 7A             	LD	A,D
+E5CE 0F             	RRCA			;bit.0->7->->->0->C
+E5CF E6 1F          	AND	01FH
+E5D1 B5             	OR	L
+E5D2 FD 77 16       	LD	(IY+22),A	;(FCB)ÉtÉ@ÉCÉãÇç≈å„Ç…ïœçXÇµÇΩéûçè
+E5D5 FD 74 17       	LD	(IY+23),H
+E5D8                
+E5D8 CD 4F DC       	CALL	_SYS2A		;(BDOS)ì˙ïtÇÃälìæ
+E5DB                				;HLÅ©îN  DÅ©åé  EÅ©ì˙
+E5DB 01 44 F8       	LD	BC,0-1980
+E5DE 09             	ADD	HL,BC
+E5DF 65             	LD	H,L
+E5E0                
+E5E0 7A             	LD	A,D
+E5E1 87             	ADD	A,A		;*2
+E5E2 87             	ADD	A,A		;*4
+E5E3 87             	ADD	A,A		;*8
+E5E4 87             	ADD	A,A		;*16
+E5E5 6F             	LD	L,A
+E5E6 29             	ADD	HL,HL		;*32
+E5E7 7D             	LD	A,L
+E5E8 B3             	OR	E
+E5E9 FD 77 14       	LD	(IY+20),A	;(FCB)ÉtÉ@ÉCÉãÇç≈å„Ç…ïœçXÇµÇΩì˙ït
+E5EC FD 74 15       	LD	(IY+21),H
+E5EF C9             	RET
+E5F0                
+E5F0                PUSHRR:
+E5F0 32 88 E6       	LD	(SETSEQ_SWC_RND),A
+E5F3 22 9A E6       	LD	(SETSEQ_SWC_SEQ_RR),HL
+E5F6 CD 16 E6       	CALL	GET_RR_AHL
+E5F9 22 5A F0       	LD	(RR_BUF_HL),HL
+E5FC 32 5C F0       	LD	(RR_BUF_A),A
+E5FF C9             	RET
+E600                
+E600                GET_CPM_R_SIZE:		;ÉoÉCÉgíPà Ç©ÇÁCP/MÇÃÉåÉRÅ[ÉhíPà ÇãÅÇﬂÇÈÅi1ÉåÉRÅ[Éh=128ÉoÉCÉgÅj
+E600 87             	ADD	A,A		;in BHLA => out AHL
+E601 ED 6A          	ADC	HL,HL
+E603 CB 18          	RR	B
+E605 B7             	OR	A
+E606 78             	LD	A,B		;Ç±Ç±Ç≈ÉtÉâÉOÇÕïœâªÇµÇ»Ç¢
+E607 C8             	RET	Z
+E608 2C             	INC	L		;INC AHL
+E609 C0             	RET	NZ		;
+E60A 24             	INC	H		;
+E60B C0             	RET	NZ		;
+E60C 3C             	INC	A		;
+E60D C9             	RET
+E60E                
+E60E                INIT_RND:
+E60E 3E CD          	LD	A,0CDH		;CALL ????
+E610 21 5D E6       	LD	HL,POPRR
+E613 CD F0 E5       	CALL	PUSHRR
+E616                GET_RR_AHL:
+E616 FD 6E 21       	LD	L,(IY+33)	;(FCB)Random record
+E619 FD 66 22       	LD	H,(IY+34)	;
+E61C FD 7E 23       	LD	A,(IY+35)	;
+E61F C9             	RET
+E620                SET_RR_AHL:
+E620 FD 75 21       	LD	(IY+33),L	;(FCB)Random record
+E623 FD 74 22       	LD	(IY+34),H
+E626 FD 77 23       	LD	(IY+35),A
+E629 C9             	RET
+E62A                INIT_SEQ:
+E62A 3E 01          	LD	A,1		;LD BC,????
+E62C 21 5A E6       	LD	HL,SETSEQ
+E62F CD F0 E5       	CALL	PUSHRR
+E632                GETSEQ:
+E632 FD 6E 20       	LD	L,(IY+32)	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
+E635 FD 66 0C       	LD	H,(IY+12)	;(FCB)ÉJÉåÉìÉgÉuÉçÉbÉN
+E638 AF             	XOR	A
+E639                
+E639 CB 25          	SLA	L	;L=L*2
+E63B                
+E63B CB 3C          	SRL	H	;HL=HL/2
+E63D CB 1D          	RR	L	;
+E63F C9             	RET
+E640                
+E640                SETSEQ1:
+E640 F5             	PUSH	AF
+E641 E5             	PUSH	HL		;AHL=Random record
+E642 CD 16 E6       	CALL	GET_RR_AHL
+E645 47             	LD	B,A		;AHLÅ®HLA
+E646 7D             	LD	A,L		;(IY+33)(FCB)ÉâÉìÉ_ÉÄÉåÉRÅ[Éh
+E647 6C             	LD	L,H		;(IY+34)
+E648 60             	LD	H,B		;(IY+35)
+E649 06 00          	LD	B,0
+E64B                
+E64B CD 00 E6       	CALL	GET_CPM_R_SIZE
+E64E                
+E64E 29             	ADD	HL,HL
+E64F CB 3D          	SRL	L		;L=L/2
+E651 FD 75 20       	LD	(IY+32),L	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
+E654 FD 74 0C       	LD	(IY+12),H	;(FCB)ÉJÉåÉìÉgÉuÉçÉbÉN
+E657 E1             	POP	HL
+E658 F1             	POP	AF
+E659 C9             	RET
+E65A                SETSEQ:
+E65A CD 40 E6       	CALL	SETSEQ1
+E65D                POPRR:
+E65D F5             	PUSH	AF
+E65E E5             	PUSH	HL
+E65F 2A 5A F0       	LD	HL,(RR_BUF_HL)
+E662 3A 5C F0       	LD	A,(RR_BUF_A)
+E665 CD 20 E6       	CALL	SET_RR_AHL
+E668 E1             	POP	HL
+E669 F1             	POP	AF
+E66A C9             	RET
+E66B                
+E66B                RB_WRITE:
+E66B C5             	PUSH	BC
+E66C ED 4B 4C F1    	LD	BC,(STABLE+2*026H)	;(BDOS)ÉâÉìÉ_ÉÄÉuÉçÉbÉNèëÇ´çûÇ›
+E670 18 05          	JR	RBRW
+E672                RB_READ:
+E672 C5             	PUSH	BC
+E673 ED 4B 4E F1    	LD	BC,(STABLE+2*027H)	;(BDOS)ÉâÉìÉ_ÉÄÉuÉçÉbÉNì«Ç›çûÇ›
+E677                RBRW:
+E677 1F             	RRA		;AHL = AHL*128
+E678 7C             	LD	A,H	;AHL = AHL0/2
+E679 1F             	RRA		;A
+E67A 65             	LD	H,L	;
+E67B CB 1C          	RR	H	;H
+E67D 2E 00          	LD	L,0	;
+E67F CB 1D          	RR	L	;L
+E681 CD 20 E6       	CALL	SET_RR_AHL
+E684 21 80 00       	LD	HL,128
+E687 C5             	PUSH	BC
+E688                SETSEQ_SWC_RND:
+E688 CD 40 E6       	CALL	SETSEQ1
+E68B C1             	POP	BC
+E68C FD CB 20 FE    	SET	7,(IY+32)	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
+E690 FD E5          	PUSH	IY
+E692 D1             	POP	DE
+E693 D5             	PUSH	DE
+E694 CD A2 E6       	CALL	JP_BC
+E697 FD E1          	POP	IY
+E699 CD 5A E6       	CALL	SETSEQ
+E69C 00 00 E6 9A    SETSEQ_SWC_SEQ_RR	EQU $-2
+E69C FD CB 20 BE    	RES	7,(IY+32)	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
+E6A0                
+E6A0 C1             	POP	BC
+E6A1 C9             	RET
+E6A2                JP_BC:
+E6A2 C5             	PUSH	BC
+E6A3 C9             	RET
+E6A4                
+E6A4 00 00 E2 1F    _SYS03	EQU	SCF_FF_RET	;(BDOS)äOïîì¸óÕ
+E6A4 00 00 E2 1F    _SYS2B	EQU	SCF_FF_RET	;(BDOS)ì˙ïtÇÃê›íË
+E6A4 00 00 E2 1F    _SYS2D	EQU	SCF_FF_RET	;(BDOS)éûçèÇÃê›íË
+E6A4 00 00 E2 1F    _SYS39	EQU	SCF_FF_RET	;(BDOS)ÉTÉuÉfÉBÉåÉNÉgÉäÇÃçÏê¨
+E6A4 00 00 E2 1F    _SYS3A	EQU	SCF_FF_RET	;(BDOS)ÉTÉuÉfÉBÉåÉNÉgÉäÇÃçÌèú
+E6A4                
+E6A4                	INCLUDE	"LDFILE2.ASM"
+E6A4                
+E6A4                ;	LSX-Dodgers FILE2
+E6A4                
+E6A4                				;Write random block
+E6A4                _SYS26:		;(BDOS)ÉâÉìÉ_ÉÄÉuÉçÉbÉNèëÇ´çûÇ›
+E6A4 AF             	XOR	A
+E6A5 32 79 E9       	LD	(DRDN1),A	;NOP
+E6A8 22 C9 E8       	LD	(RBSIZE),HL	;HLÅ©èëÇ´çûÇﬁÉåÉRÅ[Éhêî
+E6AB 22 5D F0       	LD	(LEFTX),HL
+E6AE CD 74 E1       	CALL	SETDRV
+E6B1                
+E6B1 CD 21 E8       	CALL	RBX0
+E6B4 DA 41 E7       	JP	C,RBWERR
+E6B7 CD FC E4       	CALL	WOPEN
+E6BA DA 41 E7       	JP	C,RBWERR
+E6BD 7C             	LD	A,H
+E6BE B5             	OR	L
+E6BF CA 3A E7       	JP	Z,RBW1
+E6C2                
+E6C2 2B             	DEC	HL
+E6C3                
+E6C3 CD DF E8       	CALL	GET_RR_BCDE	;BCDE=Random record
 E6C6                
-E6C6 CD F9 E8       	CALL	GET_RR_BCDE	;BCDE=Random record
-E6C9                
-E6C9 19             	ADD	HL,DE		;BCHL=HL+BCDE
-E6CA 30 01          	JR	NC,S26X1	;
-E6CC 03             	INC	BC		;
-E6CD                S26X1:
-E6CD CD 63 E5       	CALL	RWXR
-E6D0 DC 0D E5       	CALL	C,WRDFX
-E6D3 DA 51 E7       	JP	C,RBWERR
-E6D6                
-E6D6 CD 5D E8       	CALL	RBX2
-E6D9 28 1A          	JR	Z,RBWB		;NZ=ÉZÉNÉ^à»â∫ÇÃí[êîÇ™Ç†ÇÈ
-E6DB CD 7C E8       	CALL	RBXA
-E6DE 38 71          	JR	C,RBWERR
-E6E0 EB             	EX	DE,HL
-E6E1 C5             	PUSH	BC
-E6E2 ED B0          	LDIR
-E6E4 22 5F F0       	LD	(DTAX),HL
+E6C6 19             	ADD	HL,DE		;BCHL=HL+BCDE
+E6C7 30 01          	JR	NC,S26X1	;
+E6C9 03             	INC	BC		;
+E6CA                S26X1:
+E6CA CD 67 E5       	CALL	RWXR
+E6CD DC 0D E5       	CALL	C,WRDFX
+E6D0 DA 41 E7       	JP	C,RBWERR
+E6D3                
+E6D3 CD 50 E8       	CALL	RBX2
+E6D6 28 1A          	JR	Z,RBWB		;NZ=ÉZÉNÉ^à»â∫ÇÃí[êîÇ™Ç†ÇÈ
+E6D8 CD 6F E8       	CALL	RBXA
+E6DB 38 64          	JR	C,RBWERR
+E6DD EB             	EX	DE,HL
+E6DE C5             	PUSH	BC
+E6DF ED B0          	LDIR
+E6E1 22 5F F0       	LD	(DTAX),HL
+E6E4                
+E6E4 CD A1 E4       	CALL	SWTDBF		;ÉoÉbÉtÉ@ÉfÅ[É^ÇÕçXêVÇ≥ÇÍÇΩ
 E6E7                
-E6E7 CD A1 E4       	CALL	SWTDBF		;ÉoÉbÉtÉ@ÉfÅ[É^ÇÕçXêVÇ≥ÇÍÇΩ
-E6EA                
-E6EA 2A 5D F0       	LD	HL,(LEFTX)
-E6ED D1             	POP	DE
-E6EE ED 52          	SBC	HL,DE
-E6F0 22 5D F0       	LD	(LEFTX),HL
-E6F3 28 33          	JR	Z,RBWEND
-E6F5                
-E6F5                RBWB:
-E6F5 CD B2 E8       	CALL	RBXB
-E6F8 28 16          	JR	Z,RBWC
-E6FA                RBWB1:
-E6FA C5             	PUSH	BC
-E6FB D5             	PUSH	DE
-E6FC CD 72 E3       	CALL	CLUSTX
-E6FF CD 0D E9       	CALL	DWTC
-E702 D1             	POP	DE
-E703 C1             	POP	BC
-E704 38 4B          	JR	C,RBWERR
-E706 CD 0B EB       	CALL	GNCLX
-E709 38 46          	JR	C,RBWERR
-E70B 10 ED          	DJNZ	RBWB1
-E70D CD 5D E9       	CALL	DRW_FLUSH
-E710                RBWC:
-E710 CD CA E8       	CALL	RBXC
-E713 28 13          	JR	Z,RBWEND
-E715 C5             	PUSH	BC
-E716 CD 72 E3       	CALL	CLUSTX
-E719 CD 92 E9       	CALL	DRDN
-E71C C1             	POP	BC
-E71D 38 32          	JR	C,RBWERR
-E71F ED 5B 7E F1    	LD	DE,(_DTBUF)
-E723 ED B0          	LDIR
-E725 CD A1 E4       	CALL	SWTDBF		;ÉoÉbÉtÉ@ÉfÅ[É^ÇÕçXêVÇ≥ÇÍÇΩ
-E728                RBWEND:
-E728 CD D6 E8       	CALL	RBXEND
-E72B                
-E72B CD 3D E8       	CALL	RBX1
-E72E 30 1A          	JR	NC,RBW1
-E730 2A D7 E8       	LD	HL,(LEFT+1)
-E733 FD 5E 10       	LD	E,(IY+16)	;(FCB)ÉtÉ@ÉCÉãÇÃÉTÉCÉY(ÉoÉCÉgíPà )
-E736 FD 56 11       	LD	D,(IY+17)	;DE=File size
-E739 19             	ADD	HL,DE
-E73A FD 75 10       	LD	(IY+16),L	;(FCB)ÉtÉ@ÉCÉãÇÃÉTÉCÉY(ÉoÉCÉgíPà )
-E73D FD 74 11       	LD	(IY+17),H
-E740 30 08          	JR	NC,RBW1
-E742 FD 34 12       	INC	(IY+18)
-E745 20 03          	JR	NZ,RBW1
-E747 FD 34 13       	INC	(IY+19)
-E74A                RBW1:
-E74A FD E1          	POP	IY
-E74C C1             	POP	BC
-E74D D1             	POP	DE
-E74E E1             	POP	HL
-E74F                DD_NUL:
-E74F AF             	XOR	A
-E750                DRDF0:
-E750                DWTF0:
-E750 C9             	RET
-E751                
-E751                RBWERR:
-E751 FD E5          	PUSH	IY
-E753 D1             	POP	DE
-E754 2A 20 F1       	LD	HL,(STABLE+2*010H)
-E757 CD 0F 00       	CALL	JP_HL
-E75A                RBRERR1:
-E75A 3E 01          	LD	A,001H
-E75C                RBRERR2:
-E75C FD E1          	POP	IY
-E75E C1             	POP	BC
-E75F D1             	POP	DE
-E760 E1             	POP	HL
-E761 37             	SCF
-E762 21 00 00       	LD	HL,0
-E765 C9             	RET
-E766                
-E766                RBRERR:
-E766 3E FF          	LD	A,0FFH
-E768 18 F2          	JR	RBRERR2
-E76A                
-E76A                RBRFL:
-E76A 3E 00          RBRFLP:	LD	A,000H
-E76C FE 0D          	CP	00DH
-E76E 20 05          	JR	NZ,RBRFL1
-E770 D5             	PUSH	DE
-E771 1E 0A          	LD	E,00AH
-E773 18 05          	JR	RBRFL2
-E775                RBRFL1:
-E775 D5             	PUSH	DE
-E776 CD 09 F0       	CALL	_SYS07
-E779 5F             	LD	E,A
-E77A                RBRFL2:
-E77A CD CD F0       	CALL	_PRINT
-E77D 7B             	LD	A,E
-E77E D1             	POP	DE
-E77F 32 6B E7       	LD	(RBRFLP+1),A
-E782 C9             	RET
-E783                DDX:
-E783 FD 7E 01       	LD	A,(IY+1)	;(FCB)éÂÉtÉ@ÉCÉãñº
-E786 CD 97 E3       	CALL	CAP
-E789 FE 41          	CP	'A'
-E78B C9             	RET
-E78C                
-E78C                				;Read random block
-E78C                _SYS27:		;(BDOS)ÉâÉìÉ_ÉÄÉuÉçÉbÉNì«Ç›çûÇ›
-E78C 22 5D F0       	LD	(LEFTX),HL
-E78F CD 74 E1       	CALL	SETDRV
-E792                
-E792 FD CB 0D 66    	BIT	4,(IY+13)	;(FCB)ëÆê´(ÉAÉgÉäÉrÉÖÅ[Ég)
-E796 C2 1C E8       	JP	NZ,RBRDIR	;ÉfÉBÉåÉNÉgÉä
-E799 CD 2E E8       	CALL	RBX0
-E79C DA 66 E7       	JP	C,RBRERR
-E79F CD 3D E8       	CALL	RBX1
-E7A2 DA 5A E7       	JP	C,RBRERR1
-E7A5 EB             	EX	DE,HL
-E7A6 ED 52          	SBC	HL,DE		;CP 00HL,BCDE
-E7A8 19             	ADD	HL,DE
-E7A9 79             	LD	A,C
-E7AA DE 00          	SBC	A,0
-E7AC 78             	LD	A,B
-E7AD DE 00          	SBC	A,0
-E7AF 38 01          	JR	C,RBR1
-E7B1 EB             	EX	DE,HL
-E7B2                RBR1:
-E7B2 9F             	SBC	A,A
-E7B3 E6 01          	AND	1
-E7B5 32 1A E8       	LD	(RBRAP+1),A
-E7B8                
-E7B8 7C             	LD	A,H
-E7B9 B5             	OR	L
-E7BA 28 57          	JR	Z,RBREND0
-E7BC                
-E7BC 22 D7 E8       	LD	(LEFT+1),HL	;Read record byte
-E7BF 22 5D F0       	LD	(LEFTX),HL
-E7C2                
-E7C2 CD 5D E8       	CALL	RBX2
-E7C5 28 19          	JR	Z,RBRB
-E7C7 CD 7C E8       	CALL	RBXA
-E7CA DA 66 E7       	JP	C,RBRERR
-E7CD C5             	PUSH	BC
-E7CE ED B0          	LDIR
-E7D0 ED 53 5F F0    	LD	(DTAX),DE
-E7D4 2A 5D F0       	LD	HL,(LEFTX)
-E7D7 D1             	POP	DE
-E7D8 A7             	AND	A
-E7D9 ED 52          	SBC	HL,DE
-E7DB 22 5D F0       	LD	(LEFTX),HL
-E7DE 28 30          	JR	Z,RBREND
-E7E0                
-E7E0                RBRB:
-E7E0 CD B2 E8       	CALL	RBXB
-E7E3 28 15          	JR	Z,RBRC
-E7E5                RBRB1:
-E7E5 C5             	PUSH	BC
-E7E6 D5             	PUSH	DE
-E7E7 CD 72 E3       	CALL	CLUSTX
-E7EA CD 13 E9       	CALL	DRDC
-E7ED D1             	POP	DE
-E7EE C1             	POP	BC
-E7EF D4 0B EB       	CALL	NC,GNCLX
-E7F2 DA 66 E7       	JP	C,RBRERR
-E7F5 10 EE          	DJNZ	RBRB1
-E7F7 CD 5D E9       	CALL	DRW_FLUSH
-E7FA                RBRC:
-E7FA CD CA E8       	CALL	RBXC
-E7FD 28 11          	JR	Z,RBREND
-E7FF C5             	PUSH	BC
-E800 CD 72 E3       	CALL	CLUSTX
-E803 CD 76 E9       	CALL	DRDX
-E806 C1             	POP	BC
-E807 DA 66 E7       	JP	C,RBRERR
-E80A EB             	EX	DE,HL
-E80B 2A 7E F1       	LD	HL,(_DTBUF)
-E80E ED B0          	LDIR
-E810                RBREND:
-E810 CD D6 E8       	CALL	RBXEND
-E813                RBREND0:
-E813 FD E1          	POP	IY
-E815 C1             	POP	BC
-E816 D1             	POP	DE
-E817 F1             	POP	AF	;(HL)
+E6E7 2A 5D F0       	LD	HL,(LEFTX)
+E6EA D1             	POP	DE
+E6EB ED 52          	SBC	HL,DE
+E6ED 22 5D F0       	LD	(LEFTX),HL
+E6F0 28 31          	JR	Z,RBWEND
+E6F2                
+E6F2                RBWB:
+E6F2 CD A4 E8       	CALL	RBXB
+E6F5 28 14          	JR	Z,RBWC
+E6F7                RBWB1:
+E6F7 C5             	PUSH	BC
+E6F8 D5             	PUSH	DE
+E6F9 CD 72 E3       	CALL	CLUSTX
+E6FC CD F3 E8       	CALL	DWTC
+E6FF D1             	POP	DE
+E700 C1             	POP	BC
+E701 D4 F1 EA       	CALL	NC,GNCLX
+E704 38 3B          	JR	C,RBWERR
+E706 10 EF          	DJNZ	RBWB1
+E708 CD 43 E9       	CALL	DRW_FLUSH
+E70B                RBWC:
+E70B CD BC E8       	CALL	RBXC
+E70E 28 13          	JR	Z,RBWEND
+E710 C5             	PUSH	BC
+E711 CD 72 E3       	CALL	CLUSTX
+E714 CD 78 E9       	CALL	DRDN
+E717 C1             	POP	BC
+E718 38 27          	JR	C,RBWERR
+E71A ED 5B 7E F1    	LD	DE,(_DTBUF)
+E71E ED B0          	LDIR
+E720 CD A1 E4       	CALL	SWTDBF		;ÉoÉbÉtÉ@ÉfÅ[É^ÇÕçXêVÇ≥ÇÍÇΩ
+E723                RBWEND:
+E723 CD C8 E8       	CALL	RBXEND
+E726                
+E726 CD 30 E8       	CALL	RBX1
+E729 30 0F          	JR	NC,RBW1		;ÉâÉìÉ_ÉÄÉåÉRÅ[ÉhÇÃï˚Ç™ëÂÇ´Ç¢èÍçáÇÕÉTÉCÉYÇçáÇÌÇπÇÈ
+E72B CD DF E8       	CALL	GET_RR_BCDE	;BCDE=Random record
+E72E FD 73 10       	LD	(IY+16),E	;ÉtÉ@ÉCÉãÇÃÉTÉCÉY(ÉoÉCÉgíPà )
+E731 FD 72 11       	LD	(IY+17),D	;
+E734 FD 71 12       	LD	(IY+18),C	;
+E737 FD 70 13       	LD	(IY+19),B	;
+E73A                RBW1:
+E73A FD E1          	POP	IY
+E73C C1             	POP	BC
+E73D D1             	POP	DE
+E73E E1             	POP	HL
+E73F                DD_NUL:
+E73F AF             	XOR	A
+E740                DRDF0:
+E740                DWTF0:
+E740 C9             	RET
+E741                
+E741                RBWERR:
+E741 FD E5          	PUSH	IY
+E743 D1             	POP	DE
+E744 2A 20 F1       	LD	HL,(STABLE+2*010H)
+E747 CD 0F 00       	CALL	JP_HL
+E74A                RBRERR1:
+E74A 3E 01          	LD	A,001H
+E74C                RBRERR2:
+E74C FD E1          	POP	IY
+E74E C1             	POP	BC
+E74F D1             	POP	DE
+E750 E1             	POP	HL
+E751 37             	SCF
+E752 21 00 00       	LD	HL,0
+E755 C9             	RET
+E756                
+E756                RBRERR:
+E756 3E FF          	LD	A,0FFH
+E758 18 F2          	JR	RBRERR2
+E75A                
+E75A                RBRFL:
+E75A 3E 00          RBRFLP:	LD	A,000H
+E75C FE 0D          	CP	00DH
+E75E 20 05          	JR	NZ,RBRFL1
+E760 D5             	PUSH	DE
+E761 1E 0A          	LD	E,00AH
+E763 18 05          	JR	RBRFL2
+E765                RBRFL1:
+E765 D5             	PUSH	DE
+E766 CD 09 F0       	CALL	_SYS07
+E769 5F             	LD	E,A
+E76A                RBRFL2:
+E76A CD CD F0       	CALL	_PRINT
+E76D 7B             	LD	A,E
+E76E D1             	POP	DE
+E76F 32 5B E7       	LD	(RBRFLP+1),A
+E772 C9             	RET
+E773                DDX:
+E773 FD 7E 01       	LD	A,(IY+1)	;(FCB)éÂÉtÉ@ÉCÉãñº
+E776 CD 97 E3       	CALL	CAP
+E779 FE 41          	CP	'A'
+E77B C9             	RET
+E77C                
+E77C                				;Read random block
+E77C                _SYS27:		;(BDOS)ÉâÉìÉ_ÉÄÉuÉçÉbÉNì«Ç›çûÇ›
+E77C 22 5D F0       	LD	(LEFTX),HL
+E77F CD 74 E1       	CALL	SETDRV
+E782                
+E782 FD CB 0D 66    	BIT	4,(IY+13)	;(FCB)ëÆê´(ÉAÉgÉäÉrÉÖÅ[Ég)
+E786 C2 0F E8       	JP	NZ,RBRDIR	;ÉfÉBÉåÉNÉgÉä
+E789 CD 21 E8       	CALL	RBX0
+E78C DA 56 E7       	JP	C,RBRERR
+E78F CD 30 E8       	CALL	RBX1
+E792 D4 48 E8       	CALL	NC,RBX1R
+E795 DA 4A E7       	JP	C,RBRERR1
+E798 EB             	EX	DE,HL
+E799 ED 52          	SBC	HL,DE		;CP 00HL,BCDE
+E79B 19             	ADD	HL,DE
+E79C 79             	LD	A,C
+E79D DE 00          	SBC	A,0
+E79F 78             	LD	A,B
+E7A0 DE 00          	SBC	A,0
+E7A2 38 01          	JR	C,RBR1
+E7A4 EB             	EX	DE,HL
+E7A5                RBR1:
+E7A5 9F             	SBC	A,A
+E7A6 E6 01          	AND	1
+E7A8 32 0D E8       	LD	(RBRAP+1),A
+E7AB                
+E7AB 7C             	LD	A,H
+E7AC B5             	OR	L
+E7AD 28 57          	JR	Z,RBREND0
+E7AF                
+E7AF 22 C9 E8       	LD	(RBSIZE),HL	;HLÅ©ì«Ç›çûÇﬁÉåÉRÅ[Éhêî
+E7B2 22 5D F0       	LD	(LEFTX),HL
+E7B5                
+E7B5 CD 50 E8       	CALL	RBX2
+E7B8 28 19          	JR	Z,RBRB
+E7BA CD 6F E8       	CALL	RBXA
+E7BD DA 56 E7       	JP	C,RBRERR
+E7C0 C5             	PUSH	BC
+E7C1 ED B0          	LDIR
+E7C3 ED 53 5F F0    	LD	(DTAX),DE
+E7C7 2A 5D F0       	LD	HL,(LEFTX)
+E7CA D1             	POP	DE
+E7CB A7             	AND	A
+E7CC ED 52          	SBC	HL,DE
+E7CE 22 5D F0       	LD	(LEFTX),HL
+E7D1 28 30          	JR	Z,RBREND
+E7D3                
+E7D3                RBRB:
+E7D3 CD A4 E8       	CALL	RBXB
+E7D6 28 15          	JR	Z,RBRC
+E7D8                RBRB1:
+E7D8 C5             	PUSH	BC
+E7D9 D5             	PUSH	DE
+E7DA CD 72 E3       	CALL	CLUSTX
+E7DD CD F9 E8       	CALL	DRDC
+E7E0 D1             	POP	DE
+E7E1 C1             	POP	BC
+E7E2 D4 F1 EA       	CALL	NC,GNCLX
+E7E5 DA 56 E7       	JP	C,RBRERR
+E7E8 10 EE          	DJNZ	RBRB1
+E7EA CD 43 E9       	CALL	DRW_FLUSH
+E7ED                RBRC:
+E7ED CD BC E8       	CALL	RBXC
+E7F0 28 11          	JR	Z,RBREND
+E7F2 C5             	PUSH	BC
+E7F3 CD 72 E3       	CALL	CLUSTX
+E7F6 CD 5C E9       	CALL	DRDX
+E7F9 C1             	POP	BC
+E7FA DA 56 E7       	JP	C,RBRERR
+E7FD EB             	EX	DE,HL
+E7FE 2A 7E F1       	LD	HL,(_DTBUF)
+E801 ED B0          	LDIR
+E803                RBREND:
+E803 CD C8 E8       	CALL	RBXEND
+E806                RBREND0:
+E806 FD E1          	POP	IY
+E808 C1             	POP	BC
+E809 D1             	POP	DE
+E80A F1             	POP	AF	;(HL)
+E80B AF             	XOR	A
+E80C 3E 00          RBRAP:	LD	A,000H
+E80E C9             	RET
+E80F                
+E80F                RBRDIR:
+E80F FD 6E 1A       	LD	L,(IY+26)	;(FCB)ÉtÉ@ÉCÉãÇÃêÊì™ÉNÉâÉXÉ^
+E812 FD 66 1B       	LD	H,(IY+27)
+E815 CD B2 E3       	CALL	CHDIR
 E818 AF             	XOR	A
-E819 3E 00          RBRAP:	LD	A,000H
-E81B C9             	RET
-E81C                
-E81C                RBRDIR:
-E81C FD 6E 1A       	LD	L,(IY+26)	;(FCB)ÉtÉ@ÉCÉãÇÃêÊì™ÉNÉâÉXÉ^
-E81F FD 66 1B       	LD	H,(IY+27)
-E822 CD B2 E3       	CALL	CHDIR
-E825 AF             	XOR	A
-E826 67             	LD	H,A
-E827 6F             	LD	L,A
-E828 3C             	INC	A
-E829 32 1A E8       	LD	(RBRAP+1),A
-E82C 18 E5          	JR	RBREND0
-E82E                
-E82E                RBX0:
-E82E 2A 8A F0       	LD	HL,(_DTA)
-E831 22 5F F0       	LD	(DTAX),HL
-E834 2A 5D F0       	LD	HL,(LEFTX)
-E837 FD 7E 1C       	LD	A,(IY+28)	;(FCB)ÉIÅ[ÉvÉìÉÇÅ[Éh
-E83A D6 FD          	SUB	0FDH
-E83C C9             	RET
+E819 67             	LD	H,A
+E81A 6F             	LD	L,A
+E81B 3C             	INC	A
+E81C 32 0D E8       	LD	(RBRAP+1),A
+E81F 18 E5          	JR	RBREND0
+E821                
+E821                RBX0:
+E821 2A 8A F0       	LD	HL,(_DTA)
+E824 22 5F F0       	LD	(DTAX),HL
+E827 2A 5D F0       	LD	HL,(LEFTX)
+E82A FD 7E 1C       	LD	A,(IY+28)	;(FCB)ÉIÅ[ÉvÉìÉÇÅ[Éh
+E82D D6 FD          	SUB	0FDH
+E82F C9             	RET
+E830                
+E830                RBX1:				;ÉtÉ@ÉCÉãÉTÉCÉYÇ∆ÉâÉìÉ_ÉÄÉåÉRÅ[ÉhÇî‰Ç◊ÇÈ
+E830 E5             	PUSH	HL		;Record byte
+E831                				;AHL=File size
+E831 FD 6E 10       	LD	L,(IY+16)	;ÉtÉ@ÉCÉãÇÃÉTÉCÉY(ÉoÉCÉgíPà )
+E834 FD 66 11       	LD	H,(IY+17)	;
+E837 FD 7E 12       	LD	A,(IY+18)	;
+E83A                
+E83A CD DF E8       	CALL	GET_RR_BCDE	;BCDE=Random record
 E83D                
-E83D                RBX1:
-E83D E5             	PUSH	HL		;Record byte
-E83E                				;AHL=File size
-E83E FD 6E 10       	LD	L,(IY+16)	;ÉtÉ@ÉCÉãÇÃÉTÉCÉY(ÉoÉCÉgíPà )
-E841 FD 66 11       	LD	H,(IY+17)	;
-E844 FD 7E 12       	LD	A,(IY+18)	;
-E847                
-E847 CD F9 E8       	CALL	GET_RR_BCDE	;BCDE=Random record
-E84A                
-E84A A7             	AND	A
-E84B ED 52          	SBC	HL,DE
-E84D 99             	SBC	A,C
-E84E 4F             	LD	C,A
-E84F FD 7E 13       	LD	A,(IY+19)	;ÉtÉ@ÉCÉãÇÃÉTÉCÉY
-E852 98             	SBC	A,B
-E853 D1             	POP	DE
-E854                
-E854 D8             	RET	C
-E855 47             	LD	B,A
-E856 B1             	OR	C
-E857 EB             	EX	DE,HL	;BCDE=File byte	HL=Record byte
-E858 B2             	OR	D
-E859 B3             	OR	E
-E85A C0             	RET	NZ
-E85B 37             	SCF
-E85C C9             	RET
-E85D                
-E85D                RBX2:				;Cluster settings
-E85D FD 66 22       	LD	H,(IY+34)	;(+33)(FCB)ÉâÉìÉ_ÉÄÉåÉRÅ[Éh
-E860 FD 4E 23       	LD	C,(IY+35)
-E863 06 00          	LD	B,0
-E865 FD CB 20 7E    	BIT	7,(IY+32)	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
-E869 20 03          	JR	NZ,RBX3
-E86B FD 46 24       	LD	B,(IY+36)
-E86E                RBX3:
-E86E CD 63 E5       	CALL	RWXR
-E871 3A 94 E8       	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
-E874 3D             	DEC	A
-E875 FD A6 22       	AND	(IY+34)
-E878 FD B6 21       	OR	(IY+33)
-E87B C9             	RET
-E87C                
-E87C                RBXA:
-E87C C5             	PUSH	BC
-E87D D5             	PUSH	DE
-E87E CD 72 E3       	CALL	CLUSTX
-E881 CD 76 E9       	CALL	DRDX
-E884 D1             	POP	DE
-E885 C1             	POP	BC
-E886 D8             	RET	C
-E887 CD 0B EB       	CALL	GNCLX
-E88A D8             	RET	C
-E88B ED 53 FE F1    	LD	(_CLPS),DE
+E83D A7             	AND	A
+E83E ED 52          	SBC	HL,DE
+E840 99             	SBC	A,C
+E841 4F             	LD	C,A
+E842 FD 7E 13       	LD	A,(IY+19)	;ÉtÉ@ÉCÉãÇÃÉTÉCÉY
+E845 98             	SBC	A,B
+E846 D1             	POP	DE
+E847 C9             	RET
+E848                RBX1R:
+E848 47             	LD	B,A
+E849 B1             	OR	C
+E84A EB             	EX	DE,HL	;BCDE=File byte	HL=Record byte
+E84B B2             	OR	D
+E84C B3             	OR	E
+E84D C0             	RET	NZ
+E84E 37             	SCF
+E84F C9             	RET
+E850                
+E850                RBX2:				;Cluster settings
+E850 FD 66 22       	LD	H,(IY+34)	;(+33)(FCB)ÉâÉìÉ_ÉÄÉåÉRÅ[Éh
+E853 FD 4E 23       	LD	C,(IY+35)
+E856 06 00          	LD	B,0
+E858 FD CB 20 7E    	BIT	7,(IY+32)	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
+E85C 20 03          	JR	NZ,RBX3
+E85E FD 46 24       	LD	B,(IY+36)
+E861                RBX3:
+E861 CD 67 E5       	CALL	RWXR
+E864 3A 86 E8       	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
+E867 3D             	DEC	A
+E868 FD A6 22       	AND	(IY+34)
+E86B FD B6 21       	OR	(IY+33)
+E86E C9             	RET
+E86F                
+E86F                RBXA:
+E86F C5             	PUSH	BC
+E870 D5             	PUSH	DE
+E871 CD 72 E3       	CALL	CLUSTX
+E874 CD 5C E9       	CALL	DRDX
+E877 D1             	POP	DE
+E878 C1             	POP	BC
+E879 D4 F1 EA       	CALL	NC,GNCLX
+E87C D8             	RET	C
+E87D ED 53 FE F1    	LD	(_CLPS),DE
+E881                
+E881 FD 4E 21       	LD	C,(IY+33)	;(FCB)ÉâÉìÉ_ÉÄÉåÉRÅ[Éh
+E884 21 00 04       SECSZ:	LD	HL,0400H	;é©å»èëÇ´ä∑Ç¶ 1024=0400H / 512=0200H Ç±Ç±Ç…1ÉZÉNÉ^ÇÃÉTÉCÉYÇ™äiî[Ç≥ÇÍÇÈ
+E887 7C             	LD	A,H
+E888 3D             	DEC	A		;1024=3 / 512=1
+E889 FD A6 22       	AND	(IY+34)		;(FCB)ÉâÉìÉ_ÉÄÉåÉRÅ[Éh
+E88C 47             	LD	B,A		;BCÇ…1ÉZÉNÉ^à»â∫ÇÃí[êîÇ™ì¸ÇÈ
+E88D ED 42          	SBC	HL,BC		;écÇËÇåvéZ
 E88F                
-E88F FD 4E 21       	LD	C,(IY+33)	;(FCB)ÉâÉìÉ_ÉÄÉåÉRÅ[Éh
-E892 21 00 04       SECSZ:	LD	HL,0400H	;é©å»èëÇ´ä∑Ç¶ 1024=0400H / 512=0200H Ç±Ç±Ç…1ÉZÉNÉ^ÇÃÉTÉCÉYÇ™äiî[Ç≥ÇÍÇÈ
-E895 7C             	LD	A,H
-E896 3D             	DEC	A		;1024=3 / 512=1
-E897 FD A6 22       	AND	(IY+34)		;(FCB)ÉâÉìÉ_ÉÄÉåÉRÅ[Éh
-E89A 47             	LD	B,A		;BCÇ…1ÉZÉNÉ^à»â∫ÇÃí[êîÇ™ì¸ÇÈ
-E89B ED 42          	SBC	HL,BC		;écÇËÇåvéZ
-E89D                
-E89D ED 5B 5D F0    	LD	DE,(LEFTX)
-E8A1 ED 52          	SBC	HL,DE		;CP HL,DE
-E8A3 19             	ADD	HL,DE		;
-E8A4 38 01          	JR	C,RBXA1		;DEÇ∆HLÇî‰ärÇµÇƒëÂÇ´Ç¢ï˚ÇHLÇ…
-E8A6 EB             	EX	DE,HL
-E8A7                RBXA1:
-E8A7 E5             	PUSH	HL
-E8A8 2A 7E F1       	LD	HL,(_DTBUF)
-E8AB 09             	ADD	HL,BC
-E8AC ED 5B 5F F0    	LD	DE,(DTAX)
-E8B0 C1             	POP	BC
-E8B1 C9             	RET
-E8B2                
-E8B2                RBXB:
-E8B2 2A 5F F0       	LD	HL,(DTAX)
-E8B5 ED 5B FE F1    	LD	DE,(_CLPS)
-E8B9 3A 5E F0       	LD	A,(LEFTX+1)
-E8BC 47             	LD	B,A
-E8BD 3A 94 E8       	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
-E8C0                RBXB1:
-E8C0 1F             	RRA		;->CF
-E8C1 38 04          	JR	C,RBXB2
-E8C3 CB 38          	SRL	B	;B=B/2
-E8C5 18 F9          	JR	RBXB1
-E8C7                RBXB2:
-E8C7 78             	LD	A,B
-E8C8 B7             	OR	A
-E8C9 C9             	RET
-E8CA                
-E8CA                RBXC:
-E8CA ED 4B 5D F0    	LD	BC,(LEFTX)
-E8CE 3A 94 E8       	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
-E8D1 3D             	DEC	A
-E8D2 A0             	AND	B
-E8D3 47             	LD	B,A		;1ÉZÉNÉ^à»â∫ÇÃí[êîÇ™Ç»Ç¢èÍçáÇÕZ
-E8D4 B1             	OR	C
-E8D5 C9             	RET
-E8D6                
-E8D6                RBXEND:
-E8D6 11 00 00       LEFT:	LD	DE,0
-E8D9 AF             	XOR	A
-E8DA FD 6E 21       	LD	L,(IY+33)	;(FCB)ÉâÉìÉ_ÉÄÉåÉRÅ[Éh
-E8DD FD 66 22       	LD	H,(IY+34)
-E8E0 19             	ADD	HL,DE
-E8E1 FD 75 21       	LD	(IY+33),L	;(FCB)ÉâÉìÉ_ÉÄÉåÉRÅ[Éh
-E8E4 FD 74 22       	LD	(IY+34),H
-E8E7 30 0E          	JR	NC,RBXEND1
-E8E9 FD 34 23       	INC	(IY+35)
-E8EC 20 09          	JR	NZ,RBXEND1
-E8EE FD CB 20 7E    	BIT	7,(IY+32)	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
-E8F2 20 03          	JR	NZ,RBXEND1
-E8F4 FD 34 24       	INC	(IY+36)
-E8F7                RBXEND1:
-E8F7 EB             	EX	DE,HL		;HL=Read byte
-E8F8 C9             	RET
-E8F9                
-E8F9                GET_RR_BCDE:			;BCDE=Random record
-E8F9 FD 5E 21       	LD	E,(IY+33)	;(FCB)ÉâÉìÉ_ÉÄÉåÉRÅ[Éh
-E8FC FD 56 22       	LD	D,(IY+34)
-E8FF FD 4E 23       	LD	C,(IY+35)
-E902 FD 46 24       	LD	B,(IY+36)
-E905 FD CB 20 7E    	BIT	7,(IY+32)	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
-E909 C8             	RET	Z
-E90A 06 00          	LD	B,0		;CP/Må›ä∑ÇÃÉAÉNÉZÉXÇÃèÍçáÇÕFCBÇÕ36ÉoÉCÉg
-E90C C9             	RET
-E90D                
-E90D                ;	ÉâÉìÉ_ÉÄÉuÉçÉbÉNÉAÉNÉZÉXÇÃòAë±ÇµÇΩÉZÉNÉ^ÇÇ‹Ç∆ÇﬂÇÈ
-E90D                
-E90D                DWTC:
-E90D E5             	PUSH	HL
-E90E 21 9D EC       	LD	HL,DWT24B
-E911 18 04          	JR	DWTC1
-E913                DRDC:
-E913 E5             	PUSH	HL
-E914 21 8D EC       	LD	HL,DRD24B
-E917                DWTC1:
-E917 22 71 E9       	LD	(DRWF_MODE),HL
-E91A E1             	POP	HL
-E91B 3A 61 E9       	LD	A,(DRWF_B)
-E91E B7             	OR	A
-E91F 20 0F          	JR	NZ,DRDC1
-E921                SAVE_DRWC:
-E921 06 01          	LD	B,1
-E923 ED 43 60 E9    	LD	(DRWF_C),BC
-E927 ED 53 67 E9    	LD	(DRWF_E),DE
-E92B 22 6A E9       	LD	(DRWF_HL),HL
-E92E 18 20          	JR	INC_HL_DRWC
-E930                DRDC1:
-E930 E5             	PUSH	HL
-E931 21 67 E9       	LD	HL,DRWF_E
-E934 86             	ADD	A,(HL)
-E935 F5             	PUSH	AF
-E936 BB             	CP	E
-E937 20 1D          	JR	NZ,DRDC2
-E939 F1             	POP	AF
-E93A 23             	INC	HL
-E93B 7E             	LD	A,(HL)
-E93C CE 00          	ADC	A,0
-E93E F5             	PUSH	AF
-E93F BA             	CP	D
-E940 20 14          	JR	NZ,DRDC2
-E942 F1             	POP	AF
-E943 3A 60 E9       	LD	A,(DRWF_C)
-E946 CE 00          	ADC	A,0
-E948 B9             	CP	C
-E949 20 0C          	JR	NZ,DRDC3
-E94B 21 61 E9       	LD	HL,DRWF_B
-E94E 34             	INC	(HL)
-E94F E1             	POP	HL
-E950                INC_HL_DRWC:
-E950 3A 94 E8       	LD	A,(SECSZ+2)		;1ÉZÉNÉ^ÇÃÉTÉCÉYÇÃè„à 1ÉoÉCÉg
-E953 84             	ADD	A,H
-E954 67             	LD	H,A
-E955 C9             	RET
-E956                DRDC2:
-E956 F1             	POP	AF
-E957                DRDC3:
-E957 CD 5D E9       	CALL	DRW_FLUSH
-E95A E1             	POP	HL
-E95B 18 C4          	JR	SAVE_DRWC
-E95D                
-E95D                ;	ÉâÉìÉ_ÉÄÉuÉçÉbÉNÉAÉNÉZÉXÇÃòAë±ÇµÇΩÉZÉNÉ^ÇÇ‹Ç∆ÇﬂÇΩÇ‡ÇÃÇÉtÉâÉbÉVÉÖÇ∑ÇÈ
-E95D                DRW_FLUSH:
-E95D C5             	PUSH	BC
-E95E D5             	PUSH	DE
-E95F 01 00 00       	LD	BC,0
-E962 00 00 E9 60    DRWF_C	EQU	$-2
-E962 00 00 E9 61    DRWF_B	EQU	$-1
-E962 78             	LD	A,B
-E963 B7             	OR	A
-E964 28 0D          	JR	Z,DRDF1
-E966 11 00 00       	LD	DE,0
-E969 00 00 E9 67    DRWF_E	EQU	$-2
-E969 00 00 E9 68    DRWF_D	EQU	$-1
-E969 21 00 00       	LD	HL,0
-E96C 00 00 E9 6A    DRWF_HL	EQU	$-2
-E96C AF             	XOR	A
-E96D 32 61 E9       	LD	(DRWF_B),A
-E970 CD 8D EC       	CALL	DRD24B
-E973 00 00 E9 71    DRWF_MODE	EQU	$-2
-E973                DRDF1:
-E973 D1             	POP	DE
-E974 C1             	POP	BC
-E975 C9             	RET
-E976                	INCLUDE	"LDDIO.ASM"
-E976                
-E976                ;	LSX-Dodgers DIO
-E976                
-E976                DRDX:
-E976 CD B4 E9       	CALL	DRDY
-E979 C8             	RET	Z
-E97A CD 9A E9       	CALL	DRDX1		;ÉfÅ[É^ÉoÉbÉtÉ@ÇÃèÓïÒÇï€ë∂
-E97D D8             	RET	C
-E97E E5             	PUSH	HL
-E97F C5             	PUSH	BC
-E980 D5             	PUSH	DE
-E981 2A 7E F1       	LD	HL,(_DTBUF)
-E984 3A DD E9       	LD	A,(_DBS24+1)
-E987 4F             	LD	C,A
-E988 CD 8B EC       	CALL	DRD24
-E98B DC AF E9       	CALL	C,DRDNE
-E98E                POP_DE_BC_HL_RET:
-E98E D1             	POP	DE
-E98F C1             	POP	BC
-E990 E1             	POP	HL
-E991 C9             	RET
-E992                
-E992                ;	CDE:ÉZÉNÉ^î‘çÜ
-E992                DRDN:
-E992 AF             	XOR	A
-E993 00             DRDN1:	NOP			;é©å»èëÇ´ä∑Ç¶ NOP / SCF
-E994 30 E0          	JR	NC,DRDX
-E996                DRDNX:
-E996 CD B4 E9       	CALL	DRDY
-E999 C8             	RET	Z
-E99A                DRDX1:
-E99A CD CA E9       	CALL	DWTX
-E99D                				;ÉfÅ[É^ÉoÉbÉtÉ@ÇÃì«Ç›çûÇÒÇæÉhÉâÉCÉuÅEÉZÉNÉ^èÓïÒÇï€ë∂
-E99D ED 53 A6 F0    	LD	(_DBSEC),DE
-E9A1 79             	LD	A,C
-E9A2 32 DD E9       	LD	(_DBS24+1),A
-E9A5                
-E9A5 3A 88 F0       	LD	A,(_DRV)
-E9A8 32 A5 F0       	LD	(_DBDRV),A
-E9AB CD D9 F0       	CALL	_CHGDRV
-E9AE D0             	RET	NC
-E9AF                DRDNE:
-E9AF 9F             	SBC	A,A		;CF=1Ç»ÇÁÇŒA=0FFH
-E9B0 32 A5 F0       	LD	(_DBDRV),A
-E9B3 C9             	RET
-E9B4                
-E9B4                ;	CDE:ÉZÉNÉ^î‘çÜ
-E9B4                DRDY:
-E9B4 3A DD E9       	LD	A,(_DBS24+1)
-E9B7 B9             	CP	C
-E9B8 C0             	RET	NZ
+E88F ED 5B 5D F0    	LD	DE,(LEFTX)
+E893 ED 52          	SBC	HL,DE		;CP HL,DE
+E895 19             	ADD	HL,DE		;
+E896 38 01          	JR	C,RBXA1		;DEÇ∆HLÇî‰ärÇµÇƒëÂÇ´Ç¢ï˚ÇHLÇ…
+E898 EB             	EX	DE,HL
+E899                RBXA1:
+E899 E5             	PUSH	HL
+E89A 2A 7E F1       	LD	HL,(_DTBUF)
+E89D 09             	ADD	HL,BC
+E89E ED 5B 5F F0    	LD	DE,(DTAX)
+E8A2 C1             	POP	BC
+E8A3 C9             	RET
+E8A4                
+E8A4                RBXB:
+E8A4 2A 5F F0       	LD	HL,(DTAX)
+E8A7 ED 5B FE F1    	LD	DE,(_CLPS)
+E8AB 3A 5E F0       	LD	A,(LEFTX+1)
+E8AE 47             	LD	B,A
+E8AF 3A 86 E8       	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
+E8B2                RBXB1:
+E8B2 1F             	RRA		;->CF
+E8B3 38 04          	JR	C,RBXB2
+E8B5 CB 38          	SRL	B	;B=B/2
+E8B7 18 F9          	JR	RBXB1
+E8B9                RBXB2:
+E8B9 78             	LD	A,B
+E8BA B7             	OR	A
+E8BB C9             	RET
+E8BC                
+E8BC                RBXC:
+E8BC ED 4B 5D F0    	LD	BC,(LEFTX)
+E8C0 3A 86 E8       	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
+E8C3 3D             	DEC	A
+E8C4 A0             	AND	B
+E8C5 47             	LD	B,A		;1ÉZÉNÉ^à»â∫ÇÃí[êîÇ™Ç»Ç¢èÍçáÇÕZ
+E8C6 B1             	OR	C
+E8C7 C9             	RET
+E8C8                
+E8C8                RBXEND:				;ÉåÉRÅ[ÉhêîÇæÇØÉâÉìÉ_ÉÄÉåÉRÅ[ÉhÇêiÇﬂÇÈ
+E8C8 11 00 00       	LD	DE,0		;êiÇﬂÇÈÉåÉRÅ[Éhêî(RBSIZE)
+E8CB 00 00 E8 C9    RBSIZE	EQU	$-2
+E8CB CD 16 E6       	CALL	GET_RR_AHL
+E8CE 19             	ADD	HL,DE
+E8CF CE 00          	ADC	A,0
+E8D1 CD 20 E6       	CALL	SET_RR_AHL
+E8D4 EB             	EX	DE,HL		;HL=êiÇﬂÇÈÉåÉRÅ[Éhêî
+E8D5 D0             	RET	NC
+E8D6 FD CB 20 7E    	BIT	7,(IY+32)	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
+E8DA C0             	RET	NZ
+E8DB FD 34 24       	INC	(IY+36)
+E8DE C9             	RET
+E8DF                
+E8DF                GET_RR_BCDE:			;BCDE=Random record
+E8DF FD 5E 21       	LD	E,(IY+33)	;(FCB)ÉâÉìÉ_ÉÄÉåÉRÅ[Éh
+E8E2 FD 56 22       	LD	D,(IY+34)
+E8E5 FD 4E 23       	LD	C,(IY+35)
+E8E8 06 00          	LD	B,0		;CP/Må›ä∑ÇÃÉAÉNÉZÉXÇÃèÍçáÇÕFCBÇÕ36ÉoÉCÉg
+E8EA FD CB 20 7E    	BIT	7,(IY+32)	;(FCB)ÉJÉåÉìÉgÉåÉRÅ[Éh
+E8EE C0             	RET	NZ
+E8EF FD 46 24       	LD	B,(IY+36)
+E8F2 C9             	RET
+E8F3                
+E8F3                ;	ÉâÉìÉ_ÉÄÉuÉçÉbÉNÉAÉNÉZÉXÇÃòAë±ÇµÇΩÉZÉNÉ^ÇÇ‹Ç∆ÇﬂÇÈ
+E8F3                
+E8F3                DWTC:
+E8F3 E5             	PUSH	HL
+E8F4 21 83 EC       	LD	HL,DWT24B
+E8F7 18 04          	JR	DWTC1
+E8F9                DRDC:
+E8F9 E5             	PUSH	HL
+E8FA 21 73 EC       	LD	HL,DRD24B
+E8FD                DWTC1:
+E8FD 22 57 E9       	LD	(DRWF_MODE),HL
+E900 E1             	POP	HL
+E901 3A 47 E9       	LD	A,(DRWF_B)
+E904 B7             	OR	A
+E905 20 0F          	JR	NZ,DRDC1
+E907                SAVE_DRWC:
+E907 06 01          	LD	B,1
+E909 ED 43 46 E9    	LD	(DRWF_C),BC
+E90D ED 53 4D E9    	LD	(DRWF_E),DE
+E911 22 50 E9       	LD	(DRWF_HL),HL
+E914 18 20          	JR	INC_HL_DRWC
+E916                DRDC1:
+E916 E5             	PUSH	HL
+E917 21 4D E9       	LD	HL,DRWF_E
+E91A 86             	ADD	A,(HL)
+E91B F5             	PUSH	AF
+E91C BB             	CP	E
+E91D 20 1D          	JR	NZ,DRDC2
+E91F F1             	POP	AF
+E920 23             	INC	HL
+E921 7E             	LD	A,(HL)
+E922 CE 00          	ADC	A,0
+E924 F5             	PUSH	AF
+E925 BA             	CP	D
+E926 20 14          	JR	NZ,DRDC2
+E928 F1             	POP	AF
+E929 3A 46 E9       	LD	A,(DRWF_C)
+E92C CE 00          	ADC	A,0
+E92E B9             	CP	C
+E92F 20 0C          	JR	NZ,DRDC3
+E931 21 47 E9       	LD	HL,DRWF_B
+E934 34             	INC	(HL)
+E935 E1             	POP	HL
+E936                INC_HL_DRWC:
+E936 3A 86 E8       	LD	A,(SECSZ+2)		;1ÉZÉNÉ^ÇÃÉTÉCÉYÇÃè„à 1ÉoÉCÉg
+E939 84             	ADD	A,H
+E93A 67             	LD	H,A
+E93B C9             	RET
+E93C                DRDC2:
+E93C F1             	POP	AF
+E93D                DRDC3:
+E93D CD 43 E9       	CALL	DRW_FLUSH
+E940 E1             	POP	HL
+E941 18 C4          	JR	SAVE_DRWC
+E943                
+E943                ;	ÉâÉìÉ_ÉÄÉuÉçÉbÉNÉAÉNÉZÉXÇÃòAë±ÇµÇΩÉZÉNÉ^ÇÇ‹Ç∆ÇﬂÇΩÇ‡ÇÃÇÉtÉâÉbÉVÉÖÇ∑ÇÈ
+E943                DRW_FLUSH:
+E943 C5             	PUSH	BC
+E944 D5             	PUSH	DE
+E945 01 00 00       	LD	BC,0
+E948 00 00 E9 46    DRWF_C	EQU	$-2
+E948 00 00 E9 47    DRWF_B	EQU	$-1
+E948 78             	LD	A,B
+E949 B7             	OR	A
+E94A 28 0D          	JR	Z,DRDF1
+E94C 11 00 00       	LD	DE,0
+E94F 00 00 E9 4D    DRWF_E	EQU	$-2
+E94F 00 00 E9 4E    DRWF_D	EQU	$-1
+E94F 21 00 00       	LD	HL,0
+E952 00 00 E9 50    DRWF_HL	EQU	$-2
+E952 AF             	XOR	A
+E953 32 47 E9       	LD	(DRWF_B),A
+E956 CD 73 EC       	CALL	DRD24B
+E959 00 00 E9 57    DRWF_MODE	EQU	$-2
+E959                DRDF1:
+E959 D1             	POP	DE
+E95A C1             	POP	BC
+E95B C9             	RET
+E95C                	INCLUDE	"LDDIO.ASM"
+E95C                
+E95C                ;	LSX-Dodgers DIO
+E95C                
+E95C                DRDX:
+E95C CD 9A E9       	CALL	DRDY
+E95F C8             	RET	Z
+E960 CD 80 E9       	CALL	DRDX1		;ÉfÅ[É^ÉoÉbÉtÉ@ÇÃèÓïÒÇï€ë∂
+E963 D8             	RET	C
+E964 E5             	PUSH	HL
+E965 C5             	PUSH	BC
+E966 D5             	PUSH	DE
+E967 2A 7E F1       	LD	HL,(_DTBUF)
+E96A 3A C3 E9       	LD	A,(_DBS24+1)
+E96D 4F             	LD	C,A
+E96E CD 71 EC       	CALL	DRD24
+E971 DC 95 E9       	CALL	C,DRDNE
+E974                POP_DE_BC_HL_RET:
+E974 D1             	POP	DE
+E975 C1             	POP	BC
+E976 E1             	POP	HL
+E977 C9             	RET
+E978                
+E978                ;	CDE:ÉZÉNÉ^î‘çÜ
+E978                DRDN:
+E978 AF             	XOR	A
+E979 00             DRDN1:	NOP			;é©å»èëÇ´ä∑Ç¶ NOP / SCF
+E97A 30 E0          	JR	NC,DRDX
+E97C                DRDNX:
+E97C CD 9A E9       	CALL	DRDY
+E97F C8             	RET	Z
+E980                DRDX1:
+E980 CD B0 E9       	CALL	DWTX
+E983                				;ÉfÅ[É^ÉoÉbÉtÉ@ÇÃì«Ç›çûÇÒÇæÉhÉâÉCÉuÅEÉZÉNÉ^èÓïÒÇï€ë∂
+E983 ED 53 A6 F0    	LD	(_DBSEC),DE
+E987 79             	LD	A,C
+E988 32 C3 E9       	LD	(_DBS24+1),A
+E98B                
+E98B 3A 88 F0       	LD	A,(_DRV)
+E98E 32 A5 F0       	LD	(_DBDRV),A
+E991 CD D9 F0       	CALL	_CHGDRV
+E994 D0             	RET	NC
+E995                DRDNE:
+E995 9F             	SBC	A,A		;CF=1Ç»ÇÁÇŒA=0FFH
+E996 32 A5 F0       	LD	(_DBDRV),A
+E999 C9             	RET
+E99A                
+E99A                ;	CDE:ÉZÉNÉ^î‘çÜ
+E99A                DRDY:
+E99A 3A C3 E9       	LD	A,(_DBS24+1)
+E99D B9             	CP	C
+E99E C0             	RET	NZ
+E99F                
+E99F E5             	PUSH	HL
+E9A0 3A 88 F0       	LD	A,(_DRV)
+E9A3 21 A5 F0       	LD	HL,_DBDRV
+E9A6 AE             	XOR	(HL)
+E9A7 20 05          	JR	NZ,POP_HL_RET
+E9A9                
+E9A9 2A A6 F0       	LD	HL,(_DBSEC)
+E9AC ED 52          	SBC	HL,DE		;CF=0
+E9AE                POP_HL_RET:
+E9AE E1             	POP	HL
+E9AF C9             	RET
+E9B0                
+E9B0                DWTX:
+E9B0 3A A4 F0       	LD	A,(_WTDBF)
+E9B3 B7             	OR	A
+E9B4 C8             	RET	Z
+E9B5 AF             	XOR	A
+E9B6 32 A4 F0       	LD	(_WTDBF),A
 E9B9                
 E9B9 E5             	PUSH	HL
-E9BA 3A 88 F0       	LD	A,(_DRV)
-E9BD 21 A5 F0       	LD	HL,_DBDRV
-E9C0 AE             	XOR	(HL)
-E9C1 20 05          	JR	NZ,POP_HL_RET
-E9C3                
-E9C3 2A A6 F0       	LD	HL,(_DBSEC)
-E9C6 ED 52          	SBC	HL,DE		;CF=0
-E9C8                POP_HL_RET:
-E9C8 E1             	POP	HL
-E9C9 C9             	RET
-E9CA                
-E9CA                DWTX:
-E9CA 3A A4 F0       	LD	A,(_WTDBF)
-E9CD B7             	OR	A
-E9CE C8             	RET	Z
-E9CF AF             	XOR	A
-E9D0 32 A4 F0       	LD	(_WTDBF),A
-E9D3                
-E9D3 E5             	PUSH	HL
-E9D4 C5             	PUSH	BC
-E9D5 D5             	PUSH	DE
-E9D6 3A A5 F0       	LD	A,(_DBDRV)
-E9D9 CD D9 F0       	CALL	_CHGDRV
-E9DC 0E 00          _DBS24:	LD	C,0
-E9DE ED 5B A6 F0    	LD	DE,(_DBSEC)
-E9E2 2A 7E F1       	LD	HL,(_DTBUF)
-E9E5 D4 9B EC       	CALL	NC,DWT24
-E9E8                POP_DE_BC_HL_RET2:
-E9E8 18 A4          	JR	POP_DE_BC_HL_RET
-E9EA                
-E9EA                RDFATX:
-E9EA E5             	PUSH	HL
-E9EB 3A 88 F0       	LD	A,(_DRV)
-E9EE 21 AA F0       	LD	HL,_FATDRV
-E9F1 AE             	XOR	(HL)
-E9F2 28 D4          	JR	Z,POP_HL_RET
-E9F4                
-E9F4 C5             	PUSH	BC
-E9F5 D5             	PUSH	DE
-E9F6 DD E5          	PUSH	IX
-E9F8 CD 14 EA       	CALL	WTFATX
-E9FB 38 13          	JR	C,POP_IX_DE_BC_HL_RET
-E9FD                
-E9FD AF             	XOR	A
-E9FE 32 AB F0       	LD	(_FATIX),A
-EA01 3A 88 F0       	LD	A,(_DRV)
-EA04 32 AA F0       	LD	(_FATDRV),A
-EA07 CD E5 F0       	CALL	_RDFAT
-EA0A                RDFATE2:
-EA0A 30 04          	JR	NC,POP_IX_DE_BC_HL_RET
-EA0C 9F             	SBC	A,A		;A=0xFF
-EA0D 32 AA F0       	LD	(_FATDRV),A
-EA10                POP_IX_DE_BC_HL_RET:
-EA10 DD E1          	POP	IX
-EA12 18 D4          	JR	POP_DE_BC_HL_RET2
-EA14                
-EA14                WTFATX:
-EA14 3A A2 F0       	LD	A,(_WTFATF)
-EA17 B7             	OR	A
-EA18 C8             	RET	Z
-EA19 E5             	PUSH	HL
-EA1A 3A AA F0       	LD	A,(_FATDRV)
-EA1D 21 A5 F0       	LD	HL,_DBDRV
-EA20 AE             	XOR	(HL)
-EA21 CC CA E9       	CALL	Z,DWTX
-EA24 38 A2          	JR	C,POP_HL_RET
-EA26 C5             	PUSH	BC
-EA27 D5             	PUSH	DE
-EA28 DD E5          	PUSH	IX
-EA2A CD A8 EC       	CALL	WTFAT
-EA2D AF             	XOR	A
-EA2E 32 A2 F0       	LD	(_WTFATF),A
-EA31 18 DD          	JR	POP_IX_DE_BC_HL_RET
-EA33                
-EA33                NCL1:
-EA33 7A             	LD	A,D
-EA34 B3             	OR	E
-EA35 37             	SCF
-EA36 C8             	RET	Z
-EA37                
-EA37 7A             	LD	A,D
-EA38 CB 3F          	SRL	A	;/2
-EA3A CB 3F          	SRL	A	;/2
-EA3C                
-EA3C E5             	PUSH	HL
-EA3D 32 5C EA       	LD	(NCLPAT+2),A	;_FATIX
-EA40 2A AA F0       	LD	HL,(_FATDRV)	;L=_FATDRV H=_FATIX
-EA43 BC             	CP	H
-EA44 3A 88 F0       	LD	A,(_DRV)	;Ç±ÇÃä‘Ç≈ÉtÉâÉOÇÕïœâªÇµÇ»Ç¢
-EA47 32 5B EA       	LD	(NCLPAT+1),A	;_FATDRV
-EA4A 20 05          	JR	NZ,NCL2		;FATIXÇ™à·Ç§
-EA4C BD             	CP	L
-EA4D 20 02          	JR	NZ,NCL2		;ÉhÉâÉCÉuÇ™à·Ç§
-EA4F E1             	POP	HL
-EA50 C9             	RET
-EA51                NCL2:
-EA51 C5             	PUSH	BC
-EA52 D5             	PUSH	DE
-EA53 DD E5          	PUSH	IX
-EA55 CD 14 EA       	CALL	WTFATX
-EA58 38 B6          	JR	C,POP_IX_DE_BC_HL_RET
-EA5A 01 00 00       NCLPAT:	LD	BC,0		;é©å»èëÇ´ä∑Ç¶ C=_FATDRV B=_FATIX
-EA5D ED 43 AA F0    	LD	(_FATDRV),BC
-EA61 CD 7D EC       	CALL	RDFATS
-EA64 18 A4          	JR	RDFATE2
-EA66                
-EA66                NCL3:
-EA66 CB 9A          	RES	3,D
-EA68 CB 92          	RES	2,D
-EA6A 6B             	LD	L,E
-EA6B 62             	LD	H,D
-EA6C CB 3C          	SRL	H	;
-EA6E CB 1D          	RR	L	;HLA=HLA/2
-EA70 1F             	RRA		;
-EA71 F5             	PUSH	AF
-EA72 3A AB F0       	LD	A,(_FATIX)
-EA75 0F             	RRCA
-EA76 30 0B          	JR	NC,NCL3X1
-EA78 3A 94 E8       	LD	A,(SECSZ+2)
-EA7B FE 04          	CP	4		;1ÉZÉNÉ^1024ÉoÉCÉgÇÃèÍçáÇÕäÔêîÉCÉìÉfÉbÉNÉXÇÃèÍçáÇ…êÊì™Ç512ÉoÉCÉgÇ∏ÇÁÇ∑
-EA7D 20 04          	JR	NZ,NCL3X1
-EA7F 01 00 02       	LD	BC,512
-EA82 09             	ADD	HL,BC
-EA83                NCL3X1:
-EA83 F1             	POP	AF
-EA84 ED 4B 7C F1    	LD	BC,(_FATBF)
-EA88 19             	ADD	HL,DE
-EA89 09             	ADD	HL,BC
-EA8A 17             	RLA
-EA8B C9             	RET
-EA8C                
-EA8C                GNCL:
-EA8C CD 33 EA       	CALL	NCL1		;GET NEXT CLUSTER
-EA8F D8             	RET	C
-EA90 C5             	PUSH	BC
-EA91 E5             	PUSH	HL
-EA92 CD 66 EA       	CALL	NCL3
-EA95 38 09          	JR	C,GNC1
-EA97 5E             	LD	E,(HL)
-EA98 23             	INC	HL
-EA99 7E             	LD	A,(HL)
-EA9A E6 0F          	AND	00FH
-EA9C 57             	LD	D,A
-EA9D E1             	POP	HL
-EA9E C1             	POP	BC
-EA9F C9             	RET
-EAA0                GNC1:
-EAA0 7E             	LD	A,(HL)
-EAA1 23             	INC	HL
-EAA2 56             	LD	D,(HL)
-EAA3 06 04          	LD	B,4
-EAA5                GNC1L:
-EAA5 CB 3A          	SRL	D	;DA=DA/2
-EAA7 1F             	RRA		;
-EAA8 10 FB          	DJNZ	GNC1L
-EAAA                
-EAAA 5F             	LD	E,A
-EAAB E1             	POP	HL
-EAAC C1             	POP	BC
-EAAD A7             	AND	A
-EAAE C9             	RET
-EAAF                
-EAAF                SNCL:
-EAAF CD 33 EA       	CALL	NCL1
-EAB2 D8             	RET	C
-EAB3                ;				SET NEXT CLUSTER
-EAB3 E5             	PUSH	HL
-EAB4 C5             	PUSH	BC
-EAB5 D5             	PUSH	DE
-EAB6 E5             	PUSH	HL
-EAB7 CD 66 EA       	CALL	NCL3
-EABA D1             	POP	DE
-EABB                ;CF=ODD
-EABB 7E             	LD	A,(HL)
-EABC 73             	LD	(HL),E
-EABD 38 06          	JR	C,SNC1
-EABF                ;EVEN
-EABF                ;M[0] = E
-EABF                ;M[1] = (M[1] & 0xF0) | (D & 0x0F)
-EABF 23             	INC	HL
-EAC0 ED 67          	RRD		;M={A[3:0],E[3:0]}
-EAC2 7A             	LD	A,D
-EAC3 18 04          	JR	SNC11
-EAC5                SNC1:
-EAC5                ;ODD
-EAC5                ;HL[0] = (HL[0]&0x0F) | (E<<4)
-EAC5                ;HL[1] = DE>>4
-EAC5 ED 6F          	RLD		;M={D[3:0],E[7:4]}
-EAC7 23             	INC	HL
-EAC8 72             	LD	(HL),D	;M={D[3:0],E[7:4]}
-EAC9                SNC11:
-EAC9 ED 6F          	RLD		;M={M[7:4],D[3:0]}
-EACB B7             	OR	A
-EACC D1             	POP	DE
-EACD C1             	POP	BC
-EACE E1             	POP	HL
-EACF                FAT_CHANGED:
-EACF 3E 01          	LD	A,1
-EAD1 32 A2 F0       	LD	(_WTFATF),A
-EAD4 C9             	RET
-EAD5                
-EAD5                N16CL3:
-EAD5 C5             	PUSH	BC
-EAD6 6B             	LD	L,E
-EAD7 7A             	LD	A,D
-EAD8 E6 03          	AND	3
-EADA 67             	LD	H,A
-EADB 29             	ADD	HL,HL
-EADC ED 4B 7C F1    	LD	BC,(_FATBF)
-EAE0 09             	ADD	HL,BC
-EAE1 C1             	POP	BC
-EAE2 C9             	RET
-EAE3                
-EAE3                GNCL16:
-EAE3 CD 33 EA       	CALL	NCL1		;GET NEXT CLUSTER for FAT16
-EAE6 D8             	RET	C
-EAE7 E5             	PUSH	HL
-EAE8 CD D5 EA       	CALL	N16CL3
-EAEB 5E             	LD	E,(HL)
-EAEC 23             	INC	HL
-EAED 56             	LD	D,(HL)
-EAEE E1             	POP	HL
-EAEF C9             	RET
-EAF0                
-EAF0                SNCL16:
-EAF0 CD 33 EA       	CALL	NCL1		;GET NEXT CLUSTER for FAT16
-EAF3 D8             	RET	C
-EAF4 D5             	PUSH	DE
-EAF5 E5             	PUSH	HL
-EAF6 CD D5 EA       	CALL	N16CL3
-EAF9 D1             	POP	DE		;HL
-EAFA 73             	LD	(HL),E
-EAFB 23             	INC	HL
-EAFC 72             	LD	(HL),D
-EAFD 6B             	LD	L,E
-EAFE 62             	LD	H,D
-EAFF D1             	POP	DE
-EB00 18 CD          	JR	FAT_CHANGED
-EB02                
-EB02                ;------------------------
-EB02                ;éüÇÃÉZÉNÉ^ÇíTÇ∑ç€Ç…_SECPSÇÃílÇÉ`ÉFÉbÉN
-EB02                ;in
-EB02                ;	DE : ÉZÉNÉ^î‘çÜ
-EB02                ;out
-EB02                ;	DE : éüÇÃÉZÉNÉ^î‘çÜ
-EB02                ;note
-EB02                ;
-EB02                ;------------------------
-EB02                NEXTX:
-EB02 3E 00          _SECPS:	LD	A,0	;é©å»èëÇ´ä∑Ç¶
-EB04 3C             	INC	A
-EB05 E6 00          NCPAT:	AND	0	;é©å»èëÇ´ä∑Ç¶Å@1ÉNÉâÉXÉ^ÇÃò_óùÉZÉNÉ^êî-1
-EB07 32 03 EB       	LD	(_SECPS+1),A
-EB0A C9             	RET
-EB0B                
-EB0B                GNCLX:
-EB0B CD 02 EB       	CALL	NEXTX
-EB0E C0             	RET	NZ	;1ÉNÉâÉXÉ^ÇÃÉZÉNÉ^ñ¢ñûÇÃèÍçáÇÕñﬂÇÈ
-EB0F C3 F7 F0       	JP	_GNCL	;éüÇÃÉNÉâÉXÉ^ÇíTÇ∑
-EB12                
-EB12                RDFAT:
-EB12 3E 80          	LD	A,080H
-EB14 32 70 F0       	LD	(CHECK),A
-EB17                RDFAT1:
-EB17 3A 88 F0       	LD	A,(_DRV)
-EB1A CD D2 ED       	CALL	CHGDRVR
-EB1D D8             	RET	C
-EB1E DD 7E 12       	LD	A,(IX+012H)	;DPB_12_DEVICE
-EB21 CB 6F          	BIT	5,A
-EB23 28 6B          	JR	Z,RDFAT0X
-EB25 21 70 F0       	LD	HL,CHECK
-EB28 A6             	AND	(HL)
-EB29 77             	LD	(HL),A
-EB2A 11 00 00       	LD	DE,0		;BPB
-EB2D 2A 7C F1       	LD	HL,(_FATBF)
-EB30 CD 89 EC       	CALL	DRD16
-EB33 30 24          	JR	NC,GETBPB
-EB35 21 70 F0       	LD	HL,CHECK
-EB38 CB 06          	RLC	(HL)
-EB3A 3F             	CCF
-EB3B D8             	RET	C
-EB3C DD CB 0A 1E    	RR	(IX+00AH)	;DPB_0A_FDMODE
-EB40 3F             	CCF			;ÉtÉçÉbÉsÅ[ÉfÉBÉXÉNÇÃFDÉÇÅ[ÉhÇêÿÇËë÷Ç¶ÇÈ
-EB41 DD CB 0A 16    	RL	(IX+00AH)	;DPB_0A_FDMODE
-EB45 3E FF          	LD	A,0FFH
-EB47 32 89 F0       	LD	(_DSK),A
-EB4A 3A 84 F0       	LD	A,(_DRIVE)
-EB4D E6 03          	AND	3
-EB4F F6 80          	OR	080H
-EB51 6F             	LD	L,A
-EB52 26 F0          	LD	H,_CYL0/256
-EB54 3E FF          	LD	A,0FFH
-EB56 77             	LD	(HL),A
-EB57 18 BE          	JR	RDFAT1
-EB59                GETBPB:
-EB59 FD E5          	PUSH	IY
-EB5B FD 2A 7C F1    	LD	IY,(_FATBF)	;BPB
-EB5F CD F1 F0       	CALL	_BPB2DPB
-EB62 FD E1          	POP	IY
-EB64 DD 7E 12       	LD	A,(IX+012H)	;DPB_12_DEVICE
-EB67 30 21          	JR	NC,GETBPBOK
-EB69 E6 0F          	AND	00FH
-EB6B FE 07          	CP	7
-EB6D 37             	SCF
-EB6E C0             	RET	NZ
-EB6F DD CB 0A 46    	BIT	0,(IX+00AH)	;DPB_0A_FDMODE
-EB73 21 C0 F1       	LD	HL,M2D
-EB76 20 02          	JR	NZ,SETFDMODE
-EB78 2E D2          	LD	L,M2HD-STABLE
-EB7A                SETFDMODE:
-EB7A DD E5          	PUSH	IX
-EB7C D1             	POP	DE
-EB7D ED A0          	LDI
-EB7F ED A0          	LDI
-EB81 13             	INC	DE
-EB82 13             	INC	DE
-EB83 13             	INC	DE
-EB84 13             	INC	DE
-EB85 01 0C 00       	LD	BC,12
-EB88 ED B0          	LDIR
-EB8A                GETBPBOK:
-EB8A 32 99 EB       	LD	(DEVSWC),A
-EB8D CD 31 ED       	CALL	CHGDRV2
-EB90                RDFAT0X:
-EB90 CD 7D EC       	CALL	RDFATS
-EB93 D8             	RET	C
-EB94 DD AE 06       	XOR	(IX+6)		;DPB_06_FATID
-EB97 C8             	RET	Z
-EB98 3E 00          	LD	A,0		;DPB_12_DEVICE
-EB9A 00 00 EB 99    DEVSWC	EQU	$-1
-EB9A CB 6F          	BIT	5,A
-EB9C C0             	RET	NZ		;BPBÇéÊìæÇµÇƒÇ¢ÇÈèÍçáÇÕFATIDÇÉ`ÉFÉbÉNÇµÇ»Ç¢
-EB9D 37             	SCF
-EB9E C9             	RET
-EB9F                
-EB9F                BPB2DPB:
-EB9F FD 7E 0B       	LD	A,(IY+11)	;BPB_BytsPerSec
-EBA2 B7             	OR	A
-EBA3 37             	SCF
-EBA4 C0             	RET	NZ
-EBA5                BPBOK:
-EBA5 FD 7E 0D       	LD	A,(IY+13)	;BPB_SecPerClus
-EBA8 DD 77 07       	LD	(IX+7),A	;DPB_07_SECPCL
-EBAB                
-EBAB FD 7E 16       	LD	A,(IY+22)	;BPB_FATSz16
-EBAE DD 77 00       	LD	(IX+0),A	;DPB_00_FATLN
-EBB1 FD 7E 17       	LD	A,(IY+23)	;BPB_FATSz16
-EBB4 DD 77 01       	LD	(IX+1),A	;DPB_00_FATLN
-EBB7                
-EBB7 FD 6E 0E       	LD	L,(IY+14)	;BPB_RsvdSecCnt
-EBBA FD 66 0F       	LD	H,(IY+15)
-EBBD DD 75 0E       	LD	(IX+00EH),L	;DPB_0E_FATPS
-EBC0 FD 5E 16       	LD	E,(IY+22)	;BPB_FATSz16
-EBC3 FD 56 17       	LD	D,(IY+23)
-EBC6 FD 46 10       	LD	B,(IY+16)	;BPB_NumFATs
-EBC9                BPBDP1:				;BPB_FATSz16 * BPB_NumFATs
-EBC9 19             	ADD	HL,DE
-EBCA 10 FD          	DJNZ	BPBDP1
-EBCC                BPBDP2:
-EBCC DD 75 10       	LD	(IX+010H),L	;DPB_10_DIRPS
-EBCF DD 74 11       	LD	(IX+011H),H
-EBD2 E5             	PUSH	HL
-EBD3                
-EBD3 FD 6E 11       	LD	L,(IY+17)	;BPB_RootEntCnt
-EBD6 FD 66 12       	LD	H,(IY+18)
-EBD9 FD 7E 0C       	LD	A,(IY+12)	;BPB_BytsPerSec
-EBDC B7             	OR	A
-EBDD 37             	SCF
-EBDE C8             	RET	Z
-EBDF 06 06          	LD	B,6
-EBE1                BPBBPS1:
-EBE1 05             	DEC	B
-EBE2 0F             	RRCA
-EBE3 30 FC          	JR	NC,BPBBPS1
-EBE5                BPBDE1:
-EBE5 29             	ADD	HL,HL
-EBE6 10 FD          	DJNZ	BPBDE1
-EBE8                
-EBE8 7C             	LD	A,H
-EBE9 DD 77 0B       	LD	(IX+00BH),A	;DPB_0B_DIRSCNT
-EBEC                
-EBEC D1             	POP	DE		;DPB_10_DIRPS
-EBED 6C             	LD	L,H
-EBEE 26 00          	LD	H,0
-EBF0 19             	ADD	HL,DE		;MAXDIR
-EBF1 E5             	PUSH	HL
-EBF2 FD 4E 0D       	LD	C,(IY+13)	;BPB_SecPerClus
-EBF5 CB 21          	SLA	C		;*2
-EBF7 AF             	XOR	A
-EBF8 47             	LD	B,A
-EBF9 ED 42          	SBC	HL,BC
-EBFB DD 75 14       	LD	(IX+014H),L	;DPB_14_ADDCL16
-EBFE DD 74 15       	LD	(IX+015H),H
-EC01                
-EC01 D1             	POP	DE		;DE=DPB_0B_MAXDIR
-EC02 FD 6E 13       	LD	L,(IY+19)	;BPB_TotSec16
-EC05 FD 66 14       	LD	H,(IY+20)
-EC08                
-EC08 DD 7E 12       	LD	A,(IX+012H)	;DPB_12_DEVICE
-EC0B E6 0F          	AND	00FH
-EC0D FE 07          	CP	7		;ÉtÉçÉbÉsÅ[
-EC0F 20 19          	JR	NZ,NOT_FD
-EC11 E5             	PUSH	HL
-EC12 FD 4E 18       	LD	C,(IY+24)	;BPB_SecPerTr
-EC15 DD 71 0D       	LD	(IX+00DH),C	;DPB_0D_MAXSEC
-EC18 AF             	XOR	A
-EC19 CB 21          	SLA	C		;óºñ Ç»ÇÃÇ≈ÉZÉNÉ^êîÇÇQî{
-EC1B 06 10          	LD	B,16
-EC1D                DIVSEC:				;MAXCYL = BPB_TotSec16 / (BPB_SecPerTr * 2)
-EC1D 29             	ADD	HL,HL
-EC1E 17             	RLA
-EC1F B9             	CP	C
-EC20 38 02             	JR	C,DIVSEC1
-EC22 91                	SUB	C
-EC23 2C             	INC	L
-EC24                DIVSEC1:
-EC24 10 F7           	DJNZ	DIVSEC
-EC26 DD 75 0C       	LD	(IX+00CH),L	;DPB_0C_MAXCYL
-EC29 E1             	POP	HL	;Ç±Ç±Ç‹Ç≈ÉtÉçÉbÉsÅ[êÍóp
-EC2A                NOT_FD:
-EC2A 7C             	LD	A,H
-EC2B B5             	OR	L
-EC2C 3E 00          	LD	A,0		;LDÇ≈ÉtÉâÉOÇÕïœâªÇµÇ»Ç¢ÅBBPB_TotSec16Ç AHL Ç≈àµÇ§à◊ÅAAÇ…0Çì¸ÇÍÇÈ
-EC2E 20 10          	JR	NZ,BPB16BIT	;BPB_TotSec16Ç™Åu0ÅvÇÃèÍçáÇÕBPB_TotSec32Ç≈åvéZ
-EC30 FD 7E 23       	LD	A,(IY+35)	;îOÇÃÇΩÇﬂÇ…ëçÉZÉNÉ^êîÇ™24ÉrÉbÉgÇí¥Ç¶ÇÈèÍçáÇÕÉGÉâÅ[Çï‘Ç∑
-EC33 B7             	OR	A
-EC34 37             	SCF
-EC35 C0             	RET	NZ
-EC36 FD 6E 20       	LD	L,(IY+32)	;BPB_TotSec32 ÇÕ AHL ÇÃ24ÉrÉbÉgÇ≈àµÇ§
-EC39 FD 66 21       	LD	H,(IY+33)	;1ÉNÉâÉXÉ^ÇÃò_óùÉZÉNÉ^êî(DPB_07_SECPCL)Ç™ç≈ëÂ128Ç»ÇÃÇ≈
-EC3C FD 7E 22       	LD	A,(IY+34)	;24ÉrÉbÉgÇí¥Ç¶ÇÈÇ∆ïKÇ∏ÉNÉâÉXÉ^êîÇ™16ÉrÉbÉgÇí¥Ç¶ÇƒÇµÇ‹Ç§ÇÃÇ≈Ç±ÇÍÇ≈è\ï™
-EC3F A7             	AND	A		;CF=0
-EC40                BPB16BIT:
-EC40 ED 52          	SBC	HL,DE
-EC42 DE 00          	SBC	A,0
-EC44 FD 46 0D       	LD	B,(IY+13)	;BPB_SecPerClus
-EC47                BPBTC1:				;ëçÉNÉâÉXÉ^êî(AHL) = ëçÉZÉNÉ^êî(AHL) / ÉZÉNÉ^ÉTÉCÉY(B)
-EC47 CB 18          	RR	B		;->CY
-EC49 38 08          	JR	C,BPBTC2
-EC4B CB 3F          	SRL	A
-EC4D CB 1C          	RR	H		;AHL=AHL/2
-EC4F CB 1D          	RR	L
-EC51 18 F4          	JR	BPBTC1
-EC53                BPBTC2:
-EC53 B7             	OR	A
-EC54 37             	SCF
-EC55 C0             	RET	NZ		;îOÇÃÇΩÇﬂ(ÉNÉâÉXÉ^êîÇ™16ÉrÉbÉgÇí¥Ç¶ÇÈèÍçá)
-EC56 23             	INC	HL
-EC57 23             	INC	HL
-EC58 DD 75 08       	LD	(IX+8),L	;DPB_08_MAXCL
-EC5B DD 74 09       	LD	(IX+9),H
-EC5E                
-EC5E FD 7E 15       	LD	A,(IY+21)	;BPB_Media
-EC61 DD 77 06       	LD	(IX+6),A	;DPB_06_FATID
-EC64                
-EC64 FD 7E 10       	LD	A,(IY+16)	;BPB_NumFATs
-EC67 C6 FE          	ADD	A,0-2		;>2:CF=1
-EC69 FD 7E 0C       	LD	A,(IY+12)	;BPB_BytsPerSec
-EC6C 6F             	LD	L,A
-EC6D 30 02          	JR	NC,BPBFAT1
-EC6F F6 80          	OR	080H
-EC71                BPBFAT1:
-EC71 DD 77 0F       	LD	(IX+00FH),A	;DPB_0F_BPS
-EC74 2D             	DEC	L		;à»â∫ÇÃÉZÉNÉ^ÉTÉCÉYÇ…çáívÇµÇ»Ç¢èÍçáÇÕCF=1Ç≈ÉGÉâÅ[Ç…Ç∑ÇÈ
-EC75 C8             	RET	Z		;1ÉZÉNÉ^256ÉoÉCÉg
-EC76 2D             	DEC	L
-EC77 C8             	RET	Z		;1ÉZÉNÉ^512ÉoÉCÉg
-EC78 2D             	DEC	L
-EC79 2D             	DEC	L
-EC7A C8             	RET	Z		;1ÉZÉNÉ^1024ÉoÉCÉg
-EC7B 37             	SCF
-EC7C C9             	RET
-EC7D                
-EC7D                RDFATS:
-EC7D CD C3 EC       	CALL	FATSETUP
-EC80 D8             	RET	C
-EC81 CD 8D EC       	CALL	DRD24B
-EC84 2A 7C F1       	LD	HL,(_FATBF)
-EC87 7E             	LD	A,(HL)
-EC88 C9             	RET
-EC89                
-EC89                DRD16:
-EC89 0E 00          	LD	C,0
-EC8B                DRD24:
-EC8B 06 01          	LD	B,1
-EC8D                DRD24B:
-EC8D DD E5          	PUSH	IX
-EC8F DD 2A A8 F0    	LD	IX,(_DPB)
-EC93 CD ED EE       DRDPAT:	CALL	FDRD		;é©å»èëÇ´ä∑Ç¶ÅiÉfÉBÉXÉNì«Ç›çûÇ›Åj
-EC96                POP_IX_RET:
-EC96 DD E1          	POP	IX
-EC98 C9             	RET
-EC99                
-EC99                DWT16:
-EC99 0E 00          	LD	C,0
-EC9B                DWT24:
-EC9B 06 01          	LD	B,1
-EC9D                DWT24B:
-EC9D DD E5          	PUSH	IX
-EC9F DD 2A A8 F0    	LD	IX,(_DPB)
-ECA3 CD DF EE       DWTPAT:	CALL	FDWT		;é©å»èëÇ´ä∑Ç¶ÅiÉfÉBÉXÉNèëÇ´çûÇ›Åj
-ECA6 18 EE          	JR	POP_IX_RET
-ECA8                
-ECA8                WTFAT:
-ECA8 CD C3 EC       	CALL	FATSETUP
-ECAB D4 9D EC       	CALL	NC,DWT24B
-ECAE D8             	RET	C
-ECAF DD CB 0F 7E    	BIT	7,(IX+00FH)	;DPB_0F_BPS
-ECB3 C8             	RET	Z		;ó\îıFATÇ™ñ≥Ç¢
-ECB4 CD CA EC       	CALL	FATS2
-ECB7 E5             	PUSH	HL		;ó\îıFAT
-ECB8 DD 6E 00       	LD	L,(IX+0)	;DPB_00_FATLN
-ECBB DD 66 01       	LD	H,(IX+1)
-ECBE 19             	ADD	HL,DE
-ECBF EB             	EX	DE,HL
-ECC0 E1             	POP	HL
-ECC1 18 DA          	JR	DWT24B
-ECC3                ;------------------------
-ECC3                ;FATÇÃÉZÉbÉgÉAÉbÉv
-ECC3                ;out
-ECC3                ;	B  : FATÉZÉNÉ^êî
-ECC3                ;	DE : FATêÊì™ÉZÉNÉ^î‘çÜ
-ECC3                ;	HL : FATÉoÉbÉtÉ@É|ÉCÉìÉ^
-ECC3                ;	CF : 1=ÉhÉâÉCÉuêÿÇËë÷Ç¶ÉGÉâÅ[
-ECC3                ;note
-ECC3                ;	FATÉTÉCÉYÇ™FATÉoÉbÉtÉ@Çí¥Ç¶ÇÈèÍçáÇÕ
-ECC3                ;	ëŒè€ÉNÉâÉXÉ^óÃàÊ==(_FATIX)Ç…ÇÊÇ¡Çƒ
-ECC3                ;	FAT12:ëŒè€ÉNÉâÉXÉ^1024ñàÇ…1.5KBÇêÿÇËë÷Ç¶ÇÈ
-ECC3                ;	FAT16:ëŒè€ÉNÉâÉXÉ^1024ñàÇ…2KBÇêÿÇËë÷Ç¶ÇÈ
-ECC3                ;------------------------
-ECC3                FATSETUP:
-ECC3 3A AA F0       	LD	A,(_FATDRV)
-ECC6 CD D2 ED       	CALL	CHGDRVR		;ÉhÉâÉCÉuêÿÇËë÷Ç¶
-ECC9 D8             	RET	C
-ECCA                FATS2:
-ECCA DD 7E 0F       	LD	A,(IX+00FH)	;DPB_0F_BPS 512=2 1024=4
-ECCD 0F             	RRCA
-ECCE CD F7 EC       FATSX:	CALL	FATSETUP12	;é©å»èëÇ´ä∑Ç¶
-ECD1 21 00 00       	LD	HL,0
-ECD4 4A             	LD	C,D
-ECD5 54             	LD	D,H
-ECD6 3A AB F0       	LD	A,(_FATIX)	;îÕàÕFAT12:0-3/FAT16:0-63(0-03FH):65535*2/2048
-ECD9 47             	LD	B,A
-ECDA 04             	INC	B
-ECDB DD 7E 00       	LD	A,(IX+0)	;DPB_00_FATLN
-ECDE                FAT_SKP:
-ECDE 05             	DEC	B
-ECDF 28 05          	JR	Z,FAT1
-ECE1 19             	ADD	HL,DE
-ECE2 93             	SUB	E
-ECE3 30 F9          	JR	NC,FAT_SKP
-ECE5 C9             	RET
-ECE6                FAT1:
-ECE6 EB             	EX	DE,HL
-ECE7 B9             	CP	C		;C=FATÉoÉbÉtÉ@Ç…ì«Ç›çûÇﬂÇÈÉZÉNÉ^êî
-ECE8 38 01          	JR	C,FAT2
-ECEA 79             	LD	A,C
-ECEB                FAT2:
-ECEB 47             	LD	B,A
-ECEC                
-ECEC 2A FA F1       	LD	HL,(_FATPS)	;fat sector pos
-ECEF 19             	ADD	HL,DE
-ECF0 EB             	EX	DE,HL
-ECF1 2A 7C F1       	LD	HL,(_FATBF)
-ECF4 AF             	XOR	A		;CF=0
-ECF5 4F             	LD	C,A
+E9BA C5             	PUSH	BC
+E9BB D5             	PUSH	DE
+E9BC 3A A5 F0       	LD	A,(_DBDRV)
+E9BF CD D9 F0       	CALL	_CHGDRV
+E9C2 0E 00          _DBS24:	LD	C,0
+E9C4 ED 5B A6 F0    	LD	DE,(_DBSEC)
+E9C8 2A 7E F1       	LD	HL,(_DTBUF)
+E9CB D4 81 EC       	CALL	NC,DWT24
+E9CE                POP_DE_BC_HL_RET2:
+E9CE 18 A4          	JR	POP_DE_BC_HL_RET
+E9D0                
+E9D0                RDFATX:
+E9D0 E5             	PUSH	HL
+E9D1 3A 88 F0       	LD	A,(_DRV)
+E9D4 21 AA F0       	LD	HL,_FATDRV
+E9D7 AE             	XOR	(HL)
+E9D8 28 D4          	JR	Z,POP_HL_RET
+E9DA                
+E9DA C5             	PUSH	BC
+E9DB D5             	PUSH	DE
+E9DC DD E5          	PUSH	IX
+E9DE CD FA E9       	CALL	WTFATX
+E9E1 38 13          	JR	C,POP_IX_DE_BC_HL_RET
+E9E3                
+E9E3 AF             	XOR	A
+E9E4 32 AB F0       	LD	(_FATIX),A
+E9E7 3A 88 F0       	LD	A,(_DRV)
+E9EA 32 AA F0       	LD	(_FATDRV),A
+E9ED CD E5 F0       	CALL	_RDFAT
+E9F0                RDFATE2:
+E9F0 30 04          	JR	NC,POP_IX_DE_BC_HL_RET
+E9F2 9F             	SBC	A,A		;A=0xFF
+E9F3 32 AA F0       	LD	(_FATDRV),A
+E9F6                POP_IX_DE_BC_HL_RET:
+E9F6 DD E1          	POP	IX
+E9F8 18 D4          	JR	POP_DE_BC_HL_RET2
+E9FA                
+E9FA                WTFATX:
+E9FA 3A A2 F0       	LD	A,(_WTFATF)
+E9FD B7             	OR	A
+E9FE C8             	RET	Z
+E9FF E5             	PUSH	HL
+EA00 3A AA F0       	LD	A,(_FATDRV)
+EA03 21 A5 F0       	LD	HL,_DBDRV
+EA06 AE             	XOR	(HL)
+EA07 CC B0 E9       	CALL	Z,DWTX
+EA0A 38 A2          	JR	C,POP_HL_RET
+EA0C C5             	PUSH	BC
+EA0D D5             	PUSH	DE
+EA0E DD E5          	PUSH	IX
+EA10 CD 8E EC       	CALL	WTFAT
+EA13 AF             	XOR	A
+EA14 32 A2 F0       	LD	(_WTFATF),A
+EA17 18 DD          	JR	POP_IX_DE_BC_HL_RET
+EA19                
+EA19                NCL1:
+EA19 7A             	LD	A,D
+EA1A B3             	OR	E
+EA1B 37             	SCF
+EA1C C8             	RET	Z
+EA1D                
+EA1D 7A             	LD	A,D
+EA1E CB 3F          	SRL	A	;/2
+EA20 CB 3F          	SRL	A	;/2
+EA22                
+EA22 E5             	PUSH	HL
+EA23 32 42 EA       	LD	(NCLPAT+2),A	;_FATIX
+EA26 2A AA F0       	LD	HL,(_FATDRV)	;L=_FATDRV H=_FATIX
+EA29 BC             	CP	H
+EA2A 3A 88 F0       	LD	A,(_DRV)	;Ç±ÇÃä‘Ç≈ÉtÉâÉOÇÕïœâªÇµÇ»Ç¢
+EA2D 32 41 EA       	LD	(NCLPAT+1),A	;_FATDRV
+EA30 20 05          	JR	NZ,NCL2		;FATIXÇ™à·Ç§
+EA32 BD             	CP	L
+EA33 20 02          	JR	NZ,NCL2		;ÉhÉâÉCÉuÇ™à·Ç§
+EA35 E1             	POP	HL
+EA36 C9             	RET
+EA37                NCL2:
+EA37 C5             	PUSH	BC
+EA38 D5             	PUSH	DE
+EA39 DD E5          	PUSH	IX
+EA3B CD FA E9       	CALL	WTFATX
+EA3E 38 B6          	JR	C,POP_IX_DE_BC_HL_RET
+EA40 01 00 00       NCLPAT:	LD	BC,0		;é©å»èëÇ´ä∑Ç¶ C=_FATDRV B=_FATIX
+EA43 ED 43 AA F0    	LD	(_FATDRV),BC
+EA47 CD 63 EC       	CALL	RDFATS
+EA4A 18 A4          	JR	RDFATE2
+EA4C                
+EA4C                NCL3:
+EA4C CB 9A          	RES	3,D
+EA4E CB 92          	RES	2,D
+EA50 6B             	LD	L,E
+EA51 62             	LD	H,D
+EA52 CB 3C          	SRL	H	;
+EA54 CB 1D          	RR	L	;HLA=HLA/2
+EA56 1F             	RRA		;
+EA57 F5             	PUSH	AF
+EA58 3A AB F0       	LD	A,(_FATIX)
+EA5B 0F             	RRCA
+EA5C 30 0B          	JR	NC,NCL3X1
+EA5E 3A 86 E8       	LD	A,(SECSZ+2)
+EA61 FE 04          	CP	4		;1ÉZÉNÉ^1024ÉoÉCÉgÇÃèÍçáÇÕäÔêîÉCÉìÉfÉbÉNÉXÇÃèÍçáÇ…êÊì™Ç512ÉoÉCÉgÇ∏ÇÁÇ∑
+EA63 20 04          	JR	NZ,NCL3X1
+EA65 01 00 02       	LD	BC,512
+EA68 09             	ADD	HL,BC
+EA69                NCL3X1:
+EA69 F1             	POP	AF
+EA6A ED 4B 7C F1    	LD	BC,(_FATBF)
+EA6E 19             	ADD	HL,DE
+EA6F 09             	ADD	HL,BC
+EA70 17             	RLA
+EA71 C9             	RET
+EA72                
+EA72                GNCL:
+EA72 CD 19 EA       	CALL	NCL1		;GET NEXT CLUSTER
+EA75 D8             	RET	C
+EA76 C5             	PUSH	BC
+EA77 E5             	PUSH	HL
+EA78 CD 4C EA       	CALL	NCL3
+EA7B 38 09          	JR	C,GNC1
+EA7D 5E             	LD	E,(HL)
+EA7E 23             	INC	HL
+EA7F 7E             	LD	A,(HL)
+EA80 E6 0F          	AND	00FH
+EA82 57             	LD	D,A
+EA83 E1             	POP	HL
+EA84 C1             	POP	BC
+EA85 C9             	RET
+EA86                GNC1:
+EA86 7E             	LD	A,(HL)
+EA87 23             	INC	HL
+EA88 56             	LD	D,(HL)
+EA89 06 04          	LD	B,4
+EA8B                GNC1L:
+EA8B CB 3A          	SRL	D	;DA=DA/2
+EA8D 1F             	RRA		;
+EA8E 10 FB          	DJNZ	GNC1L
+EA90                
+EA90 5F             	LD	E,A
+EA91 E1             	POP	HL
+EA92 C1             	POP	BC
+EA93 A7             	AND	A
+EA94 C9             	RET
+EA95                
+EA95                SNCL:
+EA95 CD 19 EA       	CALL	NCL1
+EA98 D8             	RET	C
+EA99                ;				SET NEXT CLUSTER
+EA99 E5             	PUSH	HL
+EA9A C5             	PUSH	BC
+EA9B D5             	PUSH	DE
+EA9C E5             	PUSH	HL
+EA9D CD 4C EA       	CALL	NCL3
+EAA0 D1             	POP	DE
+EAA1                ;CF=ODD
+EAA1 7E             	LD	A,(HL)
+EAA2 73             	LD	(HL),E
+EAA3 38 06          	JR	C,SNC1
+EAA5                ;EVEN
+EAA5                ;M[0] = E
+EAA5                ;M[1] = (M[1] & 0xF0) | (D & 0x0F)
+EAA5 23             	INC	HL
+EAA6 ED 67          	RRD		;M={A[3:0],E[3:0]}
+EAA8 7A             	LD	A,D
+EAA9 18 04          	JR	SNC11
+EAAB                SNC1:
+EAAB                ;ODD
+EAAB                ;HL[0] = (HL[0]&0x0F) | (E<<4)
+EAAB                ;HL[1] = DE>>4
+EAAB ED 6F          	RLD		;M={D[3:0],E[7:4]}
+EAAD 23             	INC	HL
+EAAE 72             	LD	(HL),D	;M={D[3:0],E[7:4]}
+EAAF                SNC11:
+EAAF ED 6F          	RLD		;M={M[7:4],D[3:0]}
+EAB1 B7             	OR	A
+EAB2 D1             	POP	DE
+EAB3 C1             	POP	BC
+EAB4 E1             	POP	HL
+EAB5                FAT_CHANGED:
+EAB5 3E 01          	LD	A,1
+EAB7 32 A2 F0       	LD	(_WTFATF),A
+EABA C9             	RET
+EABB                
+EABB                N16CL3:
+EABB C5             	PUSH	BC
+EABC 6B             	LD	L,E
+EABD 7A             	LD	A,D
+EABE E6 03          	AND	3
+EAC0 67             	LD	H,A
+EAC1 29             	ADD	HL,HL
+EAC2 ED 4B 7C F1    	LD	BC,(_FATBF)
+EAC6 09             	ADD	HL,BC
+EAC7 C1             	POP	BC
+EAC8 C9             	RET
+EAC9                
+EAC9                GNCL16:
+EAC9 CD 19 EA       	CALL	NCL1		;GET NEXT CLUSTER for FAT16
+EACC D8             	RET	C
+EACD E5             	PUSH	HL
+EACE CD BB EA       	CALL	N16CL3
+EAD1 5E             	LD	E,(HL)
+EAD2 23             	INC	HL
+EAD3 56             	LD	D,(HL)
+EAD4 E1             	POP	HL
+EAD5 C9             	RET
+EAD6                
+EAD6                SNCL16:
+EAD6 CD 19 EA       	CALL	NCL1		;GET NEXT CLUSTER for FAT16
+EAD9 D8             	RET	C
+EADA D5             	PUSH	DE
+EADB E5             	PUSH	HL
+EADC CD BB EA       	CALL	N16CL3
+EADF D1             	POP	DE		;HL
+EAE0 73             	LD	(HL),E
+EAE1 23             	INC	HL
+EAE2 72             	LD	(HL),D
+EAE3 6B             	LD	L,E
+EAE4 62             	LD	H,D
+EAE5 D1             	POP	DE
+EAE6 18 CD          	JR	FAT_CHANGED
+EAE8                
+EAE8                ;------------------------
+EAE8                ;éüÇÃÉZÉNÉ^ÇíTÇ∑ç€Ç…_SECPSÇÃílÇÉ`ÉFÉbÉN
+EAE8                ;in
+EAE8                ;	DE : ÉZÉNÉ^î‘çÜ
+EAE8                ;out
+EAE8                ;	DE : éüÇÃÉZÉNÉ^î‘çÜ
+EAE8                ;note
+EAE8                ;
+EAE8                ;------------------------
+EAE8                NEXTX:
+EAE8 3E 00          _SECPS:	LD	A,0	;é©å»èëÇ´ä∑Ç¶
+EAEA 3C             	INC	A
+EAEB E6 00          NCPAT:	AND	0	;é©å»èëÇ´ä∑Ç¶Å@1ÉNÉâÉXÉ^ÇÃò_óùÉZÉNÉ^êî-1
+EAED 32 E9 EA       	LD	(_SECPS+1),A
+EAF0 C9             	RET
+EAF1                
+EAF1                GNCLX:
+EAF1 CD E8 EA       	CALL	NEXTX
+EAF4 C0             	RET	NZ	;1ÉNÉâÉXÉ^ÇÃÉZÉNÉ^ñ¢ñûÇÃèÍçáÇÕñﬂÇÈ
+EAF5 C3 F7 F0       	JP	_GNCL	;éüÇÃÉNÉâÉXÉ^ÇíTÇ∑
+EAF8                
+EAF8                RDFAT:
+EAF8 3E 80          	LD	A,080H
+EAFA 32 70 F0       	LD	(CHECK),A
+EAFD                RDFAT1:
+EAFD 3A 88 F0       	LD	A,(_DRV)
+EB00 CD B8 ED       	CALL	CHGDRVR
+EB03 D8             	RET	C
+EB04 DD 7E 12       	LD	A,(IX+012H)	;DPB_12_DEVICE
+EB07 CB 6F          	BIT	5,A
+EB09 28 6B          	JR	Z,RDFAT0X
+EB0B 21 70 F0       	LD	HL,CHECK
+EB0E A6             	AND	(HL)
+EB0F 77             	LD	(HL),A
+EB10 11 00 00       	LD	DE,0		;BPB
+EB13 2A 7C F1       	LD	HL,(_FATBF)
+EB16 CD 6F EC       	CALL	DRD16
+EB19 30 24          	JR	NC,GETBPB
+EB1B 21 70 F0       	LD	HL,CHECK
+EB1E CB 06          	RLC	(HL)
+EB20 3F             	CCF
+EB21 D8             	RET	C
+EB22 DD CB 0A 1E    	RR	(IX+00AH)	;DPB_0A_FDMODE
+EB26 3F             	CCF			;ÉtÉçÉbÉsÅ[ÉfÉBÉXÉNÇÃFDÉÇÅ[ÉhÇêÿÇËë÷Ç¶ÇÈ
+EB27 DD CB 0A 16    	RL	(IX+00AH)	;DPB_0A_FDMODE
+EB2B 3E FF          	LD	A,0FFH
+EB2D 32 89 F0       	LD	(_DSK),A
+EB30 3A 84 F0       	LD	A,(_DRIVE)
+EB33 E6 03          	AND	3
+EB35 F6 80          	OR	080H
+EB37 6F             	LD	L,A
+EB38 26 F0          	LD	H,_CYL0/256
+EB3A 3E FF          	LD	A,0FFH
+EB3C 77             	LD	(HL),A
+EB3D 18 BE          	JR	RDFAT1
+EB3F                GETBPB:
+EB3F FD E5          	PUSH	IY
+EB41 FD 2A 7C F1    	LD	IY,(_FATBF)	;BPB
+EB45 CD F1 F0       	CALL	_BPB2DPB
+EB48 FD E1          	POP	IY
+EB4A DD 7E 12       	LD	A,(IX+012H)	;DPB_12_DEVICE
+EB4D 30 21          	JR	NC,GETBPBOK
+EB4F E6 0F          	AND	00FH
+EB51 FE 07          	CP	7
+EB53 37             	SCF
+EB54 C0             	RET	NZ
+EB55 DD CB 0A 46    	BIT	0,(IX+00AH)	;DPB_0A_FDMODE
+EB59 21 C0 F1       	LD	HL,M2D
+EB5C 20 02          	JR	NZ,SETFDMODE
+EB5E 2E D2          	LD	L,M2HD-STABLE
+EB60                SETFDMODE:
+EB60 DD E5          	PUSH	IX
+EB62 D1             	POP	DE
+EB63 ED A0          	LDI
+EB65 ED A0          	LDI
+EB67 13             	INC	DE
+EB68 13             	INC	DE
+EB69 13             	INC	DE
+EB6A 13             	INC	DE
+EB6B 01 0C 00       	LD	BC,12
+EB6E ED B0          	LDIR
+EB70                GETBPBOK:
+EB70 32 7F EB       	LD	(DEVSWC),A
+EB73 CD 17 ED       	CALL	CHGDRV2
+EB76                RDFAT0X:
+EB76 CD 63 EC       	CALL	RDFATS
+EB79 D8             	RET	C
+EB7A DD AE 06       	XOR	(IX+6)		;DPB_06_FATID
+EB7D C8             	RET	Z
+EB7E 3E 00          	LD	A,0		;DPB_12_DEVICE
+EB80 00 00 EB 7F    DEVSWC	EQU	$-1
+EB80 CB 6F          	BIT	5,A
+EB82 C0             	RET	NZ		;BPBÇéÊìæÇµÇƒÇ¢ÇÈèÍçáÇÕFATIDÇÉ`ÉFÉbÉNÇµÇ»Ç¢
+EB83 37             	SCF
+EB84 C9             	RET
+EB85                
+EB85                BPB2DPB:
+EB85 FD 7E 0B       	LD	A,(IY+11)	;BPB_BytsPerSec
+EB88 B7             	OR	A
+EB89 37             	SCF
+EB8A C0             	RET	NZ
+EB8B                BPBOK:
+EB8B FD 7E 0D       	LD	A,(IY+13)	;BPB_SecPerClus
+EB8E DD 77 07       	LD	(IX+7),A	;DPB_07_SECPCL
+EB91                
+EB91 FD 7E 16       	LD	A,(IY+22)	;BPB_FATSz16
+EB94 DD 77 00       	LD	(IX+0),A	;DPB_00_FATLN
+EB97 FD 7E 17       	LD	A,(IY+23)	;BPB_FATSz16
+EB9A DD 77 01       	LD	(IX+1),A	;DPB_00_FATLN
+EB9D                
+EB9D FD 6E 0E       	LD	L,(IY+14)	;BPB_RsvdSecCnt
+EBA0 FD 66 0F       	LD	H,(IY+15)
+EBA3 DD 75 0E       	LD	(IX+00EH),L	;DPB_0E_FATPS
+EBA6 FD 5E 16       	LD	E,(IY+22)	;BPB_FATSz16
+EBA9 FD 56 17       	LD	D,(IY+23)
+EBAC FD 46 10       	LD	B,(IY+16)	;BPB_NumFATs
+EBAF                BPBDP1:				;BPB_FATSz16 * BPB_NumFATs
+EBAF 19             	ADD	HL,DE
+EBB0 10 FD          	DJNZ	BPBDP1
+EBB2                BPBDP2:
+EBB2 DD 75 10       	LD	(IX+010H),L	;DPB_10_DIRPS
+EBB5 DD 74 11       	LD	(IX+011H),H
+EBB8 E5             	PUSH	HL
+EBB9                
+EBB9 FD 6E 11       	LD	L,(IY+17)	;BPB_RootEntCnt
+EBBC FD 66 12       	LD	H,(IY+18)
+EBBF FD 7E 0C       	LD	A,(IY+12)	;BPB_BytsPerSec
+EBC2 B7             	OR	A
+EBC3 37             	SCF
+EBC4 C8             	RET	Z
+EBC5 06 06          	LD	B,6
+EBC7                BPBBPS1:
+EBC7 05             	DEC	B
+EBC8 0F             	RRCA
+EBC9 30 FC          	JR	NC,BPBBPS1
+EBCB                BPBDE1:
+EBCB 29             	ADD	HL,HL
+EBCC 10 FD          	DJNZ	BPBDE1
+EBCE                
+EBCE 7C             	LD	A,H
+EBCF DD 77 0B       	LD	(IX+00BH),A	;DPB_0B_DIRSCNT
+EBD2                
+EBD2 D1             	POP	DE		;DPB_10_DIRPS
+EBD3 6C             	LD	L,H
+EBD4 26 00          	LD	H,0
+EBD6 19             	ADD	HL,DE		;MAXDIR
+EBD7 E5             	PUSH	HL
+EBD8 FD 4E 0D       	LD	C,(IY+13)	;BPB_SecPerClus
+EBDB CB 21          	SLA	C		;*2
+EBDD AF             	XOR	A
+EBDE 47             	LD	B,A
+EBDF ED 42          	SBC	HL,BC
+EBE1 DD 75 14       	LD	(IX+014H),L	;DPB_14_ADDCL16
+EBE4 DD 74 15       	LD	(IX+015H),H
+EBE7                
+EBE7 D1             	POP	DE		;DE=DPB_0B_MAXDIR
+EBE8 FD 6E 13       	LD	L,(IY+19)	;BPB_TotSec16
+EBEB FD 66 14       	LD	H,(IY+20)
+EBEE                
+EBEE DD 7E 12       	LD	A,(IX+012H)	;DPB_12_DEVICE
+EBF1 E6 0F          	AND	00FH
+EBF3 FE 07          	CP	7		;ÉtÉçÉbÉsÅ[
+EBF5 20 19          	JR	NZ,NOT_FD
+EBF7 E5             	PUSH	HL
+EBF8 FD 4E 18       	LD	C,(IY+24)	;BPB_SecPerTr
+EBFB DD 71 0D       	LD	(IX+00DH),C	;DPB_0D_MAXSEC
+EBFE AF             	XOR	A
+EBFF CB 21          	SLA	C		;óºñ Ç»ÇÃÇ≈ÉZÉNÉ^êîÇÇQî{
+EC01 06 10          	LD	B,16
+EC03                DIVSEC:				;MAXCYL = BPB_TotSec16 / (BPB_SecPerTr * 2)
+EC03 29             	ADD	HL,HL
+EC04 17             	RLA
+EC05 B9             	CP	C
+EC06 38 02             	JR	C,DIVSEC1
+EC08 91                	SUB	C
+EC09 2C             	INC	L
+EC0A                DIVSEC1:
+EC0A 10 F7           	DJNZ	DIVSEC
+EC0C DD 75 0C       	LD	(IX+00CH),L	;DPB_0C_MAXCYL
+EC0F E1             	POP	HL	;Ç±Ç±Ç‹Ç≈ÉtÉçÉbÉsÅ[êÍóp
+EC10                NOT_FD:
+EC10 7C             	LD	A,H
+EC11 B5             	OR	L
+EC12 3E 00          	LD	A,0		;LDÇ≈ÉtÉâÉOÇÕïœâªÇµÇ»Ç¢ÅBBPB_TotSec16Ç AHL Ç≈àµÇ§à◊ÅAAÇ…0Çì¸ÇÍÇÈ
+EC14 20 10          	JR	NZ,BPB16BIT	;BPB_TotSec16Ç™Åu0ÅvÇÃèÍçáÇÕBPB_TotSec32Ç≈åvéZ
+EC16 FD 7E 23       	LD	A,(IY+35)	;îOÇÃÇΩÇﬂÇ…ëçÉZÉNÉ^êîÇ™24ÉrÉbÉgÇí¥Ç¶ÇÈèÍçáÇÕÉGÉâÅ[Çï‘Ç∑
+EC19 B7             	OR	A
+EC1A 37             	SCF
+EC1B C0             	RET	NZ
+EC1C FD 6E 20       	LD	L,(IY+32)	;BPB_TotSec32 ÇÕ AHL ÇÃ24ÉrÉbÉgÇ≈àµÇ§
+EC1F FD 66 21       	LD	H,(IY+33)	;1ÉNÉâÉXÉ^ÇÃò_óùÉZÉNÉ^êî(DPB_07_SECPCL)Ç™ç≈ëÂ128Ç»ÇÃÇ≈
+EC22 FD 7E 22       	LD	A,(IY+34)	;24ÉrÉbÉgÇí¥Ç¶ÇÈÇ∆ïKÇ∏ÉNÉâÉXÉ^êîÇ™16ÉrÉbÉgÇí¥Ç¶ÇƒÇµÇ‹Ç§ÇÃÇ≈Ç±ÇÍÇ≈è\ï™
+EC25 A7             	AND	A		;CF=0
+EC26                BPB16BIT:
+EC26 ED 52          	SBC	HL,DE
+EC28 DE 00          	SBC	A,0
+EC2A FD 46 0D       	LD	B,(IY+13)	;BPB_SecPerClus
+EC2D                BPBTC1:				;ëçÉNÉâÉXÉ^êî(AHL) = ëçÉZÉNÉ^êî(AHL) / ÉZÉNÉ^ÉTÉCÉY(B)
+EC2D CB 18          	RR	B		;->CY
+EC2F 38 08          	JR	C,BPBTC2
+EC31 CB 3F          	SRL	A
+EC33 CB 1C          	RR	H		;AHL=AHL/2
+EC35 CB 1D          	RR	L
+EC37 18 F4          	JR	BPBTC1
+EC39                BPBTC2:
+EC39 B7             	OR	A
+EC3A 37             	SCF
+EC3B C0             	RET	NZ		;îOÇÃÇΩÇﬂ(ÉNÉâÉXÉ^êîÇ™16ÉrÉbÉgÇí¥Ç¶ÇÈèÍçá)
+EC3C 23             	INC	HL
+EC3D 23             	INC	HL
+EC3E DD 75 08       	LD	(IX+8),L	;DPB_08_MAXCL
+EC41 DD 74 09       	LD	(IX+9),H
+EC44                
+EC44 FD 7E 15       	LD	A,(IY+21)	;BPB_Media
+EC47 DD 77 06       	LD	(IX+6),A	;DPB_06_FATID
+EC4A                
+EC4A FD 7E 10       	LD	A,(IY+16)	;BPB_NumFATs
+EC4D C6 FE          	ADD	A,0-2		;>2:CF=1
+EC4F FD 7E 0C       	LD	A,(IY+12)	;BPB_BytsPerSec
+EC52 6F             	LD	L,A
+EC53 30 02          	JR	NC,BPBFAT1
+EC55 F6 80          	OR	080H
+EC57                BPBFAT1:
+EC57 DD 77 0F       	LD	(IX+00FH),A	;DPB_0F_BPS
+EC5A 2D             	DEC	L		;à»â∫ÇÃÉZÉNÉ^ÉTÉCÉYÇ…çáívÇµÇ»Ç¢èÍçáÇÕCF=1Ç≈ÉGÉâÅ[Ç…Ç∑ÇÈ
+EC5B C8             	RET	Z		;1ÉZÉNÉ^256ÉoÉCÉg
+EC5C 2D             	DEC	L
+EC5D C8             	RET	Z		;1ÉZÉNÉ^512ÉoÉCÉg
+EC5E 2D             	DEC	L
+EC5F 2D             	DEC	L
+EC60 C8             	RET	Z		;1ÉZÉNÉ^1024ÉoÉCÉg
+EC61 37             	SCF
+EC62 C9             	RET
+EC63                
+EC63                RDFATS:
+EC63 CD A9 EC       	CALL	FATSETUP
+EC66 D8             	RET	C
+EC67 CD 73 EC       	CALL	DRD24B
+EC6A 2A 7C F1       	LD	HL,(_FATBF)
+EC6D 7E             	LD	A,(HL)
+EC6E C9             	RET
+EC6F                
+EC6F                DRD16:
+EC6F 0E 00          	LD	C,0
+EC71                DRD24:
+EC71 06 01          	LD	B,1
+EC73                DRD24B:
+EC73 DD E5          	PUSH	IX
+EC75 DD 2A A8 F0    	LD	IX,(_DPB)
+EC79 CD D3 EE       DRDPAT:	CALL	FDRD		;é©å»èëÇ´ä∑Ç¶ÅiÉfÉBÉXÉNì«Ç›çûÇ›Åj
+EC7C                POP_IX_RET:
+EC7C DD E1          	POP	IX
+EC7E C9             	RET
+EC7F                
+EC7F                DWT16:
+EC7F 0E 00          	LD	C,0
+EC81                DWT24:
+EC81 06 01          	LD	B,1
+EC83                DWT24B:
+EC83 DD E5          	PUSH	IX
+EC85 DD 2A A8 F0    	LD	IX,(_DPB)
+EC89 CD C5 EE       DWTPAT:	CALL	FDWT		;é©å»èëÇ´ä∑Ç¶ÅiÉfÉBÉXÉNèëÇ´çûÇ›Åj
+EC8C 18 EE          	JR	POP_IX_RET
+EC8E                
+EC8E                WTFAT:
+EC8E CD A9 EC       	CALL	FATSETUP
+EC91 D4 83 EC       	CALL	NC,DWT24B
+EC94 D8             	RET	C
+EC95 DD CB 0F 7E    	BIT	7,(IX+00FH)	;DPB_0F_BPS
+EC99 C8             	RET	Z		;ó\îıFATÇ™ñ≥Ç¢
+EC9A CD B0 EC       	CALL	FATS2
+EC9D E5             	PUSH	HL		;ó\îıFAT
+EC9E DD 6E 00       	LD	L,(IX+0)	;DPB_00_FATLN
+ECA1 DD 66 01       	LD	H,(IX+1)
+ECA4 19             	ADD	HL,DE
+ECA5 EB             	EX	DE,HL
+ECA6 E1             	POP	HL
+ECA7 18 DA          	JR	DWT24B
+ECA9                ;------------------------
+ECA9                ;FATÇÃÉZÉbÉgÉAÉbÉv
+ECA9                ;out
+ECA9                ;	B  : FATÉZÉNÉ^êî
+ECA9                ;	DE : FATêÊì™ÉZÉNÉ^î‘çÜ
+ECA9                ;	HL : FATÉoÉbÉtÉ@É|ÉCÉìÉ^
+ECA9                ;	CF : 1=ÉhÉâÉCÉuêÿÇËë÷Ç¶ÉGÉâÅ[
+ECA9                ;note
+ECA9                ;	FATÉTÉCÉYÇ™FATÉoÉbÉtÉ@Çí¥Ç¶ÇÈèÍçáÇÕ
+ECA9                ;	ëŒè€ÉNÉâÉXÉ^óÃàÊ==(_FATIX)Ç…ÇÊÇ¡Çƒ
+ECA9                ;	FAT12:ëŒè€ÉNÉâÉXÉ^1024ñàÇ…1.5KBÇêÿÇËë÷Ç¶ÇÈ
+ECA9                ;	FAT16:ëŒè€ÉNÉâÉXÉ^1024ñàÇ…2KBÇêÿÇËë÷Ç¶ÇÈ
+ECA9                ;------------------------
+ECA9                FATSETUP:
+ECA9 3A AA F0       	LD	A,(_FATDRV)
+ECAC CD B8 ED       	CALL	CHGDRVR		;ÉhÉâÉCÉuêÿÇËë÷Ç¶
+ECAF D8             	RET	C
+ECB0                FATS2:
+ECB0 DD 7E 0F       	LD	A,(IX+00FH)	;DPB_0F_BPS 512=2 1024=4
+ECB3 0F             	RRCA
+ECB4 CD DD EC       FATSX:	CALL	FATSETUP12	;é©å»èëÇ´ä∑Ç¶
+ECB7 21 00 00       	LD	HL,0
+ECBA 4A             	LD	C,D
+ECBB 54             	LD	D,H
+ECBC 3A AB F0       	LD	A,(_FATIX)	;îÕàÕFAT12:0-3/FAT16:0-63(0-03FH):65535*2/2048
+ECBF 47             	LD	B,A
+ECC0 04             	INC	B
+ECC1 DD 7E 00       	LD	A,(IX+0)	;DPB_00_FATLN
+ECC4                FAT_SKP:
+ECC4 05             	DEC	B
+ECC5 28 05          	JR	Z,FAT1
+ECC7 19             	ADD	HL,DE
+ECC8 93             	SUB	E
+ECC9 30 F9          	JR	NC,FAT_SKP
+ECCB C9             	RET
+ECCC                FAT1:
+ECCC EB             	EX	DE,HL
+ECCD B9             	CP	C		;C=FATÉoÉbÉtÉ@Ç…ì«Ç›çûÇﬂÇÈÉZÉNÉ^êî
+ECCE 38 01          	JR	C,FAT2
+ECD0 79             	LD	A,C
+ECD1                FAT2:
+ECD1 47             	LD	B,A
+ECD2                
+ECD2 2A FA F1       	LD	HL,(_FATPS)	;fat sector pos
+ECD5 19             	ADD	HL,DE
+ECD6 EB             	EX	DE,HL
+ECD7 2A 7C F1       	LD	HL,(_FATBF)
+ECDA AF             	XOR	A		;CF=0
+ECDB 4F             	LD	C,A
+ECDC C9             	RET
+ECDD                ;
+ECDD                ;	FATÉoÉbÉtÉ@Ç…ì«Ç›çûÇﬂÇÈç≈ëÂÇÃÉZÉNÉ^êîÇ∆_FATIXÇ≈êiÇﬂÇÈÉZÉNÉ^êî
+ECDD                ;	FATSETUP* (FAT12/FAT16)
+ECDD                ;out
+ECDD                ;	D : FATÉoÉbÉtÉ@Ç…ì«Ç›çûÇﬂÇÈç≈ëÂÇÃÉZÉNÉ^êî
+ECDD                ;	E : _FATIXÇ≈êiÇﬂÇÈÉZÉNÉ^êî
+ECDD                FATSETUP12:
+ECDD 11 06 06       	LD	DE,0606H	;256
+ECE0 D8             	RET	C
+ECE1 11 03 03       	LD	DE,0303H	;512
+ECE4 0F             	RRCA
+ECE5 D8             	RET	C
+ECE6 11 01 02       	LD	DE,0201H	;1024
+ECE9 C9             	RET
+ECEA                
+ECEA                FATSETUP16:
+ECEA 11 08 08       	LD	DE,0808H	;256
+ECED D8             	RET	C
+ECEE 11 04 04       	LD	DE,0404H
+ECF1 0F             	RRCA			;512
+ECF2 D8             	RET	C
+ECF3 11 02 02       	LD	DE,0202H	;1024
 ECF6 C9             	RET
-ECF7                ;
-ECF7                ;	FATÉoÉbÉtÉ@Ç…ì«Ç›çûÇﬂÇÈç≈ëÂÇÃÉZÉNÉ^êîÇ∆_FATIXÇ≈êiÇﬂÇÈÉZÉNÉ^êî
-ECF7                ;	FATSETUP* (FAT12/FAT16)
-ECF7                ;out
-ECF7                ;	D : FATÉoÉbÉtÉ@Ç…ì«Ç›çûÇﬂÇÈç≈ëÂÇÃÉZÉNÉ^êî
-ECF7                ;	E : _FATIXÇ≈êiÇﬂÇÈÉZÉNÉ^êî
-ECF7                FATSETUP12:
-ECF7 11 06 06       	LD	DE,0606H	;256
-ECFA D8             	RET	C
-ECFB 11 03 03       	LD	DE,0303H	;512
-ECFE 0F             	RRCA
-ECFF D8             	RET	C
-ED00 11 01 02       	LD	DE,0201H	;1024
-ED03 C9             	RET
-ED04                
-ED04                FATSETUP16:
-ED04 11 08 08       	LD	DE,0808H	;256
-ED07 D8             	RET	C
-ED08 11 04 04       	LD	DE,0404H
-ED0B 0F             	RRCA			;512
-ED0C D8             	RET	C
-ED0D 11 02 02       	LD	DE,0202H	;1024
-ED10 C9             	RET
-ED11                
-ED11                CHGDRV:
-ED11 E5             	PUSH	HL
-ED12 21 89 F0       	LD	HL,_DSK
-ED15 BE             	CP	(HL)
-ED16 28 0A          	JR	Z,CHGDRVE
-ED18                CHGDRV1:
-ED18 DD E5          	PUSH	IX
-ED1A CD 24 ED       	CALL	CHGDRV0
-ED1D 3A 89 F0       	LD	A,(_DSK)
-ED20 DD E1          	POP	IX
-ED22                CHGDRVE:
-ED22 E1             	POP	HL
-ED23 C9             	RET
-ED24                
-ED24                CHGDRV0:
-ED24 6F             	LD	L,A
-ED25 CD DC F0       	CALL	_GETDPB
-ED28 D8             	RET	C
-ED29 DD 22 A8 F0    	LD	(_DPB),IX
-ED2D 7D             	LD	A,L
-ED2E 32 89 F0       	LD	(_DSK),A
-ED31                CHGDRV2:
-ED31 C5             	PUSH	BC
-ED32 D5             	PUSH	DE
-ED33 ED 73 88 ED    	LD	(SPPAT2+1),SP
-ED37 F3             	DI
-ED38 DD F9          	LD	SP,IX
-ED3A                
-ED3A E1             	POP	HL		;DPB_00_FATLN
-ED3B E1             	POP	HL		;DPB_02_DRD
-ED3C 22 94 EC       	LD	(DRDPAT+1),HL
+ECF7                
+ECF7                CHGDRV:
+ECF7 E5             	PUSH	HL
+ECF8 21 89 F0       	LD	HL,_DSK
+ECFB BE             	CP	(HL)
+ECFC 28 0A          	JR	Z,CHGDRVE
+ECFE                CHGDRV1:
+ECFE DD E5          	PUSH	IX
+ED00 CD 0A ED       	CALL	CHGDRV0
+ED03 3A 89 F0       	LD	A,(_DSK)
+ED06 DD E1          	POP	IX
+ED08                CHGDRVE:
+ED08 E1             	POP	HL
+ED09 C9             	RET
+ED0A                
+ED0A                CHGDRV0:
+ED0A 6F             	LD	L,A
+ED0B CD DC F0       	CALL	_GETDPB
+ED0E D8             	RET	C
+ED0F DD 22 A8 F0    	LD	(_DPB),IX
+ED13 7D             	LD	A,L
+ED14 32 89 F0       	LD	(_DSK),A
+ED17                CHGDRV2:
+ED17 C5             	PUSH	BC
+ED18 D5             	PUSH	DE
+ED19 ED 73 6E ED    	LD	(SPPAT2+1),SP
+ED1D F3             	DI
+ED1E DD F9          	LD	SP,IX
+ED20                
+ED20 E1             	POP	HL		;DPB_00_FATLN
+ED21 E1             	POP	HL		;DPB_02_DRD
+ED22 22 7A EC       	LD	(DRDPAT+1),HL
+ED25                
+ED25 E1             	POP	HL
+ED26 22 8A EC       	LD	(DWTPAT+1),HL	;DPB_04_DWT
+ED29                
+ED29 E1             	POP	HL		;L=DPB_06_FATID H=DPB_07_SECPCL
+ED2A 7C             	LD	A,H
+ED2B 32 76 E3       	LD	(SPCPAT+1),A	;1ÉNÉâÉXÉ^ÇÃò_óùÉZÉNÉ^êî
+ED2E 3D             	DEC	A
+ED2F 32 EC EA       	LD	(NCPAT+1),A
+ED32                
+ED32 E1             	POP	HL		;DPB_08_MAXCL
+ED33 7D             	LD	A,L
+ED34 32 95 E3       	LD	(CLPAT2+1),A
+ED37 7C             	LD	A,H
+ED38 32 91 E3       	LD	(CLPAT1+1),A
+ED3B 2B             	DEC	HL
+ED3C 22 9D E5       	LD	(MAXCLP+1),HL
 ED3F                
-ED3F E1             	POP	HL
-ED40 22 A4 EC       	LD	(DWTPAT+1),HL	;DPB_04_DWT
-ED43                
-ED43 E1             	POP	HL		;L=DPB_06_FATID H=DPB_07_SECPCL
-ED44 7C             	LD	A,H
-ED45 32 76 E3       	LD	(SPCPAT+1),A	;1ÉNÉâÉXÉ^ÇÃò_óùÉZÉNÉ^êî
-ED48 3D             	DEC	A
-ED49 32 06 EB       	LD	(NCPAT+1),A
-ED4C                
-ED4C E1             	POP	HL		;DPB_08_MAXCL
-ED4D 7D             	LD	A,L
-ED4E 32 95 E3       	LD	(CLPAT2+1),A
-ED51 7C             	LD	A,H
-ED52 32 91 E3       	LD	(CLPAT1+1),A
-ED55 2B             	DEC	HL
-ED56 22 99 E5       	LD	(MAXCLP+1),HL
-ED59                
-ED59 E1             	POP	HL		;L=DPB_0A_FDMODE H=DPB_0B_DIRSCNT
-ED5A 7D             	LD	A,L
-ED5B F6 FE          	OR	0FEH
-ED5D 32 88 EE       	LD	(FDMODE+1),A
-ED60 07             	RLCA
-ED61 E6 03          	AND	3
-ED63 32 70 EE       	LD	(FSPAT+1),A
-ED66 4C             	LD	C,H
-ED67                
-ED67 E1             	POP	HL		;L=DPB_0C_MAXCYL H=DPB_0D_MAXSEC
-ED68                
-ED68 E1             	POP	HL		;L=DPB_0E_FATPS H=DPB_0F_BPS
-ED69 7C             	LD	A,H		;DPB_0F_BPS
-ED6A E6 07          	AND	7
-ED6C 32 94 E8       	LD	(SECSZ+2),A	;1ÉZÉNÉ^ÇÃÉTÉCÉYÇÃè„à 1ÉoÉCÉg 0x400 - 0x200 - 0x100
-ED6F                				;1ÉZÉNÉ^512 2D/2DD/2HC/2HQ(2HD1.44MB)/EMM/BRAM/EMEMìô
-ED6F                				;1ÉZÉNÉ^1024 2HD/2HDE98
-ED6F                				;1ÉZÉNÉ^256 GRAM/RAMF/CMOS/ìô
-ED6F                				;1024	512	256
-ED6F                				;4	2	1
-ED6F 87             	ADD	A,A		;8	4	2
-ED70 87             	ADD	A,A		;010H	8	4
-ED71 87             	ADD	A,A		;020H	010H	8
-ED72 32 F2 E1       	LD	(SDECPAT+1),A	;1ÉZÉNÉ^ï”ÇËÇÃÉfÉBÉåÉNÉgÉäÉGÉìÉgÉäêî
-ED75                
-ED75 26 00          	LD	H,0
-ED77 22 FA F1       	LD	(_FATPS),HL
+ED3F E1             	POP	HL		;L=DPB_0A_FDMODE H=DPB_0B_DIRSCNT
+ED40 7D             	LD	A,L
+ED41 F6 FE          	OR	0FEH
+ED43 32 6E EE       	LD	(FDMODE+1),A
+ED46 07             	RLCA
+ED47 E6 03          	AND	3
+ED49 32 56 EE       	LD	(FSPAT+1),A
+ED4C 4C             	LD	C,H
+ED4D                
+ED4D E1             	POP	HL		;L=DPB_0C_MAXCYL H=DPB_0D_MAXSEC
+ED4E                
+ED4E E1             	POP	HL		;L=DPB_0E_FATPS H=DPB_0F_BPS
+ED4F 7C             	LD	A,H		;DPB_0F_BPS
+ED50 E6 07          	AND	7
+ED52 32 86 E8       	LD	(SECSZ+2),A	;1ÉZÉNÉ^ÇÃÉTÉCÉYÇÃè„à 1ÉoÉCÉg 0x400 - 0x200 - 0x100
+ED55                				;1ÉZÉNÉ^512 2D/2DD/2HC/2HQ(2HD1.44MB)/EMM/BRAM/EMEMìô
+ED55                				;1ÉZÉNÉ^1024 2HD/2HDE98
+ED55                				;1ÉZÉNÉ^256 GRAM/RAMF/CMOS/ìô
+ED55                				;1024	512	256
+ED55                				;4	2	1
+ED55 87             	ADD	A,A		;8	4	2
+ED56 87             	ADD	A,A		;010H	8	4
+ED57 87             	ADD	A,A		;020H	010H	8
+ED58 32 F2 E1       	LD	(SDECPAT+1),A	;1ÉZÉNÉ^ï”ÇËÇÃÉfÉBÉåÉNÉgÉäÉGÉìÉgÉäêî
+ED5B                
+ED5B 26 00          	LD	H,0
+ED5D 22 FA F1       	LD	(_FATPS),HL
+ED60                
+ED60 E1             	POP	HL		;DPB_10_DIRPS
+ED61 22 FC F1       	LD	(_DIRPS),HL
+ED64                
+ED64 E1             	POP	HL		;L=DPB_12_DEVICE H=DPB_13_UNITNO
+ED65 7C             	LD	A,H
+ED66 32 84 F0       	LD	(_DRIVE),A
+ED69                
+ED69 E1             	POP	HL		;DPB_14_ADDCL16
+ED6A 22 86 E3       	LD	(CLSPAT+1),HL
+ED6D                
+ED6D 31 00 00       SPPAT2:	LD	SP,0		;å≥ÇÃSPÇïúå≥
+ED70 FB             	EI
+ED71 2A FC F1       	LD	HL,(_DIRPS)
+ED74 06 00          	LD	B,0
+ED76 09             	ADD	HL,BC		;C=DPB_0B_DIRSCNT
+ED77 22 0D E2       	LD	(MD_PAT+1),HL
 ED7A                
-ED7A E1             	POP	HL		;DPB_10_DIRPS
-ED7B 22 FC F1       	LD	(_DIRPS),HL
-ED7E                
-ED7E E1             	POP	HL		;L=DPB_12_DEVICE H=DPB_13_UNITNO
-ED7F 7C             	LD	A,H
-ED80 32 84 F0       	LD	(_DRIVE),A
-ED83                
-ED83 E1             	POP	HL		;DPB_14_ADDCL16
-ED84 22 86 E3       	LD	(CLSPAT+1),HL
-ED87                
-ED87 31 00 00       SPPAT2:	LD	SP,0		;å≥ÇÃSPÇïúå≥
-ED8A FB             	EI
-ED8B 2A FC F1       	LD	HL,(_DIRPS)
-ED8E 06 00          	LD	B,0
-ED90 09             	ADD	HL,BC		;C=DPB_0B_DIRSCNT
-ED91 22 0D E2       	LD	(MD_PAT+1),HL
-ED94                
-ED94 2A 99 E5       	LD	HL,(MAXCLP+1);
-ED97 11 F6 0F       	LD	DE,4086		;ÉNÉâÉXÉ^êîÇ™4086ñ¢ñû:FAT12 4086à»è„:FAT16
-ED9A ED 52          	SBC	HL,DE		;CF=0ÇÃÇÕÇ∏
-ED9C 30 0F          	JR	NC,SETFAT16
-ED9E 21 8C EA       	LD	HL,GNCL		;FAT12
-EDA1 11 AF EA       	LD	DE,SNCL
-EDA4 01 F7 EC       	LD	BC,FATSETUP12
-EDA7 DD CB 0F AE    	RES	5,(IX+00FH)	;DPB_0F_BPS(FAT12)
-EDAB 18 0D          	JR	EXTRA1
-EDAD                SETFAT16:
-EDAD 21 E3 EA       	LD	HL,GNCL16	;FAT16
-EDB0 11 F0 EA       	LD	DE,SNCL16
-EDB3 01 04 ED       	LD	BC,FATSETUP16
-EDB6 DD CB 0F EE    	SET	5,(IX+00FH)	;DPB_0F_BPS(FAT16)
-EDBA                EXTRA1:
-EDBA 22 F8 F0       	LD	(GNCPAT+1),HL
-EDBD ED 53 FB F0    	LD	(SNCPAT+1),DE
-EDC1 ED 43 CF EC    	LD	(FATSX+1),BC
-EDC5 D1             	POP	DE
-EDC6 C1             	POP	BC
-EDC7 AF             	XOR	A
-EDC8 C9             	RET
-EDC9                
-EDC9                GETDPBD:
-EDC9 DD E3          	EX	(SP),IX
-EDCB DD E5          	PUSH	IX
-EDCD 3A 88 F0       	LD	A,(_DRV)
-EDD0 18 07          	JR	GETDPB1
-EDD2                
-EDD2                CHGDRVR:
-EDD2 CD D9 F0       	CALL	_CHGDRV
-EDD5 D8             	RET	C
-EDD6 3A 89 F0       	LD	A,(_DSK)
-EDD9                GETDPB1:
-EDD9 C3 DC F0       	JP	_GETDPB
-EDDC                
-EDDC                GETDPB:
-EDDC FE 08          	CP	8
-EDDE 3F             	CCF
-EDDF D8             	RET	C
-EDE0 0F             	RRCA
-EDE1 0F             	RRCA
-EDE2 0F             	RRCA
-EDE3 DD             	DB	0DDH		;Z80ñ¢íËã`ñΩóﬂ
-EDE4 6F             	LD	L,A		;LD	IXL,A
-EDE5 DD             	DB	0DDH		;Z80ñ¢íËã`ñΩóﬂ
-EDE6 26 F2          	LD	H,DEVICE/256	;LD	IXH,DEVICE/256
-EDE8 DD 7E 00       	LD	A,(IX+0)	;DPB_00_FATLN
-EDEB A7             	AND	A		;CF=0ÇÃà◊
-EDEC DD CB 0F 6E    	BIT	5,(IX+00FH)	;DPB_0F_BPS
-EDF0 C0             	RET	NZ		;FAT16
-EDF1 DD CB 12 6E    	BIT	5,(IX+012H)	;DPB_12_DEVICE
-EDF5 C0             	RET	NZ		;BPB
-EDF6 FE 01          	CP	001H		;A=0 THEN CF=1
-EDF8 C9             	RET
-EDF9                
-EDF9                _SYS5F:
-EDF9 AF             	XOR	A
-EDFA                FFLUSH:
-EDFA F5             	PUSH	AF
-EDFB 3E FF          	LD	A,0FFH
-EDFD 32 39 F0       	LD	(SFILE),A
-EE00 CD CA E9       	CALL	DWTX
-EE03 3E FF          	LD	A,0FFH
-EE05 32 A5 F0       	LD	(_DBDRV),A
-EE08 CD 14 EA       	CALL	WTFATX
-EE0B AF             	XOR	A
-EE0C 32 AB F0       	LD	(_FATIX),A
-EE0F 2F             	CPL			;0FFH
-EE10 32 AA F0       	LD	(_FATDRV),A
-EE13 F1             	POP	AF
-EE14 C9             	RET
-EE15                
-EE15                	INCLUDE	"X1DISK.ASM"
-EE15                
-EE15                ;	LSX-Dodgers DISK
-EE15                ;	X1/turbo/Z
-EE15                
-EE15                SEEK:
-EE15 06 10          	LD	B,16
-EE17 DD 4E 0D       	LD	C,(IX+0DH)	;DPB_0D_MAXSEC
-EE1A AF             	XOR	A
-EE1B EB             	EX	DE,HL
-EE1C                DIV1:
-EE1C 29             	ADD	HL,HL
-EE1D 8F             	ADC	A,A
-EE1E B9             	CP	C
-EE1F 38 02          	JR	C,DIV2
-EE21 91             	SUB	C
-EE22 2C             	INC	L
-EE23                DIV2:
-EE23 10 F7          	DJNZ	DIV1
-EE25                
-EE25 3C             	INC	A	;ç≈è¨ÇÃÉZÉNÉ^ÇÕÇPå≈íË
-EE26 55             	LD	D,L	;TRACK
-EE27 5F             	LD	E,A	;SECTOR
-EE28 CB 3A          	SRL	D	;CYLINDER
-EE2A 9F             	SBC	A,A
-EE2B E6 10          	AND	010H	;SIDE
-EE2D 4F             	LD	C,A
-EE2E                
-EE2E 3A 84 F0       	LD	A,(_DRIVE)
-EE31 FE 04          	CP	4
-EE33 3F             	CCF
-EE34 D8             	RET	C
-EE35 B1             	OR	C
-EE36 32 B4 EE       	LD	(MOPAT+1),A	;Motor off data
-EE39 01 FC 0F       	LD	BC,00FFCH
-EE3C F6 80          	OR	080H		;Motor on
-EE3E ED 79          	OUT	(C),A
-EE40                
-EE40 CD 86 EE       	CALL	SETMODE
-EE43 D8             	RET	C
-EE44                
-EE44 CD C9 EE       	CALL	DRIVE
-EE47 FE FF          	CP	0FFH		;A=0FFH Unknown CYLINDER
-EE49 CC A8 EE       	CALL	Z,FDCRES	;Restore
-EE4C 0E F9          	LD	C,0F9H
-EE4E ED 79          	OUT	(C),A		;Currrent CYLINDER
-EE50 92             	SUB	D
-EE51 C8             	RET	Z		;No seek
-EE52                
-EE52 3A 86 F0       	LD	A,(_ISEEK)
-EE55 4F             	LD	C,A
-EE56                
-EE56 DD 7E 0C       	LD	A,(IX+00CH)	;DPB_0C_MAXCYL
-EE59 3D             	DEC	A
-EE5A BA             	CP	D		;Over CYLINDER
-EE5B D8             	RET	C
-EE5C                
-EE5C B9             	CP	C		;for Built-in 2DD
-EE5D 38 03          	JR	C,SETM2
-EE5F 78             	LD	A,B		;B=00FH
-EE60 DB FE          	IN	A,(0FEH)		;2HD mode for 2DD seek
-EE62                SETM2:
-EE62 78             	LD	A,B
-EE63 DB FD          	IN	A,(0FDH)		;MFM mode
-EE65                
-EE65 0E FB          	LD	C,0FBH
-EE67 ED 51          	OUT	(C),D
-EE69 72             	LD	(HL),D
-EE6A 0E 18          	LD	C,018H		;Seek
-EE6C                FDCCMD2:
-EE6C 3A 85 F0       	LD	A,(_SEEKSP)
-EE6F E6 FF          FSPAT:	AND	0FFH
-EE71 B1             	OR	C
+ED7A 2A 9D E5       	LD	HL,(MAXCLP+1);
+ED7D 11 F6 0F       	LD	DE,4086		;ÉNÉâÉXÉ^êîÇ™4086ñ¢ñû:FAT12 4086à»è„:FAT16
+ED80 ED 52          	SBC	HL,DE		;CF=0ÇÃÇÕÇ∏
+ED82 30 0F          	JR	NC,SETFAT16
+ED84 21 72 EA       	LD	HL,GNCL		;FAT12
+ED87 11 95 EA       	LD	DE,SNCL
+ED8A 01 DD EC       	LD	BC,FATSETUP12
+ED8D DD CB 0F AE    	RES	5,(IX+00FH)	;DPB_0F_BPS(FAT12)
+ED91 18 0D          	JR	EXTRA1
+ED93                SETFAT16:
+ED93 21 C9 EA       	LD	HL,GNCL16	;FAT16
+ED96 11 D6 EA       	LD	DE,SNCL16
+ED99 01 EA EC       	LD	BC,FATSETUP16
+ED9C DD CB 0F EE    	SET	5,(IX+00FH)	;DPB_0F_BPS(FAT16)
+EDA0                EXTRA1:
+EDA0 22 F8 F0       	LD	(GNCPAT+1),HL
+EDA3 ED 53 FB F0    	LD	(SNCPAT+1),DE
+EDA7 ED 43 B5 EC    	LD	(FATSX+1),BC
+EDAB D1             	POP	DE
+EDAC C1             	POP	BC
+EDAD AF             	XOR	A
+EDAE C9             	RET
+EDAF                
+EDAF                GETDPBD:
+EDAF DD E3          	EX	(SP),IX
+EDB1 DD E5          	PUSH	IX
+EDB3 3A 88 F0       	LD	A,(_DRV)
+EDB6 18 07          	JR	GETDPB1
+EDB8                
+EDB8                CHGDRVR:
+EDB8 CD D9 F0       	CALL	_CHGDRV
+EDBB D8             	RET	C
+EDBC 3A 89 F0       	LD	A,(_DSK)
+EDBF                GETDPB1:
+EDBF C3 DC F0       	JP	_GETDPB
+EDC2                
+EDC2                GETDPB:
+EDC2 FE 08          	CP	8
+EDC4 3F             	CCF
+EDC5 D8             	RET	C
+EDC6 0F             	RRCA
+EDC7 0F             	RRCA
+EDC8 0F             	RRCA
+EDC9 DD             	DB	0DDH		;Z80ñ¢íËã`ñΩóﬂ
+EDCA 6F             	LD	L,A		;LD	IXL,A
+EDCB DD             	DB	0DDH		;Z80ñ¢íËã`ñΩóﬂ
+EDCC 26 F2          	LD	H,DEVICE/256	;LD	IXH,DEVICE/256
+EDCE DD 7E 00       	LD	A,(IX+0)	;DPB_00_FATLN
+EDD1 A7             	AND	A		;CF=0ÇÃà◊
+EDD2 DD CB 0F 6E    	BIT	5,(IX+00FH)	;DPB_0F_BPS
+EDD6 C0             	RET	NZ		;FAT16
+EDD7 DD CB 12 6E    	BIT	5,(IX+012H)	;DPB_12_DEVICE
+EDDB C0             	RET	NZ		;BPB
+EDDC FE 01          	CP	001H		;A=0 THEN CF=1
+EDDE C9             	RET
+EDDF                
+EDDF                _SYS5F:
+EDDF AF             	XOR	A
+EDE0                FFLUSH:
+EDE0 F5             	PUSH	AF
+EDE1 3E FF          	LD	A,0FFH
+EDE3 32 39 F0       	LD	(SFILE),A
+EDE6 CD B0 E9       	CALL	DWTX
+EDE9 3E FF          	LD	A,0FFH
+EDEB 32 A5 F0       	LD	(_DBDRV),A
+EDEE CD FA E9       	CALL	WTFATX
+EDF1 AF             	XOR	A
+EDF2 32 AB F0       	LD	(_FATIX),A
+EDF5 2F             	CPL			;0FFH
+EDF6 32 AA F0       	LD	(_FATDRV),A
+EDF9 F1             	POP	AF
+EDFA C9             	RET
+EDFB                
+EDFB                	INCLUDE	"X1DISK.ASM"
+EDFB                
+EDFB                ;	LSX-Dodgers DISK
+EDFB                ;	X1/turbo/Z
+EDFB                
+EDFB                SEEK:
+EDFB 06 10          	LD	B,16
+EDFD DD 4E 0D       	LD	C,(IX+0DH)	;DPB_0D_MAXSEC
+EE00 AF             	XOR	A
+EE01 EB             	EX	DE,HL
+EE02                DIV1:
+EE02 29             	ADD	HL,HL
+EE03 8F             	ADC	A,A
+EE04 B9             	CP	C
+EE05 38 02          	JR	C,DIV2
+EE07 91             	SUB	C
+EE08 2C             	INC	L
+EE09                DIV2:
+EE09 10 F7          	DJNZ	DIV1
+EE0B                
+EE0B 3C             	INC	A	;ç≈è¨ÇÃÉZÉNÉ^ÇÕÇPå≈íË
+EE0C 55             	LD	D,L	;TRACK
+EE0D 5F             	LD	E,A	;SECTOR
+EE0E CB 3A          	SRL	D	;CYLINDER
+EE10 9F             	SBC	A,A
+EE11 E6 10          	AND	010H	;SIDE
+EE13 4F             	LD	C,A
+EE14                
+EE14 3A 84 F0       	LD	A,(_DRIVE)
+EE17 FE 04          	CP	4
+EE19 3F             	CCF
+EE1A D8             	RET	C
+EE1B B1             	OR	C
+EE1C 32 9A EE       	LD	(MOPAT+1),A	;Motor off data
+EE1F 01 FC 0F       	LD	BC,00FFCH
+EE22 F6 80          	OR	080H		;Motor on
+EE24 ED 79          	OUT	(C),A
+EE26                
+EE26 CD 6C EE       	CALL	SETMODE
+EE29 D8             	RET	C
+EE2A                
+EE2A CD AF EE       	CALL	DRIVE
+EE2D FE FF          	CP	0FFH		;A=0FFH Unknown CYLINDER
+EE2F CC 8E EE       	CALL	Z,FDCRES	;Restore
+EE32 0E F9          	LD	C,0F9H
+EE34 ED 79          	OUT	(C),A		;Currrent CYLINDER
+EE36 92             	SUB	D
+EE37 C8             	RET	Z		;No seek
+EE38                
+EE38 3A 86 F0       	LD	A,(_ISEEK)
+EE3B 4F             	LD	C,A
+EE3C                
+EE3C DD 7E 0C       	LD	A,(IX+00CH)	;DPB_0C_MAXCYL
+EE3F 3D             	DEC	A
+EE40 BA             	CP	D		;Over CYLINDER
+EE41 D8             	RET	C
+EE42                
+EE42 B9             	CP	C		;for Built-in 2DD
+EE43 38 03          	JR	C,SETM2
+EE45 78             	LD	A,B		;B=00FH
+EE46 DB FE          	IN	A,(0FEH)		;2HD mode for 2DD seek
+EE48                SETM2:
+EE48 78             	LD	A,B
+EE49 DB FD          	IN	A,(0FDH)		;MFM mode
+EE4B                
+EE4B 0E FB          	LD	C,0FBH
+EE4D ED 51          	OUT	(C),D
+EE4F 72             	LD	(HL),D
+EE50 0E 18          	LD	C,018H		;Seek
+EE52                FDCCMD2:
+EE52 3A 85 F0       	LD	A,(_SEEKSP)
+EE55 E6 FF          FSPAT:	AND	0FFH
+EE57 B1             	OR	C
+EE58                
+EE58                FDCCMD:
+EE58 CD A5 EE       	CALL	COMSET
+EE5B                
+EE5B 3E 80          FDCPAT:	LD	A,080H		;FDC COMMAND(Self-modifying code)
+EE5D E6 20          	AND	020H		;Write data Write track
+EE5F 3C             	INC	A
+EE60                
+EE60                SST:
+EE60 0E 00          	LD	C,0
+EE62                SST1:
+EE62 0D             	DEC	C		; 4
+EE63 20 FD          	JR	NZ,SST1		;12 * 256 / 4 = About 1ms
+EE65 3D             	DEC	A
+EE66 20 FA          	JR	NZ,SST1
+EE68                
+EE68 3C             	INC	A		;A=1
+EE69 CD 77 EE       	CALL	READY
+EE6C                SETMODE:
+EE6C 78             	LD	A,B		;B=00FH
+EE6D DB FF          FDMODE:	IN	A,(0FFH)	;Floppy mode(2D/2HD) (Self-modifying code)
+EE6F                
+EE6F 78             	LD	A,B
+EE70 DB FD          	IN	A,(0FDH)	;MFM mode
 EE72                
-EE72                FDCCMD:
-EE72 CD BF EE       	CALL	COMSET
-EE75                
-EE75 3E 80          FDCPAT:	LD	A,080H		;FDC COMMAND(Self-modifying code)
-EE77 E6 20          	AND	020H		;Write data Write track
-EE79 3C             	INC	A
-EE7A                
-EE7A                SST:
-EE7A 0E 00          	LD	C,0
-EE7C                SST1:
-EE7C 0D             	DEC	C		; 4
-EE7D 20 FD          	JR	NZ,SST1		;12 * 256 / 4 = About 1ms
-EE7F 3D             	DEC	A
-EE80 20 FA          	JR	NZ,SST1
-EE82                
-EE82 3C             	INC	A		;A=1
-EE83 CD 91 EE       	CALL	READY
-EE86                SETMODE:
-EE86 78             	LD	A,B		;B=00FH
-EE87 DB FF          FDMODE:	IN	A,(0FFH)	;Floppy mode(2D/2HD) (Self-modifying code)
-EE89                
-EE89 78             	LD	A,B
-EE8A DB FD          	IN	A,(0FDH)	;MFM mode
-EE8C                
-EE8C CD C3 EE       	CALL	DELAY0		;Head select time
-EE8F 3E 81          	LD	A,081H
-EE91                READY:
-EE91 32 9B EE       	LD	(WAITA+1),A
-EE94 E5             	PUSH	HL
-EE95 0E F8          	LD	C,0F8H
-EE97 61             	LD	H,C
-EE98                READY2:
-EE98 ED 78          	IN	A,(C)
-EE9A E6 81          WAITA:	AND	081H		;NOT READY,BUSY
-EE9C 28 08          	JR	Z,READYE
-EE9E E3             	EX	(SP),HL		;wait 19clock
-EE9F E3             	EX	(SP),HL		; //
-EEA0 2B             	DEC	HL
-EEA1 7C             	LD	A,H
-EEA2 B5             	OR	L
-EEA3 20 F3          	JR	NZ,READY2
-EEA5 37             	SCF
-EEA6                READYE:
-EEA6 E1             	POP	HL
-EEA7 C9             	RET
-EEA8                
-EEA8                FDCRES:
-EEA8 36 00          	LD	(HL),0
-EEAA 0E 08          	LD	C,8
-EEAC 18 BE          	JR	FDCCMD2
-EEAE                
-EEAE                FDMOFF:
-EEAE F5             	PUSH	AF
-EEAF C5             	PUSH	BC
-EEB0 01 FC 0F       	LD	BC,00FFCH	;Motor off
-EEB3 3E 00          MOPAT:	LD	A,000H		;(Self-rewriting)
-EEB5 ED 79          	OUT	(C),A
-EEB7 C1             	POP	BC
-EEB8 F1             	POP	AF
-EEB9 C9             	RET
-EEBA                
-EEBA                SECSET:
-EEBA 01 FA 0F       	LD	BC,00FFAH
-EEBD ED 59          	OUT	(C),E
-EEBF                COMSET:
-EEBF 0E F8          	LD	C,0F8H
-EEC1 ED 79          	OUT	(C),A
-EEC3                DELAY0:
-EEC3 3E 1A          	LD	A,26
-EEC5                DELAY:
-EEC5 3D             	DEC	A
-EEC6 20 FD          	JR	NZ,DELAY
-EEC8 C9             	RET
-EEC9                
-EEC9                DRIVE:
-EEC9 2A 84 F0       	LD	HL,(_DRIVE)
-EECC 26 F0          	LD	H,_CYL0/256
-EECE CB FD          	SET	7,L
-EED0 7E             	LD	A,(HL)
-EED1 C9             	RET
-EED2                
-EED2                RNF:
-EED2 CD C9 EE       	CALL	DRIVE
-EED5 36 FF          	LD	(HL),0FFH
-EED7 C9             	RET
-EED8                
-EED8 02             RETRY:	DB	2
-EED9                
-EED9                
-EED9                ;	FLOPPY DISK DRIVER(DMA)
-EED9                
-EED9                
-EED9                WTTRK:
-EED9 06 01          	LD	B,1
-EEDB 3E F4          	LD	A,0F4H
-EEDD 18 02          	JR	WTTRK1
-EEDF                FDWT:
-EEDF 3E A0          	LD	A,0A0H
-EEE1                WTTRK1:
-EEE1 32 76 EE       	LD	(FDCPAT+1),A
-EEE4 3E 10          	LD	A,16
-EEE6 18 0C          	JR	DISK
-EEE8                
-EEE8                DISKOK:
-EEE8 06 01          FDCNT:	LD	B,1
-EEEA 10 0B          	DJNZ	DISK1
-EEEC C9             	RET
-EEED                
-EEED                FDRD:
-EEED 3E 80          	LD	A,080H
-EEEF 32 76 EE       	LD	(FDCPAT+1),A
-EEF2 3E 0E          	LD	A,14
-EEF4                
-EEF4                DISK:
-EEF4 32 0B EF       	LD	(DMAPAT+1),A
-EEF7                DISK1:
-EEF7 78             	LD	A,B
-EEF8 32 E9 EE       	LD	(FDCNT+1),A
-EEFB 22 63 EF       	LD	(DMAD+11),HL
-EEFE                DISKR:
-EEFE 3E 02          	LD	A,2		;Retry count
-EF00 32 D8 EE       	LD	(RETRY),A
-EF03                DISK2:
-EF03 D5             	PUSH	DE
-EF04 CD 15 EE       	CALL	SEEK
-EF07 38 43          	JR	C,ERRF
-EF09 F3             	DI
-EF0A                
-EF0A 3E 0E          DMAPAT:	LD	A,14		;é©å»èëÇ´ä∑Ç¶
-EF0C 21 58 EF       	LD	HL,DMAD
-EF0F CD 93 DF       	CALL	SETDMA
-EF12 ED 49          	OUT	(C),C		;OUT 01F87H,087H WR6 ÉCÉlÅ[ÉuÉã
-EF14 3A 76 EE       	LD	A,(FDCPAT+1)
-EF17 C5             	PUSH	BC
-EF18 CD BA EE       	CALL	SECSET
-EF1B 2A 63 EF       	LD	HL,(DMAHL)
-EF1E 23             	INC	HL
-EF1F 11 06 BB       	LD	DE,0BB06H	;READ DMA
-EF22                
-EF22 3E 03          	LD	A,3
-EF24 CD 91 EE       	CALL	READY
-EF27 ED 78          	IN	A,(C)
-EF29                
-EF29 C1             	POP	BC
-EF2A ED 51          	OUT	(C),D		;ì«Ç›èoÇµÉ}ÉXÉNê›íË
-EF2C ED 59          	OUT	(C),E		;ÉoÉCÉgÉJÉEÉìÉ^(LH)
-EF2E ED 58          	IN	E,(C)
-EF30 ED 50          	IN	D,(C)
-EF32 19             	ADD	HL,DE
-EF33 D1             	POP	DE
-EF34 13             	INC	DE
-EF35 FB             	EI
-EF36 CD AE EE       	CALL	FDMOFF
-EF39 B7             	OR	A
-EF3A 28 AC          	JR	Z,DISKOK
-EF3C 1B             	DEC	DE
-EF3D CB 67          	BIT	4,A
-EF3F C4 D2 EE       	CALL	NZ,RNF
-EF42                DISKE2:
-EF42 21 D8 EE       	LD	HL,RETRY
-EF45 35             	DEC	(HL)
-EF46 20 BB          	JR	NZ,DISK2
-EF48 B7             	OR	A
-EF49 28 0A          	JR	Z,ERR
-EF4B D5             	PUSH	DE
-EF4C                ERRF:
-EF4C D1             	POP	DE
-EF4D                DELP:
-EF4D CD D2 EE       	CALL	RNF
-EF50 CD AE EE       	CALL	FDMOFF
-EF53 3E FF          	LD	A,0FFH
-EF55                ERR:
-EF55 BF             	CP	A
-EF56 37             	SCF
-EF57 C9             	RET
-EF58                
-EF58                			;X1turbo DISK DMA
-EF58 C3             DMAD:	DB	0C3H	;WR6 ÉäÉZÉbÉg
-EF59 7D             	DB	07DH	;WR0 É|Å[ÉgAÅ®É|Å[ÉgB ì]ëó
-EF5A FB 0F          	DW	00FFBH	;É|Å[ÉgAäJénÉAÉhÉåÉX FDC ÉfÅ[É^ÉåÉWÉXÉ^
-EF5C FF FF          	DW	0FFFFH	;ÉuÉçÉbÉNí∑(ì]ëóÉTÉCÉY-1)
-EF5E 2C             	DB	02CH	;WR1 É|Å[ÉgAÉAÉhÉåÉXå≈íË I/O
-EF5F 10             	DB	010H	;WR2 É|Å[ÉgBÉCÉìÉNÉäÉÅÉìÉg
-EF60 80             	DB	080H	;WR3
-EF61 92             	DB	092H	;WR5 WAIT RDY:LOW
-EF62 8D             	DB	08DH	;WR4 ÉoÉCÉg É|Å[ÉgBäJénÉAÉhÉåÉX(LH)
-EF63 00 00          DMAHL:	DW	0	;É|Å[ÉgBäJénÉAÉhÉåÉX
-EF65 CF             	DB	0CFH	;WR6 ÉçÅ[Éh
-EF66 01             	DB	001H	;WR0 É|Å[ÉgBÅ©É|Å[ÉgB ì]ëó
-EF67 CF             	DB	0CFH	;WR6 ÉçÅ[Éh
-EF68                
-EF68                DMAE:
-EF68                
-EF68 00 00 1E 38    AT_R	EQU	WTTRK-AT_DWT
-EF68                AT_TABLE:
-EF68                	INCLUDE	"LDCCPWK.ASM"
-EF68                
-EF68                ;	LSX-Dodgers CCP WORK
-EF68                
-EF68 00 00 00 40    PATHX	EQU	64
-EF68                PATHD:	DS	PATHX
-EFA8 00             PATHE:	DB	0
-EFA9                
-EFA9                DTA_CCP:
-EFA9                	DS	37
-EFCE                
-EFCE                FCB_BAT:
-EFCE                	DS	37
-EFF3                
-EFF3                
-EFF3 20 62 79 74    FREE:	DB	" bytes free",9,'$'
-EFF7 65 73 20 66
-EFFB 72 65 65 09
-EFFF 24
-F000                	INCLUDE	"LDWORK.ASM"
-F000                
-F000                ;	LSX-Dodgers WORK0
-F000                ;
-F000                ;	CP/Må›ä∑BIOS
-F000                ;	BOOT:ÉAÉhÉåÉXâ∫à 1ÉoÉCÉgÇ™0Ç…Ç»ÇÈÇÊÇ§Ç…
-F000                AT_WORK:
-F000                	DS	WORKAD-AT_WORK
+EE72 CD A9 EE       	CALL	DELAY0		;Head select time
+EE75 3E 81          	LD	A,081H
+EE77                READY:
+EE77 32 81 EE       	LD	(WAITA+1),A
+EE7A E5             	PUSH	HL
+EE7B 0E F8          	LD	C,0F8H
+EE7D 61             	LD	H,C
+EE7E                READY2:
+EE7E ED 78          	IN	A,(C)
+EE80 E6 81          WAITA:	AND	081H		;NOT READY,BUSY
+EE82 28 08          	JR	Z,READYE
+EE84 E3             	EX	(SP),HL		;wait 19clock
+EE85 E3             	EX	(SP),HL		; //
+EE86 2B             	DEC	HL
+EE87 7C             	LD	A,H
+EE88 B5             	OR	L
+EE89 20 F3          	JR	NZ,READY2
+EE8B 37             	SCF
+EE8C                READYE:
+EE8C E1             	POP	HL
+EE8D C9             	RET
+EE8E                
+EE8E                FDCRES:
+EE8E 36 00          	LD	(HL),0
+EE90 0E 08          	LD	C,8
+EE92 18 BE          	JR	FDCCMD2
+EE94                
+EE94                FDMOFF:
+EE94 F5             	PUSH	AF
+EE95 C5             	PUSH	BC
+EE96 01 FC 0F       	LD	BC,00FFCH	;Motor off
+EE99 3E 00          MOPAT:	LD	A,000H		;(Self-rewriting)
+EE9B ED 79          	OUT	(C),A
+EE9D C1             	POP	BC
+EE9E F1             	POP	AF
+EE9F C9             	RET
+EEA0                
+EEA0                SECSET:
+EEA0 01 FA 0F       	LD	BC,00FFAH
+EEA3 ED 59          	OUT	(C),E
+EEA5                COMSET:
+EEA5 0E F8          	LD	C,0F8H
+EEA7 ED 79          	OUT	(C),A
+EEA9                DELAY0:
+EEA9 3E 1A          	LD	A,26
+EEAB                DELAY:
+EEAB 3D             	DEC	A
+EEAC 20 FD          	JR	NZ,DELAY
+EEAE C9             	RET
+EEAF                
+EEAF                DRIVE:
+EEAF 2A 84 F0       	LD	HL,(_DRIVE)
+EEB2 26 F0          	LD	H,_CYL0/256
+EEB4 CB FD          	SET	7,L
+EEB6 7E             	LD	A,(HL)
+EEB7 C9             	RET
+EEB8                
+EEB8                RNF:
+EEB8 CD AF EE       	CALL	DRIVE
+EEBB 36 FF          	LD	(HL),0FFH
+EEBD C9             	RET
+EEBE                
+EEBE 02             RETRY:	DB	2
+EEBF                
+EEBF                
+EEBF                ;	FLOPPY DISK DRIVER(DMA)
+EEBF                
+EEBF                
+EEBF                WTTRK:
+EEBF 06 01          	LD	B,1
+EEC1 3E F4          	LD	A,0F4H
+EEC3 18 02          	JR	WTTRK1
+EEC5                FDWT:
+EEC5 3E A0          	LD	A,0A0H
+EEC7                WTTRK1:
+EEC7 32 5C EE       	LD	(FDCPAT+1),A
+EECA 3E 10          	LD	A,16
+EECC 18 0C          	JR	DISK
+EECE                
+EECE                DISKOK:
+EECE 06 01          FDCNT:	LD	B,1
+EED0 10 0B          	DJNZ	DISK1
+EED2 C9             	RET
+EED3                
+EED3                FDRD:
+EED3 3E 80          	LD	A,080H
+EED5 32 5C EE       	LD	(FDCPAT+1),A
+EED8 3E 0E          	LD	A,14
+EEDA                
+EEDA                DISK:
+EEDA 32 F1 EE       	LD	(DMAPAT+1),A
+EEDD                DISK1:
+EEDD 78             	LD	A,B
+EEDE 32 CF EE       	LD	(FDCNT+1),A
+EEE1 22 49 EF       	LD	(DMAD+11),HL
+EEE4                DISKR:
+EEE4 3E 02          	LD	A,2		;Retry count
+EEE6 32 BE EE       	LD	(RETRY),A
+EEE9                DISK2:
+EEE9 D5             	PUSH	DE
+EEEA CD FB ED       	CALL	SEEK
+EEED 38 43          	JR	C,ERRF
+EEEF F3             	DI
+EEF0                
+EEF0 3E 0E          DMAPAT:	LD	A,14		;é©å»èëÇ´ä∑Ç¶
+EEF2 21 3E EF       	LD	HL,DMAD
+EEF5 CD 93 DF       	CALL	SETDMA
+EEF8 ED 49          	OUT	(C),C		;OUT 01F87H,087H WR6 ÉCÉlÅ[ÉuÉã
+EEFA 3A 5C EE       	LD	A,(FDCPAT+1)
+EEFD C5             	PUSH	BC
+EEFE CD A0 EE       	CALL	SECSET
+EF01 2A 49 EF       	LD	HL,(DMAHL)
+EF04 23             	INC	HL
+EF05 11 06 BB       	LD	DE,0BB06H	;READ DMA
+EF08                
+EF08 3E 03          	LD	A,3
+EF0A CD 77 EE       	CALL	READY
+EF0D ED 78          	IN	A,(C)
+EF0F                
+EF0F C1             	POP	BC
+EF10 ED 51          	OUT	(C),D		;ì«Ç›èoÇµÉ}ÉXÉNê›íË
+EF12 ED 59          	OUT	(C),E		;ÉoÉCÉgÉJÉEÉìÉ^(LH)
+EF14 ED 58          	IN	E,(C)
+EF16 ED 50          	IN	D,(C)
+EF18 19             	ADD	HL,DE
+EF19 D1             	POP	DE
+EF1A 13             	INC	DE
+EF1B FB             	EI
+EF1C CD 94 EE       	CALL	FDMOFF
+EF1F B7             	OR	A
+EF20 28 AC          	JR	Z,DISKOK
+EF22 1B             	DEC	DE
+EF23 CB 67          	BIT	4,A
+EF25 C4 B8 EE       	CALL	NZ,RNF
+EF28                DISKE2:
+EF28 21 BE EE       	LD	HL,RETRY
+EF2B 35             	DEC	(HL)
+EF2C 20 BB          	JR	NZ,DISK2
+EF2E B7             	OR	A
+EF2F 28 0A          	JR	Z,ERR
+EF31 D5             	PUSH	DE
+EF32                ERRF:
+EF32 D1             	POP	DE
+EF33                DELP:
+EF33 CD B8 EE       	CALL	RNF
+EF36 CD 94 EE       	CALL	FDMOFF
+EF39 3E FF          	LD	A,0FFH
+EF3B                ERR:
+EF3B BF             	CP	A
+EF3C 37             	SCF
+EF3D C9             	RET
+EF3E                
+EF3E                			;X1turbo DISK DMA
+EF3E C3             DMAD:	DB	0C3H	;WR6 ÉäÉZÉbÉg
+EF3F 7D             	DB	07DH	;WR0 É|Å[ÉgAÅ®É|Å[ÉgB ì]ëó
+EF40 FB 0F          	DW	00FFBH	;É|Å[ÉgAäJénÉAÉhÉåÉX FDC ÉfÅ[É^ÉåÉWÉXÉ^
+EF42 FF FF          	DW	0FFFFH	;ÉuÉçÉbÉNí∑(ì]ëóÉTÉCÉY-1)
+EF44 2C             	DB	02CH	;WR1 É|Å[ÉgAÉAÉhÉåÉXå≈íË I/O
+EF45 10             	DB	010H	;WR2 É|Å[ÉgBÉCÉìÉNÉäÉÅÉìÉg
+EF46 80             	DB	080H	;WR3
+EF47 92             	DB	092H	;WR5 WAIT RDY:LOW
+EF48 8D             	DB	08DH	;WR4 ÉoÉCÉg É|Å[ÉgBäJénÉAÉhÉåÉX(LH)
+EF49 00 00          DMAHL:	DW	0	;É|Å[ÉgBäJénÉAÉhÉåÉX
+EF4B CF             	DB	0CFH	;WR6 ÉçÅ[Éh
+EF4C 01             	DB	001H	;WR0 É|Å[ÉgBÅ©É|Å[ÉgB ì]ëó
+EF4D CF             	DB	0CFH	;WR6 ÉçÅ[Éh
+EF4E                
+EF4E                DMAE:
+EF4E                
+EF4E 00 00 1E 1E    AT_R	EQU	WTTRK-AT_DWT
+EF4E                AT_TABLE:
+EF4E                	INCLUDE	"LDCCPWK.ASM"
+EF4E                
+EF4E                ;	LSX-Dodgers CCP WORK
+EF4E                
+EF4E 00 00 00 40    PATHX	EQU	64
+EF4E                PATHD:	DS	PATHX
+EF8E 00             PATHE:	DB	0
+EF8F                
+EF8F                DTA_CCP:
+EF8F                	DS	37
+EFB4                
+EFB4                FCB_BAT:
+EFB4                	DS	37
+EFD9                
+EFD9                
+EFD9 20 62 79 74    FREE:	DB	" bytes free",9,'$'
+EFDD 65 73 20 66
+EFE1 72 65 65 09
+EFE5 24
+EFE6                	INCLUDE	"LDWORK.ASM"
+EFE6                
+EFE6                ;	LSX-Dodgers WORK0
+EFE6                ;
+EFE6                ;	CP/Må›ä∑BIOS
+EFE6                ;	BOOT:ÉAÉhÉåÉXâ∫à 1ÉoÉCÉgÇ™0Ç…Ç»ÇÈÇÊÇ§Ç…
+EFE6                AT_WORK:
+EFE6                	DS	WORKAD-AT_WORK
 F000                
 F000                CPM_BOOT:
 F000 C3 00 00       	JP	0
@@ -6128,11 +6124,13 @@ F00C C3 86 DE       	JP	CONOUT1
 F00F                
 F00F                DECBF:
 F00F                	DS	5
-F014 00             FDRV	DB	0
-F015                FNAME	DS	36
+F014 00             FDRV:	DB	0
+F015                FNAME:	DS	36
 F039                SFILE:	DS	33		;DRV FILENAME
-F05A                HLBUF:	DS	3		;Random record buffer
-F05D                
+F05A                RR_BUF_HL:
+F05A                	DS	2		;Random record buffer
+F05C                RR_BUF_A:			;CP/Må›ä∑ÉtÉ@ÉCÉãÉAÉNÉZÉXÇÃç€ÇÃÉâÉìÉ_ÉÄÉåÉRÅ[ÉhÇàÍéûìIÇ»ï€ä«èÍèä
+F05C                	DS	1		;åv3ÉoÉCÉg
 F05D 00 00          LEFTX:	DW	0
 F05F 00 00          DTAX:	DW	0
 F061                
@@ -6236,25 +6234,25 @@ F0D0 C3 D1 DF       _SCRN:	JP	SCRN
 F0D3 C3 FB DF       _POS:	JP	POS
 F0D6 C3 4F DE       _LOC:	JP	LOC
 F0D9                _CHGDRV:
-F0D9 C3 11 ED       	JP	CHGDRV
+F0D9 C3 F7 EC       	JP	CHGDRV
 F0DC                _GETDPB:
-F0DC C3 DC ED       	JP	GETDPB
+F0DC C3 C2 ED       	JP	GETDPB
 F0DF                _FFLUSH:
-F0DF C3 FA ED       	JP	FFLUSH
+F0DF C3 E0 ED       	JP	FFLUSH
 F0E2                _RDFATX:
-F0E2 C3 EA E9       	JP	RDFATX
-F0E5 C3 12 EB       _RDFAT:	JP	RDFAT
-F0E8 C3 D9 EE       _WTTRK:	JP	WTTRK
-F0EB C3 ED EE       _FDRD:	JP	FDRD
-F0EE C3 DF EE       _FDWT:	JP	FDWT
+F0E2 C3 D0 E9       	JP	RDFATX
+F0E5 C3 F8 EA       _RDFAT:	JP	RDFAT
+F0E8 C3 BF EE       _WTTRK:	JP	WTTRK
+F0EB C3 D3 EE       _FDRD:	JP	FDRD
+F0EE C3 C5 EE       _FDWT:	JP	FDWT
 F0F1                _BPB2DPB:
-F0F1 C3 9F EB       	JP	BPB2DPB
+F0F1 C3 85 EB       	JP	BPB2DPB
 F0F4                _BREAK:
 F0F4 C3 C2 D3       	JP	END_BATCH
 F0F7                _GNCL:
-F0F7 C3 8C EA       GNCPAT:	JP	GNCL		; self-modifying code
+F0F7 C3 72 EA       GNCPAT:	JP	GNCL		; self-modifying code
 F0FA                _SNCL:
-F0FA C3 AF EA       SNCPAT:	JP	SNCL		; self-modifying code
+F0FA C3 95 EA       SNCPAT:	JP	SNCL		; self-modifying code
 F0FD C3 7C D2       _COMANL:JP	COMANL
 F100                
 F100                _WE:
@@ -6288,7 +6286,7 @@ F140                ;2
 F140 5F D8 1F DA    	DW	_SYS20,_SYS21,_SYS22,_SYS23
 F144 27 DA 70 DA
 F148 96 DA 5F D8    	DW	_SYS24,_ERROR,_SYS26,_SYS27
-F14C A7 E6 8C E7
+F14C A4 E6 7C E7
 F150 27 DA 9F DA    	DW	_SYS28,_SYS29,_SYS2A,_SYS2B
 F154 4F DC 1F E2
 F158 72 DC 1F E2    	DW	_SYS2C,_SYS2D,_SYS2E,_SYS2F
