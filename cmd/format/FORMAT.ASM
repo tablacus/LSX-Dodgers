@@ -113,11 +113,6 @@ TYPE:
 	JR	Z,TYPE0
 	CP	'1'
 	JR	Z,TYPE1
-	LD	B,A
-	LD	A,(BIOS)
-	INC	A
-	JR	Z,TYPE
-	LD	A,B
 	CP	'2'
 	JR	Z,TYPE2
 	CP	'L'
@@ -709,14 +704,13 @@ CALC_FATLN16:	;FAT16 - クラスタ数から必要なFATサイズを求める(セクタサイズ512)
 	RET
 
 TITLE:
-	DB	"format v1.17"
+	DB	"format v1.18"
 CRLF:
 	DB	$0D,$0A
 	DB	'$'
 MUSAGE:
 	DB	"usage: FORMAT ﾄﾞﾗｲﾌﾞ:[ｽｲｯﾁ]",$0D,$0A
 	DB	9,"/C  FAT,ﾃﾞｨﾚｸﾄﾘ ｼｮｷｶ",$0D,$0A
-;	DB	9,"/On ｵｰﾊﾞｰﾄﾗｯｸ(n:1-9)",$0D,$0A
 	DB	'$'
 FORMES:
 	DB	"format $"
