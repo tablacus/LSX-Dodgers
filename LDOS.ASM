@@ -438,16 +438,14 @@ S29X1:
 	PUSH	DE
 	PUSH	HL
 	EX	DE,HL
+	XOR	A
+	LD	(FDRV+13),A
 	LD	HL,FDRV
-	LD	BC,13
-	LDIR
-	LD	(HL),B		;B=0
-	LD	C,3
+	LD	BC,16
 	LDIR
 	POP	HL
 	POP	DE
 	POP	BC
-	XOR	A
 	RET
 
 _SYS30:		;(BDOS)論理セクタを用いた書き込み

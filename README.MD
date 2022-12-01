@@ -192,6 +192,19 @@ MSX/98/X68Kのエミュレータで使われています。
 MS-DOS系のフォーマットがなさそうなので今のところLSX-Dodgersでは使っていません。  
 ※BPBを作成すればMS-DOSフォーマットで扱うことはできると思います。
 
+|エミュレータ|2D|2DD|2HD|2HD(1.44)|HDD|RAMDISK|リモート|
+|--|--|--|--|--|--|--|--|
+|eX1/eX1twin|D88| - | - | - |LD-hdd|G:48K/E:320K| - |
+|eX1turbo/eX1turboZ|D88|D88/dsk|D88/img/xdf| - |LD-hdd|G:48K/E:320K/F:512K| - |
+|Xmil106(X1)|D88|D88| - | - |LD-hdd|G:48K|RLC/RLS|
+|Xmil106(turbo/Z)|D88|D88|D88|D88|LD-hdd|G:48K/F:512K|RLC/RLS|
+|EmuZ-700/EmuZ-1500|D88|D88| - | - | - |C:32K/F:64K/E:16MB| - |
+|M88|D88|D88|D88|D88| - |512K| - |
+|ePC-8801ma|D88|D88/dsk|D88/img/xdf(※1)| - | - |F:512K| - |
+|X88000|D88| - | - | - | - |F:512K| - |
+
+※1 2HD機の実機ROMか疑似ROMに改修が必要
+
 # Windows等とのファイルのやり取り
 
 ## L3ディスクエクスプローラ(L3 Disk Explorer) 

@@ -19,15 +19,17 @@ CPM_CONIN:
 CPM_CONOUT:
 	JP	CONOUT1
 
-DECBF:
+DECBF:				;10進数表示時のバッファ(5バイト)
 	DS	5
+RR_BUF_HL	EQU	DECBF	;CP/M互換ファイルアクセスの際のランダムレコードの一時的な保管場所
+RR_BUF_A	EQU	DECBF+2	;計3バイト
+
 FDRV:	DB	0
 FNAME:	DS	36
 SFILE:	DS	33		;DRV FILENAME
-RR_BUF_HL:
-	DS	2		;Random record buffer
-RR_BUF_A:			;CP/M互換ファイルアクセスの際のランダムレコードを一時的な保管場所
-	DS	1		;計3バイト
+
+	DS	3
+
 LEFTX:	DW	0
 DTAX:	DW	0
 
