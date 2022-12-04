@@ -746,9 +746,7 @@ $6F MSX-DOS のバージョン番号の獲得(_DOSVER) *1 MSX-DOS
   機種ID
   0: X1/turbo/Z
   1: MZ-700/1500
-
-  bit7: DPBがLAと同じ場合に1になる
-
+  2: PC-8801mkIISR
 
   備考:
   MSX-DOS1の場合はBが2未満
