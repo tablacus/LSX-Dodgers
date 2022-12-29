@@ -31,150 +31,147 @@
                                 ;
                                 ;   メイン
 000000 C000                         ORG MAINADDR
-000000 C000 EB               4      EX  DE,HL   ;EB BS_JmpBoot
-000001 C001 FE90             7      CP  090H    ;FE 90
-000003 C003 37               4      SCF     ;37 BS_OEMName
-000004 C004 3824            12      JR  C,START ;38 20
-000006 C006 49504C3838              DB  "IPL88"
-00000B C00B 0002                    DW  512 ;BPB_BytsPerSec
-00000D C00D 02                      DB  2   ;BPB_SecPerClus
-00000E C00E 0100                    DW  1   ;BPB_RsvdSecCnt
-000010 C010 02                      DB  2   ;BPB_NumFATs
-000011 C011 7000                    DW  112 ;BPB_RootEntCnt
-000013 C013 D002                    DW  720 ;BPB_TotSec16
-000015 C015 FD                      DB  0FDH    ;BPB_Media
-000016 C016 0200                    DW  2   ;BPB_FATSz16
-000018 C018 0900                    DW  9   ;BPB_SecPerTrk
-00001A C01A 0200                    DW  2   ;BPB_NumHeads
-                                
-       C01C                     DISK_SUB_SYSTEM:
+000000 C000 01FE90          10      LD  BC,090FEH   ;01 FE 90
+000003 C003 37               4      SCF     ;37
+000004 C004 3828            12      JR  C,START ;38 2A
+000006 C006 204C442049504C20        DB  " LD IPL "
+00000E C00E 537973                  DB  "Sys"
+000011 C011 20                      DB  020H    ;パスワード(通常は20h)
+000012 C012 0002                    DW  512 ;データサイズ（下位,上位の順）
+000014 C014 00FE                    DW  0FE00H  ;読込アドレス（下位,上位の順）
+000016 C016 18FE                    DW  0FE18H  ;実行アドレス（下位,上位の順）
+000018 C018 3E1D             7      LD  A,01DH  ;年...西暦の下位2桁をBCD形式
+                                            ;月,曜日...上位4bitが月、下位が曜日
+00001A C01A D300            11      OUT (0),A   ;日...BCD形式
+                                            ;時...BCD形式
+00001C C01C C7              12      RST 0   ;分...BCD形式
+00001D C01D 000000                  DB  0,0,0   ;開始クラスタ
+       C020                     DISK_SUB_SYSTEM:
                                 ;   ディスクサブシステム
-       501C                     DSS EQU DISK_SUB_SYSTEM-07000H
+       5020                     DSS EQU DISK_SUB_SYSTEM-07000H
                                 
-00001C C01C 218850          10      LD  HL,DSS_MAIN-MAINADDR+SUBADDR
-00001F C01F 110070          10      LD  DE,DSS_TO
-000022 C022 017400          10      LD  BC,DSS_LAST-DSS_TO
-000025 C025 EDB0                    LDIR
-000027 C027 C30070          10      JP  READDISKEX
+000020 C020 218C50          10      LD  HL,DSS_MAIN-MAINADDR+SUBADDR
+000023 C023 110070          10      LD  DE,DSS_TO
+000026 C026 017400          10      LD  BC,DSS_LAST-DSS_TO
+000029 C029 EDB0                    LDIR
+00002B C02B C30070          10      JP  READDISKEX
                                 
-       C02A                     START:
-00002A C02A F3               4      DI
-00002B C02B 3100C0          10      LD  SP,0C000H
+       C02E                     START:
+00002E C02E F3               4      DI
+00002F C02F 3100C0          10      LD  SP,0C000H
                                                 ;初期化
-00002E C02E AF               4      XOR A       ;イニシャライズ
-00002F C02F CDCC37          17      CALL    PUTCOM
-000032 C032 3E17             7      LD  A,017H      ;セットサーフィスモード
-000034 C034 CDCC37          17      CALL    PUTCOM
-000037 C037 3E07             7      LD  A,7     ;Bit3～Bit0 0:片面 1:両面
-000039 C039 CDD237          17      CALL    PUTDAT
-00003C C03C 3E0D             7      LD  A,0DH       ;エグゼキュート
-00003E C03E CDCC37          17      CALL    PUTCOM
-000041 C041 3E50             7      LD  A,DSS/256
-000043 C043 CDD237          17      CALL    PUTDAT
-000046 C046 3E1C             7      LD  A,DSS%256
-000048 C048 CDD237          17      CALL    PUTDAT
-00004B C04B 3E06             7      LD  A,6     ;センドリザルトステータス
-00004D C04D CDCC37          17      CALL    PUTCOM
-000050 C050 CD4738          17      CALL    GETDAT
-000053 C053 0F               4      RRCA
-000054 C054 382F            12      JR  C,ERROR
-000056 C056 3E0B             7      LD  A,0BH       ;センドメモリ2
-000058 C058 CDCC37          17      CALL    PUTCOM
-00005B C05B 3E40             7      LD  A,DSS_DATA/256  ;開始アドレスH
-00005D C05D CDD237          17      CALL    PUTDAT
-000060 C060 3E07             7      LD  A,7     ;開始アドレスL
-000062 C062 CDD237          17      CALL    PUTDAT
-000065 C065 01F925          10      LD  BC,SIZE-7
-000068 C068 78               4      LD  A,B     ;バイト数H
-000069 C069 CDD237          17      CALL    PUTDAT
-00006C C06C 79               4      LD  A,C     ;バイト数L
+000032 C032 AF               4      XOR A       ;イニシャライズ
+000033 C033 CDCC37          17      CALL    PUTCOM
+000036 C036 3E17             7      LD  A,017H      ;セットサーフィスモード
+000038 C038 CDCC37          17      CALL    PUTCOM
+00003B C03B 3E07             7      LD  A,7     ;Bit3～Bit0 0:片面 1:両面
+00003D C03D CDD237          17      CALL    PUTDAT
+000040 C040 3E0D             7      LD  A,0DH       ;エグゼキュート
+000042 C042 CDCC37          17      CALL    PUTCOM
+000045 C045 3E50             7      LD  A,DSS/256
+000047 C047 CDD237          17      CALL    PUTDAT
+00004A C04A 3E20             7      LD  A,DSS%256
+00004C C04C CDD237          17      CALL    PUTDAT
+00004F C04F 3E06             7      LD  A,6     ;センドリザルトステータス
+000051 C051 CDCC37          17      CALL    PUTCOM
+000054 C054 CD4738          17      CALL    GETDAT
+000057 C057 0F               4      RRCA
+000058 C058 382F            12      JR  C,ERROR
+00005A C05A 3E0B             7      LD  A,0BH       ;センドメモリ2
+00005C C05C CDCC37          17      CALL    PUTCOM
+00005F C05F 3E40             7      LD  A,DSS_DATA/256  ;開始アドレスH
+000061 C061 CDD237          17      CALL    PUTDAT
+000064 C064 3E07             7      LD  A,7     ;開始アドレスL
+000066 C066 CDD237          17      CALL    PUTDAT
+000069 C069 01F925          10      LD  BC,SIZE-7
+00006C C06C 78               4      LD  A,B     ;バイト数H
 00006D C06D CDD237          17      CALL    PUTDAT
-000070 C070 DB32            11      IN  A,(032H)
-000072 C072 F610             7      OR  010H        ;高速RAMアクセスモードOFF
-000074 C074 D332            11      OUT (032H),A
-000076 C076 2100CD          10      LD  HL,RUN
-       C079                     TRANS1:
-000079 C079 CD4738          17      CALL    GETDAT
-00007C C07C 77               7      LD  (HL),A
-00007D C07D EDA1            16      CPI         ;HL=HL+1 BC=BC-1 BCが0の場合にP/V=0
-00007F C07F EA79C0          10      JP  PE,TRANS1
-000082 C082 C307CD          10      JP  EXEC
-       C085                     ERROR:
-000085 C085 76               4      HALT
-000086 C086 18FD            12      JR  ERROR
+000070 C070 79               4      LD  A,C     ;バイト数L
+000071 C071 CDD237          17      CALL    PUTDAT
+000074 C074 DB32            11      IN  A,(032H)
+000076 C076 F610             7      OR  010H        ;高速RAMアクセスモードOFF
+000078 C078 D332            11      OUT (032H),A
+00007A C07A 2100CD          10      LD  HL,RUN
+       C07D                     TRANS1:
+00007D C07D CD4738          17      CALL    GETDAT
+000080 C080 77               7      LD  (HL),A
+000081 C081 EDA1            16      CPI         ;HL=HL+1 BC=BC-1 BCが0の場合にP/V=0
+000083 C083 EA7DC0          10      JP  PE,TRANS1
+000086 C086 C307CD          10      JP  EXEC
+       C089                     ERROR:
+000089 C089 76               4      HALT
+00008A C08A 18FD            12      JR  ERROR
                                 
-       C088                     DSS_MAIN:
-000088 7000                         ORG DSS_TO,DSS_MAIN-MAINADDR
+       C08C                     DSS_MAIN:
+00008C 7000                         ORG DSS_TO,DSS_MAIN-MAINADDR
        7000                     READDISKEX:
-000088 7000 210040          10      LD  HL,DSS_DATA ;開始アドレス
-00008B 7003 DD216B70        14      LD  IX,DISK_DATA
-00008F 7007 0603             7      LD  B,3
+00008C 7000 210040          10      LD  HL,DSS_DATA ;開始アドレス
+00008F 7003 DD216B70        14      LD  IX,DISK_DATA
+000093 7007 0603             7      LD  B,3
        7009                     RDDISK0:
-000091 7009 C5              11      PUSH    BC
-000092 700A CD3F70          17      CALL    FDCOMMAND
+000095 7009 C5              11      PUSH    BC
+000096 700A CD3F70          17      CALL    FDCOMMAND
        700D                     RDDISK1:
-000095 700D FB               4      EI
-000096 700E 76               4      HALT
-000097 700F DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
-000099 7011 E620             7      AND 20H     ;NO SERVICE
-00009B 7013 2808            12      JR  Z,RDDISK2
-00009D 7015 DBFB            11      IN  A,(0FBH)    ;FDC μPD765A データレジスタ
-00009F 7017 77               7      LD  (HL),A
-0000A0 7018 EDA1            16      CPI
-0000A2 701A EA0D70          10      JP  PE,RDDISK1
+000099 700D FB               4      EI
+00009A 700E 76               4      HALT
+00009B 700F DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
+00009D 7011 E620             7      AND 20H     ;NO SERVICE
+00009F 7013 2808            12      JR  Z,RDDISK2
+0000A1 7015 DBFB            11      IN  A,(0FBH)    ;FDC μPD765A データレジスタ
+0000A3 7017 77               7      LD  (HL),A
+0000A4 7018 EDA1            16      CPI
+0000A6 701A EA0D70          10      JP  PE,RDDISK1
        701D                     RDDISK2:
-0000A5 701D DBF8            11      IN  A,(0F8H)    ;FDC μPD765A TC入力
-0000A7 701F FB               4      EI
-0000A8 7020 76               4      HALT
-0000A9 7021 CD4500          17      CALL    CHECKRESULT
-0000AC 7024 010300          10      LD  BC,3
-0000AF 7027 DD09            15      ADD IX,BC
-0000B1 7029 C1              10      POP BC
-0000B2 702A 10DD            13      DJNZ    RDDISK0
-0000B4 702C 3A0040          13      LD  A,(DSS_DATA)
-0000B7 702F FEFE             7      CP  0FEH
-0000B9 7031 2804            12      JR  Z,RDDISK3
-0000BB 7033 3E01             7      LD  A,1
-0000BD 7035 1802            12      JR  RDDISK4
+0000A9 701D DBF8            11      IN  A,(0F8H)    ;FDC μPD765A TC入力
+0000AB 701F FB               4      EI
+0000AC 7020 76               4      HALT
+0000AD 7021 CD4500          17      CALL    CHECKRESULT
+0000B0 7024 010300          10      LD  BC,3
+0000B3 7027 DD09            15      ADD IX,BC
+0000B5 7029 C1              10      POP BC
+0000B6 702A 10DD            13      DJNZ    RDDISK0
+0000B8 702C 3A0040          13      LD  A,(DSS_DATA)
+0000BB 702F FEFE             7      CP  0FEH
+0000BD 7031 2804            12      JR  Z,RDDISK3
+0000BF 7033 3E01             7      LD  A,1
+0000C1 7035 1802            12      JR  RDDISK4
        7037                     RDDISK3:
-0000BF 7037 3EC0             7      LD  A,0C0H
+0000C3 7037 3EC0             7      LD  A,0C0H
        7039                     RDDISK4:
-0000C1 7039 32147F          13      LD  (CMD_STATUS),A
-0000C4 703C C32A00          10      JP  MAIN
+0000C5 7039 32147F          13      LD  (CMD_STATUS),A
+0000C8 703C C32A00          10      JP  MAIN
                                 
        703F                     FDCOMMAND:
-0000C7 703F 0E00             7      LD  C,0     ;DRIVE A:
-0000C9 7041 DD5600          19      LD  D,(IX+0)
-0000CC 7044 CDD607          17      CALL    SEEK_AND_WAIT
-0000CF 7047 3E46             7      LD  A,46H       ;READ DATA
-0000D1 7049 E7              12      RST 20H
-0000D2 704A CD0E04          17      CALL    MAPDRV      ;HD US1 US0
-0000D5 704D E7              12      RST 20H
-0000D6 704E 7A               4      LD  A,D     ;C
-0000D7 704F CB3F             8      SRL A
-0000D9 7051 E7              12      RST 20H
-0000DA 7052 7A               4      LD  A,D     ;H
-0000DB 7053 E601             7      AND 1
-0000DD 7055 E7              12      RST 20H
-0000DE 7056 DD7E01          19      LD  A,(IX+1)    ;R
-0000E1 7059 E7              12      RST 20H
-0000E2 705A 3E02             7      LD  A,2     ;N
-0000E4 705C E7              12      RST 20H
-0000E5 705D 3E09             7      LD  A,9     ;EOT
-0000E7 705F E7              12      RST 20H
-0000E8 7060 3E54             7      LD  A,54H       ;GSL
-0000EA 7062 E7              12      RST 20H
-0000EB 7063 AF               4      XOR A       ;DTL
-0000EC 7064 E7              12      RST 20H
-0000ED 7065 0E00             7      LD  C,0
-0000EF 7067 DD4602          19      LD  B,(IX+2)    ;バイト数H
-0000F2 706A C9              10      RET
+0000CB 703F 0E00             7      LD  C,0     ;DRIVE A:
+0000CD 7041 DD5600          19      LD  D,(IX+0)
+0000D0 7044 CDD607          17      CALL    SEEK_AND_WAIT
+0000D3 7047 3E46             7      LD  A,46H       ;READ DATA
+0000D5 7049 E7              12      RST 20H
+0000D6 704A CD0E04          17      CALL    MAPDRV      ;HD US1 US0
+0000D9 704D E7              12      RST 20H
+0000DA 704E 7A               4      LD  A,D     ;C
+0000DB 704F CB3F             8      SRL A
+0000DD 7051 E7              12      RST 20H
+0000DE 7052 7A               4      LD  A,D     ;H
+0000DF 7053 E601             7      AND 1
+0000E1 7055 E7              12      RST 20H
+0000E2 7056 DD7E01          19      LD  A,(IX+1)    ;R
+0000E5 7059 E7              12      RST 20H
+0000E6 705A 3E02             7      LD  A,2     ;N
+0000E8 705C E7              12      RST 20H
+0000E9 705D 3E09             7      LD  A,9     ;EOT
+0000EB 705F E7              12      RST 20H
+0000EC 7060 3E54             7      LD  A,54H       ;GSL
+0000EE 7062 E7              12      RST 20H
+0000EF 7063 AF               4      XOR A       ;DTL
+0000F0 7064 E7              12      RST 20H
+0000F1 7065 0E00             7      LD  C,0
+0000F3 7067 DD4602          19      LD  B,(IX+2)    ;バイト数H
+0000F6 706A C9              10      RET
                                 
        706B                     DISK_DATA:; T R SZ
-0000F3 706B 01040C                  DB  1,4,12  ;3072
-0000F6 706E 020112                  DB  2,1,18  ;4608
-0000F9 7071 030108                  DB  3,1,8   ;2048
+0000F7 706B 01040C                  DB  1,4,12  ;3072
+0000FA 706E 020112                  DB  2,1,18  ;4608
+0000FD 7071 030108                  DB  3,1,8   ;2048
        7074                     DSS_LAST:
-0000FC 7074                         DS  0FFH-$$
-0000FF 7077 00                      DB  0
 [EOF:BOOT88.ASM:SHIFT_JIS]

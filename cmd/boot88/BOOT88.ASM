@@ -30,22 +30,21 @@ CMD_STATUS	EQU	07F14H
 ;
 ;	メイン
 	ORG	MAINADDR
-	EX	DE,HL	;EB	BS_JmpBoot
-	CP	090H	;FE 90
-	SCF		;37	BS_OEMName
-	JR	C,START	;38 20
-	DB	"IPL88"
-	DW	512	;BPB_BytsPerSec
-	DB	2	;BPB_SecPerClus
-	DW	1	;BPB_RsvdSecCnt
-	DB	2	;BPB_NumFATs
-	DW	112	;BPB_RootEntCnt
-	DW	720	;BPB_TotSec16
-	DB	0FDH	;BPB_Media
-	DW	2	;BPB_FATSz16
-	DW	9	;BPB_SecPerTrk
-	DW	2	;BPB_NumHeads
-
+	LD	BC,090FEH	;01 FE 90
+	SCF		;37
+	JR	C,START	;38 2A
+	DB	" LD IPL "
+	DB	"Sys"
+	DB	020H	;パスワード(通常は20h)
+	DW	512	;データサイズ（下位,上位の順）
+	DW	0FE00H	;読込アドレス（下位,上位の順）
+	DW	0FE18H	;実行アドレス（下位,上位の順）
+	LD	A,01DH	;年...西暦の下位2桁をBCD形式
+			;月,曜日...上位4bitが月、下位が曜日
+	OUT	(0),A	;日...BCD形式
+			;時...BCD形式
+	RST	0	;分...BCD形式
+	DB	0,0,0	;開始クラスタ
 DISK_SUB_SYSTEM:
 ;	ディスクサブシステム
 DSS	EQU	DISK_SUB_SYSTEM-07000H
@@ -174,5 +173,3 @@ DISK_DATA:;	T R SZ
 	DB	2,1,18	;4608
 	DB	3,1,8	;2048
 DSS_LAST:
-	DS	0FFH-$$
-	DB	0

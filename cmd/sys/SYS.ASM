@@ -13,7 +13,7 @@ IPL	EQU	0FE00H
 	ORG	0100H
 	JP	START
 TITLE:
-	DB	"X1 systemcopy v1.02"
+	DB	"X1 systemcopy v1.03"
 	DB	CR,LF,"$"
 USAGE:
 	DB	"usage:"
@@ -39,12 +39,7 @@ M2HC:
 MEMM:
 	DB	"EMM$"
 
-GETDPB:	JP	000DCH
-
 START:
-	LD	A,(000BH)
-	LD	(GETDPB+2),A
-
 	LD	DE,TITLE
 	LD	C,9
 	CALL	SYSTEM
@@ -168,15 +163,16 @@ WTIPL1:
 	SBC	HL,DE
 	JP	Z,W2HC
 
-	LD	HL,(3)
-	LD	A,H
-	CP	$1D
+	CALL	IS_X1
 	JP	NZ,0
 
 	LD	A,(FCB3)
 	DEC	A
-	CALL	GETDPB
-	JP	C,0
+	LD	E,A
+	JP	C,01FH		;ディスク装置のパラメータの読み出し
+	CALL	SYSTEM
+	RET	C
+
 	LD	A,(IX+12H)
 	CP	6
 	JP	Z,WEMM
@@ -356,19 +352,32 @@ EMML:
 	JP	0
 
 EAREA:
-	LD	HL,(3)
-	LD	A,H
-	CP	$1D
+	CALL	IS_X1
 	RET	NZ
-	LD	A,4
-	CALL	GETDPB
+
+	LD	A,(FCB3)
+	DEC	A
+	LD	E,A
+	JP	C,01FH		;ディスク装置のパラメータの読み出し
+	CALL	SYSTEM
 	RET	C
+
 	LD	A,(IX+12H)
 	CP	6
 	RET	NZ
 
 	LD	A,(IX+0CH)
 	LD	(DATA+27H),A
+	RET
+
+IS_X1:
+	LD	C,06FH		;MSX-DOS のバージョン番号の獲得(_DOSVER)
+	CALL	SYSTEM
+	LD	A,C
+	CP	01DH		;LSX-Dodgersの場合、01DH
+	RET	NZ
+	LD	A,L		;機種ID
+	CP	0		;X1
 	RET
 
 MAIN:
@@ -609,6 +618,10 @@ DRDL:
 	RET	C
 	LD	A,80H
 	LD	BC,0FFAH
+	JR	SKIPBUF
+	DB	0		;0FF87H	ドライブ(IPL READ)
+	DW	SA		;0FF88H スタックオーバーライド(IPL READ)
+SKIPBUF:
 	OUT	(C),E
 	LD	C,0F8H
 	OUT	(C),A
@@ -673,7 +686,7 @@ SDMA:
 
 	LD	HL,(DMAD+11)
 	INC	HL
-	LD	DE,$BB06	;READ DMA
+	LD	DE,0BB06H	;READ DMA
 
 	POP	BC
 	OUT	(C),D
