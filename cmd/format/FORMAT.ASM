@@ -74,8 +74,11 @@ MAIN:
 	LD	C,$1F		;ディスク装置のパラメータの読み出し
 	CALL	SYSTEM
 	OR	A
-	JR	Z,USAGE
-
+	JR	NZ,MAIN0
+	LD	A,(IX+$12)	;デバイス情報(DPB_12_DEVICE)
+	CP	$26		;デバイスはEMMでBPBからDPBを作成する
+	JR	NZ,USAGE
+MAIN0:
 	CALL	SWITCH
 	CP	$20
 	JR	C,MAIN1
@@ -851,7 +854,7 @@ RESULTEX:
 AT_DSSE:
 
 TITLE:
-	DB	"format v1.18"
+	DB	"format v1.19"
 CRLF:
 	DB	$0D,$0A
 	DB	'$'
