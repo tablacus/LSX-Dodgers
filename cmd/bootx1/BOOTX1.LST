@@ -1,0 +1,46 @@
+                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.0.0, LST:Full:4
+                                ;   デュアルブートX1    by Gaku
+                                
+000000 FD00                         ORG 0FD00H
+                                
+000000 FD00 1813            12      JR  START
+000002 FD02 4C53582D446F6467        DB  "LSX-Dodgers IPL X1",0
+            6572732049504C20    
+            583100              
+       FD15                     START:
+000015 FD15 3E1D             7      LD  A,01DH
+000017 FD17 D300            11      OUT (0),A
+                                
+000019 FD19 21F9CB          10      LD  HL,0CBF9H   ;LSX-Dodgers X1 (Load address)
+00001C FD1C 0139FD          10      LD  BC,DISK_DATA
+00001F FD1F 3E03             7      LD  A,3
+       FD21                     LOOP1:
+000021 FD21 F5              11      PUSH    AF
+000022 FD22 0A               7      LD  A,(BC)
+000023 FD23 03               6      INC BC
+000024 FD24 5F               4      LD  E,A
+000025 FD25 1600             7      LD  D,0
+000027 FD27 0A               7      LD  A,(BC)
+000028 FD28 03               6      INC BC
+000029 FD29 C5              11      PUSH    BC
+00002A FD2A CD1A02          17      CALL    0021AH      ;IPL用ディスクREAD
+00002D FD2D C1              10      POP BC
+00002E FD2E F1              10      POP AF
+00002F FD2F 3D               4      DEC A
+000030 FD30 20EF            12      JR  NZ,LOOP1
+                                
+000032 FD32 3E1E             7      LD  A,01EH
+000034 FD34 D300            11      OUT (0),A
+                                
+000036 FD36 C307CC          10      JP  0CC07H      ;LSX-Dodgers X1 (Start address)
+                                
+       FD39                     DISK_DATA:
+000039 FD39 3504                    DB  16*3+6-1,4  ;2048
+00003B FD3B 4009                    DB  16*4+1-1,9  ;4608
+00003D FD3D 5007                    DB  16*5+1-1,7  ;3584
+       FD3F                     IPL_E:
+00003F FD3F                         DS  0FDFFH-IPL_E
+0000FF FDFF 00                      DB  0
+                                
+                                
+[EOF:BOOTX1.ASM:SHIFT_JIS]

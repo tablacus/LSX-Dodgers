@@ -30,21 +30,21 @@ CMD_STATUS	EQU	07F14H
 ;
 ;	メイン
 	ORG	MAINADDR
-	LD	BC,090FEH	;01 FE 90
+	LD	BC,0444CH	;01 4C 44
 	SCF		;37
 	JR	C,START	;38 2A
-	DB	" LD IPL "
+	DB	"IPL     "
 	DB	"Sys"
 	DB	020H	;パスワード(通常は20h)
-	DW	01DH	;データサイズ（下位,上位の順）
-	DW	0FE00H	;読込アドレス（下位,上位の順）
-	DW	0FE18H	;実行アドレス（下位,上位の順）
-	LD	A,01DH	;年...西暦の下位2桁をBCD形式
-			;月,曜日...上位4bitが月、下位が曜日
-	OUT	(0),A	;日...BCD形式
-			;時...BCD形式
+	DW	256	;データサイズ（下位,上位の順）
+	DW	0FD00H	;読込アドレス（下位,上位の順）
+	DW	0FD00H	;実行アドレス（下位,上位の順）
+	DB	0	;年...西暦の下位2桁をBCD形式
+	DB	0	;月,曜日...上位4bitが月、下位が曜日
+	DB	0	;日...BCD形式
+	DB	0	;時...BCD形式
 	RST	0	;分...BCD形式
-	DB	0,0,0	;開始クラスタ
+	DB	0,25,0	;開始クラスタ
 DISK_SUB_SYSTEM:
 ;	ディスクサブシステム
 DSS	EQU	DISK_SUB_SYSTEM-07000H

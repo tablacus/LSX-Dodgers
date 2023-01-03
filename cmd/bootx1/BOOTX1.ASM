@@ -1,0 +1,42 @@
+;	デュアルブートX1	by Gaku
+
+	ORG	0FD00H
+
+	JR	START
+	DB	"LSX-Dodgers IPL X1",0
+START:
+	LD	A,01DH
+	OUT	(0),A
+
+	LD	HL,0CBF9H	;LSX-Dodgers X1 (Load address)
+	LD	BC,DISK_DATA
+	LD	A,3
+LOOP1:
+	PUSH	AF
+	LD	A,(BC)
+	INC	BC
+	LD	E,A
+	LD	D,0
+	LD	A,(BC)
+	INC	BC
+	PUSH	BC
+	CALL	0021AH		;IPL用ディスクREAD
+	POP	BC
+	POP	AF
+	DEC	A
+	JR	NZ,LOOP1
+
+	LD	A,01EH
+	OUT	(0),A
+
+	JP	0CC07H		;LSX-Dodgers X1 (Start address)
+
+DISK_DATA:
+	DB	16*3+6-1,4	;2048
+	DB	16*4+1-1,9	;4608
+	DB	16*5+1-1,7	;3584
+IPL_E:
+	DS	0FDFFH-IPL_E
+	DB	0
+
+
