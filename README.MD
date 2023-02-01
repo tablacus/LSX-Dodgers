@@ -94,7 +94,7 @@ https://github.com/meister68k/X1_compatible_rom
 X1互換 8x8ドットフリーフォント  
 https://github.com/meister68k/X1_compatible_font
 
-16ドットフォントや漢字フォントを入手するには上記のXmillennium.exe(ねこちゅーん)を起動しすると以下のフォントファイルが作成されます。
+16ドットフォントや漢字フォントを入手するには上記のXmillennium.exe(ねこちゅーん)を起動すると以下のフォントファイルが作成されます。
 ```
 FNT0816.TMP
 FNT1616.TMP
