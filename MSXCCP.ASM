@@ -1,0 +1,12 @@
+
+;	LSX-Dodgers CCP
+;	MSX
+
+INITE:
+	DS	BDOS-INITE
+	JP	BDOS0
+
+WBOOT1:
+	LD	A,3
+	CALL	MSG_A
+WBOOT2:

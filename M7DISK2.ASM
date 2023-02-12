@@ -33,14 +33,21 @@ EDRW1:
 	RET
 
 EADR:
-	PUSH	BC
 	PUSH	DE
 	EX	DE,HL
+	LD	A,B
+	LD	B,(IX+DPB_BPS)
+EADR1:				;読み込むセクタ数と1クラスタのセクタ数を掛ける
+	RR	B
+	JR	C,EADR2
+	ADD	A,A
 	ADD	HL,HL
-	LD	C,(IX+00DH)	;DPB_0D_MAXSEC
-	LD	B,(IX+00CH)	;DPB_0C_MAXCYL
+	JR	EADR1
+EADR2:
+	LD	C,(IX+DPB_MAXSEC)
+	LD	B,(IX+DPB_MAXCYL)
 	ADD	HL,BC
-	LD	C,(IX+013H)	;DPB_13_UNITNO
+	LD	C,(IX+DPB_UNITNO)
 	OUT	(C),C
 	INC	C
 	OUT	(C),L
@@ -49,20 +56,14 @@ EADR:
 	INC	C
 	EX	DE,HL
 	POP	DE
-	LD	B,(IX+00FH)	;DPB_0F_BPS
-	POP	AF
-EADR1:				;読み込むセクタ数と1クラスタのセクタ数を掛ける
-	RR	B
-	RET	C
-	ADD	A,A
-	JR	EADR1
+	RET
 
 ;	CMOS BACKUP MEMORY DRIVER(32KB)
 ;	1セクタ256
 
 CDWT:
 	LD	A,B
-	LD	C,(IX+013H)	;DPB_13_UNITNO
+	LD	C,(IX+DPB_UNITNO)
 	IN	B,(C)		;アドレスカウンタを0000にリセット
 	OUT	(C),E		;W)アドレスカウンタ上位
 	LD	BC,000FAH
@@ -76,7 +77,7 @@ CDWT1:
 
 CDRD:
 	LD	A,B
-	LD	C,(IX+013H)	;DPB_13_UNITNO
+	LD	C,(IX+DPB_UNITNO)
 	IN	B,(C)		;アドレスカウンタを0000にリセット
 	OUT	(C),E		;W)アドレスカウンタ上位
 	LD	BC,000F9H

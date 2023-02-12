@@ -29,7 +29,7 @@ _DOS2:
 	JP	Z,_SYS5F
 	CP	06FH		;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
 	JR	NZ,_ERROR
-	LD	BC,011DH
+	LD	BC,VER_6F
 	LD	DE,VER
 	LD	HL,MACD
 C_REM:
@@ -366,16 +366,16 @@ _SYS1B:		;(BDOS)ディスク情報の獲得
 	LD	HL,0
 	CALL	NC,DSKF
 
-	LD	DE,(MAXCLP+1)	;DPB_08_MAXCL-1
+	LD	DE,(MAXCLP+1)	;DPB_MAXCL-1
 	DEC	DE		;DE←クラスタの総数
 	LD	IY,(_FATBF)	;IY←メモリ上のFATの先頭アドレス
 	SBC	A,A
 	RET	C
 	LD	C,A		;C=0
-	LD	A,(IX+00FH)	;DPB_0F_BPS
+	LD	A,(IX+DPB_BPS)
 	AND	00FH
 	LD	B,A
-	LD	A,(IX+7)	;DPB_07_SECPCL
+	LD	A,(IX+DPB_SECPCL)
 	RET
 
 _SYS1D:		;(BDOS)書き込みが禁止されているディスクの調査
@@ -385,7 +385,7 @@ _SYS1D:		;(BDOS)書き込みが禁止されているディスクの調査
 	RET
 
 _SYS1F:		;(BDOS)ディスク装置のパラメータの読み出し
-	LD	HL,DEVICE
+	LD	HL,_DEVICE
 	LD	A,E
 	JP	_GETDPB
 

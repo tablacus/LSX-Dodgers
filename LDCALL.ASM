@@ -56,13 +56,17 @@ M2HD:	DW	2
 	DB	0FEH,6,77,8,1,084H
 	DW	5,0A7H,9
 
-	DS	6
-
 SDDATA:	DB	22,23		;(FCB)ファイルを最後に変更した時刻
 	DB	20,21		;(FCB)ファイルを最後に変更した日付
 	DB	26,27		;(FCB)ファイルの先頭クラスタ
 	DB	16,17,18,19	;(FCB)ファイルのサイズ(バイト単位)
 SDDATAE:
+
+	DS	2
+_FCB_BAT:
+	DW	FCB_BAT
+_PATH:
+	DW	PATHD
 
 SCDIR:	DS	2		;+14 +15
 SFBPS:	DS	2		;FBPS

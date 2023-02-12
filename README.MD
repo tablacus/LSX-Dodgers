@@ -31,6 +31,20 @@ FD0にセットしたらIPLからキーボードでF→0→0(X1turbo実機ROM)/F
 2. FD1に`ldsys.d88`をセット
 3. 起動しない場合はリセットする
 
+# MSX版の起動方法
+1. Windowsのコマンドラインで`msxcat.bat`を実行してシステムとディスクイメージ`ROM.DSK`を連結する
+2. ROMスロットに`LDMSX.ROM`をセット
+3. ROMイメージのタイプを`ASCII-16K`、`ASCII-8K`(2MB以下の場合のみ)、`Konami-8K`(512MB以下の場合のみ)のいずれかに設定
+4. 起動しない場合はリセットする
+
+連結作業はディスクイメージを書き換えや差し替えしない場合は一度実行したら省略可
+`LDMSX.BIN`と`ROM.DSK`連結できれば何を使っても良いです。
+連結できるディスクイメージは2DD(640KB/720KB)のDSK、2HD(1.25MB)のXDF,IMG及び2HD(1.44MB)のIMGなど4MB以下のBPBを0セクタに持つMS-DOSフォーマット(FAT12/FAT16)の1セクタが1024バイト以下でベタ形式のディスクならOKです。
+
+フロッピーから起動したい場合は似非DOS for MSXを使用してください。
+https://github.com/tablacus/dosformsx
+
+
 # 手引書
 
 ## システムコール一覧  
@@ -60,10 +74,12 @@ https://github.com/tablacus/LSX-Dodgers/blob/master/LDSPEC.TXT
 ## ライセンス  
 https://github.com/tablacus/LSX-Dodgers/blob/master/LICENSE.TXT  
 MIT License のオープンソースです。  
+MSX版は[スロットコール関連のルーチン等](https://github.com/tablacus/LSX-Dodgers/tree/master/msx_cbios)に BSD License の [C-BIOS](http://cbios.sourceforge.net/) のコードを使用しています。この部分のライセンスについてはC-BIOSのライセンスになります。
+
 
 # エミュレータ
 
-X1/turbo/Z、MZ-700/1500、PC-8801mkIISR、どれも互換BIOS(ROM)及び互換フォントが存在するために実機を持っていなくてもエミュレータで楽しめます。
+X1/turbo/Z、MZ-700/1500、PC-8801mkIISR、MSXどれも互換BIOS(ROM)及び互換フォントが存在するために実機を持っていなくてもエミュレータで楽しめます。
 
 ## X1/turbo/Z
 
@@ -94,7 +110,7 @@ https://github.com/meister68k/X1_compatible_rom
 X1互換 8x8ドットフリーフォント  
 https://github.com/meister68k/X1_compatible_font
 
-16ドットフォントや漢字フォントを入手するには上記のXmillennium.exe(ねこちゅーん)を起動すると以下のフォントファイルが作成されます。
+16ドットフォントや漢字フォントを入手するには上記のXmillennium.exe(ねこちゅーん)を起動しすると以下のフォントファイルが作成されます。
 ```
 FNT0816.TMP
 FNT1616.TMP
@@ -169,6 +185,30 @@ project m88
 http://retropc.net/cisc/m88/
 
 漢字 ROM 作成キット
+
+
+## MSX
+
+MSXのエミュレータの場合はBIOSやフォントを内蔵しているものが多いようです。
+
+### エミュレータ
+
+WebMSX
+https://webmsx.org/
+
+WebMSX(C-BIOS)
+https://webmsx.org/cbios/
+
+blueMSX
+http://bluemsx.msxblue.com/
+
+Common Source Code Project  
+http://takeda-toshiya.my.coocan.jp/common/index.html
+
+### 互換BIOS(ROM)
+
+C-BIOS
+https://cbios.sourceforge.net/
 
 
 # イメージファイル
@@ -282,7 +322,7 @@ ZASMはINCLUDEを使うとPRNがいい感じに出ないのでWSHでコンバー
 
 https://github.com/tablacus/LSX-Dodgers/issues/3
 
-MZ-700/1500版はAILZ80ASMでアセンブルできます。  
+MZ-700/1500版、PC-8801mkIISR版、MSX版はAILZ80ASMでアセンブルできます。  
 
 
 ## AILZ80ASM  
@@ -293,6 +333,7 @@ https://github.com/AILight/AILZ80ASM/releases/tag/v1.0.0
 ASM_AILZ80ASM_X1.BAT
 ASM_AILZ80ASM_M7.BAT
 ASM_AILZ80ASM_88.BAT
+ASM_AILZ80ASM_MSX.BAT
 ```
 ## AASM
 https://www.vector.co.jp/soft/dos/prog/se010314.html
@@ -329,6 +370,6 @@ ASM.BAT
 
 # その他
 
- ステップレートの関係でCZ-800Fは使えません。
+X1ではステップレートの関係でCZ-800Fは使えません。
 MS-DOS互換のファイルフォーマットとS-OS"SWORD"のファンクションをもつOS、[L-os Angeles](https://github.com/tablacus/LosAngeles)もあります。
 

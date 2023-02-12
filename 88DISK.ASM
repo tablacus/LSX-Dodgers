@@ -46,10 +46,10 @@ GETDAT1:
 	IN	A,(0FEH)	;ディスクサブシステムI/F 8255 ポートC
 	RRCA			;DAV
 	JR	NC,GETDAT1
-	
+
 	LD	A,00AH		;RFD=0
 	OUT	(0FFH),A	;ディスクサブシステムI/F 8255 コントロール
-	
+
 	IN	A,(0FCH)	;標準状態ではサブシステムからのデータ受信ポート
 	PUSH	AF
 	LD	A,00DH		;DAC=1
@@ -111,10 +111,10 @@ FGETDAT1:
 	IN	A,(0FEH)	;ディスクサブシステムI/F 8255 ポートC
 	RRCA			;DAV
 	JR	NC,FGETDAT1
-	
+
 	LD	A,00AH		;RFD=0
 	OUT	(0FFH),A	;ディスクサブシステムI/F 8255 コントロール
-	
+
 	IN	A,(0FCH)	;標準状態ではサブシステムからのデータ受信ポート
 	LD	(HL),A
 
@@ -138,11 +138,11 @@ FGETDAT2:
 	RET
 
 ;	論理セクタ番号からトラック番号とセクタ番号を得る
-;	in 
+;	in
 ;	DE:論理セクタ
 CALC_SECTOR:
 	PUSH	BC
-	LD	C,(IX+00DH)	;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+	LD	C,(IX+DPB_MAXSEC)	;フロッピーディスクの1トラックのセクタ数
 	LD	B,16
 	XOR	A
 	EX	DE,HL
@@ -174,7 +174,7 @@ FDWT:
 	LD	(FDWT_TRACK),A
 	LD	A,E		;セクタ
 	LD	(FDWT_SECTOR),A
-	LD	A,(IX+00DH)	;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+	LD	A,(IX+DPB_MAXSEC)	;フロッピーディスクの1トラックのセクタ数
 	SUB	E
 	INC	A
 	LD	H,A
@@ -215,9 +215,9 @@ FDWT3:
 	CALL	PUTDAT
 	LD	A,WRITEDISKEX%256
 	CALL	PUTDAT
-	LD	A,(IX+013H)	;デバイスドライバ内におけるユニット番号(DPB_13_UNITNO)
+	LD	A,(IX+DPB_UNITNO)	;デバイスドライバ内におけるユニット番号
 	CALL	PUTDAT
-	LD	A,(IX+00DH)	;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+	LD	A,(IX+DPB_MAXSEC)	;フロッピーディスクの1トラックのセクタ数
 	CALL	PUTDAT
 FDWT_SECTOR	EQU	$+1
 	LD	A,0		;セクタ
@@ -225,13 +225,13 @@ FDWT_SECTOR	EQU	$+1
 FDWT_TRACK	EQU	$+1
 	LD	A,0		;トラック
 	CALL	PUTDAT
-	LD	A,(FDMODE+1)	;フロッピーディスクのモード(DPB_0A_FDMODE)
+	LD	A,(FDMODE+1)	;フロッピーディスクのモード(DPB_FDMODE)
 	CALL	PUTDAT
 	LD	A,(SECSZ+2)	;1セクタのサイズの上位1バイト
 	CALL	PUTDAT
 	LD	A,C
 	CALL	PUTDAT		;バイト数H
-	LD	A,(IX+$0C)	;フロッピーディスクのシリンダ数(DPB_0C_MAXCYL)
+	LD	A,(IX+DPB_MAXCYL)	;フロッピーディスクのシリンダ数
 	CALL	PUTDAT
 
 	LD	A,0DH		;エグゼキュート
@@ -258,9 +258,9 @@ FDRD:
 	CALL	PUTDAT
 	XOR	A
 	CALL	PUTDAT
-	LD	A,(IX+013H)	;デバイスドライバ内におけるユニット番号(DPB_13_UNITNO)
+	LD	A,(IX+DPB_UNITNO)	;デバイスドライバ内におけるユニット番号
 	CALL	PUTDAT
-	LD	A,(IX+00DH)	;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+	LD	A,(IX+DPB_MAXSEC)	;フロッピーディスクの1トラックのセクタ数
 	CALL	PUTDAT
 	PUSH	HL
 	PUSH	DE
@@ -269,12 +269,12 @@ FDRD:
 	CALL	PUTDAT
 	LD	A,D		;トラック
 	CALL	PUTDAT
-	LD	A,(IX+00DH)	;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+	LD	A,(IX+DPB_MAXSEC)	;フロッピーディスクの1トラックのセクタ数
 	SUB	E
 	INC	A
 	LD	H,A
 	POP	DE
-FDMODE:	LD	A,0FFH		;フロッピーディスクのモード(DPB_0A_FDMODE)
+FDMODE:	LD	A,0FFH		;フロッピーディスクのモード(DPB_FDMODE)
 	CALL	PUTDAT
 	LD	A,(SECSZ+2)	;1セクタのサイズの上位1バイト
 	CALL	PUTDAT
@@ -293,7 +293,7 @@ FDRD3:
 	POP	HL
 	LD	C,A
 	CALL	PUTDAT		;バイト数H
-	LD	A,(IX+$0C)	;フロッピーディスクのシリンダ数(DPB_0C_MAXCYL)
+	LD	A,(IX+DPB_MAXCYL)	;フロッピーディスクのシリンダ数
 	CALL	PUTDAT
 
 	LD	A,0DH		;エグゼキュート
