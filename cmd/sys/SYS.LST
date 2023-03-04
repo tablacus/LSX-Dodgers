@@ -1,8 +1,38 @@
-                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.0.0, LST:Full:4
+Ôªø                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.0.0, LST:Full:4
                                 ;   SYS by Gaku
                                 
        0005                     SYSTEM  EQU 0005H
        005C                     FCB1    EQU 005CH
+                                
+       0000                     DPB_FATLN   EQU 00H
+       0002                     DPB_DRD     EQU 02H
+       0004                     DPB_DWT     EQU 04H
+       0006                     DPB_FATID   EQU 06H
+       0007                     DPB_SECPCL  EQU 07H
+       0008                     DPB_MAXCL   EQU 08H
+       000A                     DPB_FDMODE  EQU 0AH
+       000B                     DPB_DIRSCNT EQU 0BH
+       000C                     DPB_MAXCYL  EQU 0CH
+       000D                     DPB_MAXSEC  EQU 0DH
+       000E                     DPB_FATPS   EQU 0EH
+       000F                     DPB_BPS     EQU 0FH
+       0010                     DPB_DIRPS   EQU 10H
+       0012                     DPB_DEVICE  EQU 12H
+       0013                     DPB_UNITNO  EQU 13H
+       0014                     DPB_ADDCL   EQU 14H
+       001C                     DPB_NAME    EQU 1CH
+                                
+       0020                     IPL_MAXCYL  EQU 20H
+       0021                     IPL_SECPCL  EQU 21H
+       0023                     IPL_DIRPS_H EQU 23H
+       0028                     IPL_MAXSEC  EQU 28H
+       0029                     IPL_FATPS   EQU 29H
+       002A                     IPL_FATLN   EQU 2AH
+       002B                     IPL_DIRPS   EQU 2BH
+       002C                     IPL_DIRSCNT EQU 2CH
+       002D                     IPL_DIRITEMS    EQU 2DH
+       002E                     IPL_ADDCL   EQU 2EH
+       002F                     IPL_ADDCL_H EQU 2FH
                                 
        000D                     CR  EQU 0DH
        000A                     LF  EQU 0AH
@@ -12,814 +42,901 @@
        FE00                     IPL EQU 0FE00H
                                 
 000000 0100                         ORG 0100H
-000000 0100 C37001          10      JP  START
+000000 0100 C36B01          10      JP  START
        0103                     TITLE:
-000003 0103 5831207379737465        DB  "X1 systemcopy v1.03"
+000003 0103 5831207379737465        DB  "X1 systemcopy v1.04"
             6D636F7079207631    
-            2E3033              
+            2E3034              
 000016 0116 0D0A24                  DB  CR,LF,"$"
        0119                     USAGE:
 000019 0119 75736167653A            DB  "usage:"
-00001F 011F 2053595320C4DED7        DB  " SYS ƒﬁ◊≤Ãﬁ:",CR,LF,"$"
-            B2CCDE3A0D0A24      
-       012E                     OK:
-00002E 012E 204F6B0D0A24            DB  " Ok",CR,LF,"$"
-       0134                     ERROR:
-000034 0134 204572726F720D0A        DB  " Error",CR,LF,"$"
+00001F 011F 2053595320647269        DB  " SYS drive:",CR,LF,"$"
+            76653A0D0A24        
+       012D                     OK:
+00002D 012D 204F4B0D0A24            DB  " OK",CR,LF,"$"
+       0133                     ERROR:
+000033 0133 204572726F720D0A        DB  " Error",CR,LF,"$"
             24                  
-       013D                     SKIP:
-00003D 013D 20536B69700D0A24        DB  " Skip",CR,LF,"$"
-       0145                     LSX:
-000045 0145 4C44202020202020        DB  "LD      .BIN$"
+       013C                     SKIP:
+00003C 013C 20536B69700D0A24        DB  " Skip",CR,LF,"$"
+       0144                     LSX:
+000044 0144 4C44202020202020        DB  "LD      .BIN$"
             2E42494E24          
-       0152                     WIPL:
-000052 0152 5772697465204950        DB  "Write IPL $"
+       0151                     WIPL:
+000051 0151 5772697465204950        DB  "Write IPL $"
             4C2024              
-       015D                     M2D:
-00005D 015D 324424                  DB  "2D$"
-       0160                     M2HD:
-000060 0160 32484424                DB  "2HD$"
-       0164                     M2HS:
-000064 0164 32485324                DB  "2HS$"
-       0168                     M2HC:
-000068 0168 32484324                DB  "2HC$"
-       016C                     MEMM:
-00006C 016C 454D4D24                DB  "EMM$"
+       015C                     M2D:
+00005C 015C 324424                  DB  "2D$"
+       015F                     M2HD:
+00005F 015F 32484424                DB  "2HD$"
+       0163                     M2HC:
+000063 0163 32484324                DB  "2HC$"
+       0167                     MEMM:
+000067 0167 454D4D24                DB  "EMM$"
                                 
-       0170                     START:
-000070 0170 110301          10      LD  DE,TITLE
-000073 0173 0E09             7      LD  C,9
-000075 0175 CD0500          17      CALL    SYSTEM
+       016B                     START:
+00006B 016B 110301          10      LD  DE,TITLE
+00006E 016E 0E09             7      LD  C,9
+000070 0170 CD0500          17      CALL    SYSTEM
                                 
-000078 0178 115A07          10      LD  DE,DATA
-00007B 017B 0E1A             7      LD  C,1AH
-00007D 017D CD0500          17      CALL    SYSTEM
+000073 0173 119507          10      LD  DE,DATA
+000076 0176 0E1A             7      LD  C,1AH
+000078 0178 CD0500          17      CALL    SYSTEM
                                 
-000080 0180 3A5C00          13      LD  A,(FCB1)
-000083 0183 B7               4      OR  A
-000084 0184 200B            12      JR  NZ,INIT
+00007B 017B 3A5C00          13      LD  A,(FCB1)
+00007E 017E B7               4      OR  A
+00007F 017F 200B            12      JR  NZ,INIT
                                 
-000086 0186 111901          10      LD  DE,USAGE
-000089 0189 0E09             7      LD  C,9
-00008B 018B CD0500          17      CALL    SYSTEM
-00008E 018E C30000          10      JP  0
-       0191                     INIT:
-000091 0191 323107          13      LD  (FCB3),A
+000081 0181 111901          10      LD  DE,USAGE
+000084 0184 0E09             7      LD  C,9
+000086 0186 CD0500          17      CALL    SYSTEM
+000089 0189 C30000          10      JP  0
+       018C                     INIT:
+00008C 018C 326C07          13      LD  (FCB3),A
                                 
-000094 0194 114501          10      LD  DE,LSX
-000097 0197 0E09             7      LD  C,9
-000099 0199 CD0500          17      CALL    SYSTEM
+00008F 018F 114401          10      LD  DE,LSX
+000092 0192 0E09             7      LD  C,9
+000094 0194 CD0500          17      CALL    SYSTEM
                                 
-00009C 019C 110C07          10      LD  DE,FCB2
-00009F 019F 0E0F             7      LD  C,0FH
-0000A1 01A1 CD0500          17      CALL    SYSTEM
-0000A4 01A4 B7               4      OR  A
-0000A5 01A5 2077            12      JR  NZ,CCHECK
+000097 0197 114707          10      LD  DE,FCB2
+00009A 019A 0E0F             7      LD  C,0FH
+00009C 019C CD0500          17      CALL    SYSTEM
+00009F 019F B7               4      OR  A
+0000A0 01A0 2077            12      JR  NZ,CCHECK
                                 
-0000A7 01A7 2A1A07          16      LD  HL,(FCB2+14)
-0000AA 01AA 225607          16      LD  (SDIR),HL
-0000AD 01AD 210100          10      LD  HL,1
-0000B0 01B0 221A07          16      LD  (FCB2+14),HL
-0000B3 01B3 223F07          16      LD  (FCB3+14),HL
+0000A2 01A2 2A5507          16      LD  HL,(FCB2+14)
+0000A5 01A5 229107          16      LD  (SDIR),HL
+0000A8 01A8 210100          10      LD  HL,1
+0000AB 01AB 225507          16      LD  (FCB2+14),HL
+0000AE 01AE 227A07          16      LD  (FCB3+14),HL
                                 
-0000B6 01B6 2A0600          16      LD  HL,(SYSTEM+1)
-0000B9 01B9 25               4      DEC H
-0000BA 01BA 25               4      DEC H
-0000BB 01BB 115A07          10      LD  DE,DATA
-0000BE 01BE ED52            15      SBC HL,DE
-0000C0 01C0 110C07          10      LD  DE,FCB2
-0000C3 01C3 0E27             7      LD  C,27H
-0000C5 01C5 CD0500          17      CALL    SYSTEM
-0000C8 01C8 3D               4      DEC A
-0000C9 01C9 2053            12      JR  NZ,CCHECK
-0000CB 01CB 225807          16      LD  (SIZE),HL
+0000B1 01B1 2A0600          16      LD  HL,(SYSTEM+1)
+0000B4 01B4 25               4      DEC H
+0000B5 01B5 25               4      DEC H
+0000B6 01B6 119507          10      LD  DE,DATA
+0000B9 01B9 ED52            15      SBC HL,DE
+0000BB 01BB 114707          10      LD  DE,FCB2
+0000BE 01BE 0E27             7      LD  C,27H
+0000C0 01C0 CD0500          17      CALL    SYSTEM
+0000C3 01C3 3D               4      DEC A
+0000C4 01C4 2053            12      JR  NZ,CCHECK
+0000C6 01C6 229307          16      LD  (SIZE),HL
                                 
-0000CE 01CE 110C07          10      LD  DE,FCB2
-0000D1 01D1 0E10             7      LD  C,10H
-0000D3 01D3 CD0500          17      CALL    SYSTEM
-0000D6 01D6 B7               4      OR  A
-0000D7 01D7 2045            12      JR  NZ,CCHECK
+0000C9 01C9 114707          10      LD  DE,FCB2
+0000CC 01CC 0E10             7      LD  C,10H
+0000CE 01CE CD0500          17      CALL    SYSTEM
+0000D1 01D1 B7               4      OR  A
+0000D2 01D2 2045            12      JR  NZ,CCHECK
                                 
-0000D9 01D9 3A0C07          13      LD  A,(FCB2)
-0000DC 01DC 213107          10      LD  HL,FCB3
-0000DF 01DF BE               7      CP  (HL)
-0000E0 01E0 200A            12      JR  NZ,CREATE
+0000D4 01D4 3A4707          13      LD  A,(FCB2)
+0000D7 01D7 216C07          10      LD  HL,FCB3
+0000DA 01DA BE               7      CP  (HL)
+0000DB 01DB 200A            12      JR  NZ,CREATE
                                 
-0000E2 01E2 113D01          10      LD  DE,SKIP
-0000E5 01E5 0E09             7      LD  C,9
-0000E7 01E7 CD0500          17      CALL    SYSTEM
-0000EA 01EA 1835            12      JR  WTIPL
+0000DD 01DD 113C01          10      LD  DE,SKIP
+0000E0 01E0 0E09             7      LD  C,9
+0000E2 01E2 CD0500          17      CALL    SYSTEM
+0000E5 01E5 1835            12      JR  WTIPL
                                 
-       01EC                     CREATE:
-0000EC 01EC 113107          10      LD  DE,FCB3
-0000EF 01EF 0E16             7      LD  C,16H
-0000F1 01F1 CD0500          17      CALL    SYSTEM
-0000F4 01F4 B7               4      OR  A
-0000F5 01F5 2027            12      JR  NZ,CCHECK
+       01E7                     CREATE:
+0000E7 01E7 116C07          10      LD  DE,FCB3
+0000EA 01EA 0E16             7      LD  C,16H
+0000EC 01EC CD0500          17      CALL    SYSTEM
+0000EF 01EF B7               4      OR  A
+0000F0 01F0 2027            12      JR  NZ,CCHECK
                                 
-0000F7 01F7 210100          10      LD  HL,1
-0000FA 01FA 223F07          16      LD  (FCB3+14),HL
+0000F2 01F2 210100          10      LD  HL,1
+0000F5 01F5 227A07          16      LD  (FCB3+14),HL
                                 
-0000FD 01FD 113107          10      LD  DE,FCB3
-000100 0200 2A5807          16      LD  HL,(SIZE)
-000103 0203 0E26             7      LD  C,26H
-000105 0205 CD0500          17      CALL    SYSTEM
-000108 0208 B7               4      OR  A
-000109 0209 2013            12      JR  NZ,CCHECK
+0000F8 01F8 116C07          10      LD  DE,FCB3
+0000FB 01FB 2A9307          16      LD  HL,(SIZE)
+0000FE 01FE 0E26             7      LD  C,26H
+000100 0200 CD0500          17      CALL    SYSTEM
+000103 0203 B7               4      OR  A
+000104 0204 2013            12      JR  NZ,CCHECK
                                 
-00010B 020B 212007          10      LD  HL,FCB2+20
-00010E 020E 114507          10      LD  DE,FCB3+20
-000111 0211 010400          10      LD  BC,4
-000114 0214 EDB0                    LDIR
+000106 0206 215B07          10      LD  HL,FCB2+20
+000109 0209 118007          10      LD  DE,FCB3+20
+00010C 020C 010400          10      LD  BC,4
+00010F 020F EDB0                    LDIR
                                 
-000116 0216 113107          10      LD  DE,FCB3
-000119 0219 0E10             7      LD  C,10H
-00011B 021B CD0500          17      CALL    SYSTEM
+000111 0211 116C07          10      LD  DE,FCB3
+000114 0214 0E10             7      LD  C,10H
+000116 0216 CD0500          17      CALL    SYSTEM
                                 
-       021E                     CCHECK:
-00011E 021E CDC702          17      CALL    CHECK
-       0221                     WTIPL:
-000121 0221 3A3107          13      LD  A,(FCB3)
-000124 0224 5F               4      LD  E,A
-000125 0225 0E1B             7      LD  C,1BH
-000127 0227 CD0500          17      CALL    SYSTEM
-00012A 022A 3C               4      INC A
-00012B 022B CA0000          10      JP  Z,0
+       0219                     CCHECK:
+000119 0219 CDC202          17      CALL    CHECK
+       021C                     WTIPL:
+00011C 021C 3A6C07          13      LD  A,(FCB3)
+00011F 021F 5F               4      LD  E,A
+000120 0220 0E1B             7      LD  C,1BH
+000122 0222 CD0500          17      CALL    SYSTEM
+000125 0225 3C               4      INC A
+000126 0226 CA0000          10      JP  Z,0
                                 
-00012E 022E 216201          10      LD  HL,354
-000131 0231 A7               4      AND A
-000132 0232 ED52            15      SBC HL,DE
-000134 0234 283F            12      JR  Z,W2D
+000129 0229 216201          10      LD  HL,354
+00012C 022C A7               4      AND A
+00012D 022D ED52            15      SBC HL,DE
+00012F 022F 283F            12      JR  Z,W2D
                                 
-000136 0236 21C504          10      LD  HL,1221
-000139 0239 A7               4      AND A
-00013A 023A ED52            15      SBC HL,DE
-00013C 023C CAD602          10      JP  Z,W2HD
+000131 0231 21C504          10      LD  HL,1221
+000134 0234 A7               4      AND A
+000135 0235 ED52            15      SBC HL,DE
+000137 0237 CAD102          10      JP  Z,W2HD
                                 
-00013F 023F 219605          10      LD  HL,1430
-000142 0242 37               4      SCF
-000143 0243 ED52            15      SBC HL,DE
-000145 0245 3008            12      JR  NC,WTIPL1
+       023A                     WTIPL1:
+00013A 023A 214309          10      LD  HL,2371
+00013D 023D A7               4      AND A
+00013E 023E ED52            15      SBC HL,DE
+000140 0240 CA0B03          10      JP  Z,W2HC
                                 
-000147 0247 FD7E00          19      LD  A,(IY+0)
-00014A 024A FEFB             7      CP  0FBH
-00014C 024C CA1003          10      JP  Z,W2HS
-       024F                     WTIPL1:
-00014F 024F 214309          10      LD  HL,2371
-000152 0252 A7               4      AND A
-000153 0253 ED52            15      SBC HL,DE
-000155 0255 CA3A03          10      JP  Z,W2HC
+000143 0243 CD0E04          17      CALL    IS_X1
+000146 0246 C20000          10      JP  NZ,0
                                 
-000158 0258 CDE003          17      CALL    IS_X1
-00015B 025B C20000          10      JP  NZ,0
+000149 0249 3A6C07          13      LD  A,(FCB3)
+00014C 024C 3D               4      DEC A
+00014D 024D 5F               4      LD  E,A
+00014E 024E DA1F00          10      JP  C,01FH      ;„Éá„Ç£„Çπ„ÇØË£ÖÁΩÆ„ÅÆ„Éë„É©„É°„Éº„Çø„ÅÆË™≠„ÅøÂá∫„Åó
+000151 0251 CD0500          17      CALL    SYSTEM
+000154 0254 D8              11      RET C
                                 
-00015E 025E 3A3107          13      LD  A,(FCB3)
-000161 0261 3D               4      DEC A
-000162 0262 5F               4      LD  E,A
-000163 0263 DA1F00          10      JP  C,01FH      ;ÉfÉBÉXÉNëïíuÇÃÉpÉâÉÅÅ[É^ÇÃì«Ç›èoÇµ
-000166 0266 CD0500          17      CALL    SYSTEM
-000169 0269 D8              11      RET C
+000155 0255 DD7E12          19      LD  A,(IX+DPB_DEVICE)
+000158 0258 FE06             7      CP  6
+00015A 025A CA3503          10      JP  Z,WEMM
+00015D 025D FE26             7      CP  26H
+00015F 025F DD7E0D          19      LD  A,(IX+DPB_MAXSEC)
+000162 0262 B7               4      OR  A
+000163 0263 C23503          10      JP  NZ,WEMM
+000166 0266 DD7E0C          19      LD  A,(IX+DPB_MAXCYL)
+000169 0269 B7               4      OR  A
+00016A 026A C23503          10      JP  NZ,WEMM
                                 
-00016A 026A DD7E12          19      LD  A,(IX+12H)
-00016D 026D FE06             7      CP  6
-00016F 026F CA6403          10      JP  Z,WEMM
+00016D 026D C30000          10      JP  0
                                 
-000172 0272 C30000          10      JP  0
+       0270                     W2D:
+000170 0270 115101          10      LD  DE,WIPL
+000173 0273 0E09             7      LD  C,9
+000175 0275 CD0500          17      CALL    SYSTEM
+000178 0278 115C01          10      LD  DE,M2D
+00017B 027B 0E09             7      LD  C,9
+00017D 027D CD0500          17      CALL    SYSTEM
                                 
-       0275                     W2D:
-000175 0275 115201          10      LD  DE,WIPL
-000178 0278 0E09             7      LD  C,9
-00017A 027A CD0500          17      CALL    SYSTEM
-00017D 027D 115D01          10      LD  DE,M2D
-000180 0280 0E09             7      LD  C,9
-000182 0282 CD0500          17      CALL    SYSTEM
+000180 0280 219507          10      LD  HL,DATA
+000183 0283 119607          10      LD  DE,DATA+1
+000186 0286 01FF03          10      LD  BC,1023
+000189 0289 3600            10      LD  (HL),0
+00018B 028B EDB0                    LDIR
                                 
-000185 0285 215A07          10      LD  HL,DATA
-000188 0288 115B07          10      LD  DE,DATA+1
-00018B 028B 01FF03          10      LD  BC,1023
-00018E 028E 3600            10      LD  (HL),0
-000190 0290 EDB0                    LDIR
+00018D 028D 216706          10      LD  HL,LIPL
+000190 0290 119507          10      LD  DE,DATA
+000193 0293 013000          10      LD  BC,30H
+000196 0296 EDB0                    LDIR
                                 
-000192 0292 21FC05          10      LD  HL,LIPL
-000195 0295 115A07          10      LD  DE,DATA
-000198 0298 013000          10      LD  BC,30H
-00019B 029B EDB0                    LDIR
+000198 0298 211B04          10      LD  HL,MAIN
+00019B 029B 017401          10      LD  BC,RDDLE-MAIN
+00019E 029E EDB0                    LDIR
                                 
-00019D 029D 21ED03          10      LD  HL,MAIN
-0001A0 02A0 017801          10      LD  BC,RDDLE-MAIN
-0001A3 02A3 EDB0                    LDIR
+       02A0                     WJUMP:
+0001A0 02A0 212707          10      LD  HL,JUMP
+0001A3 02A3 117509          10      LD  DE,DATA+01E0H
+0001A6 02A6 012000          10      LD  BC,32
+0001A9 02A9 EDB0                    LDIR
                                 
-       02A5                     WJUMP:
-0001A5 02A5 21EC06          10      LD  HL,JUMP
-0001A8 02A8 113A09          10      LD  DE,DATA+01E0H
-0001AB 02AB 012000          10      LD  BC,32
-0001AE 02AE EDB0                    LDIR
+0001AB 02AB CDB003          17      CALL    EAREA
                                 
-0001B0 02B0 CDC303          17      CALL    EAREA
+0001AE 02AE 110000          10      LD  DE,0
+0001B1 02B1 2A6C07          16      LD  HL,(FCB3)
+0001B4 02B4 2D               4      DEC L
+0001B5 02B5 2601             7      LD  H,1
+0001B7 02B7 0E30             7      LD  C,30H
+0001B9 02B9 CD0500          17      CALL    SYSTEM
                                 
-0001B3 02B3 110000          10      LD  DE,0
-0001B6 02B6 2A3107          16      LD  HL,(FCB3)
-0001B9 02B9 2D               4      DEC L
-0001BA 02BA 2601             7      LD  H,1
-0001BC 02BC 0E30             7      LD  C,30H
-0001BE 02BE CD0500          17      CALL    SYSTEM
+0001BC 02BC CDC202          17      CALL    CHECK
+0001BF 02BF C30000          10      JP  0
+       02C2                     CHECK:
+0001C2 02C2 B7               4      OR  A
+0001C3 02C3 112D01          10      LD  DE,OK
+0001C6 02C6 2803            12      JR  Z,CHECK2
+       02C8                     DISERR:
+0001C8 02C8 113301          10      LD  DE,ERROR
+       02CB                     CHECK2:
+0001CB 02CB 0E09             7      LD  C,9
+0001CD 02CD CD0500          17      CALL    SYSTEM
+0001D0 02D0 C9              10      RET
                                 
-0001C1 02C1 CDC702          17      CALL    CHECK
-0001C4 02C4 C30000          10      JP  0
-       02C7                     CHECK:
-0001C7 02C7 B7               4      OR  A
-0001C8 02C8 112E01          10      LD  DE,OK
-0001CB 02CB 2803            12      JR  Z,CHECK2
-       02CD                     DISERR:
-0001CD 02CD 113401          10      LD  DE,ERROR
-       02D0                     CHECK2:
-0001D0 02D0 0E09             7      LD  C,9
-0001D2 02D2 CD0500          17      CALL    SYSTEM
-0001D5 02D5 C9              10      RET
+       02D1                     W2HD:
+0001D1 02D1 115101          10      LD  DE,WIPL
+0001D4 02D4 0E09             7      LD  C,9
+0001D6 02D6 CD0500          17      CALL    SYSTEM
+0001D9 02D9 115F01          10      LD  DE,M2HD
+0001DC 02DC 0E09             7      LD  C,9
+0001DE 02DE CD0500          17      CALL    SYSTEM
                                 
-       02D6                     W2HD:
-0001D6 02D6 115201          10      LD  DE,WIPL
-0001D9 02D9 0E09             7      LD  C,9
-0001DB 02DB CD0500          17      CALL    SYSTEM
-0001DE 02DE 116001          10      LD  DE,M2HD
-0001E1 02E1 0E09             7      LD  C,9
-0001E3 02E3 CD0500          17      CALL    SYSTEM
+0001E1 02E1 219507          10      LD  HL,DATA
+0001E4 02E4 119607          10      LD  DE,DATA+1
+0001E7 02E7 01FF03          10      LD  BC,1023
+0001EA 02EA 3600            10      LD  (HL),0
+0001EC 02EC EDB0                    LDIR
                                 
-0001E6 02E6 215A07          10      LD  HL,DATA
-0001E9 02E9 115B07          10      LD  DE,DATA+1
-0001EC 02EC 01FF03          10      LD  BC,1023
-0001EF 02EF 3600            10      LD  (HL),0
-0001F1 02F1 EDB0                    LDIR
+0001EE 02EE 219706          10      LD  HL,HIPL
+0001F1 02F1 119507          10      LD  DE,DATA
+0001F4 02F4 013000          10      LD  BC,30H
+0001F7 02F7 EDB0                    LDIR
+       02F9                     WMAIN:
+0001F9 02F9 211B04          10      LD  HL,MAIN
+0001FC 02FC 013501          10      LD  BC,MAINE-MAIN
+0001FF 02FF EDB0                    LDIR
                                 
-0001F3 02F3 212C06          10      LD  HL,HIPL
-0001F6 02F6 115A07          10      LD  DE,DATA
-0001F9 02F9 013000          10      LD  BC,30H
-0001FC 02FC EDB0                    LDIR
-       02FE                     WMAIN:
-0001FE 02FE 21ED03          10      LD  HL,MAIN
-000201 0301 013601          10      LD  BC,MAINE-MAIN
-000204 0304 EDB0                    LDIR
+000201 0301 218F05          10      LD  HL,RDDH
+000204 0304 015800          10      LD  BC,RDDHE-RDDH
+000207 0307 EDB0                    LDIR
                                 
-000206 0306 216505          10      LD  HL,RDDH
-000209 0309 015300          10      LD  BC,RDDHE-RDDH
-00020C 030C EDB0                    LDIR
+000209 0309 1895            12      JR  WJUMP
                                 
-00020E 030E 1895            12      JR  WJUMP
+       030B                     W2HC:
+00020B 030B 115101          10      LD  DE,WIPL
+00020E 030E 0E09             7      LD  C,9
+000210 0310 CD0500          17      CALL    SYSTEM
+000213 0313 116301          10      LD  DE,M2HC
+000216 0316 0E09             7      LD  C,9
+000218 0318 CD0500          17      CALL    SYSTEM
                                 
-       0310                     W2HS:
-000210 0310 115201          10      LD  DE,WIPL
-000213 0313 0E09             7      LD  C,9
-000215 0315 CD0500          17      CALL    SYSTEM
-000218 0318 116401          10      LD  DE,M2HS
-00021B 031B 0E09             7      LD  C,9
-00021D 031D CD0500          17      CALL    SYSTEM
+00021B 031B 219507          10      LD  HL,DATA
+00021E 031E 119607          10      LD  DE,DATA+1
+000221 0321 01FF03          10      LD  BC,1023
+000224 0324 3600            10      LD  (HL),0
+000226 0326 EDB0                    LDIR
                                 
-000220 0320 215A07          10      LD  HL,DATA
-000223 0323 115B07          10      LD  DE,DATA+1
-000226 0326 01FF03          10      LD  BC,1023
-000229 0329 3600            10      LD  (HL),0
-00022B 032B EDB0                    LDIR
+000228 0328 21C706          10      LD  HL,CIPL
+00022B 032B 119507          10      LD  DE,DATA
+00022E 032E 013000          10      LD  BC,30H
+000231 0331 EDB0                    LDIR
+000233 0333 18C4            12      JR  WMAIN
                                 
-00022D 032D 215C06          10      LD  HL,SIPL
-000230 0330 115A07          10      LD  DE,DATA
-000233 0333 013000          10      LD  BC,30H
-000236 0336 EDB0                    LDIR
-000238 0338 18C4            12      JR  WMAIN
+       0335                     WEMM:
+000235 0335 115101          10      LD  DE,WIPL
+000238 0338 0E09             7      LD  C,9
+00023A 033A CD0500          17      CALL    SYSTEM
+00023D 033D 116701          10      LD  DE,MEMM
+000240 0340 0E09             7      LD  C,9
+000242 0342 CD0500          17      CALL    SYSTEM
                                 
-       033A                     W2HC:
-00023A 033A 115201          10      LD  DE,WIPL
-00023D 033D 0E09             7      LD  C,9
-00023F 033F CD0500          17      CALL    SYSTEM
-000242 0342 116801          10      LD  DE,M2HC
-000245 0345 0E09             7      LD  C,9
-000247 0347 CD0500          17      CALL    SYSTEM
+000245 0345 219507          10      LD  HL,DATA
+000248 0348 119607          10      LD  DE,DATA+1
+00024B 034B 01FF03          10      LD  BC,1023
+00024E 034E 3600            10      LD  (HL),0
+000250 0350 EDB0                    LDIR
                                 
-00024A 034A 215A07          10      LD  HL,DATA
-00024D 034D 115B07          10      LD  DE,DATA+1
-000250 0350 01FF03          10      LD  BC,1023
-000253 0353 3600            10      LD  (HL),0
-000255 0355 EDB0                    LDIR
+000252 0352 21F706          10      LD  HL,EIPL
+000255 0355 119507          10      LD  DE,DATA
+000258 0358 013000          10      LD  BC,30H
+00025B 035B EDB0                    LDIR
                                 
-000257 0357 218C06          10      LD  HL,CIPL
-00025A 035A 115A07          10      LD  DE,DATA
-00025D 035D 013000          10      LD  BC,30H
-000260 0360 EDB0                    LDIR
-000262 0362 189A            12      JR  WMAIN
+00025D 035D 211B04          10      LD  HL,MAIN
+000260 0360 013501          10      LD  BC,MAINE-MAIN
+000263 0363 EDB0                    LDIR
                                 
-       0364                     WEMM:
-000264 0364 115201          10      LD  DE,WIPL
-000267 0367 0E09             7      LD  C,9
-000269 0369 CD0500          17      CALL    SYSTEM
-00026C 036C 116C01          10      LD  DE,MEMM
-00026F 036F 0E09             7      LD  C,9
-000271 0371 CD0500          17      CALL    SYSTEM
+000265 0365 21E705          10      LD  HL,RDDE
+000268 0368 015500          10      LD  BC,RDDEE-RDDE
+00026B 036B EDB0                    LDIR
                                 
-000274 0374 215A07          10      LD  HL,DATA
-000277 0377 115B07          10      LD  DE,DATA+1
-00027A 037A 01FF03          10      LD  BC,1023
-00027D 037D 3600            10      LD  (HL),0
+00026D 036D CDB003          17      CALL    EAREA
+                                
+000270 0370 DDCB0F6E        20      BIT 5,(IX+DPB_BPS)
+000274 0374 2816            12      JR  Z,FAT12
+                                                ;FAT16
+000276 0376 213C06          10      LD  HL,GNCL16
+000279 0379 118208          10      LD  DE,GNCL-IPL+DATA
+00027C 037C 012B00          10      LD  BC,GNCL16E-GNCL16
 00027F 037F EDB0                    LDIR
+000281 0381 2116FF          10      LD  HL,DRDSB16
+000284 0384 223508          16      LD  (READ_FAT-IPL+DATA),HL
+000287 0387 3EFF             7      LD  A,0FFH
+000289 0389 327E08          13      LD  (END_OF_FILE-IPL+DATA),A
+       038C                     FAT12:
+00028C 038C AF               4      XOR A
+00028D 038D 01000D          10      LD  BC,0D00H
+000290 0390 ED79            12      OUT (C),A
+000292 0392 0C               4      INC C
+000293 0393 ED79            12      OUT (C),A
+000295 0395 0C               4      INC C
+000296 0396 ED79            12      OUT (C),A
+000298 0398 0C               4      INC C
                                 
-000281 0381 21BC06          10      LD  HL,EIPL
-000284 0384 115A07          10      LD  DE,DATA
-000287 0387 013000          10      LD  BC,30H
-00028A 038A EDB0                    LDIR
+000299 0399 219507          10      LD  HL,DATA
+       039C                     EMML:
+00029C 039C 04               4      INC B
+00029D 039D EDA3            16      OUTI
+00029F 039F 04               4      INC B
+0002A0 03A0 EDA3            16      OUTI
+0002A2 03A2 3D               4      DEC A
+0002A3 03A3 20F7            12      JR  NZ,EMML
                                 
-00028C 038C 21ED03          10      LD  HL,MAIN
-00028F 038F 013601          10      LD  BC,MAINE-MAIN
-000292 0392 EDB0                    LDIR
+0002A5 03A5 112D01          10      LD  DE,OK
+0002A8 03A8 0E09             7      LD  C,9
+0002AA 03AA CD0500          17      CALL    SYSTEM
+0002AD 03AD C30000          10      JP  0
                                 
-000294 0394 21B805          10      LD  HL,RDDE
-000297 0397 014400          10      LD  BC,RDDEE-RDDE
-00029A 039A EDB0                    LDIR
+       03B0                     EAREA:
+0002B0 03B0 CD0E04          17      CALL    IS_X1
+0002B3 03B3 C0              11      RET NZ
                                 
-00029C 039C CDC303          17      CALL    EAREA
+0002B4 03B4 3A6C07          13      LD  A,(FCB3)
+0002B7 03B7 3D               4      DEC A
+0002B8 03B8 5F               4      LD  E,A
+0002B9 03B9 DA1F00          10      JP  C,01FH      ;„Éá„Ç£„Çπ„ÇØË£ÖÁΩÆ„ÅÆ„Éë„É©„É°„Éº„Çø„ÅÆË™≠„ÅøÂá∫„Åó
+0002BC 03BC CD0500          17      CALL    SYSTEM
+0002BF 03BF D8              11      RET C
                                 
-00029F 039F AF               4      XOR A
-0002A0 03A0 01000D          10      LD  BC,0D00H
-0002A3 03A3 ED79            12      OUT (C),A
-0002A5 03A5 0C               4      INC C
-0002A6 03A6 ED79            12      OUT (C),A
-0002A8 03A8 0C               4      INC C
-0002A9 03A9 ED79            12      OUT (C),A
-0002AB 03AB 0C               4      INC C
+0002C0 03C0 DD7E12          19      LD  A,(IX+DPB_DEVICE)
+0002C3 03C3 E60F             7      AND 0FH
+0002C5 03C5 FE06             7      CP  6
+0002C7 03C7 C0              11      RET NZ
                                 
-0002AC 03AC 215A07          10      LD  HL,DATA
-       03AF                     EMML:
-0002AF 03AF 04               4      INC B
-0002B0 03B0 EDA3            16      OUTI
-0002B2 03B2 04               4      INC B
-0002B3 03B3 EDA3            16      OUTI
-0002B5 03B5 3D               4      DEC A
-0002B6 03B6 20F7            12      JR  NZ,EMML
+0002C8 03C8 DD7E0C          19      LD  A,(IX+DPB_MAXCYL)
+0002CB 03CB 32B507          13      LD  (DATA+IPL_MAXCYL),A
                                 
-0002B8 03B8 112E01          10      LD  DE,OK
-0002BB 03BB 0E09             7      LD  C,9
-0002BD 03BD CD0500          17      CALL    SYSTEM
-0002C0 03C0 C30000          10      JP  0
+0002CE 03CE DD7E07          19      LD  A,(IX+DPB_SECPCL)
+0002D1 03D1 32B607          13      LD  (DATA+IPL_SECPCL),A
                                 
-       03C3                     EAREA:
-0002C3 03C3 CDE003          17      CALL    IS_X1
-0002C6 03C6 C0              11      RET NZ
+0002D4 03D4 DD7E11          19      LD  A,(IX+DPB_DIRPS+1)
+0002D7 03D7 32B807          13      LD  (DATA+IPL_DIRPS_H),A
                                 
-0002C7 03C7 3A3107          13      LD  A,(FCB3)
-0002CA 03CA 3D               4      DEC A
-0002CB 03CB 5F               4      LD  E,A
-0002CC 03CC DA1F00          10      JP  C,01FH      ;ÉfÉBÉXÉNëïíuÇÃÉpÉâÉÅÅ[É^ÇÃì«Ç›èoÇµ
-0002CF 03CF CD0500          17      CALL    SYSTEM
-0002D2 03D2 D8              11      RET C
+0002DA 03DA DD7E0D          19      LD  A,(IX+DPB_MAXSEC)
+0002DD 03DD 32BD07          13      LD  (DATA+IPL_MAXSEC),A
                                 
-0002D3 03D3 DD7E12          19      LD  A,(IX+12H)
-0002D6 03D6 FE06             7      CP  6
-0002D8 03D8 C0              11      RET NZ
+0002E0 03E0 DD7E0E          19      LD  A,(IX+DPB_FATPS)
+0002E3 03E3 32BE07          13      LD  (DATA+IPL_FATPS),A
                                 
-0002D9 03D9 DD7E0C          19      LD  A,(IX+0CH)
-0002DC 03DC 328107          13      LD  (DATA+27H),A
-0002DF 03DF C9              10      RET
+0002E6 03E6 DD7E00          19      LD  A,(IX+DPB_FATLN)
+0002E9 03E9 32BF07          13      LD  (DATA+IPL_FATLN),A
                                 
-       03E0                     IS_X1:
-0002E0 03E0 0E6F             7      LD  C,06FH      ;MSX-DOS ÇÃÉoÅ[ÉWÉáÉìî‘çÜÇÃälìæ(_DOSVER)
-0002E2 03E2 CD0500          17      CALL    SYSTEM
-0002E5 03E5 79               4      LD  A,C
-0002E6 03E6 FE1D             7      CP  01DH        ;LSX-DodgersÇÃèÍçáÅA01DH
-0002E8 03E8 C0              11      RET NZ
-0002E9 03E9 7D               4      LD  A,L     ;ã@éÌID
-0002EA 03EA FE00             7      CP  0       ;X1
-0002EC 03EC C9              10      RET
+0002EC 03EC DD7E10          19      LD  A,(IX+DPB_DIRPS)
+0002EF 03EF 32C007          13      LD  (DATA+IPL_DIRPS),A
                                 
-       03ED                     MAIN:
-0002ED FE30                         ORG IPL+30H,MAIN-100H
+0002F2 03F2 DD7E0B          19      LD  A,(IX+DPB_DIRSCNT)
+0002F5 03F5 32C107          13      LD  (DATA+IPL_DIRSCNT),A
+                                
+0002F8 03F8 87               4      ADD A,A ;*2
+0002F9 03F9 87               4      ADD A,A ;*4
+0002FA 03FA 87               4      ADD A,A ;*8
+0002FB 03FB 87               4      ADD A,A ;*16
+0002FC 03FC 87               4      ADD A,A ;*32
+0002FD 03FD 32C207          13      LD  (DATA+IPL_DIRITEMS),A
+                                
+000300 0400 DD7E14          19      LD  A,(IX+DPB_ADDCL)
+000303 0403 32C307          13      LD  (DATA+IPL_ADDCL),A
+000306 0406 DD7E15          19      LD  A,(IX+DPB_ADDCL+1)
+000309 0409 32C407          13      LD  (DATA+IPL_ADDCL_H),A
+                                
+00030C 040C AF               4      XOR A
+00030D 040D C9              10      RET
+                                
+       040E                     IS_X1:
+00030E 040E 0E6F             7      LD  C,06FH      ;MSX-DOS „ÅÆ„Éê„Éº„Ç∏„Éß„É≥Áï™Âè∑„ÅÆÁç≤Âæó(_DOSVER)
+000310 0410 CD0500          17      CALL    SYSTEM
+000313 0413 79               4      LD  A,C
+000314 0414 FE1D             7      CP  01DH        ;LSX-Dodgers„ÅÆÂ†¥Âêà„ÄÅ01DH
+000316 0416 C0              11      RET NZ
+000317 0417 7D               4      LD  A,L     ;Ê©üÁ®ÆID
+000318 0418 FE00             7      CP  0       ;X1
+00031A 041A C9              10      RET
+                                
+       041B                     MAIN:
+00031B FE30                         ORG IPL+30H,MAIN-100H
        FE30                     FNAME:
-0002ED FE30 4C44202020202020        DB  "LD",20H,20H,20H,20H,20H,20H
-0002F5 FE38 42494E                  DB  "BIN"
+00031B FE30 4C44202020202020        DB  "LD",20H,20H,20H,20H,20H,20H
+000323 FE38 42494E                  DB  "BIN"
                                 
        FE3B                     SA:
-0002F8 FE3B F3               4      DI
-0002F9 FE3C 310000          10      LD  SP,0
-0002FC FE3F DD2100FE        14      LD  IX,IPL
-000300 FE43 3E1E             7      LD  A,1EH
-000302 FE45 D300            11      OUT (0),A
-000304 FE47 012430          10      LD  BC,3000H+36
-000307 FE4A ED78            12      IN  A,(C)
-000309 FE4C E603             7      AND 3
-00030B FE4E 3236FF          13      LD  (DRIVE+1),A
-00030E FE51 CD94FE          17      CALL    FILE
-000311 FE54 382A            12      JR  C,IPLERR
-000313 FE56 2A0300          16      LD  HL,(DTBUF+3)
-000316 FE59 ED5B0100        20      LD  DE,(DTBUF+1)
-00031A FE5D ED52            15      SBC HL,DE
-00031C FE5F 44               4      LD  B,H
-00031D FE60 4D               4      LD  C,L
-00031E FE61 03               6      INC BC
-00031F FE62 210700          10      LD  HL,DTBUF+7
-000322 FE65 EDB0                    LDIR
-000324 FE67 3A36FF          13      LD  A,(DRIVE+1)
-000327 FE6A 3287FF          13      LD  (0FF87H),A
-00032A FE6D DD7E27          19      LD  A,(IX+27H)
-00032D FE70 328CFF          13      LD  (0FF8CH),A
+000326 FE3B F3               4      DI
+000327 FE3C 310000          10      LD  SP,0
+00032A FE3F DD2100FE        14      LD  IX,IPL
+00032E FE43 3E1E             7      LD  A,1EH
+000330 FE45 D300            11      OUT (0),A
+000332 FE47 012430          10      LD  BC,3000H+36
+000335 FE4A ED78            12      IN  A,(C)
+000337 FE4C E603             7      AND 3
+000339 FE4E 3229FF          13      LD  (DRIVE+1),A
+00033C FE51 CD94FE          17      CALL    FILE
+00033F FE54 382A            12      JR  C,IPLERR
+000341 FE56 2A0300          16      LD  HL,(DTBUF+3)
+000344 FE59 ED5B0100        20      LD  DE,(DTBUF+1)
+000348 FE5D ED52            15      SBC HL,DE
+00034A FE5F 44               4      LD  B,H
+00034B FE60 4D               4      LD  C,L
+00034C FE61 03               6      INC BC
+00034D FE62 210700          10      LD  HL,DTBUF+7
+000350 FE65 EDB0                    LDIR
+000352 FE67 3A29FF          13      LD  A,(DRIVE+1)
+000355 FE6A 3287FF          13      LD  (0FF87H),A
+000358 FE6D DD7E27          19      LD  A,(IX+27H)
+00035B FE70 328CFF          13      LD  (0FF8CH),A
                                 
-000330 FE73 01031A          10      LD  BC,1A03H
-000333 FE76 3E82             7      LD  A,82H
-000335 FE78 ED79            12      OUT (C),A
-000337 FE7A ED5E             8      IM  2
-000339 FE7C 2A0500          16      LD  HL,(0005H)
-00033C FE7F E9               4      JP  (HL)
+00035E FE73 01031A          10      LD  BC,1A03H
+000361 FE76 3E82             7      LD  A,82H
+000363 FE78 ED79            12      OUT (C),A
+000365 FE7A ED5E             8      IM  2
+000367 FE7C 2A0500          16      LD  HL,(0005H)
+00036A FE7F E9               4      JP  (HL)
        FE80                     IPLERR:
-00033D FE80 3A36FF          13      LD  A,(DRIVE+1)
-000340 FE83 01FC0F          10      LD  BC,0FFCH
-000343 FE86 ED79            12      OUT (C),A
-000345 FE88 3E1D             7      LD  A,1DH
-000347 FE8A D300            11      OUT (0),A
-000349 FE8C 3E07             7      LD  A,7
-00034B FE8E 3286FF          13      LD  (0FF86H),A
-00034E FE91 C3F500          10      JP  00F5H
-                                
+00036B FE80 3A29FF          13      LD  A,(DRIVE+1)
+00036E FE83 01FC0F          10      LD  BC,0FFCH    ;„É¢„Éº„Çø„ÉºÂÅúÊ≠¢
+000371 FE86 ED79            12      OUT (C),A
+000373 FE88 3E1D             7      LD  A,1DH       ;ROM„Å´Âàá„ÇäÊõø„Åà
+000375 FE8A D300            11      OUT (0),A
+000377 FE8C 3E07             7      LD  A,7
+000379 FE8E 3286FF          13      LD  (0FF86H),A
+00037C FE91 C36600          10      JP  0066H       ;NMI„É™„Çª„ÉÉ„Éà
        FE94                     FILE:
-000351 FE94 1600             7      LD  D,0
-000353 FE96 DD5E29          19      LD  E,(IX+29H)  ;FAT
-000356 FE99 2100D0          10      LD  HL,FATBF
-000359 FE9C DD462A          19      LD  B,(IX+2AH)  ;FAT
-00035C FE9F CD0FFF          17      CALL    DRDSB
-00035F FEA2 D8              11      RET C
+00037F FE94 1600             7      LD  D,0
+000381 FE96 DD5E29          19      LD  E,(IX+IPL_FATPS)
+000384 FE99 2100D0          10      LD  HL,FATBF
+000387 FE9C DD462A          19      LD  B,(IX+IPL_FATLN)
+00038A FE9F CD59FF          17      CALL    DRDSB
+       FEA0                     READ_FAT    EQU $-2
+00038D FEA2 D8              11      RET C
                                 
-000360 FEA3 210000          10      LD  HL,DTBUF
-000363 FEA6 1600             7      LD  D,0
-000365 FEA8 DD5E2B          19      LD  E,(IX+2BH)  ;ÉfÉBÉåÉNÉgÉä
-000368 FEAB E5              11      PUSH    HL
-000369 FEAC DD462C          19      LD  B,(IX+2CH)  ;ÉfÉBÉåÉNÉgÉä
-00036C FEAF CD0FFF          17      CALL    DRDSB
-00036F FEB2 E1              10      POP HL
-000370 FEB3 D8              11      RET C
+00038E FEA3 210000          10      LD  HL,DTBUF
+000391 FEA6 DD5E2B          19      LD  E,(IX+IPL_DIRPS)
+000394 FEA9 DD5623          19      LD  D,(IX+IPL_DIRPS_H)
+000397 FEAC E5              11      PUSH    HL
+000398 FEAD DD462C          19      LD  B,(IX+IPL_DIRSCNT)
+00039B FEB0 CD59FF          17      CALL    DRDSB
+00039E FEB3 E1              10      POP HL
+00039F FEB4 D8              11      RET C
                                 
-000371 FEB4 DD4E2D          19      LD  C,(IX+2DH)  ;ÉfÉBÉåÉNÉgÉä
-       FEB7                     FILE1:
-000374 FEB7 060B             7      LD  B,11
-000376 FEB9 1130FE          10      LD  DE,FNAME
-000379 FEBC E5              11      PUSH    HL
-       FEBD                     COMP:
-00037A FEBD 1A               7      LD  A,(DE)
-00037B FEBE BE               7      CP  (HL)
-00037C FEBF 2004            12      JR  NZ,COMP1
-00037E FEC1 13               6      INC DE
-00037F FEC2 23               6      INC HL
-000380 FEC3 10F8            13      DJNZ    COMP
-       FEC5                     COMP1:
-000382 FEC5 E1              10      POP HL
-000383 FEC6 2809            12      JR  Z,FILE2
-000385 FEC8 112000          10      LD  DE,20H
-000388 FECB 19              11      ADD HL,DE
-000389 FECC 0D               4      DEC C
-00038A FECD 20E8            12      JR  NZ,FILE1
-00038C FECF 37               4      SCF
-00038D FED0 C9              10      RET
+0003A0 FEB5 DD4E2D          19      LD  C,(IX+IPL_DIRITEMS) ;„Éá„Ç£„É¨„ÇØ„Éà„É™„ÅÆÂÖ®È†ÖÁõÆÊï∞
+       FEB8                     FILE1:
+0003A3 FEB8 060B             7      LD  B,11
+0003A5 FEBA 1130FE          10      LD  DE,FNAME
+0003A8 FEBD E5              11      PUSH    HL
+       FEBE                     COMP:
+0003A9 FEBE 1A               7      LD  A,(DE)
+0003AA FEBF BE               7      CP  (HL)
+0003AB FEC0 2004            12      JR  NZ,COMP1
+0003AD FEC2 13               6      INC DE
+0003AE FEC3 23               6      INC HL
+0003AF FEC4 10F8            13      DJNZ    COMP
+       FEC6                     COMP1:
+0003B1 FEC6 E1              10      POP HL
+0003B2 FEC7 2809            12      JR  Z,FILE2
+0003B4 FEC9 112000          10      LD  DE,20H
+0003B7 FECC 19              11      ADD HL,DE
+0003B8 FECD 0D               4      DEC C
+0003B9 FECE 20E8            12      JR  NZ,FILE1
+0003BB FED0 37               4      SCF
+0003BC FED1 C9              10      RET
                                 
-       FED1                     FILE2:
-00038E FED1 111A00          10      LD  DE,1AH
-000391 FED4 19              11      ADD HL,DE
-000392 FED5 5E               7      LD  E,(HL)
-000393 FED6 23               6      INC HL
-000394 FED7 56               7      LD  D,(HL)
+       FED2                     FILE2:
+0003BD FED2 111A00          10      LD  DE,1AH
+0003C0 FED5 19              11      ADD HL,DE
+0003C1 FED6 5E               7      LD  E,(HL)
+0003C2 FED7 23               6      INC HL
+0003C3 FED8 56               7      LD  D,(HL)
                                 
-000395 FED8 210000          10      LD  HL,DTBUF
-       FEDB                     RDD1:
-000398 FEDB D5              11      PUSH    DE
-000399 FEDC CD68FF          17      CALL    DRDC
-00039C FEDF D1              10      POP DE
-00039D FEE0 D8              11      RET C
-00039E FEE1 E5              11      PUSH    HL
-00039F FEE2 CDECFE          17      CALL    GNCL
-0003A2 FEE5 E1              10      POP HL
-0003A3 FEE6 7A               4      LD  A,D
-0003A4 FEE7 FE0F             7      CP  0FH
-0003A6 FEE9 38F0            12      JR  C,RDD1
-0003A8 FEEB C9              10      RET
+0003C4 FED9 210000          10      LD  HL,DTBUF
+       FEDC                     RDD1:
+0003C7 FEDC D5              11      PUSH    DE
+0003C8 FEDD CD67FF          17      CALL    DRDC
+0003CB FEE0 D1              10      POP DE
+0003CC FEE1 D8              11      RET C
+0003CD FEE2 E5              11      PUSH    HL
+0003CE FEE3 CDEDFE          17      CALL    GNCL
+0003D1 FEE6 E1              10      POP HL
+0003D2 FEE7 7A               4      LD  A,D
+0003D3 FEE8 FE0F             7      CP  0FH
+       FEE9                     END_OF_FILE EQU $-1
+0003D5 FEEA 38F0            12      JR  C,RDD1
+0003D7 FEEC C9              10      RET
                                 
-       FEEC                     GNCL:
-0003A9 FEEC 6B               4      LD  L,E     ;GET NEXT CLUSTER
-0003AA FEED 62               4      LD  H,D
-0003AB FEEE CB3C             8      SRL H
-0003AD FEF0 CB1D             8      RR  L
-0003AF FEF2 0100D0          10      LD  BC,FATBF
-0003B2 FEF5 3809            12      JR  C,GNC1
-0003B4 FEF7 19              11      ADD HL,DE
-0003B5 FEF8 09              11      ADD HL,BC
-0003B6 FEF9 5E               7      LD  E,(HL)
-0003B7 FEFA 23               6      INC HL
-0003B8 FEFB 7E               7      LD  A,(HL)
-0003B9 FEFC E60F             7      AND 0FH
-0003BB FEFE 57               4      LD  D,A
-0003BC FEFF C9              10      RET
-       FF00                     GNC1:
-0003BD FF00 19              11      ADD HL,DE
-0003BE FF01 09              11      ADD HL,BC
-0003BF FF02 7E               7      LD  A,(HL)
-0003C0 FF03 23               6      INC HL
-0003C1 FF04 56               7      LD  D,(HL)
-0003C2 FF05 0604             7      LD  B,4
-       FF07                     GNC1L:
-0003C4 FF07 CB3A             8      SRL D
-0003C6 FF09 1F               4      RRA
-0003C7 FF0A 10FB            13      DJNZ    GNC1L
+       FEED                     GNCL:
+0003D8 FEED 6B               4      LD  L,E     ;GET NEXT CLUSTER
+0003D9 FEEE 62               4      LD  H,D
+0003DA FEEF CB3C             8      SRL H
+0003DC FEF1 CB1D             8      RR  L
+0003DE FEF3 0100D0          10      LD  BC,FATBF
+0003E1 FEF6 3809            12      JR  C,GNC1
+0003E3 FEF8 19              11      ADD HL,DE
+0003E4 FEF9 09              11      ADD HL,BC
+0003E5 FEFA 5E               7      LD  E,(HL)
+0003E6 FEFB 23               6      INC HL
+0003E7 FEFC 7E               7      LD  A,(HL)
+0003E8 FEFD E60F             7      AND 0FH
+0003EA FEFF 57               4      LD  D,A
+0003EB FF00 C9              10      RET
+       FF01                     GNC1:
+0003EC FF01 19              11      ADD HL,DE
+0003ED FF02 09              11      ADD HL,BC
+0003EE FF03 7E               7      LD  A,(HL)
+0003EF FF04 23               6      INC HL
+0003F0 FF05 56               7      LD  D,(HL)
+0003F1 FF06 0604             7      LD  B,4
+       FF08                     GNC1L:
+0003F3 FF08 CB3A             8      SRL D   ;DA=DA/2
+0003F5 FF0A 1F               4      RRA     ;
+0003F6 FF0B 10FB            13      DJNZ    GNC1L
                                 
-0003C9 FF0C 5F               4      LD  E,A
-0003CA FF0D A7               4      AND A
-0003CB FF0E C9              10      RET
+0003F8 FF0D 5F               4      LD  E,A
+0003F9 FF0E A7               4      AND A
+0003FA FF0F C9              10      RET
                                 
-       FF0F                     DRDSB:
-0003CC FF0F C5              11      PUSH    BC
-0003CD FF10 D5              11      PUSH    DE
-0003CE FF11 CD66FF          17      CALL    DRD
-0003D1 FF14 D1              10      POP DE
-0003D2 FF15 C1              10      POP BC
-0003D3 FF16 D8              11      RET C
-0003D4 FF17 13               6      INC DE
-0003D5 FF18 10F5            13      DJNZ    DRDSB
-0003D7 FF1A C9              10      RET
-       FF1B                     SEEK:
-0003D8 FF1B 0610             7      LD  B,16
-0003DA FF1D DD4E28          19      LD  C,(IX+28H)      ;MAX SECTOR
-0003DD FF20 AF               4      XOR A
-0003DE FF21 EB               4      EX  DE,HL
-       FF22                     DIV1:
-0003DF FF22 29              11      ADD HL,HL
-0003E0 FF23 8F               4      ADC A,A
-0003E1 FF24 B9               4      CP  C
-0003E2 FF25 3802            12      JR  C,DIV2
-0003E4 FF27 91               4      SUB C
-0003E5 FF28 2C               4      INC L
-       FF29                     DIV2:
-0003E6 FF29 10F7            13      DJNZ    DIV1
+       FF10                     SEEK:
+0003FB FF10 0610             7      LD  B,16
+0003FD FF12 DD4E28          19      LD  C,(IX+IPL_MAXSEC)
+000400 FF15 AF               4      XOR A
+000401 FF16 EB               4      EX  DE,HL
+       FF17                     DIV1:
+000402 FF17 29              11      ADD HL,HL
+000403 FF18 8F               4      ADC A,A
+000404 FF19 B9               4      CP  C
+000405 FF1A 3802            12      JR  C,DIV2
+000407 FF1C 91               4      SUB C
+000408 FF1D 2C               4      INC L
+       FF1E                     DIV2:
+000409 FF1E 10F7            13      DJNZ    DIV1
                                 
-0003E8 FF2B DD862F          19      ADD A,(IX+2FH)
-0003EB FF2E 5F               4      LD  E,A     ;ó]ÇË
+00040B FF20 3C               4      INC A       ;ÊúÄÂ∞è„ÅÆ„Çª„ÇØ„Çø„ÅØÔºëÂõ∫ÂÆö
+00040C FF21 5F               4      LD  E,A     ;‰Ωô„Çä
                                 
-0003EC FF2F 55               4      LD  D,L     ;è§
-0003ED FF30 CB3A             8      SRL D
-0003EF FF32 9F               4      SBC A,A
-0003F0 FF33 E610             7      AND 10H
-0003F2 FF35 F600             7  DRIVE:  OR  00H
-0003F4 FF37 01FC0F          10      LD  BC,0FFCH
-0003F7 FF3A F680             7      OR  80H     ;ÉÇÅ[É^Å[ÉIÉì
-0003F9 FF3C ED79            12      OUT (C),A
-0003FB FF3E CD50FF          17      CALL    BUSY
-0003FE FF41 D8              11      RET C
+00040D FF22 55               4      LD  D,L     ;ÂïÜ
+00040E FF23 CB3A             8      SRL D
+000410 FF25 9F               4      SBC A,A
+000411 FF26 E610             7      AND 10H     ;SIDE
+000413 FF28 F600             7  DRIVE:  OR  00H
+000415 FF2A 01FC0F          10      LD  BC,0FFCH
+000418 FF2D F680             7      OR  80H     ;„É¢„Éº„Çø„Éº„Ç™„É≥
+00041A FF2F ED79            12      OUT (C),A
+00041C FF31 CD43FF          17      CALL    BUSY
+00041F FF34 D8              11      RET C
                                 
-0003FF FF42 0EFB             7      LD  C,0FBH
-000401 FF44 ED51            12      OUT (C),D
-000403 FF46 7A               4      LD  A,D
-000404 FF47 C6FF             7      ADD A,0FFH
-000406 FF49 9F               4      SBC A,A
-000407 FF4A E618             7      AND 18H     ;ÉVÅ[ÉN/ÉäÉXÉgÉA
-000409 FF4C 0EF8             7      LD  C,0F8H
-00040B FF4E ED79            12      OUT (C),A
+000420 FF35 0EFB             7      LD  C,0FBH
+000422 FF37 ED51            12      OUT (C),D
+000424 FF39 7A               4      LD  A,D
+000425 FF3A C6FF             7      ADD A,0FFH
+000427 FF3C 9F               4      SBC A,A
+000428 FF3D E618             7      AND 18H     ;„Ç∑„Éº„ÇØ/„É™„Çπ„Éà„Ç¢
+00042A FF3F 0EF8             7      LD  C,0F8H
+00042C FF41 ED79            12      OUT (C),A
                                 
-       FF50                     BUSY:
-00040D FF50 3E12             7      LD  A,18
-       FF52                     BUSY1:
-00040F FF52 3D               4      DEC A
-000410 FF53 20FD            12      JR  NZ,BUSY1
-000412 FF55 0EF8             7      LD  C,0F8H
-000414 FF57 61               4      LD  H,C
-       FF58                     BUSY2:
-000415 FF58 ED78            12      IN  A,(C)
-000417 FF5A E681             7      AND 81H
-000419 FF5C C8              11      RET Z
-00041A FF5D E3              19      EX  (SP),HL
-00041B FF5E E3              19      EX  (SP),HL
-00041C FF5F 2B               6      DEC HL
-00041D FF60 7C               4      LD  A,H
-00041E FF61 B5               4      OR  L
-00041F FF62 20F4            12      JR  NZ,BUSY2
-000421 FF64 37               4      SCF
-000422 FF65 C9              10      RET
+       FF43                     BUSY:
+00042E FF43 3E12             7      LD  A,18
+       FF45                     BUSY1:
+000430 FF45 3D               4      DEC A
+000431 FF46 20FD            12      JR  NZ,BUSY1
+000433 FF48 0EF8             7      LD  C,0F8H
+000435 FF4A 61               4      LD  H,C
+       FF4B                     BUSY2:
+000436 FF4B ED78            12      IN  A,(C)
+000438 FF4D E681             7      AND 81H
+00043A FF4F C8              11      RET Z
+00043B FF50 E3              19      EX  (SP),HL
+00043C FF51 E3              19      EX  (SP),HL
+00043D FF52 2B               6      DEC HL
+00043E FF53 7C               4      LD  A,H
+00043F FF54 B5               4      OR  L
+000440 FF55 20F4            12      JR  NZ,BUSY2
+000442 FF57 37               4      SCF
+000443 FF58 C9              10      RET
                                 
-       FF66                     DRD:
-       FF68                     DRDC    EQU DRD+2
-000423 0523                         ORG $$+0100H    ;$DEPHASE
-       0523                     MAINE:
+       FF59                     DRDSB:
+000444 FF59 C5              11      PUSH    BC
+000445 FF5A D5              11      PUSH    DE
+000446 FF5B CD65FF          17      CALL    DRD
+000449 FF5E D1              10      POP DE
+00044A FF5F C1              10      POP BC
+00044B FF60 D8              11      RET C
+00044C FF61 13               6      INC DE
+00044D FF62 10F5            13      DJNZ    DRDSB
+00044F FF64 C9              10      RET
                                 
-       0523                     RDDL:
-000423 FF66                         ORG DRD,RDDL-100H
-       FF66                     __RDDL:
-000423 FF66 1812            12      JR  DRDL
-       FF68                     DRDCL:
-000425 FF68 EB               4      EX  DE,HL
-000426 FF69 DD7E2E          19      LD  A,(IX+2EH)  ;DE=DE+8 (2D)  !ADDCL é©å»èëÇ´ä∑Ç¶
-000429 FF6C 29              11      ADD HL,HL       ;DE=DE*2 (512) !DBLCL é©å»èëÇ´ä∑Ç¶
-00042A FF6D EB               4      EX  DE,HL
-00042B FF6E 83               4      ADD A,E
-00042C FF6F 5F               4      LD  E,A
-00042D FF70 8A               4      ADC A,D
-00042E FF71 93               4      SUB E
-00042F FF72 57               4      LD  D,A
+       FF65                     DRD:
+       FF67                     DRDC    EQU DRD+2
+000450 0550                         ORG $$+0100H    ;$DEPHASE
+       0550                     MAINE:
+                                ;
+                                ;   2D„Éï„É≠„ÉÉ„Éî„Éº
+                                ;
+       0550                     RDDL:
+000450 FF65                         ORG DRD,RDDL-100H
+       FF65                     __RDDL:
+000450 FF65 180F            12      JR  DRDL
+       FF67                     DRDCL:
+000452 FF67 EB               4      EX  DE,HL
+000453 FF68 DD7E2E          19      LD  A,(IX+IPL_ADDCL)
+000456 FF6B 29              11      ADD HL,HL       ;DE=DE*2 (512)
+000457 FF6C EB               4      EX  DE,HL
+000458 FF6D 83               4      ADD A,E
+000459 FF6E 5F               4      LD  E,A
+00045A FF6F 8A               4      ADC A,D
+00045B FF70 93               4      SUB E
+00045C FF71 57               4      LD  D,A
                                 
-000430 FF73 D5              11      PUSH    DE
-000431 FF74 CD7AFF          17      CALL    DRDL
-000434 FF77 D1              10      POP DE
-000435 FF78 D8              11      RET C
-000436 FF79 13               6      INC DE
-       FF7A                     DRDL:
-000437 FF7A E5              11      PUSH    HL
-000438 FF7B CD1BFF          17      CALL    SEEK        ;ÉfÉBÉXÉNÉäÅ[Éh
-00043B FF7E E1              10      POP HL
-00043C FF7F D8              11      RET C
-00043D FF80 3E80             7      LD  A,80H
-00043F FF82 01FA0F          10      LD  BC,0FFAH
-000442 FF85 1803            12      JR  SKIPBUF
-000444 FF87 00                      DB  0       ;0FF87H ÉhÉâÉCÉu(IPL READ)
-000445 FF88 3BFE                    DW  SA      ;0FF88H ÉXÉ^ÉbÉNÉIÅ[ÉoÅ[ÉâÉCÉh(IPL READ)
-       FF8A                     SKIPBUF:
-000447 FF8A ED59            12      OUT (C),E
-000449 FF8C 0EF8             7      LD  C,0F8H
-00044B FF8E ED79            12      OUT (C),A
-00044D FF90 3E12             7      LD  A,18
-       FF92                     DELAY:
-00044F FF92 3D               4      DEC A
-000450 FF93 20FD            12      JR  NZ,DELAY
+00045D FF72 0602             7      LD  B,2
+00045F FF74 18E3            12      JR  DRDSB
+       FF76                     DRDL:
+000461 FF76 E5              11      PUSH    HL
+000462 FF77 CD10FF          17      CALL    SEEK        ;„Éá„Ç£„Çπ„ÇØ„É™„Éº„Éâ
+000465 FF7A E1              10      POP HL
+000466 FF7B D8              11      RET C
+000467 FF7C 3E80             7      LD  A,80H
+000469 FF7E 01FA0F          10      LD  BC,0FFAH
+00046C FF81 ED59            12      OUT (C),E
+00046E FF83 0EF8             7      LD  C,0F8H
+000470 FF85 1803            12      JR  SKIPBUFL
                                 
-000452 FF95 0EFB             7      LD  C,0FBH
-       FF97                     DRD1:
-000454 FF97 78               4      LD  A,B
-000455 FF98 DBF8            11      IN  A,(0F8H)
-000457 FF9A 0F               4      RRCA
-000458 FF9B 3008            12      JR  NC,DRD3
-00045A FF9D 0F               4      RRCA
-00045B FF9E 30F7            12      JR  NC,DRD1
-00045D FFA0 EDA2            16      INI
-00045F FFA2 04               4      INC B
-000460 FFA3 18F2            12      JR  DRD1
+000472 FF87                         ORG 0FF87H,$$
+000472 FF87 00                      DB  0       ;0FF87H „Éâ„É©„Ç§„Éñ(IPL READ)
+000473 FF88 3BFE                    DW  SA      ;0FF88H „Çπ„Çø„ÉÉ„ÇØ„Ç™„Éº„Éê„Éº„É©„Ç§„Éâ(IPL READ)
                                 
-       FFA5                     DRD3:
-000462 FFA5 C6FF             7      ADD A,0FFH
-000464 FFA7 C9              10      RET
-000465 0565                         ORG $$+0100H    ;$DEPHASE
-       0565                     RDDLE:
+       FF8A                     SKIPBUFL:
+000475 FF8A ED79            12      OUT (C),A
+000477 FF8C 3E12             7      LD  A,18
+       FF8E                     DELAY:
+000479 FF8E 3D               4      DEC A
+00047A FF8F 20FD            12      JR  NZ,DELAY
                                 
-       0565                     RDDH:
-000465 FF66                         ORG DRD,RDDH-100H
-       FF66                     __DRDCH:
-000465 FF66 1808            12      JR  DRDH
-       FF68                     DRDCH:
-000467 FF68 DD7E2E          19      LD  A,(IX+2EH)
-00046A FF6B 83               4      ADD A,E
-00046B FF6C 5F               4      LD  E,A
-00046C FF6D 8A               4      ADC A,D
-00046D FF6E 93               4      SUB E
-00046E FF6F 57               4      LD  D,A
-       FF70                     DRDH:
-00046F FF70 22B5FF          16      LD  (DMAD+11),HL
-000472 FF73 CD1BFF          17      CALL    SEEK
-000475 FF76 D8              11      RET C
+00047C FF91 0EFB             7      LD  C,0FBH
+       FF93                     DRD1:
+00047E FF93 78               4      LD  A,B
+00047F FF94 DBF8            11      IN  A,(0F8H)
+000481 FF96 0F               4      RRCA
+000482 FF97 3008            12      JR  NC,DRD3
+000484 FF99 0F               4      RRCA
+000485 FF9A 30F7            12      JR  NC,DRD1
+000487 FF9C EDA2            16      INI
+000489 FF9E 04               4      INC B
+00048A FF9F 18F2            12      JR  DRD1
                                 
-000476 FF77 3E0F             7      LD  A,15
-000478 FF79 21AAFF          10      LD  HL,DMAD
+       FFA1                     DRD3:
+00048C FFA1 C6FF             7      ADD A,0FFH
+00048E FFA3 C9              10      RET
+00048F 058F                         ORG $$+0100H    ;$DEPHASE
+       058F                     RDDLE:
+                                ;
+                                ;   2HD/2HC„Éï„É≠„ÉÉ„Éî„Éº
+                                ;
+       058F                     RDDH:
+00048F FF65                         ORG DRD,RDDH-100H
+       FF65                     __DRDCH:
+00048F FF65 1808            12      JR  DRDH
+       FF67                     DRDCH:
+000491 FF67 DD7E2E          19      LD  A,(IX+IPL_ADDCL)
+000494 FF6A 83               4      ADD A,E
+000495 FF6B 5F               4      LD  E,A
+000496 FF6C 8A               4      ADC A,D
+000497 FF6D 93               4      SUB E
+000498 FF6E 57               4      LD  D,A
+       FF6F                     DRDH:
+000499 FF6F 22BAFF          16      LD  (DMAD+11),HL
+00049C FF72 CD10FF          17      CALL    SEEK
+00049F FF75 D8              11      RET C
                                 
-00047B FF7C 01871F          10      LD  BC,$1F87
-       FF7F                     SDMA:
-00047E FF7F 04               4      INC B
-00047F FF80 EDA3            16      OUTI
-000481 FF82 3D               4      DEC A
-000482 FF83 20FA            12      JR  NZ,SDMA
+0004A0 FF76 3E0F             7      LD  A,15
+0004A2 FF78 21AFFF          10      LD  HL,DMAD
                                 
-000484 FF85 3E80             7      LD  A,80H
-000486 FF87 C5              11      PUSH    BC
-000487 FF88 01FA0F          10      LD  BC,0FFAH
-00048A FF8B ED59            12      OUT (C),E
-00048C FF8D 0EF8             7      LD  C,0F8H
-00048E FF8F ED79            12      OUT (C),A
+0004A5 FF7B 01871F          10      LD  BC,1F87H
+       FF7E                     SDMA:
+0004A8 FF7E 04               4      INC B
+0004A9 FF7F EDA3            16      OUTI
+0004AB FF81 3D               4      DEC A
+0004AC FF82 20FA            12      JR  NZ,SDMA
                                 
-000490 FF91 CD50FF          17      CALL    BUSY
-000493 FF94 ED78            12      IN  A,(C)
+0004AE FF84 1804            12      JR  SKIPBUFH
                                 
-000495 FF96 2AB5FF          16      LD  HL,(DMAD+11)
-000498 FF99 23               6      INC HL
-000499 FF9A 1106BB          10      LD  DE,0BB06H   ;READ DMA
+0004B0 FF87                         ORG 0FF87H,$$
+0004B0 FF87 00                      DB  0       ;0FF87H „Éâ„É©„Ç§„Éñ(IPL READ)
+0004B1 FF88 3BFE                    DW  SA      ;0FF88H „Çπ„Çø„ÉÉ„ÇØ„Ç™„Éº„Éê„Éº„É©„Ç§„Éâ(IPL READ)
                                 
-00049C FF9D C1              10      POP BC
-00049D FF9E ED51            12      OUT (C),D
-00049F FFA0 ED59            12      OUT (C),E
-0004A1 FFA2 ED58            12      IN  E,(C)
-0004A3 FFA4 ED50            12      IN  D,(C)
-0004A5 FFA6 19              11      ADD HL,DE
-0004A6 FFA7 C6FF             7      ADD A,0FFH
-0004A8 FFA9 C9              10      RET
+       FF8A                     SKIPBUFH:
+0004B3 FF8A 3E80             7      LD  A,80H
+0004B5 FF8C C5              11      PUSH    BC
+0004B6 FF8D 01FA0F          10      LD  BC,0FFAH
+0004B9 FF90 ED59            12      OUT (C),E
+0004BB FF92 0EF8             7      LD  C,0F8H
+0004BD FF94 ED79            12      OUT (C),A
                                 
-       FFAA                     DMAD:
-0004A9 FFAA C37DFB0FFFFF2C10        DB  0C3H,7DH,0FBH,0FH,0FFH,0FFH,2CH,10H ;X1turbo
-0004B1 FFB2 80928D0000CF87          DB  80H,92H,8DH,00H,00H,0CFH,87H        ;DISK DMA
-0004B8 05B8                         ORG $$+0100H    ;$DEPHASE
-       05B8                     RDDHE:
+0004BF FF96 CD43FF          17      CALL    BUSY
+0004C2 FF99 ED78            12      IN  A,(C)
                                 
-       05B8                     RDDE:
-0004B8 FF66                         ORG DRD,RDDE-100H
-0004B8 FF66 180D            12      JR  DRDE
-       FF68                     DRDCE:
-0004BA FF68 3E04             7      LD  A,4
-0004BC FF6A 3236FF          13      LD  (DRIVE+1),A
-0004BF FF6D DD7E2E          19      LD  A,(IX+2EH)
-0004C2 FF70 83               4      ADD A,E
-0004C3 FF71 5F               4      LD  E,A
-0004C4 FF72 8A               4      ADC A,D
-0004C5 FF73 93               4      SUB E
-0004C6 FF74 57               4      LD  D,A
-       FF75                     DRDE:
-0004C7 FF75 EB               4      EX  DE,HL
-0004C8 FF76 29              11      ADD HL,HL
-0004C9 FF77 29              11      ADD HL,HL
-0004CA FF78 DD4620          19      LD  B,(IX+20H)
-0004CD FF7B 0E00             7      LD  C,0
-0004CF FF7D 09              11      ADD HL,BC
-0004D0 FF7E 060D             7      LD  B,0DH
-0004D2 FF80 ED49            12      OUT (C),C
-0004D4 FF82 0C               4      INC C
-0004D5 FF83 ED69            12      OUT (C),L
-0004D7 FF85 0C               4      INC C
-0004D8 FF86 ED61            12      OUT (C),H
-0004DA FF88 0C               4      INC C
-0004DB FF89 EB               4      EX  DE,HL
-0004DC FF8A AF               4      XOR A
-       FF8B                     EDRDC1:
-0004DD FF8B EDA2            16      INI
-0004DF FF8D 04               4      INC B
-0004E0 FF8E EDA2            16      INI
-0004E2 FF90 04               4      INC B
-0004E3 FF91 EDA2            16      INI
-0004E5 FF93 04               4      INC B
-0004E6 FF94 EDA2            16      INI
-0004E8 FF96 04               4      INC B
-0004E9 FF97 3D               4      DEC A
-0004EA FF98 20F1            12      JR  NZ,EDRDC1
-0004EC FF9A AF               4      XOR A
-0004ED FF9B C9              10      RET
-       FF9C                     ESA:
-0004EE FF9C 2100FC          10      LD  HL,0FC00H
-0004F1 FF9F 1100FE          10      LD  DE,IPL
-0004F4 FFA2 019C01          10      LD  BC,ESA-IPL
-0004F7 FFA5 EDB0                    LDIR
-0004F9 FFA7 C33BFE          10      JP  SA
-       FFAA                     EED:
-0004FC 05FC                         ORG $$+0100H    ;$DEPHASE
-       05FC                     RDDEE:
+0004C4 FF9B 2ABAFF          16      LD  HL,(DMAD+11)
+0004C7 FF9E 23               6      INC HL
+0004C8 FF9F 1106BB          10      LD  DE,0BB06H   ;READ DMA
                                 
-       05FC                     LIPL:
-0004FC 05FC EBFE904C44202020        DB  0EBH,0FEH,90H,"LD",20H,20H,20H
-000504 0604 2020200002020100        DB  20H,20H,20H,00H,02H,02H,01H,00H
-00050C 060C 027000D002FD0200        DB  02H,70H,00H,0D0H,02H,0FDH,02H,00H
-000514 0614 09000200000018FE        DB  09H,00H,02H,00H,00H,00H,18H,0FEH
-00051C 061C 0000000000000000        DB  0,0,0,0,0,0,0,0
-000524 0624 0901020507700801        DB  9,1,2,5,7,112,8,1
+0004CB FFA2 C1              10      POP BC
+0004CC FFA3 ED51            12      OUT (C),D
+0004CE FFA5 ED59            12      OUT (C),E
+0004D0 FFA7 ED58            12      IN  E,(C)
+0004D2 FFA9 ED50            12      IN  D,(C)
+0004D4 FFAB 19              11      ADD HL,DE
+0004D5 FFAC C6FF             7      ADD A,0FFH
+0004D7 FFAE C9              10      RET
                                 
-       062C                     HIPL:
-00052C 062C EBFE904C44202020        DB  0EBH,0FEH,90H,"LD",20H,20H,20H
-000534 0634 2020200004010100        DB  20H,20H,20H,00H,04H,01H,01H,00H
-00053C 063C 02C000D004FE0200        DB  02H,0C0H,00H,0D0H,04H,0FEH,02H,00H
-000544 0644 08000200000018FE        DB  08H,00H,02H,00H,00H,00H,18H,0FEH
-00054C 064C 0000000000000000        DB  0,0,0,0,0,0,0,0
-000554 0654 0801020506C00901        DB  8,1,2,5,6,192,9,1
+       FFAF                     DMAD:
+0004D8 FFAF C37DFB0FFFFF2C10        DB  0C3H,7DH,0FBH,0FH,0FFH,0FFH,2CH,10H ;X1turbo
+0004E0 FFB7 80928D0000CF87          DB  80H,92H,8DH,00H,00H,0CFH,87H        ;DISK DMA
+0004E7 05E7                         ORG $$+0100H    ;$DEPHASE
+       05E7                     RDDHE:
+                                ;
+                                ;   EMM
+                                ;
+       05E7                     RDDE:
+0004E7 FF65                         ORG DRD,RDDE-100H
+0004E7 FF65 181E            12      JR  DRDE
+       FF67                     DRDCE:
+0004E9 FF67 3E04             7      LD  A,4
+0004EB FF69 3229FF          13      LD  (DRIVE+1),A
+0004EE FF6C EB               4      EX  DE,HL
                                 
-       065C                     SIPL:
-00055C 065C EB1E904C44202020        DB  0EBH,1EH,90H,"LD",20H,20H,20H
-000564 0664 2020203248532020        DB  20H,20H,20H,"2","H","S",20H,20H
-00056C 066C 2020040001030001        DB  20H,20H,04H,00H,01H,03H,00H,01H
-000574 0674 00C005A0FB0118FE        DB  00H,0C0H,05H,0A0H,0FBH,01H,18H,0FEH
-00057C 067C EBFE000000000000        DB  0EBH,0FEH,0,0,0,0,0,0
-000584 0684 0901030406C0080A        DB  9,1,3,4,6,192,8,10
+0004EF FF6D DD4E21          19      LD  C,(IX+IPL_SECPCL)
+0004F2 FF70 41               4      LD  B,C
+       FF71                     L_CLDBL:
+0004F3 FF71 CB19             8      RR  C       ;->CF
+0004F5 FF73 3803            12      JR  C,E_CLDBL
+0004F7 FF75 29              11      ADD HL,HL       ;*2
+0004F8 FF76 18F9            12      JR  L_CLDBL
+       FF78                     E_CLDBL:
+0004FA FF78 EB               4      EX  DE,HL
                                 
-       068C                     CIPL:
-00058C 068C EBFE904C44202020        DB  0EBH,0FEH,90H,"LD",20H,20H,20H
-000594 0694 2020200002010100        DB  20H,20H,20H,00H,02H,01H,01H,00H
-00059C 069C 02E0006009F90700        DB  02H,0E0H,00H,060H,09H,0F9H,07H,00H
-0005A4 06A4 0F000200000018FE        DB  0FH,00H,02H,00H,00H,00H,18H,0FEH
-0005AC 06AC 0000000000000000        DB  0,0,0,0,0,0,0,0
-0005B4 06B4 0F01070F0EE01B01        DB  15,1,7,15,14,224,27,1
+0004FB FF79 7B               4      LD  A,E
+0004FC FF7A DD862E          19      ADD A,(IX+IPL_ADDCL)
+0004FF FF7D 5F               4      LD  E,A
+000500 FF7E 7A               4      LD  A,D
+000501 FF7F DD8E2F          19      ADC A,(IX+IPL_ADDCL_H)
+000504 FF82 57               4      LD  D,A
                                 
-       06BC                     EIPL:
-0005BC 06BC 014C53582D446F64        DB  01H,"LSX-Dodgers  Sy"
+000505 FF83 18D4            12      JR  DRDSB
+       FF85                     DRDE:
+000507 FF85 EB               4      EX  DE,HL
+000508 FF86 29              11      ADD HL,HL
+000509 FF87 DD4620          19      LD  B,(IX+IPL_MAXCYL)   ;EMM„ÅÆ„Ç™„Éï„Çª„ÉÉ„Éà
+00050C FF8A DD4E28          19      LD  C,(IX+IPL_MAXSEC)   ;„Éñ„Éº„Éà„É¨„Ç≥„Éº„Éâ„ÇíÈÅø„Åë„ÇãÁÇ∫
+00050F FF8D 09              11      ADD HL,BC
+000510 FF8E 01000D          10      LD  BC,0D00H
+000513 FF91 ED49            12      OUT (C),C
+000515 FF93 0C               4      INC C
+000516 FF94 ED69            12      OUT (C),L
+000518 FF96 0C               4      INC C
+000519 FF97 ED61            12      OUT (C),H
+00051B FF99 0C               4      INC C
+00051C FF9A EB               4      EX  DE,HL
+00051D FF9B AF               4      XOR A
+       FF9C                     EDRDC1:
+00051E FF9C EDA2            16      INI
+000520 FF9E 04               4      INC B
+000521 FF9F EDA2            16      INI
+000523 FFA1 04               4      INC B
+000524 FFA2 3D               4      DEC A
+000525 FFA3 20F7            12      JR  NZ,EDRDC1
+000527 FFA5 AF               4      XOR A
+000528 FFA6 C9              10      RET
+       FFA7                     ESA:
+000529 FFA7 2100FC          10      LD  HL,0FC00H
+00052C FFAA 1100FE          10      LD  DE,IPL
+00052F FFAD 01A701          10      LD  BC,ESA-IPL
+000532 FFB0 EDB0                    LDIR
+000534 FFB2 01FC0F          10      LD  BC,0FFCH    ;Âøµ„ÅÆ„Åü„ÇÅ„Å´FDD„ÅÆ„É¢„Éº„Çø„Éº„ÇíÂÅúÊ≠¢
+000537 FFB5 ED71            12      OUT (C),0       ;Z80Êú™ÂÆöÁæ©ÂëΩ‰ª§
+000539 FFB7 C33BFE          10      JP  SA
+       FFBA                     EED:
+00053C 063C                         ORG $$+0100H    ;$DEPHASE
+       063C                     RDDEE:
+                                ;
+                                ;   EMMÂ∞ÇÁî®FAT16
+                                ;
+       063C                     GNCL16:
+00053C FEED                         ORG GNCL,GNCL16-100H
+                                
+00053C FEED EB               4      EX  DE,HL
+00053D FEEE 29              11      ADD HL,HL
+00053E FEEF 0E00             7      LD  C,0         ;EMM„ÅÆ„Ç™„Éï„Çª„ÉÉ„Éà
+000540 FEF1 DD4628          19      LD  B,(IX+IPL_MAXSEC)   ;„Éñ„Éº„Éà„É¨„Ç≥„Éº„Éâ„ÇíÈÅø„Åë„ÇãÁÇ∫„ÅÆ„Ç™„Éï„Çª„ÉÉ„Éà
+000543 FEF4 AF               4      XOR A
+000544 FEF5 09              11      ADD HL,BC
+000545 FEF6 DD8E20          19      ADC A,(IX+IPL_MAXCYL)
+000548 FEF9 DD4629          19      LD  B,(IX+IPL_FATPS)    ;FAT„ÅÆ‰ΩçÁΩÆ
+00054B FEFC CB20             8      SLA B       ;*2 ;1„Çª„ÇØ„Çø=512„Éê„Ç§„Éà
+00054D FEFE CE00             7      ADC A,0
+00054F FF00 0E00             7      LD  C,0
+000551 FF02 09              11      ADD HL,BC
+000552 FF03 CE00             7      ADC A,0
+                                
+000554 FF05 01000D          10      LD  BC,0D00H
+000557 FF08 ED69            12      OUT (C),L
+000559 FF0A 0C               4      INC C
+00055A FF0B ED61            12      OUT (C),H
+00055C FF0D 0C               4      INC C
+00055D FF0E ED79            12      OUT (C),A
+00055F FF10 0C               4      INC C
+                                
+000560 FF11 ED58            12      IN  E,(C)
+000562 FF13 ED50            12      IN  D,(C)
+000564 FF15 C9              10      RET
+                                
+       FF16                     DRDSB16:
+000565 FF16 A7               4      AND A   ;EMM„ÅßFAT16„ÅÆÂ†¥Âêà„ÅØ„ÉÄ„Ç§„É¨„ÇØ„Éà„Å´Ë™≠„ÅøËæº„ÇÄ„ÅÆ„Åß„Éê„ÉÉ„Éï„Ç°„ÅØ‰Ωø„Çè„Å™„ÅÑ„ÄÇ
+000566 FF17 C9              10      RET
+                                
+000567 0667                         ORG $$+0100H    ;$DEPHASE
+       0667                     GNCL16E:
+                                ;
+                                ;   BPB
+                                ;
+       0667                     LIPL:
+000567 0667 EBFE904C44202020        DB  0EBH,0FEH,90H,"LD",20H,20H,20H
+00056F 066F 2020200002020100        DB  20H,20H,20H,00H,02H,02H,01H,00H
+000577 0677 027000D002FD0200        DB  02H,70H,00H,0D0H,02H,0FDH,02H,00H
+00057F 067F 09000200000018FE        DB  09H,00H,02H,00H,00H,00H,18H,0FEH
+000587 0687 0000000000000000        DB  0,0,0,0,0,0,0,0
+00058F 068F 0901020507700801        DB  9,1,2,5,7,112,8,1
+                                
+       0697                     HIPL:
+000597 0697 EBFE904C44202020        DB  0EBH,0FEH,90H,"LD",20H,20H,20H
+00059F 069F 2020200004010100        DB  20H,20H,20H,00H,04H,01H,01H,00H
+0005A7 06A7 02C000D004FE0200        DB  02H,0C0H,00H,0D0H,04H,0FEH,02H,00H
+0005AF 06AF 08000200000018FE        DB  08H,00H,02H,00H,00H,00H,18H,0FEH
+0005B7 06B7 0000000000000000        DB  0,0,0,0,0,0,0,0
+0005BF 06BF 0801020506C0            DB  8,1,2,5,6,192
+0005C5 06C5 0900                    DW  9
+                                
+       06C7                     CIPL:
+0005C7 06C7 EBFE904C44202020        DB  0EBH,0FEH,90H,"LD",20H,20H,20H
+0005CF 06CF 2020200002010100        DB  20H,20H,20H,00H,02H,01H,01H,00H
+0005D7 06D7 02E0006009F90700        DB  02H,0E0H,00H,060H,09H,0F9H,07H,00H
+0005DF 06DF 0F000200000018FE        DB  0FH,00H,02H,00H,00H,00H,18H,0FEH
+0005E7 06E7 0000000000000000        DB  0,0,0,0,0,0,0,0
+0005EF 06EF 0F01070F0EE0            DB  15,1,7,15,14,224
+0005F5 06F5 1B00                    DW  27
+                                
+       06F7                     EIPL:
+0005F7 06F7 014C53582D446F64        DB  01H,"LSX-Dodgers  Sy"
             6765727320205379    
-0005CC 06CC 7320AA0100FC9CFD        DB  "s",20H,EED,01H,00H,0FCH,ESA,ESA/256-2
-0005D4 06D4 0000000000000000        DB  00H,00H,00H,00H,00H,00H,00H,00H
-0005DC 06DC 0000000000000000        DB  00H,00H,00H,00H,00H,00H,00H,00H
-0005E4 06E4 0801020506C00901        DB  8,1,2,5,6,192,9,1
+000607 0707 7320BA01                DB  "s",20H,EED,01H
+00060B 070B 00FCA7FD                DW  0FC00H,ESA-0200H
+00060F 070F 0000000000000000        DB  0,0,0,0,0,0,0,0
+000617 0717 0000000000000000        DB  0,0,0,0,0,0,0,0
+00061F 071F 0801020506C0            DB  8,1,2,5,6,192
+000625 0725 0900                    DW  9
                                 
-       06EC                     JUMP:
-0005EC 06EC 3BFE3BFE3BFE3BFE        DW  SA,SA,SA,SA,SA,SA,SA,SA
+       0727                     JUMP:
+000627 0727 3BFE3BFE3BFE3BFE        DW  SA,SA,SA,SA,SA,SA,SA,SA
             3BFE3BFE3BFE3BFE    
-0005FC 06FC 3BFE3BFE3BFE3BFE        DW  SA,SA,SA,SA,SA,SA,SA,SA
+000637 0737 3BFE3BFE3BFE3BFE        DW  SA,SA,SA,SA,SA,SA,SA,SA
             3BFE3BFE3BFE3BFE    
                                 
-       070C                     FCB2:
-00060C 070C 004C442020202020        DB  0,"LD      BIN"
+       0747                     FCB2:
+000647 0747 004C442020202020        DB  0,"LD      BIN"
             2042494E            
-000618 0718                         DS  25,0
+000653 0753                         DS  25,0
                                 
-       0731                     FCB3:
-000631 0731 004C442020202020        DB  0,"LD      BIN"
+       076C                     FCB3:
+00066C 076C 004C442020202020        DB  0,"LD      BIN"
             2042494E            
-00063D 073D                         DS  25,0
+000678 0778                         DS  25,0
                                 
-       0756                     SDIR:
-000656 0756 0000                    DW  0
-       0758                     SIZE:
-000658 0758 0000                    DW  0
-       075A                     DATA:
-[EOF:SYS.ASM:SHIFT_JIS]
+       0791                     SDIR:
+000691 0791 0000                    DW  0
+       0793                     SIZE:
+000693 0793 0000                    DW  0
+       0795                     DATA:
+[EOF:SYS.ASM:UTF_8]

@@ -119,7 +119,7 @@ WK1FD0:
 
 CTC0:	DW	INTCTCE
 CTC1:	DW	INTCTCE
-CTC2:	DW	INTCTC2
+CTC2:	DW	INTCTCE
 CTC3:	DW	INTCTCE
 INTVEC:	DW	INT
 
@@ -147,9 +147,11 @@ _BPB2DPB:
 _BREAK:
 	JP	END_BATCH
 _GNCL:
-GNCPAT:	JP	GNCL		; self-modifying code
+	JP	GNCL		; self-modifying code
+GNCPAT	EQU	$-2
 _SNCL:
-SNCPAT:	JP	SNCL		; self-modifying code
+	JP	SNCL		; self-modifying code
+SNCPAT	EQU	$-2
 _COMANL:JP	COMANL
 
 _WE:

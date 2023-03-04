@@ -1,323 +1,317 @@
-0000*mac              	
-0000*dev              	011D*ver_6f           	00A0*nbsp             	
-CC00*run              	D206*bdos             	F000*workad           	
-F300*fatbf            	FB00*dtbuf            	FF00*keybf            	
-FF20*kbuf             	FFCA*extsp            	FFD9*trap38           	
-0050*width            	0018*line             	0007*colorf           	
-0010*keysp_h          	00C2*keysp_l          	0009*coms             	
-0001*ver_1            	0005*ver_2            	0007*ver_3            	
-1D00*macw             	0000*macd             	0157*ver              	
-0005*system           	000F*jp_hl            	005C*fcb1             	
-006C*fcb2             	005D*fcb1fn           	006D*fcb2fn           	
-0080*dta1             	FFCA*extbio           	0000*dpb_fatln        	
-0002*dpb_drd          	0004*dpb_dwt          	0006*dpb_fatid        	
-0007*dpb_secpcl       	0008*dpb_maxcl        	000A*dpb_fdmode       	
-000B*dpb_dirscnt      	000C*dpb_maxcyl       	000D*dpb_maxsec       	
-000E*dpb_fatps        	000F*dpb_bps          	0010*dpb_dirps        	
-0012*dpb_device       	0013*dpb_unitno       	0014*dpb_addcl        	
-001A*dpb_sdir         	001C*dpb_name         	CC07 start            	
-CC1B init             	CC3E inisio           	CC5E inidma           	
-CC8C sinit1           	CC96 sinit2           	CCBA text             	
-CCC7 text1            	CCE9 prn              	CD43 keyr             	
-CD56 non              	CDBB turbo            	CDCD biosok           	
-CDD2 nobios           	CDE4 crt1             	CDED tz1              	
-CDFE tz2              	CE04 bank             	CE19 bank1            	
-CE29 bank2            	CE44 nobank           	CE44 emm              	
-CE51 echeck1          	CE77 echeck2          	CE86 emm_bpb          	
-CE95 noemm            	CE95 keyrep           	CEA1 keyr1            	
-CEE1 init0            	CEE9 init1            	CF1E eadr2            	
-CF3A eadr0            	CF43 chkctc           	CF47 inictc1          	
-CF6A setcrtc          	CF6E setcrt1          	CF89 calc_fatln       	
-CF99 autod            	CFA2 autodv           	CFA5 inimes           	
-CFD2 _c8025h          	CFE2 textdt           	CFE9 siodata          	
-CFF5 at_trap38        	D004 prhx             	D00D prhx2            	
-D01C at_trape         	D01C at_scr1          	D02B at_scrup1        	
-D042 at_scrcl         	D04D at_upsub         	D051 at_upsub1        	
-D05D diskc            	D063 diskd            	D06E at_delp          	
-D076 at_errz          	D077 at_err           	D07A errw             	
-D081 errdw            	D08C errdr            	D097 at_wttrk         	
-D09E at_scrn          	D0A1 at_scre          	D0A1 at_dwt           	
-D0A3 at_wttrk1        	D0A6 dwtbl            	D0AF dwt0             	
-D0C1 dwt1             	D0C2 dwt2             	D0CB dwt3             	
-D0D0 dwt4             	D0E5 diskok_wt        	D0E5 at_wtb           	
-D0EA at_drd           	D0EF drdbl            	D0F8 drd0             	
-D10A drd1             	D118 drd3             	D12A diskok_rd        	
-D12A at_rdb           	D12F at_cpue          	D12F at_edwt          	
-D132 at_edwt0         	D134 at_edwt1         	D143 at_edrd          	
-D146 at_edrd0         	D148 at_edrd1         	D157 at_eadr          	
-D175 at_emme          	2FE4*at_rt            	D175 inite            	
-D209 wboot1           	D220 setcrt2          	D22D setcrt3          	
-D24D command          	D26D command2         	D27C comanl           	
-D29E comb             	D2A2 comb2            	D2B9 cex1             	
-D2D3 sdvsw            	D2DD open1            	D2E0 open             	
-D2E2 open3            	D2EF open2            	D2F3 defcb            	
-D301 setdta100        	D304 setdta           	D307 setdta1          	
-D30C sysc0f           	D30E system0          	D313 c_cd             	
-D317 s27buf           	D320 s27dta           	D323 s27              	
-D327 cexe4            	D336 cexe7            	D339 cexe5            	
-D354 cexe6            	D359 c_exe            	D36E compat           	
-D37D c_bat            	D392 c_bat1           	D3A4 c_bat2           	
-D3B3 run_batch        	D3C2 end_batch        	D3C9 fgetc_bat        	
-D3CC fgetc            	D3D8 c_del            	D3E2 c_ren            	
-D3EC cdel1            	D3F5 c_dir            	D406 cdir1            	
-D411 pdskf            	D420 pds1             	D425 pds2             	
-D42E pds3             	D435 pdskf1           	D454 p_name           	
-D483 dir3             	D48D dir6             	D495 ltnl             	
-D49A c_path           	D4A4 cpathp           	D4B0 cpath0           	
-D4B5 cpath1           	D4BC putdrv           	D4C6 msg_ar           	
-D4C9 prdec_hl         	D4CA prdec_ahl        	D4CD prdec_dehl       	
-D4D9 dec1             	D4E4 dec2             	D4F6 dec3             	
-D4FF decx             	D503 dec4             	D50B dec5             	
-D50D fprnt            	D51B fpr1             	D520 p_n1             	
-D52F prttms           	D569 prttms1          	D589 prdec_a          	
-D58E prta1            	D59E setfcb           	D5A7 setfcba          	
-D5C3 setfcb1          	D5CE setfcb2          	D5D3 zero_memory_de   	
-D5D4 fill_memory_de   	D5D9 c_copy           	D5F3 copy0            	
-D5FD copy1            	D61E copy8            	D624 copy9            	
-D629 copy1a           	D636 copy2            	D63D copy3            	
-D64A putname          	D65D putn1            	D66F copy6            	
-D686 copy7            	D6A7 copye            	D6AF copye2           	
-D6B1 c_type           	D6BB type1            	D6C4 type2            	
-D6D1 type3            	D6E1 typee            	D6E6 cwild            	
-D6E9 cwild1           	D6ED cwild2           	D6F4 dirmes           	
-D6FF dirhd            	D703 comtb            	D739 gdrd             	
-D73E gdrd1            	D749 gbank0           	D750 gdwt             	
-D755 gdwt1            	D762 gadr             	D76D s1fd0            	
-D778 bdwt             	D77C bdrd             	D77E brw              	
-D78F brw0             	D799 brw1             	D7AA brwpat           	
-D7B5 brwt             	D7BB brw2             	D7CB*banksp_h         	
-D7CA*banksp           	D7CE btfr             	D7D0 btfr1            	
-D7E4 edwt             	D7E8 edrd             	D7EA edwt1            	
-D81B dma_add_sec      	D820 edmad            	D824 dmalen           	
-D82C dmab             	D82F emme             	06B5*at_re            	
-D82F bdos0            	D837 dos1             	D842 _dos2            	
-D85E c_rem            	D85F _error           	D861 _sys09           	
-D862 _sx09            	D86D msx1             	D870 msx              	
-D876 _sys0c           	D87B _sys0d           	D88A _sys0e           	
-D899 sx0e2            	D89B _sys0f           	D8AB _s16xx           	
-D8D9 s16loop          	D8E0 s16pat           	D8ED fend0f           	
-D8EF _sys10           	D8FB _s10a            	D91D sdecm1           	
-D934 fend10           	D936 _sys11           	D93C _s12x1           	
-D96D _s12dir          	D976 _s11b            	D978 fend             	
-D979 fende            	D97F _sys12           	D989 _s16k            	
-D990 ofcb             	D996 s16k1            	D9B1 s16k2            	
-D9B2 s16k3            	D9B5 _sys13           	D9BB fend13           	
-D9BD _sys14           	D9C3 sread            	D9CD fendx            	
-D9D3 _sys15           	D9D9 swrite           	D9E0 _sys17           	
-D9E8 _sys16           	D9FC _s16x2           	DA03 _s16x1           	
-DA1F _sys21           	DA27 _sys22           	DA27 _sys28           	
-DA2F _sys18           	DA34 _sys19           	DA39 _sys1a           	
-DA3F _sys1b           	DA65 _sys1d           	DA69 _sys1f           	
-DA70 _sys23           	DA8D _s24x1           	DA94 _s23x1           	
-DA96 _sys24           	DA9F _sys29           	DAA6 s29x1            	
-DABA _sys30           	DAC0 _sys2f           	DAC4 s2fx             	
-DAD9 s2fpat           	DADC s30x2            	DAE1 _sys5a           	
-D85F*_sys04           	D85F*_sys05           	D85F*_sys1c           	
-D85F*_sys1e           	D85F*_sys20           	D85F*_sys2e           	
-DAF5 bios             	DAFD bios1            	DB05 bios3            	
-DB0B bios2            	DB16*bios_sp          	DB19 int              	
-DB24 scexe            	DB2B intpe            	DB2C intpe2           	
-DB2D intctce          	DB30 intctc2          	DB32*intcpat          	
-DB3F keyset0          	DB55 keyset1          	DB66 keys10e          	
-DB89 keyset           	DB8D keybs            	DB8F keybs1           	
-DBA7 keybc_ifbreak    	DBAA keybc            	DBB3 pop_af_hl_scf_ret	
-DBB7 _sys01           	DBBA msg_a            	DBC3 _sys02           	
-DBC8 _sys06           	DBCD printx           	DBD0 _sys08           	
-DBD5 break            	DBD9 break1           	DBE1 pause            	
-DBE4 flget            	DBF1 flget1           	DC09 _sys0a           	
-DC1C sax0             	DC1E sax1             	DC24 sax4             	
-DC28 sax2             	DC2C sax3             	DC35 _sys0b           	
-DC3D constx           	DC4B _sys2a           	DC5A rddate1          	
-DC66 rddate2          	DC6E _sys2c           	DC83 in49sb_bcd       	
-DC94 esc1             	DCAF ct0cx            	DCC7 ct05x            	
-DCD2 esc1x            	DCD4 esc1y            	DCDC esc1w            	
-DCDE esc1z            	DCE4 esc1c            	DCE5 ank              	
-DCF3 kanjie           	DCF6 printe5          	DCFA esc              	
-DD12 esc2             	DD14 escyp            	DD1D print            	
-DD1F escflg           	DD29 insflg           	DD32 kanflg           	
-DD44 kanji1           	DD49 ctrl             	DD5C kanji2           	
-DD8F kanclr           	DDA8 printe7          	DDAA printe6          	
-DDAD printe4          	DDB3 printe2          	DDB4 printe3          	
-DDBA printe8          	DDC0 ctrl00           	DDC1 print2           	
-DDC8 set_txadr_hl     	DDCC ctrl08           	DDD3 ctrl1d           	
-DDDC ctrl1e           	DDE7 ctrl1c           	DDED ctrl09           	
-DDFC ctrl02           	DE18 c8x1             	DE20 ctrl05           	
-DE28 c08x1            	DE2C linecl           	DE33 linecl1          	
-DE46 ctrl0d           	DE4B loc              	DE59 ctrl12           	
-DE61 ctrl0b           	DE68 ctrl1b           	DE6E loc1             	
-DE79 loc2             	DE7D loc3             	DE82 conout1          	
-DE94 cursor           	DEA3 ctrl07           	DEA6 beep1            	
-DEB3 ot49sb           	DEBE in49sb           	DEC2 canr             	
-DECF canw             	DED9 comout           	DEE2 insert           	
-DEF6 c12x1            	DEFE c12s             	DF04 x1pat            	
-DF17 ctrl0c           	DF1A ctrl06           	DF1E c1ax1            	
-DF3B ctrl04           	DF41 ctrl03           	DF44 ctrl0a           	
-DF44 ctrl1f           	DF59 ctrl0e           	DF5F scr              	
-DF63 scr1             	DF72 scrup1           	DF8F setdma           	
-DF92 sdma             	DF99 scrdmad          	DFA0 upsub            	
-DFB7 go_dma           	DFC2 scrcl            	DFCD scrn             	
-DFF2 scrn1            	DFF4 scrn2            	DFF7 scrne            	
-DFF7 pos              	E000 pos1             	E00B getl             	
-E014 getl1            	E023 getl1v           	E051 getl2            	
-E05A getl3            	E065 inkey            	E079 inkey1           	
-0F47*at_rs            	E07C filec            	E07F filec2           	
-E087 file             	E0AA devi1            	E0B8 noroot           	
-E0B8 setdir           	E0C0 setdir1          	E0E4 filed            	
-E0EC file2            	E0FC file3            	E104 file4            	
-E109 file4l           	E119 file12           	E122 file9            	
-E127 file10           	E12B filei            	E133 fill_memory      	
-E138 cchkf            	E140 cchk2            	E143 cchk3            	
-E15D ss1              	E15E spcut            	E164 setdrvf          	
-E167 setdrv0          	E170 setdrv           	E183 getdrv           	
-E18C getdrv1          	E190 sopenx           	E1BD sopen            	
-E1C0 sopenc           	E1DE sdirx0           	E1E9 sdirx1           	
-E1ED sopen1           	E1ED sdecpat          	E1EF sopen1x          	
-E1F7 sopen2           	E1F8 openpat          	E200 sopen3           	
-E208 md_pat           	E212 sopen5           	E219 sopen6           	
-E21B scf_ff_ret       	E21E rdderr           	E221 nopen            	
-E253 nopen2           	E25D sopene2          	E26C sopene           	
-E26E copen            	E29A copencl          	E2AD copen1           	
-E2BF copene           	E2C4 read_dir         	E2D3 filese           	
-E2E8 filese1          	E2ED zf0_cf0_aff_ret  	E2F0 nextse           	
-E2FF fnext            	E30B cpname           	E31F cpname1          	
-E325 cpfile4          	E32B cpfile           	E32F cpstr1           	
-E346 cpstr2           	E34A cpstr3           	E34C cpfile2          	
-E354 dcpat            	E369 dc1              	E36E clustx           	
-E371 spcpat           	E373 l_cldbl          	E37B e_cldbl          	
-E381 clspat           	E38B endcl            	E38C clpat1           	
-E390 clpat2           	E393 cap              	E39C cap2             	
-E39F cap3             	E3A8 cap4             	E3AE chdir            	
-E3BB lddir            	E3D0 chdir2           	E3D3 lddirx           	
-E3D8 lddirx1          	E3E8 lddirs           	E3EE kill             	
-E3F6 kills            	E3FC killsx           	E408 kills1           	
-E427 killw            	E42A killw1           	E437 killw2           	
-E43A chkatt           	E444 name             	E462 namep            	
-E475 setname          	E482 sname1           	E490 sname3           	
-E498 wtdb             	E49D swtdbf           	E4A4 fkanc            	
-E4AB fkan             	E4AC fkanx            	E4BB fkan1            	
-E4BE chkwildx         	E4C2 chkwild          	E4C6 chkwil1          	
-E4CE sdirent          	E4DF sde1             	E4E8 sdloop           	
-E4ED sdpat            	E4F8 wopen            	E503 topen2           	
-E504 topen            	E509 wrdfx            	E50C l_wrfx           	
-E515 e_wrfx           	E51D wrdf             	E524 wrdf1            	
-E544 wrdf2            	E547 wrdf3            	E559 wrdf4            	
-E55B wrdf5            	E563 rwxr             	E566 l_rwx            	
-E571 e_rwx            	E57B rwx1             	E591 rwx2             	
-E596 scf_ret          	E598 dskf             	E598 maxclp           	
-E5A5 dskf1            	E5B0 dskf2            	E5B7 popscf           	
-E5BA settms           	E5BF settmsx          	E5EC pushrr           	
-E5FC get_cpm_r_size   	E60A init_rnd         	E612 get_rr_ahl       	
-E61C set_rr_ahl       	E626 init_seq         	E62E getseq           	
-E63C setseq1          	E656 setseq           	E659 poprr            	
-E667 rb_write         	E66E rb_read          	E673 rbrw             	
-E684 setseq_swc_rnd   	E696*setseq_swc_seq_rr	E69E jp_bc            	
-E21B*_sys03           	E21B*_sys2b           	E21B*_sys2d           	
-E21B*_sys39           	E21B*_sys3a           	E6A0 _sys26           	
-E6C6 s26x1            	E6EE rbwb             	E6F3 rbwb1            	
-E707 rbwc             	E71F rbwend           	E736 rbw1             	
-E73B dd_nul           	E73C drdf0            	E73C dwtf0            	
-E73D rbwerr           	E746 rbrerr1          	E748 rbrerr2          	
-E752 rbrerr           	E756 rbrfl            	E756 rbrflp           	
-E761 rbrfl1           	E766 rbrfl2           	E76F ddx              	
-E778 _sys27           	E7A1 rbr1             	E7CF rbrb             	
-E7D4 rbrb1            	E7E9 rbrc             	E7FF rbrend           	
-E802 rbrend0          	E808 rbrap            	E80B rbrdir           	
-E81D rbx0             	E82C rbx1             	E844 rbx1r            	
-E84C rbx2             	E85D rbx3             	E86B rbxa             	
-E880 secsz            	E895 rbxa1            	E8A0 rbxb             	
-E8AE rbxb1            	E8B5 rbxb2            	E8B8 rbxc             	
-E8C4 rbxend           	E8C5*rbsize           	E8DB get_rr_bcde      	
-E8EF dwtc             	E8F5 drdc             	E8F9 dwtc1            	
-E903 save_drwc        	E912 drdc1            	E932 inc_hl_drwc      	
-E938 drdc2            	E939 drdc3            	E93F drw_flush        	
-E942*drwf_c           	E943*drwf_b           	E949*drwf_e           	
-E94A*drwf_d           	E94C*drwf_hl          	E953*drwf_mode        	
-E955 drdf1            	E958 drdx             	E970 pop_de_bc_hl_ret 	
-E974 drdn             	E975 drdn1            	E978 drdnx            	
-E97C drdx1            	E991 drdne            	E996 drdy             	
-E9AA pop_hl_ret       	E9AC dwtx             	E9BE _dbs24           	
-E9CA pop_de_bc_hl_ret2	E9CC rdfatx           	E9EC rdfate2          	
-E9F2 pop_ix_de_bc_hl_ret	E9F6 wtfatx           	EA15 ncl1             	
-EA33 ncl2             	EA3C nclpat           	EA48 ncl3             	
-EA65 ncl3x1           	EA6E gncl             	EA82 gnc1             	
-EA87 gnc1l            	EA91 sncl             	EAA7 snc1             	
-EAAB snc11            	EAB1 fat_changed      	EAB7 n16cl3           	
-EAC5 gncl16           	EAD2 sncl16           	EAE4 nextx            	
-EAE4 _secps           	EAE7 ncpat            	EAED gnclx            	
-EAF4 rdfat            	EAF9 rdfat1           	EB3B getbpb           	
-EB5C setfdmode        	EB6C getbpbok         	EB72 rdfat0x          	
-EB7B*devswc           	EB81 bpb2dpb          	EB87 bpbok            	
-EBAB bpbdp1           	EBAE bpbdp2           	EBC3 bpbbps1          	
-EBC7 bpbde1           	EBFF divsec           	EC06 divsec1          	
-EC0C not_fd           	EC22 bpb16bit         	EC29 bpbtc1           	
-EC35 bpbtc2           	EC53 bpbfat1          	EC5F rdfats           	
-EC6B drd16            	EC6D drd24            	EC6F drd24b           	
-EC75 drdpat           	EC78 pop_ix_ret       	EC7B dwt16            	
-EC7D dwt24            	EC7F dwt24b           	EC85 dwtpat           	
-EC8A wtfat            	ECA5 fatsetup         	ECAC fats2            	
-ECB0 fatsx            	ECC0 fat_skp          	ECC8 fat1             	
-ECCD fat2             	ECD9 fatsetup12       	ECE6 fatsetup16       	
-ECF3 chgdrv           	ECFA chgdrv1          	ED04 chgdrve          	
-ED06 chgdrv0          	ED13 chgdrv2          	ED69 sppat2           	
-ED8F setfat16         	ED9C extra1           	EDAB getdpbd          	
-EDB4 chgdrvr          	EDBB getdpb1          	EDBE getdpb           	
-EDDB _sys5f           	EDDC fflush           	EDE9 fflushbuf        	
-EDF7 seek             	EDFE div1             	EE05 div2             	
-EE44 setm2            	EE4E fdccmd2          	EE51 fspat            	
-EE54 fdccmd           	EE57 fdcpat           	EE5C sst              	
-EE5E sst1             	EE68 setmode          	EE69 fdmode           	
-EE73 ready            	EE7A ready2           	EE7C waita            	
-EE88 readye           	EE8A fdcres           	EE90 fdmoff           	
-EE95 mopat            	EE9C secset           	EEA1 comset           	
-EEA5 delay0           	EEA7 delay            	EEAB drive            	
-EEB4 rnf              	EEBA retry            	EEBB wttrk            	
-EEC1 fdwt             	EEC3 wttrk1           	EECA diskok           	
-EECA fdcnt            	EECF fdrd             	EED6 disk             	
-EED9 disk1            	EEE0 diskr            	EEE5 disk2            	
-EEEC dmapat           	EF24 diske2           	EF2E errf             	
-EF2F delp             	EF37 err              	EF3A dmad             	
-EF45 dmahl            	EF4A dmae             	1E1A*at_r             	
-EF4A at_table         	0040*pathx            	EF4A pathd            	
-EF8A pathe            	EF8B dta_ccp          	EFB0 fcb_bat          	
-EFD5 free             	EFE2 at_work          	F000 cpm_boot         	
-F003 _sys00           	F003 cpm_wboot        	F006 cpm_const        	
-F009 _sys07           	F009 cpm_conin        	F00C cpm_conout       	
-F00F decbf            	F00F*rr_buf_hl        	F011*rr_buf_a         	
-F014 fdrv             	F015 fname            	F039 sfile            	
-F05D leftx            	F05F dtax             	F061 zero             	
-F061 beepd            	F062*rtc_yy           	F063*rtc_mw           	
-F064*rtc_dd           	F065*rtc_tt           	F066*rtc_mm           	
-F067*rtc_ss           	F062*rom_slt          	F070 check            	
-F071 ok               	F079 comerm           	F080 _cyl0            	
-F081 _cyl1            	F082 _cyl2            	F083 _cyl3            	
-F084 _drive           	F085 _seeksp          	F086 _iseek           	
-F087 _dvsw            	F088 _drv             	F089 _dsk             	
-F08A _dta             	F08C _ctc             	F08E _txadr           	
-F090 _keyps           	F092 _keyd            	F094 _keysp           	
-F096 _colorf          	F097 _line            	F098 _fcb             	
-F09A _fbps            	F09C _fbad            	F09E _fbcnt           	
-F09F _filen           	F0A0 _dirf            	F0A2 _wtfatf          	
-F0A4 _wtdbf           	F0A5 _dbdrv           	F0A6 _dbsec           	
-F0A8 _dpb             	F0AA _fatdrv          	F0AB _fatix           	
-F0AC _fakefree        	F0B0 crtcd            	F0B1 _width           	
-F0B2 tvramtop         	F0B6 _line2           	F0B7 wke4             	
-F0B8 wke6             	F0B9 wk40             	F0BA _page_minus      	
-F0BC _width_minus     	F0BE wk30             	F0BF wk31             	
-F0BF wk1fd0           	F0C0 ctc0             	F0C2 ctc1             	
-F0C4 ctc2             	F0C6 ctc3             	F0C8 intvec           	
-F0CA _inkey           	F0CD _print           	F0D0 _scrn            	
-F0D3 _pos             	F0D6 _loc             	F0D9 _chgdrv          	
-F0DC _getdpb          	F0DF _fflush          	F0E2 _rdfatx          	
-F0E5 _rdfat           	F0E8 _wttrk           	F0EB _fdrd            	
-F0EE _fdwt            	F0F1 _bpb2dpb         	F0F4 _break           	
-F0F7 _gncl            	F0F7 gncpat           	F0FA _sncl            	
-F0FA sncpat           	F0FD _comanl          	F100 _we              	
-F100 stable           	F17C _fatbf           	F17E _dtbuf           	
-F180 ctrltb           	F1C0 m2d              	F1D2 m2hd             	
-F1E4 sddata           	F1EE sddatae          	F1F0 _fcb_bat         	
-F1F2 _path            	F1F4 scdir            	F1F6 sfbps            	
-F1F8 sfndf            	F1FA _fatps           	F1FC _dirps           	
-F1FE _clps            	F200 _pe              	F200 _device          	
-F280 emmfl            	F282 emmrd            	F284 emmwr            	
-F288 emmcl            	F292 emmdv            	F2A0 bankfl           	
+0000*mac              	0000*dev              	
+011D*ver_6f           	CD00*run              	D306*bdos             	
+F000*workad           	F300*fatbf            	FB00*dtbuf            	
+FF00*keybf            	FF20*kbuf             	FFCA*extsp            	
+FFD9*trap38           	0050*width            	0018*line             	
+0007*colorf           	0010*keysp_h          	00C2*keysp_l          	
+0008*coms             	0001*ver_1            	0005*ver_2            	
+0008*ver_3            	1D00*macw             	0000*macd             	
+0158*ver              	0005*system           	000F*jp_hl            	
+005C*fcb1             	006C*fcb2             	005D*fcb1fn           	
+006D*fcb2fn           	0080*dta1             	FFCA*extbio           	
+0000*dpb_fatln        	0002*dpb_drd          	0004*dpb_dwt          	
+0006*dpb_fatid        	0007*dpb_secpcl       	0008*dpb_maxcl        	
+000A*dpb_fdmode       	000B*dpb_dirscnt      	000C*dpb_maxcyl       	
+000D*dpb_maxsec       	000E*dpb_fatps        	000F*dpb_bps          	
+0010*dpb_dirps        	0012*dpb_device       	0013*dpb_unitno       	
+0014*dpb_addcl        	001A*dpb_sdir         	001C*dpb_name         	
+CD07 start            	CD1B init             	CD3E inisio           	
+CD5E inidma           	CD8C sinit1           	CD96 sinit2           	
+CDBA text             	CDC7 text1            	CDE9 prn              	
+CE43 keyr             	CE56 non              	CEA1 turbo            	
+CEB3 biosok           	CEB8 nobios           	CECA crt1             	
+CED3 tz1              	CEE4 tz2              	CEEA bank             	
+CEFF bank1            	CF0F bank2            	CF2A nobank           	
+CF2A emm              	CF37 echeck1          	CF5D echeck2          	
+CF7E emm_bpb          	CF82 emm_nobpb        	CF89 emm_bpb1         	
+CF95 noemm            	CF95 keyrep           	CFA1 keyr1            	
+CFE1 init0            	CFE9 init1            	D01E eadr0            	
+D027 eadrx            	D02D chkctc           	D031 inictc1          	
+D054 setcrtc          	D058 setcrt1          	D073 calc_fatln       	
+D083 autod            	D08C autodv           	D08F inimes           	
+D0BC _c8025h          	D0CC textdt           	D0D3 siodata          	
+D0DF at_trap38        	D0EE prhx             	D0F7 prhx2            	
+D106 at_trape         	D106 at_scr1          	D115 at_scrup1        	
+D12C at_scrcl         	D137 at_upsub         	D13B at_upsub1        	
+D147 diskc            	D14D diskd            	D158 at_delp          	
+D160 at_errz          	D161 at_err           	D164 errw             	
+D16B errdw            	D176 errdr            	D181 at_wttrk         	
+D188 at_scrn          	D18B at_scre          	D18B at_dwt           	
+D18D at_wttrk1        	D190 dwtbl            	D199 dwt0             	
+D1AB dwt1             	D1AC dwt2             	D1B5 dwt3             	
+D1BA dwt4             	D1CF diskok_wt        	D1CF at_wtb           	
+D1D4 at_drd           	D1D9 drdbl            	D1E2 drd0             	
+D1F4 drd1             	D202 drd3             	D214 diskok_rd        	
+D214 at_rdb           	D219 at_cpue          	2EFA*at_rt            	
+D219 inite            	D309 wboot1           	D320 setcrt2          	
+D32D setcrt3          	D34D command          	D36D command2         	
+D37C comanl           	D39E comb             	D3A2 comb2            	
+D3B9 cex1             	D3D3 sdvsw            	D3DD open1            	
+D3E0 open             	D3E2 open3            	D3EF open2            	
+D3F3 defcb            	D401 setdta100        	D404 setdta           	
+D407 setdta1          	D40C sysc0f           	D40E system0          	
+D413 c_cd             	D417 s27buf           	D420 s27dta           	
+D423 s27              	D427 cexe4            	D436 cexe7            	
+D439 cexe5            	D454 cexe6            	D459 c_exe            	
+D46E compat           	D47D c_bat            	D492 c_bat1           	
+D4A4 c_bat2           	D4B3 run_batch        	D4C2 end_batch        	
+D4C9 fgetc_bat        	D4CC fgetc            	D4D8 c_del            	
+D4E2 c_ren            	D4EC cdel1            	D4F5 c_dir            	
+D506 cdir1            	D511 pdskf            	D520 pds1             	
+D525 pds2             	D52E pds3             	D535 pdskf1           	
+D554 p_name           	D56A dir3             	D574 dir6             	
+D587 ltnl             	D58C c_path           	D596 cpathp           	
+D5A2 cpath0           	D5A7 cpath1           	D5AE putdrv           	
+D5B8 msg_ar           	D5BB prdec_hl         	D5BE prdec_dehl       	
+D5CA dec1             	D5D5 dec2             	D5E7 dec3             	
+D5F0 decx             	D5F4 dec4             	D5FC dec5             	
+D5FE fprnt            	D60F p_n1             	D61C p_n2             	
+D620 setfcb           	D629 setfcba          	D645 setfcb1          	
+D650 setfcb2          	D655 zero_memory_de   	D656 fill_memory_de   	
+D65B c_copy           	D675 copy0            	D67F copy1            	
+D6A0 copy8            	D6A6 copy9            	D6AB copy1a           	
+D6B8 copy2            	D6BF copy3            	D6CC putname          	
+D6DF putn1            	D6F1 copy6            	D708 copy7            	
+D729 copye            	D731 copye2           	D733 cwild            	
+D736 cwild1           	D73A cwild2           	D741 comtb            	
+D771 gdrd             	D776 gdrd1            	D781 gbank0           	
+D788 gdwt             	D78D gdwt1            	D79A gadr             	
+D7A5 s1fd0            	D7B0 bdwt             	D7B4 bdrd             	
+D7B6 brw              	D7C7 brw0             	D7D1 brw1             	
+D7E2 brwpat           	D7ED brwt             	D7F3 brw2             	
+D803*banksp_h         	D802*banksp           	D806 btfr             	
+D808 btfr1            	D81C edwt             	D81F edwt0            	
+D821 edwt1            	D830 edrd             	D833 edrd0            	
+D835 edrd1            	D844 eadr             	D862 bdos0            	
+D86A dos1             	D875 _dos2            	D891 c_rem            	
+D892 _error           	D894 _sys09           	D895 _sx09            	
+D8A0 msx1             	D8A3 msx              	D8A9 _sys0c           	
+D8AE _sys0d           	D8BD _sys0e           	D8CC sx0e2            	
+D8CE _sys0f           	D8DE _s16xx           	D90C s16loop          	
+D913 s16pat           	D920 fend0f           	D922 _sys10           	
+D92E _s10a            	D950 sdecm1           	D967 fend10           	
+D969 _sys11           	D96F _s12x1           	D9A0 _s12dir          	
+D9A9 _s11b            	D9AB fend             	D9AC fende            	
+D9B2 _sys12           	D9BC _s16k            	D9C3 ofcb             	
+D9C9 s16k1            	D9E4 s16k2            	D9E5 s16k3            	
+D9E8 _sys13           	D9EE fend13           	D9F0 _sys14           	
+D9F6 sread            	DA00 fendx            	DA06 _sys15           	
+DA0C swrite           	DA13 _sys17           	DA1B _sys16           	
+DA2F _s16x2           	DA36 _s16x1           	DA52 _sys21           	
+DA5A _sys22           	DA5A _sys28           	DA62 _sys18           	
+DA67 _sys19           	DA6C _sys1a           	DA72 _sys1b           	
+DA98 _sys1d           	DA9C _sys1f           	DAA3 _sys23           	
+DAC0 _s24x1           	DAC7 _s23x1           	DAC9 _sys24           	
+DAD2 _sys29           	DAD9 s29x1            	DAED _sys30           	
+DAF3 _sys2f           	DAF7 s2fx             	DB0C s2fpat           	
+DB0F s30x2            	DB14 _sys5a           	D892*_sys04           	
+D892*_sys05           	D892*_sys1c           	D892*_sys1e           	
+D892*_sys20           	D892*_sys2e           	DB28 bios             	
+DB30 bios1            	DB38 bios3            	DB3E bios2            	
+DB49*bios_sp          	DB4C int              	DB57 scexe            	
+DB5E intpe            	DB5F intpe2           	DB60 intctce          	
+DB63 keyset1          	DB75 keyset           	DB79 keybs            	
+DB7B keybs1           	DB93 keybc_ifbreak    	DB96 keybc            	
+DB9F pop_af_hl_scf_ret	DBA3 _sys01           	DBA6 msg_a            	
+DBAF _sys02           	DBB4 _sys06           	DBB9 printx           	
+DBBC _sys08           	DBC1 break            	DBC5 break1           	
+DBCD pause            	DBD0 flget            	DBDD flget1           	
+DBEB flgetr           	DBFF flget2           	DC00*flget_swc        	
+DC09 flget3           	DC15*keyrepeat_swc    	DC1F flget4           	
+DC22 flgete           	DC27 _sys0a           	DC3A sax0             	
+DC3C sax1             	DC42 sax4             	DC46 sax2             	
+DC4A sax3             	DC53 _sys0b           	DC5B constx           	
+DC69 _sys2a           	DC78 rddate1          	DC84 rddate2          	
+DC8C _sys2c           	DCA1 in49sb_bcd       	DCB2 esc1             	
+DCCD ct0cx            	DCE5 ct05x            	DCF0 esc1x            	
+DCF2 esc1y            	DCFA esc1w            	DCFC esc1z            	
+DD02 esc1c            	DD03 ank              	DD11 kanjie           	
+DD14 printe5          	DD18 esc              	DD30 esc2             	
+DD32 escyp            	DD3B print            	DD3D escflg           	
+DD47 insflg           	DD50 kanflg           	DD62 kanji1           	
+DD67 ctrl             	DD7A kanji2           	DDAD kanclr           	
+DDC6 printe7          	DDC8 printe6          	DDCB printe4          	
+DDD1 printe2          	DDD2 printe3          	DDD8 printe8          	
+DDDE ctrl00           	DDDF print2           	DDE6 set_txadr_hl     	
+DDEA ctrl08           	DDF1 ctrl1d           	DDFA ctrl1e           	
+DE05 ctrl1c           	DE0B ctrl09           	DE1A ctrl02           	
+DE36 c8x1             	DE3E ctrl05           	DE46 c08x1            	
+DE4A linecl           	DE51 linecl1          	DE64 ctrl0d           	
+DE69 loc              	DE77 ctrl12           	DE7F ctrl0b           	
+DE86 ctrl1b           	DE8C loc1             	DE97 loc2             	
+DE9B loc3             	DEA0 conout1          	DEB2 cursor           	
+DEC1 ctrl07           	DEC4 beep1            	DED1 ot49sb           	
+DEDC in49sb           	DEE0 canr             	DEED canw             	
+DEF7 comout           	DF00 insert           	DF14 c12x1            	
+DF1C c12s             	DF22 x1pat            	DF35 ctrl0c           	
+DF38 ctrl06           	DF3C c1ax1            	DF59 ctrl04           	
+DF5F ctrl03           	DF62 ctrl0a           	DF62 ctrl1f           	
+DF77 ctrl0e           	DF7D scr              	DF81 scr1             	
+DF90 scrup1           	DFAD setdma           	DFB0 sdma             	
+DFB7 scrdmad          	DFBE upsub            	DFD5 go_dma           	
+DFE0 scrcl            	DFEB scrn             	E010 scrn1            	
+E012 scrn2            	E015 scrne            	E015 pos              	
+E01E pos1             	E029 getl             	E032 getl1            	
+E041 getl1v           	E06F getl2            	E078 getl3            	
+E083 inkey            	E097 inkey1           	0E7B*at_rs            	
+E09A filec            	E09D filec2           	E0A5 file             	
+E0C8 devi1            	E0D6 noroot           	E0D6 setdir           	
+E0DE setdir1          	E102 filed            	E10A file2            	
+E11A file3            	E122 file4            	E127 file4l           	
+E137 file12           	E140 file9            	E145 file10           	
+E149 filei            	E151 fill_memory      	E156 cchkf            	
+E15E cchk2            	E161 cchk3            	E17B ss1              	
+E17C spcut            	E182 setdrvf          	E185 setdrv0          	
+E18E setdrv           	E1A1 getdrv           	E1AA getdrv1          	
+E1AE sopenx           	E1DB sopen            	E1DE sopenc           	
+E1FC sdirx0           	E207 sdirx1           	E20B sopen1           	
+E20C*sdecpat          	E20D sopen1x          	E215 sopen2           	
+E216 openpat          	E21E sopen3           	E227*md_pat           	
+E230 sopen5           	E237 sopen6           	E239 scf_ff_ret       	
+E23C rdderr           	E23F nopen            	E271 nopen2           	
+E27B sopene2          	E28A sopene           	E28C copen            	
+E2B8 copencl          	E2CB copen1           	E2DD copene           	
+E2E2 read_dir         	E2F1 filese           	E306 filese1          	
+E30B zf0_cf0_aff_ret  	E30E nextse           	E31D fnext            	
+E329 cpname           	E33D cpname1          	E343 cpfile4          	
+E349 cpfile           	E34D cpstr1           	E364 cpstr2           	
+E368 cpstr3           	E36A cpfile2          	E372 dcpat            	
+E387 dc1              	E38C clustx           	E390*spcpat           	
+E391 l_cldbl          	E399 e_cldbl          	E3A0*clspat           	
+E3A9 endcl            	E3AB*clpat1           	E3AF*clpat2           	
+E3B1 cap              	E3BA cap2             	E3BD cap3             	
+E3C4 cap4             	E3C7 chdir            	E3D4 lddir            	
+E3E9 chdir2           	E3EC lddirx           	E3F1 lddirx1          	
+E401 lddirs           	E407 kill             	E40F kills            	
+E415 killsx           	E421 kills1           	E440 killw            	
+E443 killw1           	E450 killw2           	E453 chkatt           	
+E45D name             	E47B namep            	E48E setname          	
+E49B sname1           	E4A9 sname3           	E4B1 wtdb             	
+E4B6 swtdbf           	E4BD fkanc            	E4C4 fkan             	
+E4C5 fkanx            	E4D4 fkan1            	E4D7 chkwildx         	
+E4DB chkwild          	E4DF chkwil1          	E4E7 sdirent          	
+E4F8 sde1             	E501 sdloop           	E506 sdpat            	
+E511 wopen            	E51C topen2           	E51D topen            	
+E522 wrdfx            	E525 l_wrfx           	E52E e_wrfx           	
+E536 wrdf             	E53D wrdf1            	E55D wrdf2            	
+E560 wrdf3            	E572 wrdf4            	E574 wrdf5            	
+E57C rwxr             	E57F l_rwx            	E58A e_rwx            	
+E594 rwx1             	E5AA rwx2             	E5AF scf_ret          	
+E5B1 dskf             	E5B2*maxclp           	E5BE dskf1            	
+E5C9 dskf2            	E5D0 popscf           	E5D3 settms           	
+E5D8 settmsx          	E605 pushrr           	E615 get_cpm_r_size   	
+E623 init_rnd         	E62B get_rr_ahl       	E635 set_rr_ahl       	
+E63F init_seq         	E647 getseq           	E655 setseq1          	
+E66F setseq           	E672 poprr            	E680 rb_write         	
+E687 rb_read          	E68C rbrw             	E69D setseq_swc_rnd   	
+E6AF*setseq_swc_seq_rr	E6B7 jp_bc            	E239*_sys03           	
+E239*_sys2b           	E239*_sys2d           	E239*_sys39           	
+E239*_sys3a           	E6B9 _sys26           	E6DF s26x1            	
+E707 rbwb             	E70C rbwb1            	E720 rbwc             	
+E738 rbwend           	E74F rbw1             	E754 dd_nul           	
+E755 drdf0            	E755 dwtf0            	E756 rbwerr           	
+E75F rbrerr1          	E761 rbrerr2          	E76B rbrerr           	
+E76F rbrfl            	E76F rbrflp           	E77A rbrfl1           	
+E77F rbrfl2           	E788 ddx              	E791 _sys27           	
+E7BA rbr1             	E7E8 rbrb             	E7ED rbrb1            	
+E802 rbrc             	E818 rbrend           	E81B rbrend0          	
+E821 rbrap            	E824 rbrdir           	E836 rbx0             	
+E845 rbx1             	E85D rbx1r            	E865 rbx2             	
+E876 rbx3             	E884 rbxa             	E899 secsz            	
+E8AE rbxa1            	E8B9 rbxb             	E8C7 rbxb1            	
+E8CE rbxb2            	E8D1 rbxc             	E8DD rbxend           	
+E8DE*rbsize           	E8F4 get_rr_bcde      	E908 dwtc             	
+E90E drdc             	E912 dwtc1            	E91C save_drwc        	
+E92B drdc1            	E94B inc_hl_drwc      	E951 drdc2            	
+E952 drdc3            	E958 drw_flush        	E95B*drwf_c           	
+E95C*drwf_b           	E962*drwf_e           	E963*drwf_d           	
+E965*drwf_hl          	E96C*drwf_mode        	E96E drdf1            	
+E971 drdx             	E989 pop_de_bc_hl_ret 	E98D drdn             	
+E98E drdn1            	E991 drdnx            	E995 drdx1            	
+E9AA drdne            	E9AF drdy             	E9C3 pop_hl_ret       	
+E9C5 dwtx             	E9D8*_dbs24           	E9E3 pop_de_bc_hl_ret2	
+E9E5 rdfatx           	EA05 rdfate2          	EA0B pop_ix_de_bc_hl_ret	
+EA0F wtfatx           	EA2E ncl1             	EA4C ncl2             	
+EA57*nclpat_fatix     	EA56*nclpat_fatdrv    	EA61 ncl3             	
+EA7E ncl3x1           	EA87 gncl             	EA9B gnc1             	
+EAA0 gnc1l            	EAAA sncl             	EAC0 snc1             	
+EAC4 snc11            	EACA fat_changed      	EAD0 n16cl3           	
+EADE gncl16           	EAEB sncl16           	EAFD nextx            	
+EAFE*_secps           	EB01*_ncpat           	EB06 gnclx            	
+EB0D rdfat            	EB12 rdfat1           	EB54 getbpb           	
+EB75 setfdmode        	EB85 getbpbok         	EB88 rdfat0x          	
+EB97 pop_hl_scf_ret   	EB9A bpb2dpb          	EBA0 bpbok            	
+EBC4 bpbdp1           	EBC7 bpbdp2           	EBDC bpbbps1          	
+EBE0 bpbde1           	EC18 divsec           	EC1F divsec1          	
+EC25 not_fd           	EC3B bpb16bit         	EC42 bpbtc1           	
+EC4E bpbtc2           	EC6C bpbfat1          	EC78 rdfats           	
+EC84 drd16            	EC86 drd24            	EC88 drd24b           	
+EC8F*drdpat           	EC91 pop_ix_ret       	EC94 dwt16            	
+EC96 dwt24            	EC98 dwt24b           	EC9F*dwtpat           	
+ECA3 wtfat            	ECBE fatsetup         	ECC5 fats2            	
+ECCA*fatsx            	ECD9 fat_skp          	ECE1 fat1             	
+ECE6 fat2             	ECF2 fatsetup12       	ECFF fatsetup16       	
+ED0C chgdrv           	ED13 chgdrv1          	ED1D chgdrve          	
+ED1F chgdrv0          	ED2C chgdrv2          	ED83*sppat2           	
+EDA8 setfat16         	EDB5 extra1           	EDC4 getdpbd          	
+EDCD chgdrvr          	EDD4 getdpb1          	EDD7 getdpb           	
+EDF4 _sys5f           	EDF5 fflush           	EE02 fflushbuf        	
+EE10 seek             	EE17 div1             	EE1E div2             	
+EE5D setm2            	EE67 fdccmd2          	EE6A fspat            	
+EE6D fdccmd           	EE70 fdcpat           	EE75 sst              	
+EE77 sst1             	EE81 setmode          	EE82 fdmode           	
+EE8C ready            	EE93 ready2           	EE95 waita            	
+EEA1 readye           	EEA3 fdcres           	EEA9 fdmoff           	
+EEAE mopat            	EEB5 secset           	EEBA comset           	
+EEBE delay0           	EEC0 delay            	EEC4 drive            	
+EECD rnf              	EED3 retry            	EED4 wttrk            	
+EEDA fdwt             	EEDC wttrk1           	EEE3 diskok           	
+EEE3 fdcnt            	EEE8 fdrd             	EEEF disk             	
+EEF2 disk1            	EEF9 diskr            	EEFE disk2            	
+EF05 dmapat           	EF3D diske2           	EF47 errf             	
+EF48 delp             	EF50 err              	EF53 dmad             	
+EF5E dmahl            	EF63 dmae             	1D49*at_r             	
+EF63 at_table         	003B*pathx            	EF63 pathd            	
+EF9E pathe            	EF9F dta_ccp          	EFC4 fcb_bat          	
+EFE9 dirmes           	EFF4 free             	EFFB at_work          	
+F000 cpm_boot         	F003 _sys00           	F003 cpm_wboot        	
+F006 cpm_const        	F009 _sys07           	F009 cpm_conin        	
+F00C cpm_conout       	F00F decbf            	F00F*rr_buf_hl        	
+F011*rr_buf_a         	F014 fdrv             	F015 fname            	
+F039 sfile            	F05D leftx            	F05F dtax             	
+F061 zero             	F061 beepd            	F062*rtc_yy           	
+F063*rtc_mw           	F064*rtc_dd           	F065*rtc_tt           	
+F066*rtc_mm           	F067*rtc_ss           	F062*rom_slt          	
+F070 check            	F071 ok               	F079 comerm           	
+F080 _cyl0            	F081 _cyl1            	F082 _cyl2            	
+F083 _cyl3            	F084 _drive           	F085 _seeksp          	
+F086 _iseek           	F087 _dvsw            	F088 _drv             	
+F089 _dsk             	F08A _dta             	F08C _ctc             	
+F08E _txadr           	F090 _keyps           	F092 _keyd            	
+F094 _keysp           	F096 _colorf          	F097 _line            	
+F098 _fcb             	F09A _fbps            	F09C _fbad            	
+F09E _fbcnt           	F09F _filen           	F0A0 _dirf            	
+F0A2 _wtfatf          	F0A4 _wtdbf           	F0A5 _dbdrv           	
+F0A6 _dbsec           	F0A8 _dpb             	F0AA _fatdrv          	
+F0AB _fatix           	F0AC _fakefree        	F0B0 crtcd            	
+F0B1 _width           	F0B2 tvramtop         	F0B6 _line2           	
+F0B7 wke4             	F0B8 wke6             	F0B9 wk40             	
+F0BA _page_minus      	F0BC _width_minus     	F0BE wk30             	
+F0BF wk31             	F0BF wk1fd0           	F0C0 ctc0             	
+F0C2 ctc1             	F0C4 ctc2             	F0C6 ctc3             	
+F0C8 intvec           	F0CA _inkey           	F0CD _print           	
+F0D0 _scrn            	F0D3 _pos             	F0D6 _loc             	
+F0D9 _chgdrv          	F0DC _getdpb          	F0DF _fflush          	
+F0E2 _rdfatx          	F0E5 _rdfat           	F0E8 _wttrk           	
+F0EB _fdrd            	F0EE _fdwt            	F0F1 _bpb2dpb         	
+F0F4 _break           	F0F7 _gncl            	F0F8*gncpat           	
+F0FA _sncl            	F0FB*sncpat           	F0FD _comanl          	
+F100 _we              	F100 stable           	F17C _fatbf           	
+F17E _dtbuf           	F180 ctrltb           	F1C0 m2d              	
+F1D2 m2hd             	F1E4 sddata           	F1EE sddatae          	
+F1F0 _fcb_bat         	F1F2 _path            	F1F4 scdir            	
+F1F6 sfbps            	F1F8 sfndf            	F1FA _fatps           	
+F1FC _dirps           	F1FE _clps            	F200 _pe              	
+F200 _device          	F280 emmfl            	F282 emmrd            	
+F284 emmwr            	F288 emmcl            	F2A0 bankfl           	
 F2A8 bankcl           	F2B2 bankdv           	F2F9 last_adr         	

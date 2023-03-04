@@ -250,7 +250,8 @@ SDIRX0:
 SDIRX1:
 	LD	DE,(_DIRPS)	;Root Directory
 SOPEN1:
-SDECPAT:LD	C,32		;自己書き換え 1セクタ辺りのディレクトリエントリ数  1024=32 / 512=16 / 256=8
+	LD	C,32		;自己書き換え 1セクタ辺りのディレクトリエントリ数  1024=32 / 512=16 / 256=8
+SDECPAT	EQU	$-1
 SOPEN1X:
 	CALL	READ_DIR	;FILE SEARCH
 	JR	C,RDDERR
@@ -267,7 +268,8 @@ SOPEN3:
 	JR	NZ,SOPEN5
 	INC	DE		;ルートディレクトリ
 	PUSH	HL
-MD_PAT:	LD	HL,12		;(self-modifying code)MAXDIR
+	LD	HL,12		;(self-modifying code)MAXDIR
+MD_PAT	EQU	$-2
 	SBC	HL,DE		;CF=0 なので SUB HL,DE
 	POP	HL
 	JR	NZ,SOPEN1
@@ -354,11 +356,11 @@ COPENCL:
 	CPI			;HL=HL+1 BC=BC-1 BCが0の場合にP/V=0
 	JP	PE,COPENCL
 
-	LD	A,(SPCPAT+1)	;1クラスタの論理セクタ数
+	LD	A,(SPCPAT)	;1クラスタの論理セクタ数
 	DEC	A
 	JR	Z,COPENE
 	LD	A,1		;1セクタ辺りのセクタ数が2以上の場合
-	LD	(_SECPS+1),A
+	LD	(_SECPS),A
 	POP	DE		;DE=(_CLPS)
 	PUSH	DE
 COPEN1:
@@ -498,9 +500,9 @@ DCPAT:
 	LD	A,(_DIRF)	;ディレクトリか判別
 	OR	A
 	RET	Z		;ルートディレクトリの場合はCレジスタを0にしておく(CDEがセクタ番号)
-	LD	A,(SPCPAT+1)
+	LD	A,(SPCPAT)
 	LD	C,A
-	LD	A,(_SECPS+1)
+	LD	A,(_SECPS)
 	CP	C
 	JR	C,DC1
 	XOR	A
@@ -511,7 +513,8 @@ CLUSTX:
 	PUSH	HL
 	EX	DE,HL
 	XOR	A
-SPCPAT:	LD	C,1		;自己書き換え（1クラスタの論理セクタ数）
+	LD	C,1		;自己書き換え（1クラスタの論理セクタ数）
+SPCPAT	EQU	$-1
 L_CLDBL:
 	RR	C		;->CF
 	JR	C,E_CLDBL
@@ -520,10 +523,11 @@ L_CLDBL:
 	JR	L_CLDBL
 E_CLDBL:
 	LD	C,A
-	LD	A,(_SECPS+1)
+	LD	A,(_SECPS)
 	OR	L
 	LD	L,A
-CLSPAT:	LD	DE,8	;+8 (2D)  !ADDCL (self-modifying code)
+	LD	DE,8	;+8 (2D)  !ADDCL (self-modifying code)
+CLSPAT	EQU	$-2
 	XOR	A
 	ADD	HL,DE	;データ格納領域の先頭論理セクタ番号
 	ADC	A,C
@@ -534,10 +538,12 @@ CLSPAT:	LD	DE,8	;+8 (2D)  !ADDCL (self-modifying code)
 
 ENDCL:
 	LD	A,D	;END CLUSTER
-CLPAT1:	CP	1	;164=356	(self-modifying code)
+	CP	1	;164=356	(self-modifying code)
+CLPAT1	EQU	$-1
 	RET	NZ
 	LD	A,E
-CLPAT2:	CP	064H	;		(self-modifying code)
+	CP	064H	;		(self-modifying code)
+CLPAT2	EQU	$-1
 	RET
 
 CAP:
@@ -549,15 +555,12 @@ CAP:
 	RET
 CAP2:
 	CALL	CAP
-CAP3:
-	CALL	CAP4
+CAP3:				;
+	CP	5
+	JR	Z,CAP4
 	CP	021H
-	RET	NC
-	LD	A,NBSP
 	RET
 CAP4:
-	CP	5
-	RET	NZ
 	LD	A,0E5H
 	RET
 
@@ -586,7 +589,7 @@ LDDIRX:
 	LD	A,(_DIRF)	;(FCB)アクセスするディレクトリのセクタインデックス
 	AND	07FH
 LDDIRX1:
-	LD	(_SECPS+1),A
+	LD	(_SECPS),A
 	LD	E,(IY+14)	;(FCB)アクセスするディレクトリのクラスタ番号+1
 	LD	D,(IY+15)
 	DEC	DE
@@ -797,7 +800,7 @@ TOPEN:				;Initializes the time stamp
 	RET
 
 WRDFX:
-	LD	A,(SPCPAT+1)	;1クラスタの論理セクタ
+	LD	A,(SPCPAT)	;1クラスタの論理セクタ
 L_WRFX:
 	RRA			;->CF
 	JR	C,E_WRFX
@@ -814,7 +817,7 @@ E_WRFX:
 WRDF:				;BCクラスタ分FATを確保する
 	LD	DE,2
 	XOR	A
-	LD	(_SECPS+1),A
+	LD	(_SECPS),A
 WRDF1:
 	PUSH	BC
 	PUSH	DE
@@ -870,7 +873,7 @@ E_RWX:
 	LD	E,(IY+26)	;(FCB)ファイルの先頭クラスタ
 	LD	D,(IY+27)
 	XOR	A
-	LD	(_SECPS+1),A
+	LD	(_SECPS),A
 RWX1:
 	LD	(_CLPS),DE
 	LD	A,D
@@ -897,7 +900,8 @@ SCF_RET:
 	RET
 
 DSKF:
-MAXCLP:	LD	DE,0
+	LD	DE,0
+MAXCLP	EQU	$-2
 	LD	HL,(_FAKEFREE)
 	LD	A,H
 	OR	L

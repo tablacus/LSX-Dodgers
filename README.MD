@@ -1,11 +1,11 @@
-LSX-Dodgers for X1/turbo/Z, MZ-700/1500 and PC-8801mkIISR Gaku
+LSX-Dodgers for X1/turbo/Z, MZ-700/1500, PC-8801mkIISR and MSX Gaku
 
 A>■
 
 
 # 機能概略
 
- このソフトはX1/turbo/ZやMZ-700/1500やPC-8801mkIISRでCP/M80やMSX-DOSのソフトを実行するためのOSです。  
+ このソフトはX1/turbo/ZやMZ-700/1500やPC-8801mkIISRやMSXでCP/M80やMSX-DOSのソフトを実行するためのOSです。  
 MS-DOS互換のファイルフォーマットを持ちCP/M80やMSX-DOSと互換のシステムコールを持っています。  
 また、階層ディレクトリにも対応しています。  
 
@@ -236,14 +236,15 @@ MS-DOS系のフォーマットがなさそうなので今のところLSX-Dodgers
 |--|--|--|--|--|--|--|--|
 |eX1/eX1twin|D88| - | - | - |LD-hdd|G:48K/E:320K| - |
 |eX1turbo/eX1turboZ|D88|D88/dsk|D88/img/xdf| - |LD-hdd|G:48K/E:320K/F:512K| - |
-|Xmil106(X1)|D88|D88| - | - |LD-hdd|G:48K|RLC/RLS|
-|Xmil106(turbo/Z)|D88|D88|D88|D88|LD-hdd|G:48K/F:512K|RLC/RLS|
-|EmuZ-700/EmuZ-1500|D88|D88| - | - | - |C:32K/F:64K/E:16MB| - |
+|Xmil106(X1)|D88|D88| - | - |LD-hdd|G:48K/E:16M|RLC/RLS|
+|Xmil106(turbo/Z)|D88|D88|D88|D88|LD-hdd|G:48K/F:512K/E:16M※2|RLC/RLS|
+|EmuZ-700/EmuZ-1500|D88|D88| - | - | - |C:32K/F:64K/E:16M※2| - |
 |M88|D88|D88|D88|D88| - |F:512K| - |
 |ePC-8801ma|D88|D88/dsk|D88/img/xdf(※1)| - | - |F:512K| - |
 |X88000|D88| - | - | - | - |F:512K| - |
 
 ※1 2HD機の実機ROMか疑似ROMに改修が必要
+※2 Xmillennium系と同じフォルダに`emm0.mem`を作成する必要がある（電源を切っても内容が保存されます）
 
 # Windows等とのファイルのやり取り
 

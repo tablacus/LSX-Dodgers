@@ -63,7 +63,7 @@ NMIは$0066がデフォルトのFCBと重なるため使用できません。
 
 $0002	システムコールテーブル&システムワークの上位アドレス
 $000F	JP (HL)
-$0018	BIOS-ROM呼び出し(PC-8801mkIISR/X1turboシリーズのみ)
+$0018	BIOS-ROM呼び出し(X1turboシリーズのみ)
 $0028	トラップ(MZ-700/1500のみ)
 $0038	トラップ(x1/turbo/Z・PC-8801mkIISR)/割り込み(MZ-700/1500・MSX)
 
@@ -87,7 +87,7 @@ $000Bは$0002と同じになります。
 2: PC-8801mkIISR
 3: MSX
 
-※BIOS-ROM呼び出し(X1turbo/PC-8801mkIISR)
+※BIOS-ROM呼び出し(X1turbo)
 
  BCレジスタにBIOS-ROMのコールアドレスを入れてコール(RST 18H)する。
 

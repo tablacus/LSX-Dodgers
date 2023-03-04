@@ -3,9 +3,9 @@
                                 ;   PC-8801mkSR ブート
                                 ;
                                 
-       CD00                     RUN     EQU 0CD00H
-       2600                     SIZE        EQU 9728
-       CD07                     EXEC        EQU RUN+7
+       CE00                     RUN     EQU 0CE00H
+       2500                     SIZE        EQU 9472
+       CE07                     EXEC        EQU RUN+7
        C000                     MAINADDR    EQU 0C000H
        5000                     SUBADDR     EQU 05000H
                                 
@@ -83,7 +83,7 @@
 000061 C061 CDD237          17      CALL    PUTDAT
 000064 C064 3E07             7      LD  A,7     ;開始アドレスL
 000066 C066 CDD237          17      CALL    PUTDAT
-000069 C069 01F925          10      LD  BC,SIZE-7
+000069 C069 01F924          10      LD  BC,SIZE-7
 00006C C06C 78               4      LD  A,B     ;バイト数H
 00006D C06D CDD237          17      CALL    PUTDAT
 000070 C070 79               4      LD  A,C     ;バイト数L
@@ -91,13 +91,13 @@
 000074 C074 DB32            11      IN  A,(032H)
 000076 C076 F610             7      OR  010H        ;高速RAMアクセスモードOFF
 000078 C078 D332            11      OUT (032H),A
-00007A C07A 2100CD          10      LD  HL,RUN
+00007A C07A 2100CE          10      LD  HL,RUN
        C07D                     TRANS1:
 00007D C07D CD4738          17      CALL    GETDAT
 000080 C080 77               7      LD  (HL),A
 000081 C081 EDA1            16      CPI         ;HL=HL+1 BC=BC-1 BCが0の場合にP/V=0
 000083 C083 EA7DC0          10      JP  PE,TRANS1
-000086 C086 C307CD          10      JP  EXEC
+000086 C086 C307CE          10      JP  EXEC
        C089                     ERROR:
 000089 C089 76               4      HALT
 00008A C08A 18FD            12      JR  ERROR

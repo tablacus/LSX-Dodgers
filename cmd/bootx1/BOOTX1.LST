@@ -11,7 +11,7 @@
 000015 FD15 3E1D             7      LD  A,01DH
 000017 FD17 D300            11      OUT (0),A
                                 
-000019 FD19 21F9CB          10      LD  HL,0CBF9H   ;LSX-Dodgers X1 (Load address)
+000019 FD19 21F9CC          10      LD  HL,0CCF9H   ;LSX-Dodgers X1 (Load address)
 00001C FD1C 0139FD          10      LD  BC,DISK_DATA
 00001F FD1F 3E03             7      LD  A,3
        FD21                     LOOP1:
@@ -32,12 +32,12 @@
 000032 FD32 3E1E             7      LD  A,01EH
 000034 FD34 D300            11      OUT (0),A
                                 
-000036 FD36 C307CC          10      JP  0CC07H      ;LSX-Dodgers X1 (Start address)
+000036 FD36 C307CD          10      JP  0CD07H      ;LSX-Dodgers X1 (Start address)
                                 
        FD39                     DISK_DATA:
 000039 FD39 3504                    DB  16*3+6-1,4  ;2048
 00003B FD3B 4009                    DB  16*4+1-1,9  ;4608
-00003D FD3D 5007                    DB  16*5+1-1,7  ;3584
+00003D FD3D 5006                    DB  16*5+1-1,6  ;3072
        FD3F                     IPL_E:
 00003F FD3F                         DS  0FDFFH-IPL_E
 0000FF FDFF 00                      DB  0

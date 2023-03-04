@@ -7,6 +7,24 @@ JP_HL	EQU	$000F
 FCB1	EQU	$005C
 DTA	EQU	$0080
 
+DPB_FATLN	EQU	00H
+DPB_DRD		EQU	02H
+DPB_DWT		EQU	04H
+DPB_FATID	EQU	06H
+DPB_SECPCL	EQU	07H
+DPB_MAXCL	EQU	08H
+DPB_FDMODE	EQU	0AH
+DPB_DIRSCNT	EQU	0BH
+DPB_MAXCYL	EQU	0CH
+DPB_MAXSEC	EQU	0DH
+DPB_FATPS	EQU	0EH
+DPB_BPS		EQU	0FH
+DPB_DIRPS	EQU	10H
+DPB_DEVICE	EQU	12H
+DPB_UNITNO	EQU	13H
+DPB_ADDCL	EQU	14H
+DPB_NAME	EQU	1CH
+
 ;	PC-8801mkIISR
 S_MAIN	EQU	$002A
 DSS	EQU	$6000
@@ -75,8 +93,8 @@ MAIN:
 	CALL	SYSTEM
 	OR	A
 	JR	NZ,MAIN0
-	LD	A,(IX+$12)	;デバイス情報(DPB_12_DEVICE)
-	CP	$26		;デバイスはEMMでBPBからDPBを作成する
+	LD	A,(IX+DPB_DEVICE)	;デバイス情報
+	CP	$26			;デバイスはEMMでBPBを使っている
 	JR	NZ,USAGE
 MAIN0:
 	CALL	SWITCH
@@ -84,7 +102,7 @@ MAIN0:
 	JR	C,MAIN1
 	SUB	'C'
 	JR	NZ,USAGE
-	LD	(LOGSW+1),A
+	LD	(LOGSW),A
 MAIN1:
 	LD	DE,FORMES	;format
 	LD	C,9		;文字列出力
@@ -93,7 +111,7 @@ MAIN1:
 	LD	BC,$0406
 	PUSH	IX
 PRNAME:
-	LD	E,(IX+$1C)	;デバイスの名前(DPB_1C_NAME)
+	LD	E,(IX+DPB_NAME)	;デバイスの名前
 	LD	C,6		;コンソール直接入出力
 	PUSH	BC
 	CALL	SYSTEM
@@ -103,11 +121,23 @@ PRNAME:
 	POP	IX
 	CALL	NL
 
-	LD	A,(IX+$12)	;デバイス情報(DPB_12_DEVICE)
+	LD	A,(IX+DPB_DEVICE)	;デバイス情報
+	CP	$26			;デバイスはEMMでBPBを使っている
+	JR	Z,EMM
 	AND	$0F
 	CP	7		;FDD
-	JP	NZ,LOGIC
-LOGSW:	LD	A,1
+	JR	Z,FDD
+	JP	LOGIC
+EMM:
+	LD	A,(LOGSW)
+	OR	A
+	JP	Z,LOGICY
+	CALL	SURE
+	CALL	BPB_FROM_EMM
+	JP	LOGICX
+FDD:
+	LD	A,1
+LOGSW	EQU	$-1
 	OR	A
 	JP	Z,LOGICY
 
@@ -146,9 +176,9 @@ SUBPG1:
 	LD	HL,AT_DSS
 	CALL	FPUTDAT
 ENABLE_PHISIC:
-	BIT	0,(IX+$0A)	;フロッピーディスクのモード(DPB_0A_FDMODE)
+	BIT	0,(IX+DPB_FDMODE)	;フロッピーディスクのモード
 	JR	Z,ENABLE_2HD
-	BIT	7,(IX+$12)	;デバイス情報(DPB_12_DEVICE)
+	BIT	7,(IX+DPB_DEVICE)	;デバイス情報
 	JR	NZ,ENABLE_2HD
 	LD	DE,FOTMESL	;format type
 	JR	DISABLE_2HD
@@ -206,7 +236,7 @@ TYPEX:
 	LD	BC,12
 	LDIR
 
-	LD	A,(IX+$0C)	;フロッピーディスクのシリンダ数(DPB_0C_MAXCYL)
+	LD	A,(IX+DPB_MAXCYL)	;フロッピーディスクのシリンダ数
 	LD	(MAXCYL),A
 
 	LD	HL,(WBOOT+1)
@@ -219,7 +249,7 @@ TYPEX:
 	LD	L,$D9		;CHGDRV
 	CALL	JP_HL
 	POP	HL
-	LD	A,(IX+$13)	;デバイスドライバ内におけるユニット番号(DPB_13_UNITNO)
+	LD	A,(IX+DPB_UNITNO)	;デバイスドライバ内におけるユニット番号
 	AND	3
 	OR	$80
 	LD	L,A
@@ -242,7 +272,7 @@ TYPEX:
 	LD	(HL),0
 	LD	BC,$400
 	LDIR
-	LD	A,(IX+6)	;メディアバイト(DPB_06_FATID)
+	LD	A,(IX+DPB_FATID)	;メディアバイト
 	CP	$FD
 	LD	HL,LIPL
 	JR	Z,IPL
@@ -290,10 +320,6 @@ LOGICY:
 LOGIC:
 	CALL	SURE
 LOGICX:
-	LD	A,(IX+$12)	;デバイス情報(DPB_12_DEVICE)
-	CP	$26		;デバイスはEMMでBPBからDPBを作成する
-	CALL	Z,BPB_FROM_EMM
-LOGICX1:
 	LD	DE,LOGMES
 	LD	C,9		;文字列出力
 	CALL	SYSTEM
@@ -308,26 +334,26 @@ LOGICX1:
 	LDIR
 ;
 	LD	HL,FDATA
-	LD	A,(IX+6)	;メディアバイト(DPB_06_FATID)
+	LD	A,(IX+DPB_FATID)	;メディアバイト
 	LD	(HL),A		;FATID
 	INC	HL
 	DEC	(HL)		;LD (HL),$FF
 	INC	HL
 	DEC	(HL)		;LD (HL),$FF
-	BIT	6,(IX+$0F)	;FAT情報と論理セクタのサイズ(DPB_0F_BPS)
+	BIT	6,(IX+DPB_BPS)	;FAT情報と論理セクタのサイズ
 	JR	Z,FAT12
 	INC	HL		;FAT16の場合
 	DEC	(HL)		;LD (HL),$FF
 FAT12:
-	LD	E,(IX+$0E)	;FAT領域の先頭論理セクタ番号(DPB_0E_FATPS)
+	LD	E,(IX+DPB_FATPS)	;FAT領域の先頭論理セクタ番号
 	LD	D,0
 
-	LD	A,(IX+$0F)	;FAT情報と論理セクタのサイズ(DPB_0F_BPS)
+	LD	A,(IX+DPB_BPS)	;FAT情報と論理セクタのサイズ
 	AND	$80		;bit7:予備FAT
 LOGIC0:
 	PUSH	AF
-	LD	C,(IX+0)	;FAT領域のセクタ単位でのサイズ(DPB_00_FATLN)
-	LD	B,(IX+1)
+	LD	C,(IX+DPB_FATLN)	;FAT領域のセクタ単位でのサイズ
+	LD	B,(IX+DPB_FATLN+1)
 	LD	HL,FDATA
 LOGIC1:
 	CALL	DWT
@@ -343,10 +369,10 @@ LOGIC1:
 	ADD	A,A		;bit7:予備FAT
 	JR	C,LOGIC0
 LOGIC2:				;ディレクトリエントリ
-	LD	E,(IX+$10)	;ルートディレクトリ領域の先頭論理セクタ番号(DPB_10_DIRPS)
-	LD	D,(IX+$11)
+	LD	E,(IX+DPB_DIRPS)	;ルートディレクトリ領域の先頭論理セクタ番号
+	LD	D,(IX+DPB_DIRPS+1)
 
-	LD	B,(IX+$0B)	;ルートディレクトリ領域の論理セクタ数(DPB_0B_DIRSCNT)
+	LD	B,(IX+DPB_DIRSCNT)	;ルートディレクトリ領域の論理セクタ数
 LOGIC3:
 	LD	HL,FDATA+4
 	CALL	DWT
@@ -410,9 +436,9 @@ WRITE_ID88:		;PC-8801mkIISR
 	CALL	PUTDAT
 	XOR	A
 	CALL	PUTDAT
-	LD	A,(IX+013H)	;デバイスドライバ内におけるユニット番号(DPB_13_UNITNO)
+	LD	A,(IX+DPB_UNITNO)	;デバイスドライバ内におけるユニット番号
 	CALL	PUTDAT		;+0
-	LD	A,(IX+00DH)	;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+	LD	A,(IX+DPB_MAXSEC)	;フロッピーディスクの1トラックのセクタ数
 	CALL	PUTDAT		;+1 SC
 	LD	A,(IY+18)	;GSL
 	CALL	PUTDAT		;+2 GPL
@@ -421,9 +447,9 @@ WRITE_ID88:		;PC-8801mkIISR
 	EXX
 	ADD	A,A		;トラック番号
 	CALL	PUTDAT		;+3
-	LD	A,(IX+00AH)	;フロッピーディスクのモード(DPB_0A_FDMODE)
+	LD	A,(IX+DPB_FDMODE)	;フロッピーディスクのモード
 	CALL	PUTDAT		;+4
-	LD	A,(IX+00FH)	;FAT情報と論理セクタのサイズ(DPB_0F_BPS)
+	LD	A,(IX+DPB_BPS)	;FAT情報と論理セクタのサイズ
 	AND	7
 	CP	3
 	JR	C,W88X1
@@ -470,7 +496,7 @@ WTTRK:
 WTTRKP:	CALL	$00E8		;_WTTRK
 	POP	DE
 ;
-	LD	L,(IX+$0D)	;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+	LD	L,(IX+DPB_MAXSEC)	;フロッピーディスクの1トラックのセクタ数
 	LD	H,0
 	ADD	HL,DE
 	EX	DE,HL
@@ -502,7 +528,7 @@ MAKES1:
 	LD	(IY+0),A		;SECTOR
 	PUSH	HL
 	INC	IY
-	LD	A,(IX+$07)	;1クラスタの論理セクタ数(DPB_07_SECPCL)
+	LD	A,(IX+DPB_SECPCL)	;1クラスタの論理セクタ数
 	CP	1
 	JR	Z,SIZE1024	;1
 	JR	C,SIZE1024	;0(v1.29まで)
@@ -517,7 +543,7 @@ SIZE:
 	EXX
 	CALL	SETD
 	POP	AF		;AF=HL
-	CP	(IX+$0D)	;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+	CP	(IX+DPB_MAXSEC)	;フロッピーディスクの1トラックのセクタ数
 	JR	C,MAKE1
 
 	LD	HL,HGAP4
@@ -551,7 +577,7 @@ VE2:
 	LD	E,'v'
 	LD	C,2		;コンソール出力
 	CALL	SYSTEM
-	LD	A,(IX+00DH)	;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+	LD	A,(IX+DPB_MAXSEC)	;フロッピーディスクの1トラックのセクタ数
 	ADD	A,A
 	LD	H,A
 	LD	A,(FCB1)
@@ -563,7 +589,7 @@ VE2:
 	POP	BC
 	RET	C
 	LD	H,0
-	LD	A,(IX+00DH)	;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+	LD	A,(IX+DPB_MAXSEC)	;フロッピーディスクの1トラックのセクタ数
 	ADD	A,A
 	LD	L,A
 	ADD	HL,DE
@@ -636,12 +662,16 @@ ERROR:
 	CALL	SYSTEM
 	JP	0
 
-BPB_FROM_EMM:			;EMMのサイズからBPBを作成する
-	LD	A,(IX+$0D)	;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+BPB_FROM_EMM:				;EMMのサイズからBPBを作成する
+	LD	DE,EMMMES
+	LD	C,9		;文字列出力
+	CALL	SYSTEM
+
+	LD	A,(IX+DPB_MAXSEC)	;フロッピーディスクの1トラックのセクタ数
 	LD	(EMMAL),A
-	LD	A,(IX+$0C)	;フロッピーディスクのシリンダ数(DPB_0C_MAXCYL)
+	LD	A,(IX+DPB_MAXCYL)	;フロッピーディスクのシリンダ数
 	LD	(EMMBL),A
-	LD	A,(IX+$13)	;デバイスドライバ内におけるユニット番号(DPB_13_UNITNO)
+	LD	A,(IX+DPB_UNITNO)	;デバイスドライバ内におけるユニット番号
 	LD	(EMMDV),A
 
 	CALL	EADR0
@@ -667,7 +697,7 @@ ECHECK1:
 	OUT	(C),H
 	CP	L
 	JR	NZ,ECHECK2
-	BIT	6,D
+	BIT	7,D
 	JR	Z,ECHECK1
 ECHECK2:
 	CALL	EADR0
@@ -687,13 +717,12 @@ ECHECK2:
 EFAT12:
 	PUSH	DE
 	POP	HL
-	ADD	HL,HL
 	LD	(EMM_TotSec16),HL	;総セクタ数
 	EX	DE,HL
 CALC_FATLN	EQU	$+1
 	CALL	CALC_FATLN12		;自己書き換え
 	LD	(EMM_FATSz16),A		;FATのサイズ
-	LD	(IX+0),A		;FAT領域のセクタ単位でのサイズ(DPB_00_FATLN)
+	LD	(IX+DPB_FATLN),A	;FAT領域のセクタ単位でのサイズ
 
 	LD	HL,FDATA
 	LD	DE,FDATA+1
@@ -711,28 +740,27 @@ CALC_FATLN	EQU	$+1
 	LD	E,A
 	LD	C,$1B		;ディスク情報の獲得
 	JP	SYSTEM
+
+EADR0:
+	PUSH	DE
+	EX	DE,HL
+	LD	HL,0
+	JR	EADR1
 EADR2:
 	PUSH	DE
 	EX	DE,HL
 	ADD	HL,HL
-	ADD	HL,HL
 	LD	BC,(EMMAL)
 	ADD	HL,BC
+EADR1:
 	LD	BC,(EMMDV)
-	OUT	(C),C
+	OUT (C),0		;Z80未定義命令
 	INC	C
 	OUT	(C),L
 	INC	C
 	OUT	(C),H
 	INC	C
 	EX	DE,HL
-	POP	DE
-	RET
-
-EADR0:
-	PUSH	DE
-	LD	DE,0
-	CALL	EADR2
 	POP	DE
 	RET
 
@@ -872,6 +900,8 @@ PHYMES:
 	DB	"physical format",$0D,$0A,'$'
 LOGMES:
 	DB	"logical  format",$0D,$0A,'$'
+EMMMES:
+	DB	"analysis EMM",$0D,$0A,'$'
 COMMES:
 	DB	"completed!",$0D,$0A,'$'
 HITMES:
@@ -975,7 +1005,7 @@ IPLPRG:
 	JP	$F5
 IPLPEND:
 
-EMMDV:	DW	$0B00
+EMMDV:	DW	$0D00
 EMMAL:	DB	0
 EMMBL:	DB	0
 

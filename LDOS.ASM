@@ -70,7 +70,7 @@ _SYS0D:		;(BDOS)ディスクリセット
 	POP	HL
 	PUSH	DE
 	LD	E,0
-	DB	03EH
+	DB	03EH	;次の PUSH DE をスキップ
 
 _SYS0E:		;(BDOS)カレントドライブの設定
 	PUSH	DE
@@ -152,13 +152,13 @@ _S10A:				;Write
 	LD	A,(IY+29)	;(FCB)ディレクトリモード
 	LD	(_DIRF),A
 	AND	07FH
-	LD	(_SECPS+1),A
+	LD	(_SECPS),A
 	LD	E,(IY+30)	;(FCB)ディレクトリポジション
 	LD	D,(IY+31)
 	CALL	READ_DIR
 	JR	C,FEND10
 
-SDECM1:	LD	A,(SDECPAT+1)	;1セクタ辺りのディレクトリエントリ数
+SDECM1:	LD	A,(SDECPAT)	;1セクタ辺りのディレクトリエントリ数
  	DEC	A		;1024=01FH / 512=00FH / 256=7
 	AND	(IY+25)		;(FCB)ディレクトリロケーション
 	LD	L,A
@@ -198,7 +198,7 @@ _S12X1:
 	LD	A,H
 	OR	A
 	JR	Z,_S12DIR
-	LD	A,(_SECPS+1)
+	LD	A,(_SECPS)
 	OR	080H
 	LD	H,A
 _S12DIR:
@@ -366,14 +366,14 @@ _SYS1B:		;(BDOS)ディスク情報の獲得
 	LD	HL,0
 	CALL	NC,DSKF
 
-	LD	DE,(MAXCLP+1)	;DPB_MAXCL-1
+	LD	DE,(MAXCLP)	;DPB_MAXCL-1
 	DEC	DE		;DE←クラスタの総数
 	LD	IY,(_FATBF)	;IY←メモリ上のFATの先頭アドレス
 	SBC	A,A
 	RET	C
 	LD	C,A		;C=0
 	LD	A,(IX+DPB_BPS)
-	AND	00FH
+	AND	7
 	LD	B,A
 	LD	A,(IX+DPB_SECPCL)
 	RET

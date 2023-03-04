@@ -8,7 +8,7 @@ START:
 	LD	A,01DH
 	OUT	(0),A
 
-	LD	HL,0CBF9H	;LSX-Dodgers X1 (Load address)
+	LD	HL,0CCF9H	;LSX-Dodgers X1 (Load address)
 	LD	BC,DISK_DATA
 	LD	A,3
 LOOP1:
@@ -29,12 +29,12 @@ LOOP1:
 	LD	A,01EH
 	OUT	(0),A
 
-	JP	0CC07H		;LSX-Dodgers X1 (Start address)
+	JP	0CD07H		;LSX-Dodgers X1 (Start address)
 
 DISK_DATA:
 	DB	16*3+6-1,4	;2048
 	DB	16*4+1-1,9	;4608
-	DB	16*5+1-1,7	;3584
+	DB	16*5+1-1,6	;3072
 IPL_E:
 	DS	0FDFFH-IPL_E
 	DB	0
