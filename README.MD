@@ -165,6 +165,12 @@ ePC-8801MAで2DD/2HDを使う方法→ https://github.com/tablacus/LSX-Dodgers/i
 Manuke Station : Project X88000  
 https://quagma.sakura.ne.jp/manuke/x88000.html
 
+PC-8801MAエミュレータ XM8  
+http://retropc.net/pi/xm8/index.html
+
+互換BIOS(ROM)で使う場合は以下のダミーROMも必要になります。  
+https://github.com/tablacus/LSX-Dodgers/issues/18
+
 ### 互換BIOS(ROM)
 
 project m88  
