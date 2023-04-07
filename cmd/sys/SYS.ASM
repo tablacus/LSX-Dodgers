@@ -43,7 +43,7 @@ IPL	EQU	0FE00H
 	ORG	0100H
 	JP	START
 TITLE:
-	DB	"X1 systemcopy v1.04"
+	DB	"X1 systemcopy v1.05"
 	DB	CR,LF,"$"
 USAGE:
 	DB	"usage:"
@@ -735,7 +735,7 @@ SDMA:
 	DEC	A
 	JR	NZ,SDMA
 
-	JR	SKIPBUFH
+	JP	SKIPBUFH
 
 	ORG	0FF87H,$$
 	DB	0		;0FF87H	ドライブ(IPL READ)

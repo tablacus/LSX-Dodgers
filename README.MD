@@ -8,6 +8,7 @@ A>■
  このソフトはX1/turbo/ZやMZ-700/1500やPC-8801mkIISRやMSXでCP/M80やMSX-DOSのソフトを実行するためのOSです。  
 MS-DOS互換のファイルフォーマットを持ちCP/M80やMSX-DOSと互換のシステムコールを持っています。  
 また、階層ディレクトリにも対応しています。  
+「エルディー」って呼んでください。  
 
 # エミュレータ用イメージファイル
 
@@ -249,8 +250,10 @@ MS-DOS系のフォーマットがなさそうなので今のところLSX-Dodgers
 |ePC-8801ma|D88|D88/dsk|D88/img/xdf(※1)| - | - |F:512K| - |
 |X88000|D88| - | - | - | - |F:512K| - |
 
-※1 2HD機の実機ROMか疑似ROMに改修が必要
+※1 2HD機の実機ROMか疑似ROMに改修が必要  
+[ePC-8801MAで2DD/2HDを使う方法](https://github.com/tablacus/LSX-Dodgers/issues/13)  
 ※2 Xmillennium系と同じフォルダに`emm0.mem`を作成する必要がある（電源を切っても内容が保存されます）
+[Xmil106でのEMMディスクの作成方法](https://github.com/tablacus/LSX-Dodgers/issues/17)
 
 # Windows等とのファイルのやり取り
 
