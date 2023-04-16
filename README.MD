@@ -383,3 +383,14 @@ ASM.BAT
 X1ではステップレートの関係でCZ-800Fは使えません。
 MS-DOS互換のファイルフォーマットとS-OS"SWORD"のファンクションをもつOS、[L-os Angeles](https://github.com/tablacus/LosAngeles)もあります。
 
+# 同梱配布アプリ
+
+以下のアプリのCOMファイルを`ldsys.d88`に同梱させていただいています。  
+ライセンスについては各アプリのライセンスに従ってください。
+
+## LD-hdd
+https://github.com/ho-ogino/LD-hdd/releases  
+
+## M8A Graphic Loader
+http://studio293.sakura.ne.jp/  
+
