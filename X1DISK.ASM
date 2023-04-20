@@ -68,7 +68,6 @@ SETM2:
 	LD	C,018H		;Seek
 FDCCMD2:
 	LD	A,(_SEEKSP)
-FSPAT:	AND	0FFH
 	OR	C
 
 FDCCMD:
@@ -89,28 +88,36 @@ SST1:
 	INC	A		;A=1
 	CALL	READY
 SETMODE:
-	LD	A,B		;B=00FH
-FDMODE:	IN	A,(0FFH)	;Floppy mode(2D/2HD) (Self-modifying code)
+	LD	C,(IX+DPB_FDMODE)	;フロッピーディスクのモード
+	IN	A,(C)
 
 	LD	A,B
 	IN	A,(0FDH)	;MFM mode
 
 	CALL	DELAY0		;Head select time
-	LD	A,081H
+	LD	A,081H		;NOT READY,BUSY
 READY:
-	LD	(WAITA+1),A
 	PUSH	HL
+	LD	L,0
+	LD	H,A
 	LD	C,0F8H
-	LD	H,C
 READY2:
 	IN	A,(C)
-WAITA:	AND	081H		;NOT READY,BUSY
+	AND	H
 	JR	Z,READYE
-	EX	(SP),HL		;wait 19clock
-	EX	(SP),HL		; //
-	DEC	HL
-	LD	A,H
-	OR	L
+	LD	A,1AH
+	IN	A,(01H)
+	ADD	A,A
+	JR	NC,READY2
+READY3:
+	IN	A,(C)
+	AND	H
+	JR	Z,READYE
+	LD	A,1AH
+	IN	A,(01H)
+	ADD	A,A
+	JR	C,READY3
+	DEC	L
 	JR	NZ,READY2
 	SCF
 READYE:

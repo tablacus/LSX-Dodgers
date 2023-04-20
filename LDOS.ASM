@@ -123,15 +123,16 @@ _S16XX:
 S16LOOP:				;(FCB)ファイルのサイズ(バイト単位)
 	LD	A,(DE)
 	INC	DE
-	LD	(S16PAT+2),A
+	LD	(S16PAT),A
 	LD	A,(HL)
 	INC	HL
-S16PAT:	LD	(IY+0),A
+	LD	(IY+0),A
+S16PAT	EQU	$-1
 	DJNZ	S16LOOP
 
 	XOR	A
 	LD	(IY+12),A	;(FCB)カレントブロック
-	LD	(OFCB+1),IY
+	LD	(OFCB_SWC),IY
 FEND0F:
 	JR	FEND10
 
@@ -146,7 +147,7 @@ _S10A:				;Write
 	LD	(IY+14),A	;(FCB)レコードサイズ/アクセスするディレクトリのクラスタ番号+1
 	LD	(IY+15),A
 
-	INC	(IY+28)		;0FEH->0FFH ;オープンモード
+	INC	(IY+28)		;(FCB)オープンモード 0FEH->0FFH
 	CALL	SETTMS
 
 	LD	A,(IY+29)	;(FCB)ディレクトリモード
@@ -226,12 +227,8 @@ _SYS12:		;(BDOS)次のファイルの検索
 	JR	_S12X1
 
 _S16K:
-	LD	A,(IY+28)	;(FCB)オープンモード
-	CP	0FDH		;Device(0FDH)
-	SCF
-	RET	Z
-
-OFCB:	LD	DE,0
+	LD	DE,0
+OFCB_SWC	EQU	$-2
 	PUSH	DE
 	LD	B,26		;First cluster
 S16K1:
@@ -251,8 +248,8 @@ S16K1:
 	POP	HL
 	PUSH	IY
 	POP	DE
-	LD	A,(DE)		;Drive
-	CP	(HL)
+	LD	A,(HL)
+	CALL	IS_SAME_DRV_A_DE
 	JR	NZ,S16K3
 				;ここはCFが必ず0
 	SBC	HL,DE		;CP HL,DE

@@ -47,7 +47,7 @@ COMB:
 	JP	NC,JP_HL
 COMB2:
 	EX	DE,HL
-	LD	(COMPAT+1),HL
+	LD	(COMSWC),HL
 	PUSH	AF
 	CALL	CEXE4
 	POP	AF
@@ -120,15 +120,16 @@ SYSTEM0:
 	RET
 
 C_CD:
-	LD	C,5AH
+	LD	C,05AH
 	JR	SYSTEM0
 
 S27BUF:
-	LD	A,(SYSTEM+2)
-	DEC	A
+	LD	HL,-00200H	;スクラッチエリア(0100H)+スタック予備(0100H)
+	ADD	HL,SP
+	LD	L,0
+	LD	A,H
 	AND	0F8H
 	LD	H,A
-	LD	L,0
 S27DTA:
 	LD	DE,DTA_CCP
 S27:
@@ -182,7 +183,8 @@ C_EXE:
 	SCF
 	RET	Z
 	CALL	SETDTA1
-COMPAT:	LD	DE,0				; self-modifying code
+	LD	DE,0				; self-modifying code
+COMSWC	EQU	$-2
 	LD	SP,(SYSTEM+1)
 	LD	H,A				; A=0 in SETDTA1(_SYS1A)
 	LD	L,A
@@ -371,8 +373,8 @@ CPATH1:
 	RET
 
 PUTDRV:
-	LD	A,(FDRV)
-	ADD	A,'A'-1
+	LD	A,(_DSK)
+	ADD	A,'A'
 	CALL	MSG_A
 	LD	A,':'
 MSG_AR:

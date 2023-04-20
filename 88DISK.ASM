@@ -100,8 +100,8 @@ FPUTDAT3:
 	JR	NZ,FPUTDAT3
 
 	CPI			;HL=HL+1 BC=BC-1 BCが0の場合にP/V=0
-	JP	PE,FPUTDAT
-	RET
+	RET	PO
+	JR	FPUTDAT
 
 
 ;	高速ハンドシェイク（ホストが受信）
@@ -136,8 +136,8 @@ FGETDAT2:
 	OUT	(0FFH),A
 
 	CPI			;HL=HL+1 BC=BC-1 BCが0の場合にP/V=0
-	JP	PE,FGETDAT
-	RET
+	RET	PO
+	JR	FGETDAT
 
 ;	論理セクタ番号からトラック番号とセクタ番号を得る
 ;	in
@@ -223,10 +223,10 @@ FDWT3:
 FDWT_SECTOR	EQU	$+1
 	LD	A,0		;セクタ
 	CALL	PUTDAT
-FDWT_TRACK	EQU	$+1
 	LD	A,0		;トラック
+FDWT_TRACK	EQU	$-1
 	CALL	PUTDAT
-	LD	A,(FDMODE+1)	;フロッピーディスクのモード(DPB_FDMODE)
+	LD	A,(IX+DPB_FDMODE)	;フロッピーディスクのモード
 	CALL	PUTDAT
 	LD	A,(SECSZ+2)	;1セクタのサイズの上位1バイト
 	CALL	PUTDAT
@@ -273,7 +273,7 @@ FDRD:
 	INC	A
 	LD	H,A
 	POP	DE
-FDMODE:	LD	A,0FFH		;フロッピーディスクのモード(DPB_FDMODE)
+	LD	A,(IX+DPB_FDMODE)	;フロッピーディスクのモード
 	CALL	PUTDAT
 	LD	A,(SECSZ+2)	;1セクタのサイズの上位1バイト
 	CALL	PUTDAT
@@ -325,6 +325,4 @@ FDRD3:
 	OR	A
 	JP	NZ,FDRD
 	RET
-
-FSPAT	EQU	BEEPD+9
 

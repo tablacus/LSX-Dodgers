@@ -183,26 +183,37 @@ SETDRV:
 	EX	(SP),IY
 
 	CALL	GETDRV
-	INC	A
-	LD	(IY+0),A	;(FCB)ドライブ番号
-	DEC	A
 	CALL	_CHGDRV
 
 	JP	(HL)
 
 GETDRV:
+	CALL	GETDRV1
+	LD	(_DRV),A
+	RET
+
+IS_SAME_DRV_A_DE:
+;	A と (DE) が同じドライブか調べる
+;	ZF=1ならば同じドライブ
+	CALL	GETDRV1
+	PUSH	BC
+	LD	C,A
+	LD	A,(DE)
+	CALL	GETDRV1
+	XOR	C
+	POP	BC
+	RET
+GETDRV1:
 	AND	07FH
 	SUB	001H
-	JR	NC,GETDRV1
+	RET	NC
 	LD	A,(_DVSW)	;Current Drive
-GETDRV1:
-	LD	(_DRV),A
 	RET
 
 SOPENX:
 	LD	DE,SFILE
-	LD	A,(DE)
-	CP	(IY+0)		;(FCB)ドライブ番号
+	LD	A,(IY+0)		;(FCB)ドライブ番号
+	CALL	IS_SAME_DRV_A_DE
 	JR	NZ,SOPEN
 	INC	DE
 	PUSH	IY
@@ -226,7 +237,7 @@ SOPENX:
 SOPEN:
 	LD	HL,FILESE
 SOPENC:
-	LD	(OPENPAT+1),HL
+	LD	(OPENPAT),HL
 
 	CALL	_RDFATX		;Detect Media
 	JR	C,RDDERR
@@ -258,7 +269,8 @@ SOPEN1X:
 	LD	HL,(_DTBUF)
 SOPEN2:
 	PUSH	DE
-OPENPAT:CALL	FILESE		;(self-modifying code)
+	CALL	FILESE		;(self-modifying code)
+OPENPAT	EQU	$-2
 	POP	DE
 	JR	C,SOPENE
 	JR	Z,SCF_FF_RET
@@ -292,13 +304,12 @@ RDDERR:
 
 NOPEN:
 	LD	HL,FILESE
-	LD	(OPENPAT+1),HL
+	LD	(OPENPAT),HL
 	LD	IY,(_FCB)
 	CALL	CHKWILDX
 	JR	NC,SCF_FF_RET
-	LD	A,(IY+0)	;(FCB)ドライブ番号
-	DEC	A
-	LD	(_DRV),A
+	LD	A,(IY+0)
+	CALL	GETDRV
 	CALL	_CHGDRV
 	RET	C
 	LD	HL,(SFNDF)	;Direcroty location and Flags
@@ -661,7 +672,7 @@ NAME:
 	RET	C
 	LD	DE,4
 	ADD	HL,DE
-	LD	(NAMEP+2),HL
+	LD	(NAMEP),HL
 	INC	HL
 	CALL	CHKWILD
 	RET	C
@@ -671,10 +682,9 @@ NAME:
 	CALL	NC,CHKATT
 	RET	C
 
-	LD	A,(IY+0)
 	PUSH	IY
-NAMEP:	LD	IY,0		;自己書き換え
-	LD	(IY+0),A
+	LD	IY,0		;自己書き換え
+NAMEP	EQU	$-2
 	CALL	SOPENX
 	EX	(SP),IY
 	CCF
@@ -776,8 +786,9 @@ SDE1:
 SDLOOP:					;(FCB)ファイルのサイズ(バイト単位)
 	LD	A,(HL)
 	INC	HL
-	LD	(SDPAT+2),A
-SDPAT:	LD	A,(IY+0)	;LD A,(IY+A)
+	LD	(SDPAT),A
+	LD	A,(IY+0)	;LD A,(IY+A)
+SDPAT	EQU	$-1
 	LD	(DE),A
 	INC	DE
 	DJNZ	SDLOOP

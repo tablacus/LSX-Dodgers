@@ -63,7 +63,30 @@ INIT:
 
 	LD	A,0E9H		;JP (HL)
 	LD	(0000FH),A
-
+					;CHECK PCG(MZ-1500)
+	LD	HL,0E800H
+	LD	B,(HL)
+	DI
+	LD	A,1
+	OUT	(0E5H),A	;MZ-1500: PCGバンク切り替え
+	LD	C,(HL)
+	LD	A,C
+	ADD	A,0A5H
+	LD	E,A
+	LD	(HL),E
+	OUT	(0E6H),A	;MZ-1500: PCGバンクを閉じる
+	LD	(HL),C
+	LD	A,1
+	OUT	(0E5H),A	;MZ-1500: PCGバンク切り替え
+	LD	A,(HL)
+	CP	E
+	OUT	(0E6H),A	;MZ-1500: PCGバンクを閉じる
+	LD	(HL),B
+	EI
+	JR	Z,MZ1500
+	XOR	A		;MZ-700はPCGバンクが存在しない
+	LD	(GRAMFL),A
+MZ1500:
 	LD	IX,EMMFL
 	CALL	CHECK_EMM_BPB
 	CP	0EBH

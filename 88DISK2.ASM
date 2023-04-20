@@ -13,36 +13,35 @@ BDRD:
 BRW:
 	DI
 	OUT	(0E2H),A	;拡張RAM リード/ライト制御
-	LD	(BANKSP+1),SP
-	LD	A,(BANKSP+2)
+	LD	(BANKSP),SP
+	LD	A,(BANKSPH)
 	ADD	A,A
 	JR	C,BRW1
-	LD	SP,EXTSP
+	LD	SP,EXTSP	;拡張メモリにスタックが重なる場合
 BRW1:
 	PUSH	BC
 	PUSH	DE
-	EX	DE,HL
+	EX	DE,HL		;DE=メインメモリ
 	ADD	HL,HL
 	ADD	HL,HL
 	LD	A,H
 	ADD	A,(IX+DPB_MAXCYL)
-	AND	00FH		;バンク
 	OUT	(0E3H),A	;拡張RAM バンク選択
 	LD	H,L
 	SRL	H	;/2
 	LD	L,0
 	IN	A,(0E2H)	;拡張RAM リード/ライト制御
 	RRCA
-	JR	NC,BRW2
-	EX	DE,HL
+	JR	NC,BRW2		;0: リード可
+	EX	DE,HL		;DE=拡張メモリ HL=メインメモリ
 BRW2:
 	LD	BC,512
 	LDIR
 
 	IN	A,(0E2H)	;拡張RAM リード/ライト制御
 	RRCA
-	JR	C,BRW3
-	EX	DE,HL
+	JR	C,BRW3		;1: リード不可
+	EX	DE,HL		;DE=拡張メモリ HL=メインメモリ
 BRW3:
 	POP	DE
 	POP	BC
@@ -51,7 +50,9 @@ BRW3:
 
 	XOR	A
 	OUT	(0E2H),A	;メインメモリに切り替える
-BANKSP:	LD	SP,0
+	LD	SP,0
+BANKSP	EQU	$-2
+BANKSPH	EQU	$-1
 	EI
 	RET
 

@@ -53,38 +53,47 @@ TVCL3:
 
 	CALL	INIT_CRTC
 BANK:
-	IN	A,(0E2H)
-	LD	B,0E3H		;拡張RAM バンク選択
+	LD	BC,000E3H	;拡張RAM バンク選択
 	LD	HL,07F00H
+	LD	D,(HL)
 	DI
-	LD	A,011H
+	LD	A,1		;リード可
 	OUT	(0E2H),A	;拡張RAM リード/ライト制御
-	OUT	(C),L
+	OUT	(C),B		;拡張RAM バンク選択
 	LD	A,(0)
 	CP	0EBH
 	JR	NZ,BANK1
 	LD	A,02BH
 	LD	(BANKDV),A
 BANK1:
-	LD	A,011H
+	LD	A,1		;リード可
 	OUT	(0E2H),A	;拡張RAM リード/ライト制御
-	OUT	(C),L
+	OUT	(C),B		;拡張RAM バンク選択
 	LD	E,(HL)
+	LD	A,E
+	ADD	A,0A5H
+	LD	(HL),A		;メインメモリに書き込む
+	CP	(HL)
+	JR	Z,BANK2		;メインメモリが反映されているか？
+	LD	A,011H		;ライト/リード可
+	OUT	(0E2H),A	;拡張RAM リード/ライト制御
 	LD	A,E
 	ADD	A,0A5H
 	LD	(HL),A
 	CP	(HL)
-	LD	(HL),E
-	JR	NZ,BANK2
-	INC	L
-	BIT	4,L
+	LD	(HL),E		;拡張RAM に元の値を戻す
+	JR	NZ,BANK2	;拡張RAM に反映しているか？
+	INC	B
+	BIT	4,B
 	JR	Z,BANK1
 BANK2:
-	XOR	A
+	XOR	A		;ライト/リード不可
 	OUT	(0E2H),A	;拡張RAM リード/ライト制御
-	LD	A,L
+	LD	(HL),D		;メインメモリ に元の値を戻す
+	LD	A,B
 	OR	A
 	JR	Z,NOBANK
+	LD	L,B
 	LD	H,0
 	ADD	HL,HL	;*2
 	ADD	HL,HL	;*4
