@@ -2,8 +2,8 @@
 ;	LSX-Dodgers DEF
 
 VER_1   EQU	1
-VER_2   EQU	5
-VER_3   EQU	9
+VER_2   EQU	6
+VER_3   EQU	0
 MACW	EQU	MAC + 01D00H	;機種フラグとLD判別フラグ
 MACD	EQU	MAC + DEV * 256	;機種フラグとデバイスフラグ
 VER	EQU	VER_1 * 256 + VER_2 * 16 + VER_3
