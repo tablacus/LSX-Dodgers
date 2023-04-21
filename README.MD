@@ -245,8 +245,8 @@ MS-DOS系のフォーマットがなさそうなので今のところLSX-Dodgers
 |eX1turbo/eX1turboZ|D88|D88/dsk|D88/img/xdf| - |LD-hdd|G:48K/E:320K/F:512K| - |
 |Xmil106(X1)|D88|D88| - | - |LD-hdd|G:48K/E:16M|RLC/RLS|
 |Xmil106(turbo/Z)|D88|D88|D88|D88|LD-hdd|G:48K/F:512K/E:16M※2|RLC/RLS|
-|EmuZ-700|D88|D88| - | - | - |C:32K/F:64K/E:16M※2| - |
-|EmuZ-1500|D88|D88| - | - | - |G:24K/C:32K/F:64K/E:16M※2| - |
+|EmuZ-700|D88|D88| - | - | - |C:32K/F:64K/E:16M| - |
+|EmuZ-1500|D88|D88| - | - | - |G:24K/C:32K/F:64K/E:16M| - |
 |M88|D88|D88|D88|D88| - |F:128K| - |
 |ePC-8801ma|D88|D88/dsk|D88/img/xdf(※1)| - | - |F:128K| - |
 |X88000|D88| - | - | - | - |F:256K| - |
