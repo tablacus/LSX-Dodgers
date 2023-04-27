@@ -415,7 +415,7 @@ CAP:
 	RET
 
 TITLE:
-	DB	"X1 screen controler v1.04"
+	DB	"X1 screen controler v1.05"
 	DB	$0D,$0A
 	DB	"$"
 USAGE:
@@ -442,7 +442,8 @@ C8025I:	DB	$A7,$50,$74,$38,$1F,$01,$19,$1C
 	DB	$03,$0E,$80,$F8,$B0,$FF,$0C,$A3
 	DB	24
 
-_C8025H:	DB	$6B,$50,$59,$88,$1B,$01,$19,$1A
+_C8025H:
+	DB	$6B,$50,$59,$88,$1B,$00,$19,$1A
 	DB	$00,$0F,$80,$F8,$B0,$FF,$0C,$A3
 	DB	24
 
