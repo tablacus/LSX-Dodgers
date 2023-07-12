@@ -20,6 +20,7 @@ INIT_ROM:
 	RLCA
 	RLCA
 	PUSH	AF
+	LD	D,4+1
 	CALL	GTSL2_
 	LD	(RAMAD3),A
 	LD	A,(RAMAD1)
@@ -29,6 +30,7 @@ INIT_ROM:
 	CALL	FIXRAMAD
 	LD	(RAMAD0),A
 	POP	AF
+	LD	D,2+1
 	CALL	GTSL2_
 	LD	(RAMAD2),A
 
@@ -50,6 +52,7 @@ GTSL1_:				;自分のいるスロットを知る
 	CALL	RSLREG		;read primary slot #
 	RRCA
 	RRCA
+	LD	D,1
 GTSL2_:
 	AND	3		;[A]=000000PP
 	LD	E,A		;[E]=000000PP
@@ -63,11 +66,16 @@ GTSL2_:
 	ADD	A,4		;桁上りは無い
 	LD	L,A
 	LD	A,(HL)		;get currently expansion slot register
+GTSL3_:
+	DEC	D
+	JR	Z,GTSL4_:
+	RRCA
+	JR	GTSL3_:
+GTSL4_:
 	AND	00CH		;[A] = 0000SS00
 	OR	E		;[A] = 0000SSPP
 	OR	080H		;[A] = 1000SSPP
 	RET
-GTSL1_E:
 
 START:
 	DI
@@ -293,19 +301,19 @@ CHK_RAM_SLT:
 	BIT	7,C
 	JR	Z,CHK_RAM_E		;スロットは拡張されていない
 	LD	A,C
-	ADD	A,4			;スロット#X-1
+	ADD	A,4*1			;スロット#X-1
 	PUSH	HL
 	CALL	CHK_RAM0
 	POP	HL
 	RET	Z
 	LD	A,C
-	ADD	A,4			;スロット#X-2
+	ADD	A,4*2			;スロット#X-2
 	PUSH	HL
 	CALL	CHK_RAM0
 	POP	HL
 	RET	Z
 	LD	A,C
-	ADD	A,4			;スロット#X-3
+	ADD	A,4*3			;スロット#X-3
 	PUSH	HL
 	CALL	CHK_RAM0
 	POP	HL
@@ -364,7 +372,7 @@ AUTODV:	DB	"A:",0
 INIMES:	DB	00CH,"LSX-Dodgers for MSX v"
 	DB	030H + VER_1, '.'
 	DB	030H + VER_2 ,030H + VER_3
-	DB	"C"
+	DB	"D"
 	DB	' Gaku',0DH,0AH
 	DB	0
 
