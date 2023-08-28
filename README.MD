@@ -239,16 +239,17 @@ MSX/98/X68Kのエミュレータで使われています。
 MS-DOS系のフォーマットがなさそうなので今のところLSX-Dodgersでは使っていません。  
 ※BPBを作成すればMS-DOSフォーマットで扱うことはできると思います。
 
+## イメージファイル対応表
 |エミュレータ|2D|2DD|2HD|2HD(1.44)|HDD|RAMDISK|リモート|
 |--|--|--|--|--|--|--|--|
 |eX1/eX1twin|D88| - | - | - |LD-hdd|G:48K/E:320K| - |
 |eX1turbo/eX1turboZ|D88|D88/dsk|D88/img/xdf| - |LD-hdd|G:48K/E:320K/F:512K| - |
 |Xmil106(X1)|D88|D88| - | - |LD-hdd|G:48K/E:16M|RLC/RLS|
 |Xmil106(turbo/Z)|D88|D88|D88|D88|LD-hdd|G:48K/F:512K/E:16M※2|RLC/RLS|
-|EmuZ-700|D88|D88| - | - | - |C:32K/F:64K/E:16M| - |
-|EmuZ-1500|D88|D88| - | - | - |G:24K/C:32K/F:64K/E:16M| - |
+|EmuZ-700|D88|D88/dsk| - | - | - |C:32K/F:64K/E:16M※2| - |
+|EmuZ-1500|D88|D88/dsk| - | - | - |G:24K/C:32K/F:64K/E:16M| - |
 |M88|D88|D88|D88|D88| - |F:128K| - |
-|ePC-8801ma|D88|D88/dsk|D88/img/xdf(※1)| - | - |F:128K| - |
+|ePC-8801ma|D88|D88/dsk(※1)|D88/img/xdf(※1)| - | - |F:128K| - |
 |X88000|D88| - | - | - | - |F:256K| - |
 
 ※1 2HD機の実機ROMか疑似ROMに改修が必要  
