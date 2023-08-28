@@ -1,0 +1,76 @@
+                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.0.0, LST:Full:4
+                                ;   TYPE
+                                
+       0005                     SYSTEM  EQU 0005H       ;システムコール
+       005C                     FCB1    EQU 005CH       ;1番目の引数のFCB
+       006C                     FCB2    EQU 006CH       ;2番目の引数のFCB
+       0080                     DTA1    EQU 0080H
+                                
+000000 0100                         ORG 0100H
+                                
+000000 0100 C30301          10      JP  START       ;0C3HはZ80ではJPだが、i8086ではRETなので
+       0103                     START:              ;間違えてMS-DOS環境で実行しても即終了できる
+000003 0103 115C00          10      LD  DE,FCB1     ;引数が1つだけの場合はFCB1がそのまま使える
+000006 0106 0E0F             7      LD  C,00FH      ;ファイルのオープン(_FOPEN) CP/M MSX-DOS
+000008 0108 CD0500          17      CALL    SYSTEM
+00000B 010B B7               4      OR  A
+00000C 010C C20000          10      JP  NZ,0        ;失敗したら終了
+                                
+00000F 010F 210100          10      LD  HL,1
+000012 0112 226A00          16      LD  (FCB1+14),HL    ;レコードサイズを1にする
+                                
+000015 0115 210000          10      LD  HL,0        ;FCB1を使う場合はランダムレコードを初期化する
+000018 0118 227D00          16      LD  (FCB1+33),HL    ;ランダムレコードを0にする
+00001B 011B 227F00          16      LD  (FCB1+35),HL
+                                
+00001E 011E 116901          10      LD  DE,BUFAD    ;データの読み出し先
+000021 0121 0E1A             7      LD  C,01AH      ;DTAの設定(_SETDTA) CP/M MSX-DOS
+000023 0123 CD0500          17      CALL    SYSTEM
+       0126                     LOOP1:
+000026 0126 115C00          10      LD  DE,FCB1
+000029 0129 2A0600          16      LD  HL,(SYSTEM+1)   ;バッファサイズを計算
+00002C 012C 0197FF          10      LD  BC,-(BUFAD+0100H)   ;0100Hはスタックの部分
+00002F 012F 09              11      ADD HL,BC
+000030 0130 2E00             7      LD  L,0
+000032 0132 7C               4      LD  A,H
+000033 0133 E6F8             7      AND 0F8H        ;バッファを1KB単位にする(HL = HL AND 0F800H)
+000035 0135 67               4      LD  H,A
+000036 0136 0E27             7      LD  C,027H      ;ランダムブロック読み出し(_RDBLK) MSX-DOS
+000038 0138 CD0500          17      CALL    SYSTEM
+00003B 013B FEFF             7      CP  0FFH
+00003D 013D 281F            12      JR  Z,EXIT2     ;失敗したら終了
+00003F 013F F5              11      PUSH    AF
+000040 0140 116901          10      LD  DE,BUFAD
+       0143                     LOOP2:
+000043 0143 7C               4      LD  A,H     ;HLに読み込んだサイズ
+000044 0144 B5               4      OR  L
+000045 0145 2813            12      JR  Z,EXIT1
+                                
+000047 0147 1A               7      LD  A,(DE)
+000048 0148 FE1A             7      CP  01AH        ;EOF
+00004A 014A 2812            12      JR  Z,EXIT2
+                                
+00004C 014C 13               6      INC DE
+                                
+00004D 014D D5              11      PUSH    DE      ;CP/MやMSX-DOSではシステムコールでレジスタが破壊される
+00004E 014E E5              11      PUSH    HL
+00004F 014F 5F               4      LD  E,A
+000050 0150 0E02             7      LD  C,2     ;コンソール出力(_CONOUT) CP/M MSX-DOS
+000052 0152 CD0500          17      CALL    SYSTEM
+000055 0155 E1              10      POP HL
+000056 0156 D1              10      POP DE
+000057 0157 2B               6      DEC HL
+000058 0158 18E9            12      JR  LOOP2
+       015A                     EXIT1:
+00005A 015A F1              10      POP AF
+00005B 015B B7               4      OR  A       ;A=0の場合はバッファサイズすべて読み込みできたなので、まだ読み込みできていない残りがある
+00005C 015C 28C8            12      JR  Z,LOOP1     ;A=1の場合はすべて読み込み完了している
+       015E                     EXIT2:
+00005E 015E 115C00          10      LD  DE,FCB1
+000061 0161 0E10             7      LD  C,010H      ;ファイルのクローズ(_FCLOSE) CP/M MSX-DOS
+000063 0163 CD0500          17      CALL    SYSTEM
+                                
+000066 0166 C30000          10      JP  0       ;プログラム終了
+                                
+       0169                     BUFAD:
+[EOF:TYPE.ASM:SHIFT_JIS]
