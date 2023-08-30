@@ -211,7 +211,7 @@
        8165                     CHECK_EMM_BPB:
 000165 8165 D5              11      PUSH    DE
 000166 8166 110000          10      LD  DE,0
-000169 8169 CD35EA          17      CALL    EADR
+000169 8169 CD24EA          17      CALL    EADR
 00016C 816C D1              10      POP DE
 00016D 816D ED78            12      IN  A,(C)
 00016F 816F C9              10      RET
@@ -226,7 +226,7 @@
             313530302076        
 00019A 819A 312E                    DB  030H + VER_1, '.'
 00019C 819C 3630                    DB  030H + VER_2 ,030H + VER_3
-00019E 819E 41                      DB  "A"
+00019E 819E 45                      DB  "E"
 00019F 819F 2047616B750D0A          DB  ' Gaku',0DH,0AH
 0001A6 81A6 00                      DB  0
                                 
@@ -489,7 +489,7 @@
                                 ;   LSX-Dodgers CCP
                                 
        D01B                     COMMAND:
-0002EB D01B 3A33EB          13      LD  A,(FCB_BAT)
+0002EB D01B 3A22EB          13      LD  A,(FCB_BAT)
 0002EE D01E B7               4      OR  A
 0002EF D01F C261D1          10      JP  NZ,C_BAT1
 0002F2 D022 CDD5D0          17      CALL    SETDTA1
@@ -542,7 +542,7 @@
 00034C D07C 116D00          10      LD  DE,FCB2+1   ;COMMAND NAME
 00034F D07F 010B00          10      LD  BC,11
 000352 D082 EDB0                    LDIR
-000354 D084 11D2EA          10      LD  DE,PATHD
+000354 D084 11C1EA          10      LD  DE,PATHD
        D087                     CEX1:
 000357 D087 1A               7      LD  A,(DE)
 000358 D088 FE20             7      CP  020H
@@ -572,7 +572,7 @@
 00037E D0AE 0E11             7      LD  C,011H      ;(BDOS)ファイルの検索
        D0B0                     OPEN3:
 000380 D0B0 D5              11      PUSH    DE
-000381 D0B1 110EEB          10      LD  DE,DTA_CCP
+000381 D0B1 11FDEA          10      LD  DE,DTA_CCP
 000384 D0B4 CDD2D0          17      CALL    SETDTA
 000387 D0B7 EB               4      EX  DE,HL
 000388 D0B8 CDDCD0          17      CALL    SYSTEM0
@@ -584,10 +584,10 @@
 00038F D0BF 18EF            12      JR  OPEN3
                                 
        D0C1                     DEFCB:              ;Z=Ok NZ=Error
-000391 D0C1 110EEB          10      LD  DE,DTA_CCP
+000391 D0C1 11FDEA          10      LD  DE,DTA_CCP
 000394 D0C4 CDDAD0          17      CALL    SYSC0F
                                 
-000397 D0C7 112FEB          10      LD  DE,DTA_CCP+33   ;(FCB)ランダムレコード
+000397 D0C7 111EEB          10      LD  DE,DTA_CCP+33   ;(FCB)ランダムレコード
 00039A D0CA 0604             7      LD  B,4
 00039C D0CC CD27D3          17      CALL    ZERO_MEMORY_DE
        D0CF                     SETDTA100:
@@ -618,7 +618,7 @@
 0003BC D0EC E6F8             7      AND 0F8H
 0003BE D0EE 67               4      LD  H,A
        D0EF                     S27DTA:
-0003BF D0EF 110EEB          10      LD  DE,DTA_CCP
+0003BF D0EF 11FDEA          10      LD  DE,DTA_CCP
        D0F2                     S27:
 0003C2 D0F2 0E27             7      LD  C,027H      ;(BDOS)ランダムブロック読み込み
 0003C4 D0F4 18E6            12      JR  SYSTEM0
@@ -638,14 +638,14 @@
 0003D5 D105 CDABD0          17      CALL    OPEN1
        D108                     CEXE5:
 0003D8 D108 C0              11      RET NZ
-0003D9 D109 2A18EB          16      LD  HL,(DTA_CCP+1+9)
+0003D9 D109 2A07EB          16      LD  HL,(DTA_CCP+1+9)
 0003DC D10C 7C               4      LD  A,H
 0003DD D10D CD54DE          17      CALL    CAP
 0003E0 D110 67               4      LD  H,A
 0003E1 D111 7D               4      LD  A,L
 0003E2 D112 CD54DE          17      CALL    CAP
 0003E5 D115 6F               4      LD  L,A
-0003E6 D116 3A17EB          13      LD  A,(DTA_CCP+1+8)
+0003E6 D116 3A06EB          13      LD  A,(DTA_CCP+1+8)
 0003E9 D119 CD54DE          17      CALL    CAP
 0003EC D11C D642             7      SUB 'B'
 0003EE D11E 282C            12      JR  Z,C_BAT
@@ -687,8 +687,8 @@
                                 
 000423 D153 CDC1D0          17      CALL    DEFCB
                                 
-000426 D156 210EEB          10      LD  HL,DTA_CCP
-000429 D159 1133EB          10      LD  DE,FCB_BAT
+000426 D156 21FDEA          10      LD  HL,DTA_CCP
+000429 D159 1122EB          10      LD  DE,FCB_BAT
 00042C D15C 012500          10      LD  BC,37
 00042F D15F EDB0                    LDIR
        D161                     C_BAT1:
@@ -720,11 +720,11 @@
 00045E D18E C33BD0          10      JP  COMMAND2
        D191                     END_BATCH:
 000461 D191 AF               4      XOR A       ;バッチファイルを閉じる
-000462 D192 3233EB          13      LD  (FCB_BAT),A
+000462 D192 3222EB          13      LD  (FCB_BAT),A
 000465 D195 C300F0          10      JP  CPM_BOOT
                                 
        D198                     FGETC_BAT:
-000468 D198 1133EB          10      LD  DE,FCB_BAT
+000468 D198 1122EB          10      LD  DE,FCB_BAT
        D19B                     FGETC:              ;1文字ずつ読み込む
 00046B D19B E5              11      PUSH    HL      ;Z:成功
 00046C D19C 210100          10      LD  HL,1
@@ -792,7 +792,7 @@
 0004D2 D202 10F9            13      DJNZ    PDS3
        D204                     PDSKF1:
 0004D4 D204 CD90D2          17      CALL    PRDEC_DEHL
-0004D7 D207 1163EB          10      LD  DE,FREE
+0004D7 D207 1152EB          10      LD  DE,FREE
 0004DA D20A CD7BD4          17      CALL    _SYS09      ;(BDOS)文字列出力
 0004DD D20D CD7DD2          17      CALL    PUTDRV
 0004E0 D210 3E5C             7      LD  A,05CH      ;\
@@ -806,20 +806,20 @@
 0004F1 D221 1833            12      JR  LTNL
                                 
        D223                     P_NAME:
-0004F3 D223 3A0FEB          13      LD  A,(DTA_CCP+1)
+0004F3 D223 3AFEEA          13      LD  A,(DTA_CCP+1)
 0004F6 D226 FE2E             7      CP  '.'
 0004F8 D228 C8              11      RET Z
                                 
-0004F9 D229 3A1AEB          13      LD  A,(DTA_CCP+1+00BH)
+0004F9 D229 3A09EB          13      LD  A,(DTA_CCP+1+00BH)
 0004FC D22C F5              11      PUSH    AF
 0004FD D22D CB67             8      BIT 4,A
 0004FF D22F 2808            12      JR  Z,DIR3
-000501 D231 1158EB          10      LD  DE,DIRMES
+000501 D231 1147EB          10      LD  DE,DIRMES
 000504 D234 CD7BD4          17      CALL    _SYS09      ;(BDOS)文字列出力
 000507 D237 180A            12      JR  DIR6
        D239                     DIR3:
-000509 D239 ED5B2DEB        20      LD  DE,(DTA_CCP+1+01EH)
-00050D D23D 2A2BEB          16      LD  HL,(DTA_CCP+1+01CH)
+000509 D239 ED5B1CEB        20      LD  DE,(DTA_CCP+1+01EH)
+00050D D23D 2A1AEB          16      LD  HL,(DTA_CCP+1+01CH)
 000510 D240 CD90D2          17      CALL    PRDEC_DEHL
        D243                     DIR6:
 000513 D243 F1              10      POP AF
@@ -829,7 +829,7 @@
 000518 D248 C620             7      ADD A,020H
 00051A D24A CD11D7          17      CALL    MSG_A
 00051D D24D CD7DD2          17      CALL    PUTDRV
-000520 D250 210FEB          10      LD  HL,DTA_CCP+1
+000520 D250 21FEEA          10      LD  HL,DTA_CCP+1
 000523 D253 CDD0D2          17      CALL    FPRNT
                                 
        D256                     LTNL:
@@ -838,7 +838,7 @@
                                 
        D25B                     C_PATH:
 00052B D25B CD14DC          17      CALL    SPCUT
-00052E D25E 21D2EA          10      LD  HL,PATHD
+00052E D25E 21C1EA          10      LD  HL,PATHD
 000531 D261 FE21             7      CP  021H
 000533 D263 300C            12      JR  NC,CPATH0
        D265                     CPATHP:
@@ -1003,7 +1003,7 @@
 000621 D351 C0              11      RET NZ
 000622 D352 CDC1D0          17      CALL    DEFCB
                                 
-000625 D355 3A1BEB          13      LD  A,(DTA_CCP+13)
+000625 D355 3A0AEB          13      LD  A,(DTA_CCP+13)
 000628 D358 CB67             8      BIT 4,A
 00062A D35A 2821            12      JR  Z,COPY1A
                                 
@@ -1013,7 +1013,7 @@
                                 
 000634 D364 3E20             7      LD  A,020H
 000636 D366 325D00          13      LD  (FCB1+1),A
-000639 D369 2A28EB          16      LD  HL,(DTA_CCP+26)
+000639 D369 2A17EB          16      LD  HL,(DTA_CCP+26)
 00063C D36C 23               6      INC HL
 00063D D36D 226A00          16      LD  (FCB1+14),HL
 000640 D370 18D5            12      JR  COPY0
@@ -1028,7 +1028,7 @@
        D37D                     COPY1A:
 00064D D37D 216C00          10      LD  HL,FCB2
 000650 D380 1114F0          10      LD  DE,FDRV
-000653 D383 0110EB          10      LD  BC,DTA_CCP+2
+000653 D383 01FFEA          10      LD  BC,DTA_CCP+2
 000656 D386 EDA0            16      LDI
 000658 D388 3E0B             7      LD  A,11
        D38A                     COPY2:
@@ -1078,9 +1078,9 @@
 0006A6 D3D6 2023            12      JR  NZ,COPYE
 0006A8 D3D8 10E9            13      DJNZ    COPY6
        D3DA                     COPY7:
-0006AA D3DA 3A1BEB          13      LD  A,(DTA_CCP+13)  ;(FCB)属性
+0006AA D3DA 3A0AEB          13      LD  A,(DTA_CCP+13)  ;(FCB)属性
 0006AD D3DD 3221F0          13      LD  (FDRV+13),A
-0006B0 D3E0 2122EB          10      LD  HL,DTA_CCP+20   ;(FCB)タイムスタンプ
+0006B0 D3E0 2111EB          10      LD  HL,DTA_CCP+20   ;(FCB)タイムスタンプ
 0006B3 D3E3 1128F0          10      LD  DE,FDRV+20
 0006B6 D3E6 010400          10      LD  BC,4
 0006B9 D3E9 EDB0                    LDIR
@@ -1167,7 +1167,7 @@
 000731 D461 FE5C             7      CP  05CH        ;(BDOS)ファイル名の解析(_PFILE)
 000733 D463 CAB4D6          10      JP  Z,_SYS29
 000736 D466 FE5F             7      CP  05FH        ;(BDOS)ディスクバッファのフラッシュ(_FLUSH)
-000738 D468 CA85E8          10      JP  Z,_SYS5F
+000738 D468 CA74E8          10      JP  Z,_SYS5F
 00073B D46B FE6F             7      CP  06FH        ;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
 00073D D46D 200A            12      JR  NZ,_ERROR
 00073F D46F 011D01          10      LD  BC,VER_6F
@@ -1588,11 +1588,11 @@
                                 
        D6CF                     _SYS30:     ;(BDOS)論理セクタを用いた書き込み
 00099F D6CF C5              11      PUSH    BC
-0009A0 D6D0 0135E7          10      LD  BC,DWT24B
+0009A0 D6D0 0133E7          10      LD  BC,DWT24B
 0009A3 D6D3 1804            12      JR  S2FX
        D6D5                     _SYS2F:
 0009A5 D6D5 C5              11      PUSH    BC
-0009A6 D6D6 0125E7          10      LD  BC,DRD24B
+0009A6 D6D6 0123E7          10      LD  BC,DRD24B
        D6D9                     S2FX:
 0009A9 D6D9 ED43EFD6        20      LD  (S2FPAT+1),BC
 0009AD D6DD CDDFF0          17      CALL    _FFLUSH
@@ -1606,7 +1606,7 @@
 0009B9 D6E9 2A8AF0          16      LD  HL,(_DTA)
                                 
 0009BC D6EC 0E00             7      LD  C,0
-0009BE D6EE CD25E7          17  S2FPAT: CALL    DRD24B
+0009BE D6EE CD23E7          17  S2FPAT: CALL    DRD24B
        D6F1                     S30X2:
 0009C1 D6F1 E1              10      POP HL
 0009C2 D6F2 D1              10      POP DE
@@ -2778,7 +2778,7 @@
 00103F DD6F C5              11      PUSH    BC
 001040 DD70 2A7EF1          16      LD  HL,(_DTBUF)
 001043 DD73 CD2FDE          17      CALL    CLUSTX
-001046 DD76 CD33E7          17      CALL    DWT24
+001046 DD76 CD31E7          17      CALL    DWT24
 001049 DD79 C1              10      POP BC
 00104A DD7A D1              10      POP DE
 00104B DD7B CD9AE5          17      CALL    NEXTX
@@ -2975,14 +2975,14 @@
 001139 DE69 C9              10      RET
                                 
        DE6A                     CHDIR:
-00113A DE6A CD55E8          17      CALL    GETDPBD
+00113A DE6A CD44E8          17      CALL    GETDPBD
 00113D DE6D 381D            12      JR  C,CHDIR2
 00113F DE6F DD751A          19      LD  (IX+DPB_SDIR),L
 001142 DE72 DD741B          19      LD  (IX+DPB_SDIR+1),H
 001145 DE75 1815            12      JR  CHDIR2      ;POP_IX_RET
                                 
        DE77                     LDDIR:
-001147 DE77 CD55E8          17      CALL    GETDPBD
+001147 DE77 CD44E8          17      CALL    GETDPBD
 00114A DE7A DD5E1A          19      LD  E,(IX+DPB_SDIR)
 00114D DE7D DD561B          19      LD  D,(IX+DPB_SDIR+1)
 001150 DE80 13               6      INC DE
@@ -3869,11 +3869,11 @@
                                 
        E3A5                     DWTC:
 001675 E3A5 E5              11      PUSH    HL
-001676 E3A6 2135E7          10      LD  HL,DWT24B
+001676 E3A6 2133E7          10      LD  HL,DWT24B
 001679 E3A9 1804            12      JR  DWTC1
        E3AB                     DRDC:
 00167B E3AB E5              11      PUSH    HL
-00167C E3AC 2125E7          10      LD  HL,DRD24B
+00167C E3AC 2123E7          10      LD  HL,DRD24B
        E3AF                     DWTC1:
 00167F E3AF 2209E4          16      LD  (DRWF_MODE),HL
 001682 E3B2 E1              10      POP HL
@@ -3937,7 +3937,7 @@
        E402                     DRWF_HL EQU $-2
 0016D4 E404 AF               4      XOR A
 0016D5 E405 32F9E3          13      LD  (DRWF_B),A
-0016D8 E408 CD25E7          17      CALL    DRD24B
+0016D8 E408 CD23E7          17      CALL    DRD24B
        E409                     DRWF_MODE   EQU $-2
        E40B                     DRDF1:
 0016DB E40B D1              10      POP DE
@@ -3959,7 +3959,7 @@
 0016E9 E419 2A7EF1          16      LD  HL,(_DTBUF)
 0016EC E41C 3A75E4          13      LD  A,(_DBS24)
 0016EF E41F 4F               4      LD  C,A
-0016F0 E420 CD23E7          17      CALL    DRD24
+0016F0 E420 CD21E7          17      CALL    DRD24
 0016F3 E423 DC47E4          17      CALL    C,DRDNE
        E426                     POP_DE_BC_HL_RET:
 0016F6 E426 D1              10      POP DE
@@ -4025,7 +4025,7 @@
        E475                     _DBS24  EQU $-1
 001746 E476 ED5BA6F0        20      LD  DE,(_DBSEC)
 00174A E47A 2A7EF1          16      LD  HL,(_DTBUF)
-00174D E47D D433E7          17      CALL    NC,DWT24
+00174D E47D D431E7          17      CALL    NC,DWT24
        E480                     POP_DE_BC_HL_RET2:
 001750 E480 18A4            12      JR  POP_DE_BC_HL_RET
                                 
@@ -4068,7 +4068,7 @@
 00178E E4BE C5              11      PUSH    BC
 00178F E4BF D5              11      PUSH    DE
 001790 E4C0 DDE5            15      PUSH    IX
-001792 E4C2 CD40E7          17      CALL    WTFAT
+001792 E4C2 CD3EE7          17      CALL    WTFAT
 001795 E4C5 AF               4      XOR A
 001796 E4C6 32A2F0          13      LD  (_WTFATF),A
 001799 E4C9 18DD            12      JR  POP_IX_DE_BC_HL_RET
@@ -4104,7 +4104,7 @@
        E4F4                     NCLPAT_FATIX    EQU $-1
        E4F3                     NCLPAT_FATDRV   EQU $-2
 0017C5 E4F5 ED43AAF0        20      LD  (_FATDRV),BC
-0017C9 E4F9 CD15E7          17      CALL    RDFATS
+0017C9 E4F9 CD13E7          17      CALL    RDFATS
 0017CC E4FC 18A4            12      JR  RDFATE2
                                 
        E4FE                     NCL3:
@@ -4268,7 +4268,7 @@
 00187C E5AC 3270F0          13      LD  (CHECK),A
        E5AF                     RDFAT1:
 00187F E5AF 3A88F0          13      LD  A,(_DRV)
-001882 E5B2 CD5EE8          17      CALL    CHGDRVR
+001882 E5B2 CD4DE8          17      CALL    CHGDRVR
 001885 E5B5 D8              11      RET C
 001886 E5B6 DD7E12          19      LD  A,(IX+DPB_DEVICE)
 001889 E5B9 CB6F             8      BIT 5,A
@@ -4278,7 +4278,7 @@
 001891 E5C1 77               7      LD  (HL),A
 001892 E5C2 110000          10      LD  DE,0        ;BPB
 001895 E5C5 2A7CF1          16      LD  HL,(_FATBF)
-001898 E5C8 CD21E7          17      CALL    DRD16
+001898 E5C8 CD1FE7          17      CALL    DRD16
 00189B E5CB 3024            12      JR  NC,GETBPB
 00189D E5CD 2170F0          10      LD  HL,CHECK
 0018A0 E5D0 CB06            15      RLC (HL)
@@ -4324,9 +4324,9 @@
 0018ED E61D 010C00          10      LD  BC,12
 0018F0 E620 EDB0                    LDIR
        E622                     GETBPBOK:
-0018F2 E622 CDC9E7          17      CALL    CHGDRV2
+0018F2 E622 CDB9E7          17      CALL    CHGDRV2
        E625                     RDFAT0X:
-0018F5 E625 CD15E7          17      CALL    RDFATS
+0018F5 E625 CD13E7          17      CALL    RDFATS
 0018F8 E628 D8              11      RET C
 0018F9 E629 DDAE06          19      XOR (IX+DPB_FATID)
 0018FC E62C C8              11      RET Z
@@ -4427,102 +4427,101 @@
 001992 E6C2 7C               4      LD  A,H
 001993 E6C3 B5               4      OR  L
 001994 E6C4 3E00             7      LD  A,0     ;LDでフラグは変化しない。BPB_TotSec16を AHL で扱う為、Aに0を入れる
-001996 E6C6 2010            12      JR  NZ,BPB16BIT ;BPB_TotSec16が「0」の場合はBPB_TotSec32で計算
-001998 E6C8 FD7E23          19      LD  A,(IY+35)   ;念のために総セクタ数が24ビットを超える場合はエラーを返す
-00199B E6CB B7               4      OR  A
-00199C E6CC 37               4      SCF
-00199D E6CD C0              11      RET NZ
-00199E E6CE FD6E20          19      LD  L,(IY+32)   ;BPB_TotSec32 は AHL の24ビットで扱う
-0019A1 E6D1 FD6621          19      LD  H,(IY+33)   ;1クラスタの論理セクタ数(DPB_SECPCL)が最大128なので
-0019A4 E6D4 FD7E22          19      LD  A,(IY+34)   ;24ビットを超えると必ずクラスタ数が16ビットを超えてしまうのでこれで十分
-0019A7 E6D7 A7               4      AND A       ;CF=0
-       E6D8                     BPB16BIT:
-0019A8 E6D8 ED52            15      SBC HL,DE
-0019AA E6DA DE00             7      SBC A,0
-0019AC E6DC FD460D          19      LD  B,(IY+13)   ;BPB_SecPerClus
-       E6DF                     BPBTC1:             ;総クラスタ数(AHL) = 総セクタ数(AHL) / セクタサイズ(B)
-0019AF E6DF CB18             8      RR  B       ;->CY
-0019B1 E6E1 3808            12      JR  C,BPBTC2
-0019B3 E6E3 CB3F             8      SRL A
-0019B5 E6E5 CB1C             8      RR  H       ;AHL=AHL/2
-0019B7 E6E7 CB1D             8      RR  L
-0019B9 E6E9 18F4            12      JR  BPBTC1
-       E6EB                     BPBTC2:
-0019BB E6EB B7               4      OR  A
-0019BC E6EC 37               4      SCF
-0019BD E6ED C0              11      RET NZ      ;念のため(クラスタ数が16ビットを超える場合)
-0019BE E6EE 23               6      INC HL
-0019BF E6EF 23               6      INC HL
-0019C0 E6F0 DD7508          19      LD  (IX+DPB_MAXCL),L
-0019C3 E6F3 DD7409          19      LD  (IX+DPB_MAXCL+1),H
+001996 E6C6 200E            12      JR  NZ,BPB16BIT ;BPB_TotSec16が「0」の場合はBPB_TotSec32で計算
+001998 E6C8 2F               4      CPL         ;A=0FFH
+001999 E6C9 FD8623          19      ADD A,(IY+35)   ;念のために総セクタ数が24ビットを超える場合はエラーを返す
+00199C E6CC D8              11      RET C
+00199D E6CD FD6E20          19      LD  L,(IY+32)   ;BPB_TotSec32 は AHL の24ビットで扱う
+0019A0 E6D0 FD6621          19      LD  H,(IY+33)   ;1クラスタの論理セクタ数(DPB_SECPCL)が最大128なので、
+0019A3 E6D3 FD7E22          19      LD  A,(IY+34)   ;FAT12,FAT16では総セクタ数が24ビットを超えることは無い
+       E6D6                     BPB16BIT:
+0019A6 E6D6 ED52            15      SBC HL,DE       ;DE=DPB_MAXDIR
+0019A8 E6D8 DE00             7      SBC A,0
+0019AA E6DA FD460D          19      LD  B,(IY+13)   ;BPB_SecPerClus
+       E6DD                     BPBTC1:             ;総クラスタ数(AHL) = 総セクタ数(AHL) / セクタサイズ(B)
+0019AD E6DD CB18             8      RR  B       ;->CY
+0019AF E6DF 3808            12      JR  C,BPBTC2
+0019B1 E6E1 CB3F             8      SRL A
+0019B3 E6E3 CB1C             8      RR  H       ;AHL=AHL/2
+0019B5 E6E5 CB1D             8      RR  L
+0019B7 E6E7 18F4            12      JR  BPBTC1
+       E6E9                     BPBTC2:
+0019B9 E6E9 C6FF             7      ADD A,0FFH
+0019BB E6EB D8              11      RET C       ;念のため(クラスタ数が16ビットを超える場合)
+0019BC E6EC 23               6      INC HL
+0019BD E6ED 23               6      INC HL
+0019BE E6EE DD7508          19      LD  (IX+DPB_MAXCL),L
+0019C1 E6F1 DD7409          19      LD  (IX+DPB_MAXCL+1),H
                                 
-0019C6 E6F6 FD7E15          19      LD  A,(IY+21)   ;BPB_Media
-0019C9 E6F9 DD7706          19      LD  (IX+DPB_FATID),A
+0019C4 E6F4 FD7E15          19      LD  A,(IY+21)   ;BPB_Media
+0019C7 E6F7 DD7706          19      LD  (IX+DPB_FATID),A
                                 
-0019CC E6FC FD7E10          19      LD  A,(IY+16)   ;BPB_NumFATs
-0019CF E6FF C6FE             7      ADD A,0-2       ;>2:CF=1
-0019D1 E701 FD7E0C          19      LD  A,(IY+12)   ;BPB_BytsPerSec
-0019D4 E704 6F               4      LD  L,A
-0019D5 E705 3002            12      JR  NC,BPBFAT1
-0019D7 E707 F680             7      OR  080H
-       E709                     BPBFAT1:            ;ここではCF=0
-0019D9 E709 DD770F          19      LD  (IX+DPB_BPS),A
-0019DC E70C 2D               4      DEC L       ;以下のセクタサイズに合致しない場合はCF=1でエラーにする
-0019DD E70D C8              11      RET Z       ;1セクタ256バイト
+0019CA E6FA FD7E10          19      LD  A,(IY+16)   ;BPB_NumFATs
+0019CD E6FD C6FE             7      ADD A,0-2       ;>2:CF=1
+0019CF E6FF FD7E0C          19      LD  A,(IY+12)   ;BPB_BytsPerSec
+0019D2 E702 6F               4      LD  L,A
+0019D3 E703 3002            12      JR  NC,BPBFAT1
+0019D5 E705 F680             7      OR  080H
+       E707                     BPBFAT1:            ;ここではCF=0
+0019D7 E707 DD770F          19      LD  (IX+DPB_BPS),A
+0019DA E70A 2D               4      DEC L       ;以下のセクタサイズに合致しない場合はCF=1でエラーにする
+0019DB E70B C8              11      RET Z       ;1セクタ256バイト
+0019DC E70C 2D               4      DEC L
+0019DD E70D C8              11      RET Z       ;1セクタ512バイト
 0019DE E70E 2D               4      DEC L
-0019DF E70F C8              11      RET Z       ;1セクタ512バイト
-0019E0 E710 2D               4      DEC L
-0019E1 E711 2D               4      DEC L
-0019E2 E712 C8              11      RET Z       ;1セクタ1024バイト
-0019E3 E713 37               4      SCF
-0019E4 E714 C9              10      RET
+0019DF E70F 2D               4      DEC L
+0019E0 E710 C8              11      RET Z       ;1セクタ1024バイト
+0019E1 E711 37               4      SCF
+0019E2 E712 C9              10      RET
                                 
-       E715                     RDFATS:
-0019E5 E715 CD5BE7          17      CALL    FATSETUP
-0019E8 E718 D8              11      RET C
-0019E9 E719 CD25E7          17      CALL    DRD24B
-0019EC E71C 2A7CF1          16      LD  HL,(_FATBF)
-0019EF E71F 7E               7      LD  A,(HL)
-0019F0 E720 C9              10      RET
+       E713                     RDFATS:
+0019E3 E713 CD44E7          17      CALL    FATSETUP
+0019E6 E716 D8              11      RET C
+0019E7 E717 CD23E7          17      CALL    DRD24B
+0019EA E71A 2A7CF1          16      LD  HL,(_FATBF)
+0019ED E71D 7E               7      LD  A,(HL)
+0019EE E71E C9              10      RET
                                 
-       E721                     DRD16:
-0019F1 E721 0E00             7      LD  C,0
-       E723                     DRD24:
-0019F3 E723 0601             7      LD  B,1
-       E725                     DRD24B:
-0019F5 E725 DDE5            15      PUSH    IX
-0019F7 E727 DD2AA8F0        20      LD  IX,(_DPB)
-0019FB E72B CDACE9          17      CALL    FDRD        ;自己書き換え（ディスク読み込み）
-       E72C                     DRDPAT  EQU $-2
-       E72E                     POP_IX_RET:
-0019FE E72E DDE1            14      POP IX
-001A00 E730 C9              10      RET
+       E71F                     DRD16:
+0019EF E71F 0E00             7      LD  C,0
+       E721                     DRD24:
+0019F1 E721 0601             7      LD  B,1
+       E723                     DRD24B:
+0019F3 E723 DDE5            15      PUSH    IX
+0019F5 E725 DD2AA8F0        20      LD  IX,(_DPB)
+0019F9 E729 CD9BE9          17      CALL    FDRD        ;自己書き換え（ディスク読み込み）
+       E72A                     DRDPAT  EQU $-2
+       E72C                     POP_IX_RET:
+0019FC E72C DDE1            14      POP IX
+0019FE E72E C9              10      RET
                                 
-       E731                     DWT16:
-001A01 E731 0E00             7      LD  C,0
-       E733                     DWT24:
-001A03 E733 0601             7      LD  B,1
-       E735                     DWT24B:
-001A05 E735 DDE5            15      PUSH    IX
-001A07 E737 DD2AA8F0        20      LD  IX,(_DPB)
-001A0B E73B CD52E9          17      CALL    FDWT        ;自己書き換え（ディスク書き込み）
-       E73C                     DWTPAT  EQU $-2
-001A0E E73E 18EE            12      JR  POP_IX_RET
+       E72F                     DWT16:
+0019FF E72F 0E00             7      LD  C,0
+       E731                     DWT24:
+001A01 E731 0601             7      LD  B,1
+       E733                     DWT24B:
+001A03 E733 DDE5            15      PUSH    IX
+001A05 E735 DD2AA8F0        20      LD  IX,(_DPB)
+001A09 E739 CD41E9          17      CALL    FDWT        ;自己書き換え（ディスク書き込み）
+       E73A                     DWTPAT  EQU $-2
+001A0C E73C 18EE            12      JR  POP_IX_RET
                                 
-       E740                     WTFAT:
-001A10 E740 CD5BE7          17      CALL    FATSETUP
-001A13 E743 D435E7          17      CALL    NC,DWT24B
-001A16 E746 D8              11      RET C
-001A17 E747 DDCB0F7E        20      BIT 7,(IX+DPB_BPS)
-001A1B E74B C8              11      RET Z       ;予備FATが無い
-001A1C E74C CD62E7          17      CALL    FATS2
-001A1F E74F E5              11      PUSH    HL      ;予備FAT
-001A20 E750 DD6E00          19      LD  L,(IX+DPB_FATLN)
-001A23 E753 DD6601          19      LD  H,(IX+DPB_FATLN+1)
-001A26 E756 19              11      ADD HL,DE
-001A27 E757 EB               4      EX  DE,HL
-001A28 E758 E1              10      POP HL
-001A29 E759 18DA            12      JR  DWT24B
+       E73E                     WTFAT:
+001A0E E73E CD44E7          17      CALL    FATSETUP
+001A11 E741 30F0            12      JR  NC,DWT24B
+001A13 E743 C9              10      RET
+                                ;   CALL    NC,DWT24B   ;予備FATの保存ルーチン
+                                ;   RET C
+                                ;   BIT 7,(IX+DPB_BPS)
+                                ;   RET Z       ;予備FATが無い
+                                ;   CALL    FATS2
+                                ;   PUSH    HL      ;予備FAT
+                                ;   LD  L,(IX+DPB_FATLN)
+                                ;   LD  H,(IX+DPB_FATLN+1)
+                                ;   ADD HL,DE
+                                ;   EX  DE,HL
+                                ;   POP HL
+                                ;   JR  DWT24B
                                 ;------------------------
                                 ;FATのセットアップ
                                 ;out
@@ -4536,231 +4535,235 @@
                                 ;   FAT12:対象クラスタ1024毎に1.5KBを切り替える
                                 ;   FAT16:対象クラスタ1024毎に2KBを切り替える
                                 ;------------------------
-       E75B                     FATSETUP:
-001A2B E75B 3AAAF0          13      LD  A,(_FATDRV)
-001A2E E75E CD5EE8          17      CALL    CHGDRVR     ;ドライブ切り替え
-001A31 E761 D8              11      RET C
-       E762                     FATS2:
-001A32 E762 DD7E0F          19      LD  A,(IX+DPB_BPS)  ;512=2 1024=4
-001A35 E765 0F               4      RRCA
-001A36 E766 CD8FE7          17      CALL    FATSETUP12  ;自己書き換え
-       E767                     FATSX   EQU $-2
-001A39 E769 210000          10      LD  HL,0
-001A3C E76C 4A               4      LD  C,D
-001A3D E76D 54               4      LD  D,H
-001A3E E76E 3AABF0          13      LD  A,(_FATIX)  ;範囲FAT12:0-3/FAT16:0-63(0-03FH):65535*2/2048
-001A41 E771 47               4      LD  B,A
-001A42 E772 04               4      INC B
-001A43 E773 DD7E00          19      LD  A,(IX+DPB_FATLN)
-       E776                     FAT_SKP:
-001A46 E776 05               4      DEC B
-001A47 E777 2805            12      JR  Z,FAT1
-001A49 E779 19              11      ADD HL,DE
-001A4A E77A 93               4      SUB E
-001A4B E77B 30F9            12      JR  NC,FAT_SKP
-001A4D E77D C9              10      RET
-       E77E                     FAT1:
-001A4E E77E EB               4      EX  DE,HL
-001A4F E77F B9               4      CP  C       ;C=FATバッファに読み込めるセクタ数
-001A50 E780 3801            12      JR  C,FAT2
-001A52 E782 79               4      LD  A,C
-       E783                     FAT2:
-001A53 E783 47               4      LD  B,A
+       E744                     FATSETUP:
+001A14 E744 3AAAF0          13      LD  A,(_FATDRV)
+001A17 E747 CD4DE8          17      CALL    CHGDRVR     ;ドライブ切り替え
+001A1A E74A D8              11      RET C
+       E74B                     FATS2:
+001A1B E74B DD7E0F          19      LD  A,(IX+DPB_BPS)  ;512=2 1024=4
+001A1E E74E 0F               4      RRCA
+001A1F E74F CD7FE7          17      CALL    FATSETUP12  ;自己書き換え
+       E750                     FATSX   EQU $-2
+001A22 E752 210000          10      LD  HL,0
+001A25 E755 4A               4      LD  C,D
+001A26 E756 54               4      LD  D,H
+001A27 E757 3AABF0          13      LD  A,(_FATIX)  ;範囲FAT12:0-3/FAT16:0-63(0-03FH):65535*2/2048
+001A2A E75A 47               4      LD  B,A
+001A2B E75B 04               4      INC B
+001A2C E75C DD7E00          19      LD  A,(IX+DPB_FATLN)
+       E75F                     FAT_SKP:
+001A2F E75F 05               4      DEC B
+001A30 E760 2809            12      JR  Z,FAT1
+001A32 E762 19              11      ADD HL,DE
+001A33 E763 93               4      SUB E
+001A34 E764 30F9            12      JR  NC,FAT_SKP
+001A36 E766 DDCB0146        20      BIT 0,(IX+DPB_FATLN+1)  ;FATサイズが0100H(256)の場合
+001A3A E76A C8              11      RET Z
+       E76B                     FAT1:
+001A3B E76B EB               4      EX  DE,HL
+001A3C E76C B7               4      OR  A       ;0の場合は0100Hとして扱う
+001A3D E76D 2803            12      JR  Z,FAT3
+001A3F E76F B9               4      CP  C       ;C=FATバッファに読み込めるセクタ数
+001A40 E770 3801            12      JR  C,FAT2
+       E772                     FAT3:
+001A42 E772 79               4      LD  A,C
+       E773                     FAT2:
+001A43 E773 47               4      LD  B,A
                                 
-001A54 E784 2AFAF1          16      LD  HL,(_FATPS) ;fat sector pos
-001A57 E787 19              11      ADD HL,DE
-001A58 E788 EB               4      EX  DE,HL
-001A59 E789 2A7CF1          16      LD  HL,(_FATBF)
-001A5C E78C AF               4      XOR A       ;CF=0
-001A5D E78D 4F               4      LD  C,A
-001A5E E78E C9              10      RET
+001A44 E774 2AFAF1          16      LD  HL,(_FATPS) ;fat sector pos
+001A47 E777 19              11      ADD HL,DE
+001A48 E778 EB               4      EX  DE,HL
+001A49 E779 2A7CF1          16      LD  HL,(_FATBF)
+001A4C E77C AF               4      XOR A       ;CF=0
+001A4D E77D 4F               4      LD  C,A
+001A4E E77E C9              10      RET
                                 ;
                                 ;   FATバッファに読み込める最大のセクタ数と_FATIXで進めるセクタ数
                                 ;   FATSETUP* (FAT12/FAT16)
                                 ;out
                                 ;   D : FATバッファに読み込める最大のセクタ数
                                 ;   E : _FATIXで進めるセクタ数
-       E78F                     FATSETUP12:
-001A5F E78F 110606          10      LD  DE,0606H    ;256
-001A62 E792 D8              11      RET C
-001A63 E793 110303          10      LD  DE,0303H    ;512
-001A66 E796 0F               4      RRCA
-001A67 E797 D8              11      RET C
-001A68 E798 110102          10      LD  DE,0201H    ;1024
-001A6B E79B C9              10      RET
+       E77F                     FATSETUP12:
+001A4F E77F 110606          10      LD  DE,0606H    ;256
+001A52 E782 D8              11      RET C
+001A53 E783 110303          10      LD  DE,0303H    ;512
+001A56 E786 0F               4      RRCA
+001A57 E787 D8              11      RET C
+001A58 E788 110102          10      LD  DE,0201H    ;1024
+001A5B E78B C9              10      RET
                                 
-       E79C                     FATSETUP16:
-001A6C E79C 110808          10      LD  DE,0808H    ;256
-001A6F E79F D8              11      RET C
-001A70 E7A0 110404          10      LD  DE,0404H
-001A73 E7A3 0F               4      RRCA            ;512
-001A74 E7A4 D8              11      RET C
-001A75 E7A5 110202          10      LD  DE,0202H    ;1024
-001A78 E7A8 C9              10      RET
+       E78C                     FATSETUP16:
+001A5C E78C 110808          10      LD  DE,0808H    ;256
+001A5F E78F D8              11      RET C
+001A60 E790 110404          10      LD  DE,0404H
+001A63 E793 0F               4      RRCA            ;512
+001A64 E794 D8              11      RET C
+001A65 E795 110202          10      LD  DE,0202H    ;1024
+001A68 E798 C9              10      RET
                                 
-       E7A9                     CHGDRV:
-001A79 E7A9 E5              11      PUSH    HL
-001A7A E7AA 2189F0          10      LD  HL,_DSK
-001A7D E7AD BE               7      CP  (HL)
-001A7E E7AE 280A            12      JR  Z,CHGDRVE
-       E7B0                     CHGDRV1:
-001A80 E7B0 DDE5            15      PUSH    IX
-001A82 E7B2 CDBCE7          17      CALL    CHGDRV0
-001A85 E7B5 3A89F0          13      LD  A,(_DSK)
-001A88 E7B8 DDE1            14      POP IX
-       E7BA                     CHGDRVE:
-001A8A E7BA E1              10      POP HL
-001A8B E7BB C9              10      RET
+       E799                     CHGDRV:
+001A69 E799 E5              11      PUSH    HL
+001A6A E79A 2189F0          10      LD  HL,_DSK
+001A6D E79D BE               7      CP  (HL)
+001A6E E79E 280A            12      JR  Z,CHGDRVE
+       E7A0                     CHGDRV1:
+001A70 E7A0 DDE5            15      PUSH    IX
+001A72 E7A2 CDACE7          17      CALL    CHGDRV0
+001A75 E7A5 3A89F0          13      LD  A,(_DSK)
+001A78 E7A8 DDE1            14      POP IX
+       E7AA                     CHGDRVE:
+001A7A E7AA E1              10      POP HL
+001A7B E7AB C9              10      RET
                                 
-       E7BC                     CHGDRV0:
-001A8C E7BC 6F               4      LD  L,A
-001A8D E7BD CDDCF0          17      CALL    _GETDPB
-001A90 E7C0 D8              11      RET C
-001A91 E7C1 DD22A8F0        20      LD  (_DPB),IX
-001A95 E7C5 7D               4      LD  A,L
-001A96 E7C6 3289F0          13      LD  (_DSK),A
-       E7C9                     CHGDRV2:
-001A99 E7C9 C5              11      PUSH    BC
-001A9A E7CA D5              11      PUSH    DE
-001A9B E7CB ED7314E8        20      LD  (SPPAT2),SP
-001A9F E7CF F3               4      DI
-001AA0 E7D0 DDF9            10      LD  SP,IX
+       E7AC                     CHGDRV0:
+001A7C E7AC 6F               4      LD  L,A
+001A7D E7AD CDDCF0          17      CALL    _GETDPB
+001A80 E7B0 D8              11      RET C
+001A81 E7B1 DD22A8F0        20      LD  (_DPB),IX
+001A85 E7B5 7D               4      LD  A,L
+001A86 E7B6 3289F0          13      LD  (_DSK),A
+       E7B9                     CHGDRV2:
+001A89 E7B9 C5              11      PUSH    BC
+001A8A E7BA D5              11      PUSH    DE
+001A8B E7BB ED7304E8        20      LD  (SPPAT2),SP
+001A8F E7BF F3               4      DI
+001A90 E7C0 DDF9            10      LD  SP,IX
                                 
-001AA2 E7D2 E1              10      POP HL      ;00:DPB_FATLN
-001AA3 E7D3 E1              10      POP HL      ;02:DPB_DRD
-001AA4 E7D4 222CE7          16      LD  (DRDPAT),HL
+001A92 E7C2 E1              10      POP HL      ;00:DPB_FATLN
+001A93 E7C3 E1              10      POP HL      ;02:DPB_DRD
+001A94 E7C4 222AE7          16      LD  (DRDPAT),HL
                                 
-001AA7 E7D7 E1              10      POP HL
-001AA8 E7D8 223CE7          16      LD  (DWTPAT),HL ;04:DPB_DWT
+001A97 E7C7 E1              10      POP HL
+001A98 E7C8 223AE7          16      LD  (DWTPAT),HL ;04:DPB_DWT
                                 
-001AAB E7DB E1              10      POP HL      ;L=06:DPB_FATID H=07:DPB_SECPCL
-001AAC E7DC 7C               4      LD  A,H
-001AAD E7DD 3233DE          13      LD  (SPCPAT),A  ;1クラスタの論理セクタ数
-001AB0 E7E0 3D               4      DEC A
-001AB1 E7E1 329EE5          13      LD  (_NCPAT),A
+001A9B E7CB E1              10      POP HL      ;L=06:DPB_FATID H=07:DPB_SECPCL
+001A9C E7CC 7C               4      LD  A,H
+001A9D E7CD 3233DE          13      LD  (SPCPAT),A  ;1クラスタの論理セクタ数
+001AA0 E7D0 3D               4      DEC A
+001AA1 E7D1 329EE5          13      LD  (_NCPAT),A
                                 
-001AB4 E7E4 E1              10      POP HL      ;08:DPB_MAXCL
-001AB5 E7E5 7D               4      LD  A,L
-001AB6 E7E6 3252DE          13      LD  (CLPAT2),A
-001AB9 E7E9 7C               4      LD  A,H
-001ABA E7EA 324EDE          13      LD  (CLPAT1),A
-001ABD E7ED 2B               6      DEC HL
-001ABE E7EE 224FE0          16      LD  (MAXCLP),HL
+001AA4 E7D4 E1              10      POP HL      ;08:DPB_MAXCL
+001AA5 E7D5 7D               4      LD  A,L
+001AA6 E7D6 3252DE          13      LD  (CLPAT2),A
+001AA9 E7D9 7C               4      LD  A,H
+001AAA E7DA 324EDE          13      LD  (CLPAT1),A
+001AAD E7DD 2B               6      DEC HL
+001AAE E7DE 224FE0          16      LD  (MAXCLP),HL
                                 
-001AC1 E7F1 E1              10      POP HL      ;L=0A:DPB_FDMODE H=0B:DPB_DIRSCNT
-001AC2 E7F2 4C               4      LD  C,H
+001AB1 E7E1 E1              10      POP HL      ;L=0A:DPB_FDMODE H=0B:DPB_DIRSCNT
+001AB2 E7E2 4C               4      LD  C,H
                                 
-001AC3 E7F3 E1              10      POP HL      ;L=0C:DPB_MAXCYL H=0D:DPB_MAXSEC
+001AB3 E7E3 E1              10      POP HL      ;L=0C:DPB_MAXCYL H=0D:DPB_MAXSEC
                                 
-001AC4 E7F4 E1              10      POP HL      ;L=0E:DPB_FATPS H=0F:DPB_BPS
-001AC5 E7F5 7C               4      LD  A,H     ;DPB_BPS
-001AC6 E7F6 E607             7      AND 7
-001AC8 E7F8 3238E3          13      LD  (SECSZ+2),A ;1セクタのサイズの上位1バイト 0x400 - 0x200 - 0x100
+001AB4 E7E4 E1              10      POP HL      ;L=0E:DPB_FATPS H=0F:DPB_BPS
+001AB5 E7E5 7C               4      LD  A,H     ;DPB_BPS
+001AB6 E7E6 E607             7      AND 7
+001AB8 E7E8 3238E3          13      LD  (SECSZ+2),A ;1セクタのサイズの上位1バイト 0x400 - 0x200 - 0x100
                                                 ;1セクタ512 2D/2DD/2HC/2HQ(2HD1.44MB)/EMM/BRAM/EMEM等
                                                 ;1セクタ1024 2HD/2HDE98
                                                 ;1セクタ256 GRAM/RAMF/CMOS/等
                                                 ;1024   512 256
                                                 ;4  2   1
-001ACB E7FB 87               4      ADD A,A     ;8  4   2
-001ACC E7FC 87               4      ADD A,A     ;010H   8   4
-001ACD E7FD 87               4      ADD A,A     ;020H   010H    8
-001ACE E7FE 32B0DC          13      LD  (SDECPAT),A ;1セクタ辺りのディレクトリエントリ数
+001ABB E7EB 87               4      ADD A,A     ;8  4   2
+001ABC E7EC 87               4      ADD A,A     ;010H   8   4
+001ABD E7ED 87               4      ADD A,A     ;020H   010H    8
+001ABE E7EE 32B0DC          13      LD  (SDECPAT),A ;1セクタ辺りのディレクトリエントリ数
                                 
-001AD1 E801 2600             7      LD  H,0
-001AD3 E803 22FAF1          16      LD  (_FATPS),HL
+001AC1 E7F1 2600             7      LD  H,0
+001AC3 E7F3 22FAF1          16      LD  (_FATPS),HL
                                 
-001AD6 E806 E1              10      POP HL      ;10:DPB_DIRPS
-001AD7 E807 22FCF1          16      LD  (_DIRPS),HL
+001AC6 E7F6 E1              10      POP HL      ;10:DPB_DIRPS
+001AC7 E7F7 22FCF1          16      LD  (_DIRPS),HL
                                 
-001ADA E80A E1              10      POP HL      ;L=12:DPB_DEVICE H=13:DPB_UNITNO
-001ADB E80B 7C               4      LD  A,H
-001ADC E80C 3284F0          13      LD  (_DRIVE),A
+001ACA E7FA E1              10      POP HL      ;L=12:DPB_DEVICE H=13:DPB_UNITNO
+001ACB E7FB 7C               4      LD  A,H
+001ACC E7FC 3284F0          13      LD  (_DRIVE),A
                                 
-001ADF E80F E1              10      POP HL      ;14:DPB_ADDCL
-001AE0 E810 2243DE          16      LD  (CLSPAT),HL
+001ACF E7FF E1              10      POP HL      ;14:DPB_ADDCL
+001AD0 E800 2243DE          16      LD  (CLSPAT),HL
                                 
-001AE3 E813 310000          10      LD  SP,0        ;元のSPを復元
-       E814                     SPPAT2  EQU $-2
-001AE6 E816 FB               4      EI
-001AE7 E817 2AFCF1          16      LD  HL,(_DIRPS)
-001AEA E81A 0600             7      LD  B,0
-001AEC E81C 09              11      ADD HL,BC       ;C=DPB_DIRSCNT
-001AED E81D 22CBDC          16      LD  (MD_PAT),HL
+001AD3 E803 310000          10      LD  SP,0        ;元のSPを復元
+       E804                     SPPAT2  EQU $-2
+001AD6 E806 FB               4      EI
+001AD7 E807 2AFCF1          16      LD  HL,(_DIRPS)
+001ADA E80A 0600             7      LD  B,0
+001ADC E80C 09              11      ADD HL,BC       ;C=DPB_DIRSCNT
+001ADD E80D 22CBDC          16      LD  (MD_PAT),HL
                                 
-001AF0 E820 2A4FE0          16      LD  HL,(MAXCLP);
-001AF3 E823 11F60F          10      LD  DE,4086     ;クラスタ数が4086未満:FAT12 4086以上:FAT16
-001AF6 E826 ED52            15      SBC HL,DE       ;CF=0のはず
-001AF8 E828 300F            12      JR  NC,SETFAT16
-001AFA E82A 2124E5          10      LD  HL,GNCL     ;FAT12
-001AFD E82D 1147E5          10      LD  DE,SNCL
-001B00 E830 018FE7          10      LD  BC,FATSETUP12
-001B03 E833 DDCB0FAE        23      RES 5,(IX+DPB_BPS)  ;DPB_BPS(FAT12)
-001B07 E837 180D            12      JR  EXTRA1
-       E839                     SETFAT16:
-001B09 E839 217BE5          10      LD  HL,GNCL16   ;FAT16
-001B0C E83C 1188E5          10      LD  DE,SNCL16
-001B0F E83F 019CE7          10      LD  BC,FATSETUP16
-001B12 E842 DDCB0FEE        23      SET 5,(IX+DPB_BPS)  ;DPB_BPS(FAT16)
-       E846                     EXTRA1:
-001B16 E846 22F8F0          16      LD  (GNCPAT),HL
-001B19 E849 ED53FBF0        20      LD  (SNCPAT),DE
-001B1D E84D ED4367E7        20      LD  (FATSX),BC
-001B21 E851 D1              10      POP DE
-001B22 E852 C1              10      POP BC
-001B23 E853 AF               4      XOR A
-001B24 E854 C9              10      RET
+001AE0 E810 2A4FE0          16      LD  HL,(MAXCLP)
+001AE3 E813 110AF0          10      LD  DE,-4086    ;クラスタ数が4086未満:FAT12 4086以上:FAT16
+001AE6 E816 19              11      ADD HL,DE
+001AE7 E817 380F            12      JR  C,SETFAT16
+001AE9 E819 2124E5          10      LD  HL,GNCL     ;FAT12
+001AEC E81C 1147E5          10      LD  DE,SNCL
+001AEF E81F 017FE7          10      LD  BC,FATSETUP12
+001AF2 E822 DDCB0FAE        23      RES 5,(IX+DPB_BPS)  ;DPB_BPS(FAT12)
+001AF6 E826 180D            12      JR  EXTRA1
+       E828                     SETFAT16:
+001AF8 E828 217BE5          10      LD  HL,GNCL16   ;FAT16
+001AFB E82B 1188E5          10      LD  DE,SNCL16
+001AFE E82E 018CE7          10      LD  BC,FATSETUP16
+001B01 E831 DDCB0FEE        23      SET 5,(IX+DPB_BPS)  ;DPB_BPS(FAT16)
+       E835                     EXTRA1:
+001B05 E835 22F8F0          16      LD  (GNCPAT),HL
+001B08 E838 ED53FBF0        20      LD  (SNCPAT),DE
+001B0C E83C ED4350E7        20      LD  (FATSX),BC
+001B10 E840 D1              10      POP DE
+001B11 E841 C1              10      POP BC
+001B12 E842 AF               4      XOR A
+001B13 E843 C9              10      RET
                                 
-       E855                     GETDPBD:
-001B25 E855 DDE3            23      EX  (SP),IX
-001B27 E857 DDE5            15      PUSH    IX
-001B29 E859 3A88F0          13      LD  A,(_DRV)
-001B2C E85C 1807            12      JR  GETDPB1
+       E844                     GETDPBD:
+001B14 E844 DDE3            23      EX  (SP),IX
+001B16 E846 DDE5            15      PUSH    IX
+001B18 E848 3A88F0          13      LD  A,(_DRV)
+001B1B E84B 1807            12      JR  GETDPB1
                                 
-       E85E                     CHGDRVR:
-001B2E E85E CDD9F0          17      CALL    _CHGDRV
-001B31 E861 D8              11      RET C
-001B32 E862 3A89F0          13      LD  A,(_DSK)
-       E865                     GETDPB1:
-001B35 E865 C3DCF0          10      JP  _GETDPB
+       E84D                     CHGDRVR:
+001B1D E84D CDD9F0          17      CALL    _CHGDRV
+001B20 E850 D8              11      RET C
+001B21 E851 3A89F0          13      LD  A,(_DSK)
+       E854                     GETDPB1:
+001B24 E854 C3DCF0          10      JP  _GETDPB
                                 
-       E868                     GETDPB:
-001B38 E868 FE08             7      CP  8
-001B3A E86A 3F               4      CCF
-001B3B E86B D8              11      RET C
-001B3C E86C 0F               4      RRCA
-001B3D E86D 0F               4      RRCA
-001B3E E86E 0F               4      RRCA
-001B3F E86F DD                      DB  0DDH        ;Z80未定義命令
-001B40 E870 6F               4      LD  L,A     ;LD IXL,A
-001B41 E871 DD                      DB  0DDH        ;Z80未定義命令
-001B42 E872 26F2             7      LD  H,_DEVICE/256   ;LD IXH,_DEVICE/256
-001B44 E874 DD7E00          19      LD  A,(IX+DPB_FATLN)
-001B47 E877 A7               4      AND A       ;CF=0の為
-001B48 E878 DDCB0F6E        20      BIT 5,(IX+DPB_BPS)
-001B4C E87C C0              11      RET NZ      ;FAT16
-001B4D E87D DDCB126E        20      BIT 5,(IX+DPB_DEVICE)
-001B51 E881 C0              11      RET NZ      ;BPB
-001B52 E882 FE01             7      CP  001H        ;A=0 THEN CF=1
-001B54 E884 C9              10      RET
+       E857                     GETDPB:
+001B27 E857 FE08             7      CP  8
+001B29 E859 3F               4      CCF
+001B2A E85A D8              11      RET C
+001B2B E85B 0F               4      RRCA
+001B2C E85C 0F               4      RRCA
+001B2D E85D 0F               4      RRCA
+001B2E E85E DD                      DB  0DDH        ;Z80未定義命令
+001B2F E85F 6F               4      LD  L,A     ;LD IXL,A
+001B30 E860 DD                      DB  0DDH        ;Z80未定義命令
+001B31 E861 26F2             7      LD  H,_DEVICE/256   ;LD IXH,_DEVICE/256
+001B33 E863 DD7E00          19      LD  A,(IX+DPB_FATLN)
+001B36 E866 A7               4      AND A       ;CF=0の為
+001B37 E867 DDCB0F6E        20      BIT 5,(IX+DPB_BPS)
+001B3B E86B C0              11      RET NZ      ;FAT16
+001B3C E86C DDCB126E        20      BIT 5,(IX+DPB_DEVICE)
+001B40 E870 C0              11      RET NZ      ;BPB
+001B41 E871 FE01             7      CP  001H        ;A=0 THEN CF=1
+001B43 E873 C9              10      RET
                                 
-       E885                     _SYS5F:
-001B55 E885 AF               4      XOR A
-       E886                     FFLUSH:
-001B56 E886 F5              11      PUSH    AF
-001B57 E887 CDACE4          17      CALL    WTFATX
-001B5A E88A AF               4      XOR A
-001B5B E88B 32ABF0          13      LD  (_FATIX),A
-001B5E E88E 2F               4      CPL         ;0FFH
-001B5F E88F 32AAF0          13      LD  (_FATDRV),A
-001B62 E892 3E                      DB  03EH        ;次のPUSH AFをスキップ
-       E893                     FFLUSHBUF:
-001B63 E893 F5              11      PUSH    AF
-001B64 E894 CD62E4          17      CALL    DWTX
-001B67 E897 3EFF             7      LD  A,0FFH
-001B69 E899 3239F0          13      LD  (SFILE),A
-001B6C E89C 32A5F0          13      LD  (_DBDRV),A
-001B6F E89F F1              10      POP AF
-001B70 E8A0 C9              10      RET
+       E874                     _SYS5F:
+001B44 E874 AF               4      XOR A
+       E875                     FFLUSH:
+001B45 E875 F5              11      PUSH    AF
+001B46 E876 CDACE4          17      CALL    WTFATX
+001B49 E879 AF               4      XOR A
+001B4A E87A 32ABF0          13      LD  (_FATIX),A
+001B4D E87D 2F               4      CPL         ;0FFH
+001B4E E87E 32AAF0          13      LD  (_FATDRV),A
+001B51 E881 3E                      DB  03EH        ;次のPUSH AFをスキップ
+       E882                     FFLUSHBUF:
+001B52 E882 F5              11      PUSH    AF
+001B53 E883 CD62E4          17      CALL    DWTX
+001B56 E886 3EFF             7      LD  A,0FFH
+001B58 E888 3239F0          13      LD  (SFILE),A
+001B5B E88B 32A5F0          13      LD  (_DBDRV),A
+001B5E E88E F1              10      POP AF
+001B5F E88F C9              10      RET
                                 
 [EOF:LDDIO.ASM:SHIFT_JIS]
                                     INCLUDE "M7DISK.ASM"
@@ -4768,305 +4771,305 @@
                                 ;   LSX-Dodgers DISK
                                 ;   MZ-700/1500
                                 
-       E8A1                     SEEK:
-001B71 E8A1 0610             7      LD  B,16
-001B73 E8A3 DD4E0D          19      LD  C,(IX+DPB_MAXSEC)
-001B76 E8A6 AF               4      XOR A
-001B77 E8A7 EB               4      EX  DE,HL
-       E8A8                     DIV1:
-001B78 E8A8 29              11      ADD HL,HL
-001B79 E8A9 8F               4      ADC A,A
-001B7A E8AA B9               4      CP  C
-001B7B E8AB 3802            12      JR  C,DIV2
-001B7D E8AD 91               4      SUB C
-001B7E E8AE 2C               4      INC L
-       E8AF                     DIV2:
-001B7F E8AF 10F7            13      DJNZ    DIV1
+       E890                     SEEK:
+001B60 E890 0610             7      LD  B,16
+001B62 E892 DD4E0D          19      LD  C,(IX+DPB_MAXSEC)
+001B65 E895 AF               4      XOR A
+001B66 E896 EB               4      EX  DE,HL
+       E897                     DIV1:
+001B67 E897 29              11      ADD HL,HL
+001B68 E898 8F               4      ADC A,A
+001B69 E899 B9               4      CP  C
+001B6A E89A 3802            12      JR  C,DIV2
+001B6C E89C 91               4      SUB C
+001B6D E89D 2C               4      INC L
+       E89E                     DIV2:
+001B6E E89E 10F7            13      DJNZ    DIV1
                                 
-001B81 E8B1 3C               4      INC A   ;最小のセクタは１固定
-001B82 E8B2 55               4      LD  D,L ;TRACK
-001B83 E8B3 5F               4      LD  E,A ;SECTOR
+001B70 E8A0 3C               4      INC A   ;最小のセクタは１固定
+001B71 E8A1 55               4      LD  D,L ;TRACK
+001B72 E8A2 5F               4      LD  E,A ;SECTOR
                                 
-001B84 E8B4 3A84F0          13      LD  A,(_DRIVE)
-001B87 E8B7 FE04             7      CP  4
-001B89 E8B9 3F               4      CCF
-001B8A E8BA D8              11      RET C
-001B8B E8BB F684             7      OR  084H        ;Motor on + ドライブセレクト有効
-001B8D E8BD D3DC            11      OUT (0DCH),A
-001B8F E8BF CB3A             8      SRL D       ;CYLINDER
-001B91 E8C1 9F               4      SBC A,A
-001B92 E8C2 D3DD            11      OUT (0DDH),A    ;SIDE
+001B73 E8A3 3A84F0          13      LD  A,(_DRIVE)
+001B76 E8A6 FE04             7      CP  4
+001B78 E8A8 3F               4      CCF
+001B79 E8A9 D8              11      RET C
+001B7A E8AA F684             7      OR  084H        ;Motor on + ドライブセレクト有効
+001B7C E8AC D3DC            11      OUT (0DCH),A
+001B7E E8AE CB3A             8      SRL D       ;CYLINDER
+001B80 E8B0 9F               4      SBC A,A
+001B81 E8B1 D3DD            11      OUT (0DDH),A    ;SIDE
                                 
-001B94 E8C4 CD00E9          17      CALL    SETMODE
-001B97 E8C7 D8              11      RET C
+001B83 E8B3 CDEFE8          17      CALL    SETMODE
+001B86 E8B6 D8              11      RET C
                                 
-001B98 E8C8 CD3CE9          17      CALL    DRIVE
-001B9B E8CB FEFF             7      CP  0FFH        ;A=0FFH Unknown CYLINDER
-001B9D E8CD CC21E9          17      CALL    Z,FDCRES    ;Restore
+001B87 E8B7 CD2BE9          17      CALL    DRIVE
+001B8A E8BA FEFF             7      CP  0FFH        ;A=0FFH Unknown CYLINDER
+001B8C E8BC CC10E9          17      CALL    Z,FDCRES    ;Restore
+001B8F E8BF 2F               4      CPL         ;データバスが負論理
+001B90 E8C0 D3D9            11      OUT (0D9H),A    ;Currrent CYLINDER
+001B92 E8C2 2F               4      CPL         ;データバスが負論理
+001B93 E8C3 92               4      SUB D
+001B94 E8C4 C8              11      RET Z       ;No seek
+                                
+001B95 E8C5 3A86F0          13      LD  A,(_ISEEK)
+001B98 E8C8 4F               4      LD  C,A
+                                
+001B99 E8C9 DD7E0C          19      LD  A,(IX+DPB_MAXCYL)
+001B9C E8CC 3D               4      DEC A
+001B9D E8CD BA               4      CP  D       ;Over CYLINDER
+001B9E E8CE D8              11      RET C
+                                
+001B9F E8CF 7A               4      LD  A,D
 001BA0 E8D0 2F               4      CPL         ;データバスが負論理
-001BA1 E8D1 D3D9            11      OUT (0D9H),A    ;Currrent CYLINDER
-001BA3 E8D3 2F               4      CPL         ;データバスが負論理
-001BA4 E8D4 92               4      SUB D
-001BA5 E8D5 C8              11      RET Z       ;No seek
+001BA1 E8D1 D3DB            11      OUT (0DBH),A
+001BA3 E8D3 72               7      LD  (HL),D
                                 
-001BA6 E8D6 3A86F0          13      LD  A,(_ISEEK)
-001BA9 E8D9 4F               4      LD  C,A
+001BA4 E8D4 0E18             7      LD  C,018H      ;Seek
+       E8D6                     FDCCMD2:
+001BA6 E8D6 3A85F0          13      LD  A,(_SEEKSP)
+001BA9 E8D9 B1               4      OR  C
                                 
-001BAA E8DA DD7E0C          19      LD  A,(IX+DPB_MAXCYL)
-001BAD E8DD 3D               4      DEC A
-001BAE E8DE BA               4      CP  D       ;Over CYLINDER
-001BAF E8DF D8              11      RET C
+       E8DA                     FDCCMD:
+001BAA E8DA CD22E9          17      CALL    COMSET
+       E8DE                     FDCSMC  EQU $+1
+001BAD E8DD 3E80             7      LD  A,080H      ;FDC COMMAND(Self-modifying code)
+001BAF E8DF E620             7      AND 020H        ;Write data Write track
+001BB1 E8E1 3C               4      INC A
                                 
-001BB0 E8E0 7A               4      LD  A,D
-001BB1 E8E1 2F               4      CPL         ;データバスが負論理
-001BB2 E8E2 D3DB            11      OUT (0DBH),A
-001BB4 E8E4 72               7      LD  (HL),D
+       E8E2                     SST:
+001BB2 E8E2 0E00             7      LD  C,0
+       E8E4                     SST1:
+001BB4 E8E4 0D               4      DEC C       ; 4
+001BB5 E8E5 20FD            12      JR  NZ,SST1     ;12 * 256 / 4 = About 1ms
+001BB7 E8E7 3D               4      DEC A
+001BB8 E8E8 20FA            12      JR  NZ,SST1
                                 
-001BB5 E8E5 0E18             7      LD  C,018H      ;Seek
-       E8E7                     FDCCMD2:
-001BB7 E8E7 3A85F0          13      LD  A,(_SEEKSP)
-001BBA E8EA B1               4      OR  C
+001BBA E8EA 0E01             7      LD  C,1
+001BBC E8EC CDF4E8          17      CALL    READY
+       E8EF                     SETMODE:
+001BBF E8EF CD25E9          17      CALL    DELAY0      ;Head select time
+001BC2 E8F2 0E81             7      LD  C,081H
+       E8F4                     READY:
+001BC4 E8F4 0680             7      LD  B,128
+       E8F6                     READY2:
+001BC6 E8F6 DBD8            11      IN  A,(0D8H)
+001BC8 E8F8 2F               4      CPL         ;データバスが負論理
+001BC9 E8F9 A1               4      AND C       ;NOT READY,BUSY
+001BCA E8FA C8              11      RET Z
+001BCB E8FB CD1BCF          17      CALL    RD556VSYNC
+001BCE E8FE 87               4      ADD A,A
+001BCF E8FF 30F5            12      JR  NC,READY2
+       E901                     READY3:
+001BD1 E901 DBD8            11      IN  A,(0D8H)
+001BD3 E903 2F               4      CPL         ;データバスが負論理
+001BD4 E904 A1               4      AND C       ;NOT READY,BUSY
+001BD5 E905 C8              11      RET Z
+001BD6 E906 CD1BCF          17      CALL    RD556VSYNC
+001BD9 E909 87               4      ADD A,A
+001BDA E90A 38F5            12      JR  C,READY3
+001BDC E90C 10E8            13      DJNZ    READY2
+001BDE E90E 37               4      SCF
+001BDF E90F C9              10      RET
                                 
-       E8EB                     FDCCMD:
-001BBB E8EB CD33E9          17      CALL    COMSET
-       E8EF                     FDCSMC  EQU $+1
-001BBE E8EE 3E80             7      LD  A,080H      ;FDC COMMAND(Self-modifying code)
-001BC0 E8F0 E620             7      AND 020H        ;Write data Write track
-001BC2 E8F2 3C               4      INC A
+       E910                     FDCRES:
+001BE0 E910 3600            10      LD  (HL),0
+001BE2 E912 0E08             7      LD  C,8
+001BE4 E914 18C0            12      JR  FDCCMD2
                                 
-       E8F3                     SST:
-001BC3 E8F3 0E00             7      LD  C,0
-       E8F5                     SST1:
-001BC5 E8F5 0D               4      DEC C       ; 4
-001BC6 E8F6 20FD            12      JR  NZ,SST1     ;12 * 256 / 4 = About 1ms
-001BC8 E8F8 3D               4      DEC A
-001BC9 E8F9 20FA            12      JR  NZ,SST1
+       E916                     FDMOFF:
+001BE6 E916 F5              11      PUSH    AF
+001BE7 E917 AF               4      XOR A       ;Motor off(ドライブセレクト無効)
+001BE8 E918 D3DC            11      OUT (0DCH),A
+001BEA E91A F1              10      POP AF
+001BEB E91B C9              10      RET
                                 
-001BCB E8FB 0E01             7      LD  C,1
-001BCD E8FD CD05E9          17      CALL    READY
-       E900                     SETMODE:
-001BD0 E900 CD36E9          17      CALL    DELAY0      ;Head select time
-001BD3 E903 0E81             7      LD  C,081H
-       E905                     READY:
-001BD5 E905 0680             7      LD  B,128
-       E907                     READY2:
-001BD7 E907 DBD8            11      IN  A,(0D8H)
-001BD9 E909 2F               4      CPL         ;データバスが負論理
-001BDA E90A A1               4      AND C       ;NOT READY,BUSY
-001BDB E90B C8              11      RET Z
-001BDC E90C CD1BCF          17      CALL    RD556VSYNC
-001BDF E90F 87               4      ADD A,A
-001BE0 E910 30F5            12      JR  NC,READY2
-       E912                     READY3:
-001BE2 E912 DBD8            11      IN  A,(0D8H)
-001BE4 E914 2F               4      CPL         ;データバスが負論理
-001BE5 E915 A1               4      AND C       ;NOT READY,BUSY
-001BE6 E916 C8              11      RET Z
-001BE7 E917 CD1BCF          17      CALL    RD556VSYNC
-001BEA E91A 87               4      ADD A,A
-001BEB E91B 38F5            12      JR  C,READY3
-001BED E91D 10E8            13      DJNZ    READY2
-001BEF E91F 37               4      SCF
-001BF0 E920 C9              10      RET
+       E91C                     SECSET:
+001BEC E91C F5              11      PUSH    AF
+001BED E91D 7B               4      LD  A,E
+001BEE E91E 2F               4      CPL         ;データバスが負論理
+001BEF E91F D3DA            11      OUT (0DAH),A
+001BF1 E921 F1              10      POP AF
+       E922                     COMSET:
+001BF2 E922 2F               4      CPL         ;データバスが負論理
+001BF3 E923 D3D8            11      OUT (0D8H),A
+       E925                     DELAY0:
+001BF5 E925 3E1A             7      LD  A,26
+       E927                     DELAY:
+001BF7 E927 3D               4      DEC A
+001BF8 E928 20FD            12      JR  NZ,DELAY
+001BFA E92A C9              10      RET
                                 
-       E921                     FDCRES:
-001BF1 E921 3600            10      LD  (HL),0
-001BF3 E923 0E08             7      LD  C,8
-001BF5 E925 18C0            12      JR  FDCCMD2
+       E92B                     DRIVE:
+001BFB E92B 2A84F0          16      LD  HL,(_DRIVE)
+001BFE E92E 26F0             7      LD  H,_CYL0/256
+001C00 E930 CBFD             8      SET 7,L
+001C02 E932 7E               7      LD  A,(HL)
+001C03 E933 C9              10      RET
                                 
-       E927                     FDMOFF:
-001BF7 E927 F5              11      PUSH    AF
-001BF8 E928 AF               4      XOR A       ;Motor off(ドライブセレクト無効)
-001BF9 E929 D3DC            11      OUT (0DCH),A
-001BFB E92B F1              10      POP AF
-001BFC E92C C9              10      RET
+       E934                     RNF:
+001C04 E934 CD2BE9          17      CALL    DRIVE
+001C07 E937 36FF            10      LD  (HL),0FFH
+001C09 E939 C9              10      RET
                                 
-       E92D                     SECSET:
-001BFD E92D F5              11      PUSH    AF
-001BFE E92E 7B               4      LD  A,E
-001BFF E92F 2F               4      CPL         ;データバスが負論理
-001C00 E930 D3DA            11      OUT (0DAH),A
-001C02 E932 F1              10      POP AF
-       E933                     COMSET:
-001C03 E933 2F               4      CPL         ;データバスが負論理
-001C04 E934 D3D8            11      OUT (0D8H),A
-       E936                     DELAY0:
-001C06 E936 3E1A             7      LD  A,26
-       E938                     DELAY:
-001C08 E938 3D               4      DEC A
-001C09 E939 20FD            12      JR  NZ,DELAY
-001C0B E93B C9              10      RET
-                                
-       E93C                     DRIVE:
-001C0C E93C 2A84F0          16      LD  HL,(_DRIVE)
-001C0F E93F 26F0             7      LD  H,_CYL0/256
-001C11 E941 CBFD             8      SET 7,L
-001C13 E943 7E               7      LD  A,(HL)
-001C14 E944 C9              10      RET
-                                
-       E945                     RNF:
-001C15 E945 CD3CE9          17      CALL    DRIVE
-001C18 E948 36FF            10      LD  (HL),0FFH
-001C1A E94A C9              10      RET
-                                
-001C1B E94B 02                  RETRY:  DB  2
+001C0A E93A 02                  RETRY:  DB  2
                                 
                                 
                                 ;   FLOPPY DISK DRIVER
                                 
-       E94C                     WTTRK:
-001C1C E94C 0601             7      LD  B,1
-001C1E E94E 3EF4             7      LD  A,0F4H
-001C20 E950 1802            12      JR  WTTRK1
-       E952                     FDWT:
-001C22 E952 3EA0             7      LD  A,0A0H
-       E954                     WTTRK1:
-001C24 E954 32EFE8          13      LD  (FDCSMC),A
-       E957                     DWTBL:
-001C27 E957 78               4      LD  A,B
-001C28 E958 3297E9          13      LD  (WTBSMC),A
-001C2B E95B 3E02             7      LD  A,2     ;Retry count
-001C2D E95D 324BE9          13      LD  (RETRY),A
+       E93B                     WTTRK:
+001C0B E93B 0601             7      LD  B,1
+001C0D E93D 3EF4             7      LD  A,0F4H
+001C0F E93F 1802            12      JR  WTTRK1
+       E941                     FDWT:
+001C11 E941 3EA0             7      LD  A,0A0H
+       E943                     WTTRK1:
+001C13 E943 32DEE8          13      LD  (FDCSMC),A
+       E946                     DWTBL:
+001C16 E946 78               4      LD  A,B
+001C17 E947 3286E9          13      LD  (WTBSMC),A
+001C1A E94A 3E02             7      LD  A,2     ;Retry count
+001C1C E94C 323AE9          13      LD  (RETRY),A
                                 
-       E960                     DWT0:
-001C30 E960 D5              11      PUSH    DE
-001C31 E961 E5              11      PUSH    HL
-001C32 E962 CDA1E8          17      CALL    SEEK        ;Write disk
-001C35 E965 E1              10      POP HL
-001C36 E966 383A            12      JR  C,ERRDW
-001C38 E968 F3               4      DI
-001C39 E969 3AEFE8          13      LD  A,(FDCSMC)
-001C3C E96C CD2DE9          17      CALL    SECSET
-001C3F E96F 0EDB             7      LD  C,0DBH
-       E971                     DWT1:
-001C41 E971 7E               7      LD  A,(HL)
-001C42 E972 2F               4      CPL         ;データバスが負論理
-001C43 E973 57               4      LD  D,A
+       E94F                     DWT0:
+001C1F E94F D5              11      PUSH    DE
+001C20 E950 E5              11      PUSH    HL
+001C21 E951 CD90E8          17      CALL    SEEK        ;Write disk
+001C24 E954 E1              10      POP HL
+001C25 E955 383A            12      JR  C,ERRDW
+001C27 E957 F3               4      DI
+001C28 E958 3ADEE8          13      LD  A,(FDCSMC)
+001C2B E95B CD1CE9          17      CALL    SECSET
+001C2E E95E 0EDB             7      LD  C,0DBH
+       E960                     DWT1:
+001C30 E960 7E               7      LD  A,(HL)
+001C31 E961 2F               4      CPL         ;データバスが負論理
+001C32 E962 57               4      LD  D,A
                                 
-       E974                     DWT2:
-001C44 E974 DBD8            11      IN  A,(0D8H)
-001C46 E976 2F               4      CPL         ;データバスが負論理
-001C47 E977 0F               4      RRCA
-001C48 E978 3008            12      JR  NC,DWT4
-001C4A E97A 0F               4      RRCA
-001C4B E97B 30F7            12      JR  NC,DWT2
-       E97D                     DWT3:
-001C4D E97D ED51            12      OUT (C),D
-001C4F E97F 23               6      INC HL
-001C50 E980 18EF            12      JR  DWT1
+       E963                     DWT2:
+001C33 E963 DBD8            11      IN  A,(0D8H)
+001C35 E965 2F               4      CPL         ;データバスが負論理
+001C36 E966 0F               4      RRCA
+001C37 E967 3008            12      JR  NC,DWT4
+001C39 E969 0F               4      RRCA
+001C3A E96A 30F7            12      JR  NC,DWT2
+       E96C                     DWT3:
+001C3C E96C ED51            12      OUT (C),D
+001C3E E96E 23               6      INC HL
+001C3F E96F 18EF            12      JR  DWT1
                                 
-       E982                     DWT4:
-001C52 E982 3D               4      DEC A
-001C53 E983 28F8            12      JR  Z,DWT3
-001C55 E985 3C               4      INC A
-001C56 E986 FB               4      EI
-001C57 E987 D1              10      POP DE
-001C58 E988 13               6      INC DE
-001C59 E989 CD27E9          17      CALL    FDMOFF
-001C5C E98C 2808            12      JR  Z,DISKOK_WT
-001C5E E98E CDF9E9          17      CALL    DISKC
-001C61 E991 20CD            12      JR  NZ,DWT0
-001C63 E993 B7               4      OR  A
-001C64 E994 2005            12      JR  NZ,ERRW
+       E971                     DWT4:
+001C41 E971 3D               4      DEC A
+001C42 E972 28F8            12      JR  Z,DWT3
+001C44 E974 3C               4      INC A
+001C45 E975 FB               4      EI
+001C46 E976 D1              10      POP DE
+001C47 E977 13               6      INC DE
+001C48 E978 CD16E9          17      CALL    FDMOFF
+001C4B E97B 2808            12      JR  Z,DISKOK_WT
+001C4D E97D CDE8E9          17      CALL    DISKC
+001C50 E980 20CD            12      JR  NZ,DWT0
+001C52 E982 B7               4      OR  A
+001C53 E983 2005            12      JR  NZ,ERRW
                                 
-       E996                     DISKOK_WT:
-       E997                     WTBSMC  EQU $+1
-001C66 E996 0601             7      LD  B,1
-001C68 E998 10BD            13      DJNZ    DWTBL
+       E985                     DISKOK_WT:
+       E986                     WTBSMC  EQU $+1
+001C55 E985 0601             7      LD  B,1
+001C57 E987 10BD            13      DJNZ    DWTBL
+001C59 E989 C9              10      RET
+                                
+       E98A                     ERRW:
+001C5A E98A 3EFF             7      LD  A,0FFH
+       E98C                     ERRZ:
+001C5C E98C BF               4      CP  A
+001C5D E98D 37               4      SCF
+001C5E E98E C316E9          10      JP  FDMOFF
+                                
+       E991                     ERRDW:
+001C61 E991 D1              10      POP DE
+001C62 E992 CDF9E9          17      CALL    DELP
+001C65 E995 20B8            12      JR  NZ,DWT0
+001C67 E997 B7               4      OR  A
+001C68 E998 20F0            12      JR  NZ,ERRW
 001C6A E99A C9              10      RET
                                 
-       E99B                     ERRW:
-001C6B E99B 3EFF             7      LD  A,0FFH
-       E99D                     ERRZ:
-001C6D E99D BF               4      CP  A
-001C6E E99E 37               4      SCF
-001C6F E99F C327E9          10      JP  FDMOFF
+       E99B                     FDRD:
+001C6B E99B 3E80             7      LD  A,080H
+001C6D E99D 32DEE8          13      LD  (FDCSMC),A
+       E9A0                     DRDBL:
+001C70 E9A0 78               4      LD  A,B
+001C71 E9A1 32DAE9          13      LD  (RDBSMC),A
+001C74 E9A4 3E02             7      LD  A,2     ;Retry count
+001C76 E9A6 323AE9          13      LD  (RETRY),A
+       E9A9                     DRD0:
+001C79 E9A9 D5              11      PUSH    DE
+001C7A E9AA E5              11      PUSH    HL
+001C7B E9AB CD90E8          17      CALL    SEEK        ;Read disk
+001C7E E9AE E1              10      POP HL
+001C7F E9AF 382D            12      JR  C,ERRDR
+001C81 E9B1 F3               4      DI
+001C82 E9B2 3ADEE8          13      LD  A,(FDCSMC)
+001C85 E9B5 CD1CE9          17      CALL    SECSET
+       E9B8                     DRD1:
+001C88 E9B8 DBD8            11      IN  A,(0D8H)
+001C8A E9BA 2F               4      CPL         ;データバスが負論理
+001C8B E9BB 0F               4      RRCA
+001C8C E9BC 300A            12      JR  NC,DRD3
+001C8E E9BE 0F               4      RRCA
+001C8F E9BF 30F7            12      JR  NC,DRD1
+001C91 E9C1 DBDB            11      IN  A,(0DBH)
+001C93 E9C3 2F               4      CPL         ;データバスが負論理
+001C94 E9C4 77               7      LD  (HL),A
+001C95 E9C5 23               6      INC HL
+001C96 E9C6 18F0            12      JR  DRD1
                                 
-       E9A2                     ERRDW:
-001C72 E9A2 D1              10      POP DE
-001C73 E9A3 CD0AEA          17      CALL    DELP
-001C76 E9A6 20B8            12      JR  NZ,DWT0
-001C78 E9A8 B7               4      OR  A
-001C79 E9A9 20F0            12      JR  NZ,ERRW
-001C7B E9AB C9              10      RET
+       E9C8                     DRD3:
+001C98 E9C8 B7               4      OR  A
+001C99 E9C9 FB               4      EI
+001C9A E9CA D1              10      POP DE
+001C9B E9CB 13               6      INC DE
+001C9C E9CC CD16E9          17      CALL    FDMOFF
+001C9F E9CF 2808            12      JR  Z,DISKOK_RD
+001CA1 E9D1 CDE8E9          17      CALL    DISKC
+001CA4 E9D4 20D3            12      JR  NZ,DRD0
+001CA6 E9D6 B7               4      OR  A
+001CA7 E9D7 20B1            12      JR  NZ,ERRW
                                 
-       E9AC                     FDRD:
-001C7C E9AC 3E80             7      LD  A,080H
-001C7E E9AE 32EFE8          13      LD  (FDCSMC),A
-       E9B1                     DRDBL:
-001C81 E9B1 78               4      LD  A,B
-001C82 E9B2 32EBE9          13      LD  (RDBSMC),A
-001C85 E9B5 3E02             7      LD  A,2     ;Retry count
-001C87 E9B7 324BE9          13      LD  (RETRY),A
-       E9BA                     DRD0:
-001C8A E9BA D5              11      PUSH    DE
-001C8B E9BB E5              11      PUSH    HL
-001C8C E9BC CDA1E8          17      CALL    SEEK        ;Read disk
-001C8F E9BF E1              10      POP HL
-001C90 E9C0 382D            12      JR  C,ERRDR
-001C92 E9C2 F3               4      DI
-001C93 E9C3 3AEFE8          13      LD  A,(FDCSMC)
-001C96 E9C6 CD2DE9          17      CALL    SECSET
-       E9C9                     DRD1:
-001C99 E9C9 DBD8            11      IN  A,(0D8H)
-001C9B E9CB 2F               4      CPL         ;データバスが負論理
-001C9C E9CC 0F               4      RRCA
-001C9D E9CD 300A            12      JR  NC,DRD3
-001C9F E9CF 0F               4      RRCA
-001CA0 E9D0 30F7            12      JR  NC,DRD1
-001CA2 E9D2 DBDB            11      IN  A,(0DBH)
-001CA4 E9D4 2F               4      CPL         ;データバスが負論理
-001CA5 E9D5 77               7      LD  (HL),A
-001CA6 E9D6 23               6      INC HL
-001CA7 E9D7 18F0            12      JR  DRD1
+       E9D9                     DISKOK_RD:
+       E9DA                     RDBSMC  EQU $+1
+001CA9 E9D9 0601             7      LD  B,1
+001CAB E9DB 10C3            13      DJNZ    DRDBL
+001CAD E9DD C9              10      RET
                                 
-       E9D9                     DRD3:
-001CA9 E9D9 B7               4      OR  A
-001CAA E9DA FB               4      EI
-001CAB E9DB D1              10      POP DE
-001CAC E9DC 13               6      INC DE
-001CAD E9DD CD27E9          17      CALL    FDMOFF
-001CB0 E9E0 2808            12      JR  Z,DISKOK_RD
-001CB2 E9E2 CDF9E9          17      CALL    DISKC
-001CB5 E9E5 20D3            12      JR  NZ,DRD0
-001CB7 E9E7 B7               4      OR  A
-001CB8 E9E8 20B1            12      JR  NZ,ERRW
+       E9DE                     ERRDR:
+001CAE E9DE D1              10      POP DE
+001CAF E9DF CDF9E9          17      CALL    DELP
+001CB2 E9E2 20C5            12      JR  NZ,DRD0
+001CB4 E9E4 B7               4      OR  A
+001CB5 E9E5 20A3            12      JR  NZ,ERRW
+001CB7 E9E7 C9              10      RET
+       E9E8                     DISKC:
+001CB8 E9E8 1B               6      DEC DE
+001CB9 E9E9 CB5F             8      BIT 3,A
+001CBB E9EB C434E9          17      CALL    NZ,RNF
+       E9EE                     DISKD:
+001CBE E9EE E5              11      PUSH    HL
+001CBF E9EF 213AE9          10      LD  HL,RETRY
+001CC2 E9F2 35              11      DEC (HL)
+001CC3 E9F3 E1              10      POP HL
+001CC4 E9F4 200C            12      JR  NZ,ERR      ;Retry
+001CC6 E9F6 B7               4      OR  A
+001CC7 E9F7 2809            12      JR  Z,ERR       ;Error
                                 
-       E9EA                     DISKOK_RD:
-       E9EB                     RDBSMC  EQU $+1
-001CBA E9EA 0601             7      LD  B,1
-001CBC E9EC 10C3            13      DJNZ    DRDBL
-001CBE E9EE C9              10      RET
-                                
-       E9EF                     ERRDR:
-001CBF E9EF D1              10      POP DE
-001CC0 E9F0 CD0AEA          17      CALL    DELP
-001CC3 E9F3 20C5            12      JR  NZ,DRD0
-001CC5 E9F5 B7               4      OR  A
-001CC6 E9F6 20A3            12      JR  NZ,ERRW
-001CC8 E9F8 C9              10      RET
-       E9F9                     DISKC:
-001CC9 E9F9 1B               6      DEC DE
-001CCA E9FA CB5F             8      BIT 3,A
-001CCC E9FC C445E9          17      CALL    NZ,RNF
-       E9FF                     DISKD:
-001CCF E9FF E5              11      PUSH    HL
-001CD0 EA00 214BE9          10      LD  HL,RETRY
-001CD3 EA03 35              11      DEC (HL)
-001CD4 EA04 E1              10      POP HL
-001CD5 EA05 200C            12      JR  NZ,ERR      ;Retry
-001CD7 EA07 B7               4      OR  A
-001CD8 EA08 2809            12      JR  Z,ERR       ;Error
-                                
-       EA0A                     DELP:
-001CDA EA0A CD45E9          17      CALL    RNF
-001CDD EA0D CD27E9          17      CALL    FDMOFF
-001CE0 EA10 3EFF             7      LD  A,0FFH
-       EA12                     AERRZ:
-001CE2 EA12 BF               4      CP  A
-       EA13                     ERR:
-001CE3 EA13 3EFF             7      LD  A,0FFH
-001CE5 EA15 C9              10      RET
+       E9F9                     DELP:
+001CC9 E9F9 CD34E9          17      CALL    RNF
+001CCC E9FC CD16E9          17      CALL    FDMOFF
+001CCF E9FF 3EFF             7      LD  A,0FFH
+       EA01                     AERRZ:
+001CD1 EA01 BF               4      CP  A
+       EA02                     ERR:
+001CD2 EA02 3EFF             7      LD  A,0FFH
+001CD4 EA04 C9              10      RET
 [EOF:M7DISK.ASM:SHIFT_JIS]
                                     INCLUDE "M7DISK2.ASM"
                                 
@@ -5076,192 +5079,192 @@
                                 ;   EMM DRIVER
                                 ;   1セクタ可変(256/512/1024)
                                 
-       EA16                     EDWT:
-001CE6 EA16 F5              11      PUSH    AF
-001CE7 EA17 CD35EA          17      CALL    EADR
-001CEA EA1A 0600             7      LD  B,0
-       EA1C                     EDWT1:
-001CEC EA1C EDB3                    OTIR
-001CEE EA1E 3D               4      DEC A
-001CEF EA1F 20FB            12      JR  NZ,EDWT1
-001CF1 EA21 180B            12      JR  EDRW1
+       EA05                     EDWT:
+001CD5 EA05 F5              11      PUSH    AF
+001CD6 EA06 CD24EA          17      CALL    EADR
+001CD9 EA09 0600             7      LD  B,0
+       EA0B                     EDWT1:
+001CDB EA0B EDB3                    OTIR
+001CDD EA0D 3D               4      DEC A
+001CDE EA0E 20FB            12      JR  NZ,EDWT1
+001CE0 EA10 180B            12      JR  EDRW1
                                 
-       EA23                     EDRD:
-001CF3 EA23 C5              11      PUSH    BC
-001CF4 EA24 CD35EA          17      CALL    EADR
-001CF7 EA27 0600             7      LD  B,0
-       EA29                     EDRD1:
-001CF9 EA29 EDB2                    INIR
-001CFB EA2B 3D               4      DEC A
-001CFC EA2C 20FB            12      JR  NZ,EDRD1
-       EA2E                     EDRW1:
-001CFE EA2E F1              10      POP AF
-001CFF EA2F 83               4      ADD A,E ;セクタを進める
-001D00 EA30 5F               4      LD  E,A
-001D01 EA31 8A               4      ADC A,D
-001D02 EA32 93               4      SUB E
-001D03 EA33 57               4      LD  D,A
-001D04 EA34 C9              10      RET
+       EA12                     EDRD:
+001CE2 EA12 C5              11      PUSH    BC
+001CE3 EA13 CD24EA          17      CALL    EADR
+001CE6 EA16 0600             7      LD  B,0
+       EA18                     EDRD1:
+001CE8 EA18 EDB2                    INIR
+001CEA EA1A 3D               4      DEC A
+001CEB EA1B 20FB            12      JR  NZ,EDRD1
+       EA1D                     EDRW1:
+001CED EA1D F1              10      POP AF
+001CEE EA1E 83               4      ADD A,E ;セクタを進める
+001CEF EA1F 5F               4      LD  E,A
+001CF0 EA20 8A               4      ADC A,D
+001CF1 EA21 93               4      SUB E
+001CF2 EA22 57               4      LD  D,A
+001CF3 EA23 C9              10      RET
                                 
-       EA35                     EADR:
-001D05 EA35 D5              11      PUSH    DE
-001D06 EA36 EB               4      EX  DE,HL
-001D07 EA37 78               4      LD  A,B
-001D08 EA38 DD460F          19      LD  B,(IX+DPB_BPS)
-       EA3B                     EADR1:              ;読み込むセクタ数と1クラスタのセクタ数を掛ける
-001D0B EA3B CB18             8      RR  B
-001D0D EA3D 3804            12      JR  C,EADR2
-001D0F EA3F 87               4      ADD A,A
-001D10 EA40 29              11      ADD HL,HL
-001D11 EA41 18F8            12      JR  EADR1
-       EA43                     EADR2:
-001D13 EA43 DD4E0D          19      LD  C,(IX+DPB_MAXSEC)
-001D16 EA46 DD460C          19      LD  B,(IX+DPB_MAXCYL)
-001D19 EA49 09              11      ADD HL,BC
-001D1A EA4A DD4E13          19      LD  C,(IX+DPB_UNITNO)
-001D1D EA4D ED71                    DB  0EDH,071H   ;OUT (C),0  Z80未定義命令
-001D1F EA4F 0C               4      INC C
-001D20 EA50 ED69            12      OUT (C),L
-001D22 EA52 0C               4      INC C
-001D23 EA53 ED61            12      OUT (C),H
-001D25 EA55 0C               4      INC C
-001D26 EA56 EB               4      EX  DE,HL
-001D27 EA57 D1              10      POP DE
-001D28 EA58 C9              10      RET
+       EA24                     EADR:
+001CF4 EA24 D5              11      PUSH    DE
+001CF5 EA25 EB               4      EX  DE,HL
+001CF6 EA26 78               4      LD  A,B
+001CF7 EA27 DD460F          19      LD  B,(IX+DPB_BPS)
+       EA2A                     EADR1:              ;読み込むセクタ数と1クラスタのセクタ数を掛ける
+001CFA EA2A CB18             8      RR  B
+001CFC EA2C 3804            12      JR  C,EADR2
+001CFE EA2E 87               4      ADD A,A
+001CFF EA2F 29              11      ADD HL,HL
+001D00 EA30 18F8            12      JR  EADR1
+       EA32                     EADR2:
+001D02 EA32 DD4E0D          19      LD  C,(IX+DPB_MAXSEC)
+001D05 EA35 DD460C          19      LD  B,(IX+DPB_MAXCYL)
+001D08 EA38 09              11      ADD HL,BC
+001D09 EA39 DD4E13          19      LD  C,(IX+DPB_UNITNO)
+001D0C EA3C ED71                    DB  0EDH,071H   ;OUT (C),0  Z80未定義命令
+001D0E EA3E 0C               4      INC C
+001D0F EA3F ED69            12      OUT (C),L
+001D11 EA41 0C               4      INC C
+001D12 EA42 ED61            12      OUT (C),H
+001D14 EA44 0C               4      INC C
+001D15 EA45 EB               4      EX  DE,HL
+001D16 EA46 D1              10      POP DE
+001D17 EA47 C9              10      RET
                                 
                                 ;   CMOS BACKUP MEMORY DRIVER(32KB)
                                 ;   1セクタ256
                                 
-       EA59                     CDWT:
-001D29 EA59 78               4      LD  A,B
-001D2A EA5A DD4E13          19      LD  C,(IX+DPB_UNITNO)
-001D2D EA5D ED40            12      IN  B,(C)       ;アドレスカウンタを0000にリセット
-001D2F EA5F ED59            12      OUT (C),E       ;W)アドレスカウンタ上位
-001D31 EA61 01FA00          10      LD  BC,000FAH
-       EA64                     CDWT1:
-001D34 EA64 EDB3                    OTIR            ;W)データ書き込み・アドレスカウンタ+1
-001D36 EA66 13               6      INC DE
-001D37 EA67 3D               4      DEC A
-001D38 EA68 20FA            12      JR  NZ,CDWT1
-001D3A EA6A A7               4      AND A
-001D3B EA6B C9              10      RET
+       EA48                     CDWT:
+001D18 EA48 78               4      LD  A,B
+001D19 EA49 DD4E13          19      LD  C,(IX+DPB_UNITNO)
+001D1C EA4C ED40            12      IN  B,(C)       ;アドレスカウンタを0000にリセット
+001D1E EA4E ED59            12      OUT (C),E       ;W)アドレスカウンタ上位
+001D20 EA50 01FA00          10      LD  BC,000FAH
+       EA53                     CDWT1:
+001D23 EA53 EDB3                    OTIR            ;W)データ書き込み・アドレスカウンタ+1
+001D25 EA55 13               6      INC DE
+001D26 EA56 3D               4      DEC A
+001D27 EA57 20FA            12      JR  NZ,CDWT1
+001D29 EA59 A7               4      AND A
+001D2A EA5A C9              10      RET
                                 
-       EA6C                     CDRD:
-001D3C EA6C 78               4      LD  A,B
-001D3D EA6D DD4E13          19      LD  C,(IX+DPB_UNITNO)
-001D40 EA70 ED40            12      IN  B,(C)       ;アドレスカウンタを0000にリセット
-001D42 EA72 ED59            12      OUT (C),E       ;W)アドレスカウンタ上位
-001D44 EA74 01F900          10      LD  BC,000F9H
-       EA77                     CDRD1:
-001D47 EA77 EDB2                    INIR            ;R)データ読み出し・アドレスカウンタ+1
-001D49 EA79 13               6      INC DE
-001D4A EA7A 3D               4      DEC A
-001D4B EA7B 20FA            12      JR  NZ,CDRD1
-001D4D EA7D A7               4      AND A
-001D4E EA7E C9              10      RET
+       EA5B                     CDRD:
+001D2B EA5B 78               4      LD  A,B
+001D2C EA5C DD4E13          19      LD  C,(IX+DPB_UNITNO)
+001D2F EA5F ED40            12      IN  B,(C)       ;アドレスカウンタを0000にリセット
+001D31 EA61 ED59            12      OUT (C),E       ;W)アドレスカウンタ上位
+001D33 EA63 01F900          10      LD  BC,000F9H
+       EA66                     CDRD1:
+001D36 EA66 EDB2                    INIR            ;R)データ読み出し・アドレスカウンタ+1
+001D38 EA68 13               6      INC DE
+001D39 EA69 3D               4      DEC A
+001D3A EA6A 20FA            12      JR  NZ,CDRD1
+001D3C EA6C A7               4      AND A
+001D3D EA6D C9              10      RET
                                 
                                 ;   RAM DISK DRIVER (64KB)
                                 ;   1セクタ256
                                 
-       EA7F                     RDWT:
-001D4F EA7F 3EB3             7      LD  A,0B3H      ;OTIR
-001D51 EA81 1802            12      JR  RDRW
-       EA83                     RDRD:
-001D53 EA83 3EB2             7      LD  A,0B2H      ;INIR
-       EA85                     RDRW:
-001D55 EA85 3292EA          13      LD  (RDRW1+1),A
+       EA6E                     RDWT:
+001D3E EA6E 3EB3             7      LD  A,0B3H      ;OTIR
+001D40 EA70 1802            12      JR  RDRW
+       EA72                     RDRD:
+001D42 EA72 3EB2             7      LD  A,0B2H      ;INIR
+       EA74                     RDRW:
+001D44 EA74 3281EA          13      LD  (RDRW1+1),A
                                 
-001D58 EA88 78               4      LD  A,B
-001D59 EA89 43               4      LD  B,E     ;B=アドレスカウンタ上位(X1の様な16bitのI/Oアクセス)
-001D5A EA8A 0EEB             7      LD  C,0EBH
-001D5C EA8C ED71            12      OUT (C),0       ;0=アドレスカウンタ下位
-001D5E EA8E 0D               4      DEC C       ;EA(R)データ読み出し・アドレスカウンタ+1
-001D5F EA8F 0600             7      LD  B,0
-       EA91                     RDRW1:
-001D61 EA91 EDB2                    INIR            ;自己書き換え(INIR/OTIR)
-001D63 EA93 13               6      INC DE
-001D64 EA94 3D               4      DEC A
-001D65 EA95 20FA            12      JR  NZ,RDRW1
-001D67 EA97 A7               4      AND A
-001D68 EA98 C9              10      RET
+001D47 EA77 78               4      LD  A,B
+001D48 EA78 43               4      LD  B,E     ;B=アドレスカウンタ上位(X1の様な16bitのI/Oアクセス)
+001D49 EA79 0EEB             7      LD  C,0EBH
+001D4B EA7B ED71            12      OUT (C),0       ;0=アドレスカウンタ下位
+001D4D EA7D 0D               4      DEC C       ;EA(R)データ読み出し・アドレスカウンタ+1
+001D4E EA7E 0600             7      LD  B,0
+       EA80                     RDRW1:
+001D50 EA80 EDB2                    INIR            ;自己書き換え(INIR/OTIR)
+001D52 EA82 13               6      INC DE
+001D53 EA83 3D               4      DEC A
+001D54 EA84 20FA            12      JR  NZ,RDRW1
+001D56 EA86 A7               4      AND A
+001D57 EA87 C9              10      RET
                                 
                                 ;   G-RAM(PCG) DISK DRIVER (24KB)
                                 ;   1セクタ256
                                 
-       EA99                     GDWT:
-001D69 EA99 C5              11      PUSH    BC
-001D6A EA9A D5              11      PUSH    DE
-001D6B EA9B CDC3EA          17      CALL    GADR
-       EA9E                     GDWT2:
-001D6E EA9E 4E               7      LD  C,(HL)
-001D6F EA9F 23               6      INC HL
-001D70 EAA0 EB               4      EX  DE,HL   ;HL=PCG,DE=メモリ
-001D71 EAA1 CDD2CF          17      CALL    WR_PCG
-001D74 EAA4 23               6      INC HL
-001D75 EAA5 EB               4      EX  DE,HL   ;HL=メモリ,DE=PCG
-001D76 EAA6 10F6            13      DJNZ    GDWT2
-001D78 EAA8 D1              10      POP DE
-001D79 EAA9 1C               4      INC E
-001D7A EAAA C1              10      POP BC
-001D7B EAAB 10EC            13      DJNZ    GDWT
-001D7D EAAD C9              10      RET
-       EAAE                     GDRD:
-001D7E EAAE C5              11      PUSH    BC
-001D7F EAAF D5              11      PUSH    DE
-001D80 EAB0 CDC3EA          17      CALL    GADR
-       EAB3                     GDRD2:
-001D83 EAB3 EB               4      EX  DE,HL   ;HL=PCG,DE=メモリ
-001D84 EAB4 CDCACF          17      CALL    RD_PCG
-001D87 EAB7 23               6      INC HL
-001D88 EAB8 EB               4      EX  DE,HL   ;HL=メモリ,DE=PCG
-001D89 EAB9 71               7      LD  (HL),C
-001D8A EABA 23               6      INC HL
-001D8B EABB 10F6            13      DJNZ    GDRD2
-001D8D EABD D1              10      POP DE
-001D8E EABE 1C               4      INC E
-001D8F EABF C1              10      POP BC
-001D90 EAC0 10EC            13      DJNZ    GDRD
-001D92 EAC2 C9              10      RET
+       EA88                     GDWT:
+001D58 EA88 C5              11      PUSH    BC
+001D59 EA89 D5              11      PUSH    DE
+001D5A EA8A CDB2EA          17      CALL    GADR
+       EA8D                     GDWT2:
+001D5D EA8D 4E               7      LD  C,(HL)
+001D5E EA8E 23               6      INC HL
+001D5F EA8F EB               4      EX  DE,HL   ;HL=PCG,DE=メモリ
+001D60 EA90 CDD2CF          17      CALL    WR_PCG
+001D63 EA93 23               6      INC HL
+001D64 EA94 EB               4      EX  DE,HL   ;HL=メモリ,DE=PCG
+001D65 EA95 10F6            13      DJNZ    GDWT2
+001D67 EA97 D1              10      POP DE
+001D68 EA98 1C               4      INC E
+001D69 EA99 C1              10      POP BC
+001D6A EA9A 10EC            13      DJNZ    GDWT
+001D6C EA9C C9              10      RET
+       EA9D                     GDRD:
+001D6D EA9D C5              11      PUSH    BC
+001D6E EA9E D5              11      PUSH    DE
+001D6F EA9F CDB2EA          17      CALL    GADR
+       EAA2                     GDRD2:
+001D72 EAA2 EB               4      EX  DE,HL   ;HL=PCG,DE=メモリ
+001D73 EAA3 CDCACF          17      CALL    RD_PCG
+001D76 EAA6 23               6      INC HL
+001D77 EAA7 EB               4      EX  DE,HL   ;HL=メモリ,DE=PCG
+001D78 EAA8 71               7      LD  (HL),C
+001D79 EAA9 23               6      INC HL
+001D7A EAAA 10F6            13      DJNZ    GDRD2
+001D7C EAAC D1              10      POP DE
+001D7D EAAD 1C               4      INC E
+001D7E EAAE C1              10      POP BC
+001D7F EAAF 10EC            13      DJNZ    GDRD
+001D81 EAB1 C9              10      RET
                                 
-       EAC3                     GADR:
-001D93 EAC3 7B               4      LD  A,E
-001D94 EAC4 E61F             7      AND 01FH
-001D96 EAC6 C6D0             7      ADD A,0D0H
-001D98 EAC8 57               4      LD  D,A
-001D99 EAC9 7B               4      LD  A,E
-001D9A EACA 07               4      RLCA
-001D9B EACB 07               4      RLCA
-001D9C EACC 07               4      RLCA
-001D9D EACD 3C               4      INC A
-001D9E EACE 0600             7      LD  B,0
-001DA0 EAD0 58               4      LD  E,B
-001DA1 EAD1 C9              10      RET
+       EAB2                     GADR:
+001D82 EAB2 7B               4      LD  A,E
+001D83 EAB3 E61F             7      AND 01FH
+001D85 EAB5 C6D0             7      ADD A,0D0H
+001D87 EAB7 57               4      LD  D,A
+001D88 EAB8 7B               4      LD  A,E
+001D89 EAB9 07               4      RLCA
+001D8A EABA 07               4      RLCA
+001D8B EABB 07               4      RLCA
+001D8C EABC 3C               4      INC A
+001D8D EABD 0600             7      LD  B,0
+001D8F EABF 58               4      LD  E,B
+001D90 EAC0 C9              10      RET
 [EOF:M7DISK2.ASM:UTF_8]
                                     INCLUDE "LDCCPWK.ASM"
                                 
                                 ;   LSX-Dodgers CCP WORK
                                 
        003B                     PATHX   EQU 59
-001DA2 EAD2                     PATHD:  DS  PATHX
-001DDD EB0D 00                  PATHE:  DB  0
+001D91 EAC1                     PATHD:  DS  PATHX
+001DCC EAFC 00                  PATHE:  DB  0
                                 
-       EB0E                     DTA_CCP:
-001DDE EB0E                         DS  37
+       EAFD                     DTA_CCP:
+001DCD EAFD                         DS  37
                                 
-       EB33                     FCB_BAT:
-001E03 EB33                         DS  37
+       EB22                     FCB_BAT:
+001DF2 EB22                         DS  37
                                 
-001E28 EB58 2020203C4449523E    DIRMES: DB  "   <DIR>  $"
+001E17 EB47 2020203C4449523E    DIRMES: DB  "   <DIR>  $"
             202024              
-001E33 EB63 20667265652024      FREE:   DB  " free $"
+001E22 EB52 20667265652024      FREE:   DB  " free $"
 [EOF:LDCCPWK.ASM:UTF_8]
                                     INCLUDE "M7TABLE.ASM"
                                 
                                 ;   LSX-Dodgers TABLE 表示関連のテーブル
                                 ;   MZ-700/1500
                                 
-       EB6A                     AT_TABLE:
-001E3A EB6A                         DS  TABLEAD-AT_TABLE
+       EB59                     AT_TABLE:
+001E29 EB59                         DS  TABLEAD-AT_TABLE
                                 
        ED40                     KEY_TABLE:
 002010 ED40 12081E1F1C1D5C2F        DB  12H,08H,1EH,1FH,1CH,1DH,5CH,'/'
@@ -5493,17 +5496,17 @@
 0023A3 F0D3 C3EAD9          10  _POS:   JP  POS
 0023A6 F0D6 C30FD9          10  _LOC:   JP  LOC
        F0D9                     _CHGDRV:
-0023A9 F0D9 C3A9E7          10      JP  CHGDRV
+0023A9 F0D9 C399E7          10      JP  CHGDRV
        F0DC                     _GETDPB:
-0023AC F0DC C368E8          10      JP  GETDPB
+0023AC F0DC C357E8          10      JP  GETDPB
        F0DF                     _FFLUSH:
-0023AF F0DF C386E8          10      JP  FFLUSH
+0023AF F0DF C375E8          10      JP  FFLUSH
        F0E2                     _RDFATX:
 0023B2 F0E2 C382E4          10      JP  RDFATX
 0023B5 F0E5 C3AAE5          10  _RDFAT: JP  RDFAT
-0023B8 F0E8 C34CE9          10  _WTTRK: JP  WTTRK
-0023BB F0EB C3ACE9          10  _FDRD:  JP  FDRD
-0023BE F0EE C352E9          10  _FDWT:  JP  FDWT
+0023B8 F0E8 C33BE9          10  _WTTRK: JP  WTTRK
+0023BB F0EB C39BE9          10  _FDRD:  JP  FDRD
+0023BE F0EE C341E9          10  _FDWT:  JP  FDWT
        F0F1                     _BPB2DPB:
 0023C1 F0F1 C337E6          10      JP  BPB2DPB
        F0F4                     _BREAK:
@@ -5585,9 +5588,9 @@
                                 
 0024BE F1EE                         DS  2
        F1F0                     _FCB_BAT:
-0024C0 F1F0 33EB                    DW  FCB_BAT
+0024C0 F1F0 22EB                    DW  FCB_BAT
        F1F2                     _PATH:
-0024C2 F1F2 D2EA                    DW  PATHD
+0024C2 F1F2 C1EA                    DW  PATHD
                                 
 0024C4 F1F4                     SCDIR:  DS  2       ;+14 +15
 0024C6 F1F6                     SFBPS:  DS  2       ;FBPS
@@ -5655,8 +5658,8 @@
                                 ;   C:
                                 
 002510 F240 0100                    DW  1   ;DPB_FATLN
-002512 F242 6CEA                    DW  CDRD    ;DPB_DRD
-002514 F244 59EA                    DW  CDWT    ;DPB_DWT
+002512 F242 5BEA                    DW  CDRD    ;DPB_DRD
+002514 F244 48EA                    DW  CDWT    ;DPB_DWT
 002516 F246 FA                      DB  0FAH    ;DPB_FATID
 002517 F247 01                      DB  1   ;DPB_SECPCL
 002518 F248 7A00                    DW  122 ;DPB_MAXCL
@@ -5683,8 +5686,8 @@
                                 
        F280                     EMMFL:
 002550 F280 0000                    DW  0   ;DPB_FATLN
-002552 F282 23EA                    DW  EDRD    ;DPB_DRD
-002554 F284 16EA                    DW  EDWT    ;DPB_DWT
+002552 F282 12EA                    DW  EDRD    ;DPB_DRD
+002554 F284 05EA                    DW  EDWT    ;DPB_DWT
 002556 F286 FA                      DB  0FAH    ;DPB_FATID
 002557 F287 02                      DB  2   ;DPB_SECPCL
 002558 F288 0000                    DW  0   ;DPB_MAXCL
@@ -5706,8 +5709,8 @@
                                 ;   F:
                                 
 002570 F2A0 0200                    DW  2   ;DPB_FATLN
-002572 F2A2 83EA                    DW  RDRD    ;DPB_DRD
-002574 F2A4 7FEA                    DW  RDWT    ;DPB_DWT
+002572 F2A2 72EA                    DW  RDRD    ;DPB_DRD
+002574 F2A4 6EEA                    DW  RDWT    ;DPB_DWT
 002576 F2A6 FA                      DB  0FAH    ;DPB_FATID
 002577 F2A7 01                      DB  1   ;DPB_SECPCL
 002578 F2A8 F600                    DW  246 ;DPB_MAXCL
@@ -5729,8 +5732,8 @@
                                 ;   G:
        F2C0                     GRAMFL:
 002590 F2C0 0100                    DW  1   ;DPB_FATLN
-002592 F2C2 AEEA                    DW  GDRD    ;DPB_DRD
-002594 F2C4 99EA                    DW  GDWT    ;DPB_DWT
+002592 F2C2 9DEA                    DW  GDRD    ;DPB_DRD
+002594 F2C4 88EA                    DW  GDWT    ;DPB_DWT
 002596 F2C6 FA                      DB  0FAH    ;DPB_FATID
 002597 F2C7 01                      DB  1   ;DPB_SECPCL
 002598 F2C8 5A00                    DW  90  ;DPB_MAXCL

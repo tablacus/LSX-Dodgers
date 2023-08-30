@@ -481,16 +481,14 @@ NOT_FD:
 	OR	L
 	LD	A,0		;LDでフラグは変化しない。BPB_TotSec16を AHL で扱う為、Aに0を入れる
 	JR	NZ,BPB16BIT	;BPB_TotSec16が「0」の場合はBPB_TotSec32で計算
-	LD	A,(IY+35)	;念のために総セクタ数が24ビットを超える場合はエラーを返す
-	OR	A
-	SCF
-	RET	NZ
+	CPL			;A=0FFH
+	ADD	A,(IY+35)	;念のために総セクタ数が24ビットを超える場合はエラーを返す
+	RET	C
 	LD	L,(IY+32)	;BPB_TotSec32 は AHL の24ビットで扱う
-	LD	H,(IY+33)	;1クラスタの論理セクタ数(DPB_SECPCL)が最大128なので
-	LD	A,(IY+34)	;24ビットを超えると必ずクラスタ数が16ビットを超えてしまうのでこれで十分
-	AND	A		;CF=0
+	LD	H,(IY+33)	;1クラスタの論理セクタ数(DPB_SECPCL)が最大128なので、
+	LD	A,(IY+34)	;FAT12,FAT16では総セクタ数が24ビットを超えることは無い
 BPB16BIT:
-	SBC	HL,DE
+	SBC	HL,DE		;DE=DPB_MAXDIR
 	SBC	A,0
 	LD	B,(IY+13)	;BPB_SecPerClus
 BPBTC1:				;総クラスタ数(AHL) = 総セクタ数(AHL) / セクタサイズ(B)
@@ -501,9 +499,8 @@ BPBTC1:				;総クラスタ数(AHL) = 総セクタ数(AHL) / セクタサイズ(B)
 	RR	L
 	JR	BPBTC1
 BPBTC2:
-	OR	A
-	SCF
-	RET	NZ		;念のため(クラスタ数が16ビットを超える場合)
+	ADD	A,0FFH
+	RET	C		;念のため(クラスタ数が16ビットを超える場合)
 	INC	HL
 	INC	HL
 	LD	(IX+DPB_MAXCL),L
@@ -564,18 +561,20 @@ DWTPAT	EQU	$-2
 
 WTFAT:
 	CALL	FATSETUP
-	CALL	NC,DWT24B
-	RET	C
-	BIT	7,(IX+DPB_BPS)
-	RET	Z		;予備FATが無い
-	CALL	FATS2
-	PUSH	HL		;予備FAT
-	LD	L,(IX+DPB_FATLN)
-	LD	H,(IX+DPB_FATLN+1)
-	ADD	HL,DE
-	EX	DE,HL
-	POP	HL
-	JR	DWT24B
+	JR	NC,DWT24B
+	RET
+;	CALL	NC,DWT24B	;予備FATの保存ルーチン
+;	RET	C
+;	BIT	7,(IX+DPB_BPS)
+;	RET	Z		;予備FATが無い
+;	CALL	FATS2
+;	PUSH	HL		;予備FAT
+;	LD	L,(IX+DPB_FATLN)
+;	LD	H,(IX+DPB_FATLN+1)
+;	ADD	HL,DE
+;	EX	DE,HL
+;	POP	HL
+;	JR	DWT24B
 ;------------------------
 ;FATのセットアップ
 ;out
@@ -611,11 +610,15 @@ FAT_SKP:
 	ADD	HL,DE
 	SUB	E
 	JR	NC,FAT_SKP
-	RET
+	BIT	0,(IX+DPB_FATLN+1)	;FATサイズが0100H(256)の場合
+	RET	Z
 FAT1:
 	EX	DE,HL
+	OR	A		;0の場合は0100Hとして扱う
+	JR	Z,FAT3
 	CP	C		;C=FATバッファに読み込めるセクタ数
 	JR	C,FAT2
+FAT3:
 	LD	A,C
 FAT2:
 	LD	B,A
@@ -740,10 +743,10 @@ SPPAT2	EQU	$-2
 	ADD	HL,BC		;C=DPB_DIRSCNT
 	LD	(MD_PAT),HL
 
-	LD	HL,(MAXCLP);
-	LD	DE,4086		;クラスタ数が4086未満:FAT12 4086以上:FAT16
-	SBC	HL,DE		;CF=0のはず
-	JR	NC,SETFAT16
+	LD	HL,(MAXCLP)
+	LD	DE,-4086	;クラスタ数が4086未満:FAT12 4086以上:FAT16
+	ADD	HL,DE
+	JR	C,SETFAT16
 	LD	HL,GNCL		;FAT12
 	LD	DE,SNCL
 	LD	BC,FATSETUP12
