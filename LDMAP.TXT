@@ -16,6 +16,11 @@ CF06-FFFF	システム領域
 0100-D105	TPA(Transient Program Area)
 D106-FFFF	システム領域
 
+※MSX
+0000-00FF	システムスクラッチエリア
+0100-C905	TPA(Transient Program Area)
+C906-FFFF	システム領域
+
 
 システムスクラッチエリア
 

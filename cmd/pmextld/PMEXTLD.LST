@@ -1,123 +1,217 @@
-Ôªø                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.0.0, LST:Full:4
+                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.0.0, LST:Full:4
                                 ; pmextld
                                 ;
-                                ; PMEXT.COM „Å´LSX-DodgersÁî®„ÅÆ„Çø„Ç§„É†„Çπ„Çø„É≥„Éó„Éë„ÉÉ„ÉÅ„Çí„ÅÇ„Å¶„Çã
+                                ; PMEXT.COM Ç…LSX-DodgersópÇÃÉ^ÉCÉÄÉXÉ^ÉìÉvÉpÉbÉ`ÇÇ†ÇƒÇÈ
                                 
-       0003                     OSFLG   EQU 0003H
        0005                     SYSTEM  EQU 0005H
-       000B                     BASE    EQU 000BH
-       000F                     JP_HL   EQU 000FH
-       0018                     BIOS    EQU 0018H
        005C                     FCB1    EQU 005CH
        0080                     DTA EQU 0080H
                                 
 000000 0100                         ORG 0100H
                                 
 000000 0100 ED7B0600        20      LD  SP,(SYSTEM+1)
-000004 0104 11DC01          10      LD  DE,TITLE
-000007 0107 0E09             7      LD  C,09H
+000004 0104 114D02          10      LD  DE,TITLE
+000007 0107 0E09             7      LD  C,9     ;STROUT ï∂éöóÒèoóÕ CP/M
 000009 0109 CD0500          17      CALL    SYSTEM
-00000C 010C 117E01          10      LD  DE,FCB
-00000F 010F 0E0F             7      LD  C,0FH
-000011 0111 CD0500          17      CALL    SYSTEM
-000014 0114 B7               4      OR  A
-000015 0115 2054            12      JR  NZ,SHOW_NOTFOUND
-000017 0117 118000          10      LD  DE,DTA
-00001A 011A 0E1A             7      LD  C,1AH
-00001C 011C CD0500          17      CALL    SYSTEM
-00001F 011F 117E01          10      LD  DE,FCB
-000022 0122 0E21             7      LD  C,21H
-000024 0124 CD0500          17      CALL    SYSTEM
+                                
+00000C 010C 3A5C00          13      LD  A,(FCB1)
+00000F 010F 328C02          13      LD  (FCB),A
+000012 0112 3A5D00          13      LD  A,(FCB1+1)
+000015 0115 FE20             7      CP  020H
+000017 0117 280B            12      JR  Z,SHOW_DRV
+000019 0119 215C00          10      LD  HL,FCB1
+00001C 011C 118C02          10      LD  DE,FCB
+00001F 011F 011000          10      LD  BC,16
+000022 0122 EDB0                    LDIR
+       0124                     SHOW_DRV:
+000024 0124 3A8C02          13      LD  A,(FCB)
 000027 0127 B7               4      OR  A
-000028 0128 203C            12      JR  NZ,SHOW_ERROR
-00002A 012A 21A301          10      LD  HL,PATCH_START
-00002D 012D 119000          10      LD  DE,DTA+10H
-000030 0130 012E00          10      LD  BC,PATCH_END-PATCH_START
-000033 0133 EDB0                    LDIR
-000035 0135 117E01          10      LD  DE,FCB
-000038 0138 0E22             7      LD  C,22H
-00003A 013A CD0500          17      CALL    SYSTEM
-00003D 013D B7               4      OR  A
-00003E 013E 2026            12      JR  NZ,SHOW_ERROR
-000040 0140 3E01             7      LD  A,01H
-000042 0142 329F01          13      LD  (RANDOM_RECORD),A
-000045 0145 117E01          10      LD  DE,FCB
-000048 0148 0E21             7      LD  C,21H
-00004A 014A CD0500          17      CALL    SYSTEM
-00004D 014D B7               4      OR  A
-00004E 014E 2016            12      JR  NZ,SHOW_ERROR
-000050 0150 21D101          10      LD  HL,OSNAME
-000053 0153 118200          10      LD  DE,DTA+2
-000056 0156 010B00          10      LD  BC,OSNAME_END-OSNAME
-000059 0159 EDB0                    LDIR
-00005B 015B 117E01          10      LD  DE,FCB
-00005E 015E 0E22             7      LD  C,22H
+000028 0128 2009            12      JR  NZ,SHOW_DRV1
+                                
+00002A 012A 0E19             7      LD  C,019H      ;ÉJÉåÉìÉgÉhÉâÉCÉuî‘çÜÇÃälìæ(_CURDRV) CP/M MSX-DOS
+00002C 012C CD0500          17      CALL    SYSTEM
+00002F 012F 3C               4      INC A
+000030 0130 328C02          13      LD  (FCB),A
+       0133                     SHOW_DRV1:
+000033 0133 3A8C02          13      LD  A,(FCB)
+000036 0136 C640             7      ADD A,040H
+000038 0138 5F               4      LD  E,A
+000039 0139 0E02             7      LD  C,2     ;ÉRÉìÉ\Å[ÉãèoóÕ(_CONOUT) CP/M MSX-DOS
+00003B 013B CD0500          17      CALL    SYSTEM
+00003E 013E 1E3A             7      LD  E,':'
+000040 0140 0E02             7      LD  C,2     ;ÉRÉìÉ\Å[ÉãèoóÕ(_CONOUT) CP/M MSX-DOS
+000042 0142 CD0500          17      CALL    SYSTEM
+000045 0145 0608             7      LD  B,8
+000047 0147 218D02          10      LD  HL,FCB+1
+00004A 014A CDEF01          17      CALL    SHOW_STRN
+00004D 014D E5              11      PUSH    HL
+00004E 014E 1E2E             7      LD  E,'.'
+000050 0150 0E02             7      LD  C,2     ;ÉRÉìÉ\Å[ÉãèoóÕ(_CONOUT) CP/M MSX-DOS
+000052 0152 CD0500          17      CALL    SYSTEM
+000055 0155 E1              10      POP HL
+000056 0156 0603             7      LD  B,3
+000058 0158 CDEF01          17      CALL    SHOW_STRN
+                                
+00005B 015B 118C02          10      LD  DE,FCB
+00005E 015E 0E0F             7      LD  C,00FH      ;FOPEN FCB ÉtÉ@ÉCÉãÉIÅ[ÉvÉì CP/M
 000060 0160 CD0500          17      CALL    SYSTEM
-000063 0163 B7               4      OR  A
-000064 0164 280D            12      JR  Z,FINISH
-       0166                     SHOW_ERROR:
-000066 0166 110902          10      LD  DE,MSG_ERROR
-000069 0169 1803            12      JR  SHOW_MESSAGE
-       016B                     SHOW_NOTFOUND:
-00006B 016B 11F301          10      LD  DE,MSG_NOT_FOUND
-       016E                     SHOW_MESSAGE:
-00006E 016E 0E09             7      LD  C,09H
-000070 0170 CD0500          17      CALL    SYSTEM
-       0173                     FINISH:
-000073 0173 117E01          10      LD  DE,FCB
-000076 0176 0E10             7      LD  C,10H
-000078 0178 CD0500          17      CALL    SYSTEM
-00007B 017B C30000          10      JP  0
-       017E                     FCB:                ;PMEXT.COM„ÅÆFCB
-00007E 017E 00504D4558542020        DB  0,"PMEXT   COM",0
+000063 0163 3C               4      INC A
+000064 0164 287E            12      JR  Z,SHOW_NOTFOUND
+000066 0166 118000          10      LD  DE,DTA
+000069 0169 0E1A             7      LD  C,01AH      ;SETDTA ÉfÉBÉXÉNì]ëóÉAÉhÉåÉXÇÃê›íË CP/M
+00006B 016B CD0500          17      CALL    SYSTEM
+00006E 016E 118C02          10      LD  DE,FCB
+000071 0171 0E21             7      LD  C,021H      ;RDRND FCB ÉâÉìÉ_ÉÄì«Ç›èoÇµ CP/M
+000073 0173 CD0500          17      CALL    SYSTEM
+000076 0176 B7               4      OR  A
+000077 0177 2059            12      JR  NZ,SHOW_ERROR
+                                
+000079 0179 214D02          10      LD  HL,TITLE
+00007C 017C 118200          10      LD  DE,DTA+2
+00007F 017F 0605             7      LD  B,5
+000081 0181 CDFD01          17      CALL    CPSTRN
+000084 0184 2059            12      JR  NZ,SHOW_INCORRECT
+                                
+000086 0186 210502          10      LD  HL,PATCH_START
+000089 0189 119000          10      LD  DE,DTA+010H
+00008C 018C 013800          10      LD  BC,PATCH_END-PATCH_START
+00008F 018F EDB0                    LDIR
+000091 0191 118C02          10      LD  DE,FCB
+000094 0194 0E22             7      LD  C,022H      ;WRRND FCB ÉâÉìÉ_ÉÄèëÇ´çûÇ› CP/M
+000096 0196 CD0500          17      CALL    SYSTEM
+000099 0199 B7               4      OR  A
+00009A 019A 2036            12      JR  NZ,SHOW_ERROR
+00009C 019C 3E01             7      LD  A,001H
+00009E 019E 32AD02          13      LD  (RANDOM_RECORD),A
+0000A1 01A1 118C02          10      LD  DE,FCB
+0000A4 01A4 0E21             7      LD  C,021H      ;RDRND FCB ÉâÉìÉ_ÉÄì«Ç›èoÇµ CP/M
+0000A6 01A6 CD0500          17      CALL    SYSTEM
+0000A9 01A9 B7               4      OR  A
+0000AA 01AA 2026            12      JR  NZ,SHOW_ERROR
+0000AC 01AC 213D02          10      LD  HL,OSNAME
+0000AF 01AF 118200          10      LD  DE,DTA+2
+0000B2 01B2 011000          10      LD  BC,OSNAME_END-OSNAME
+0000B5 01B5 EDB0                    LDIR
+0000B7 01B7 118C02          10      LD  DE,FCB
+0000BA 01BA 0E22             7      LD  C,22H       ;WRRND FCB ÉâÉìÉ_ÉÄèëÇ´çûÇ› CP/M
+0000BC 01BC CD0500          17      CALL    SYSTEM
+0000BF 01BF B7               4      OR  A
+0000C0 01C0 2010            12      JR  NZ,SHOW_ERROR
+0000C2 01C2 118C02          10      LD  DE,FCB
+0000C5 01C5 0E10             7      LD  C,10H       ;FCLOSE FCB ÉtÉ@ÉCÉãÉNÉçÅ[ÉY CP/M
+0000C7 01C7 CD0500          17      CALL    SYSTEM
+0000CA 01CA 3C               4      INC A
+0000CB 01CB 2805            12      JR  Z,SHOW_ERROR
+0000CD 01CD 118602          10      LD  DE,MSG_OK
+0000D0 01D0 1815            12      JR  SHOW_MESSAGE
+       01D2                     SHOW_ERROR:
+0000D2 01D2 118C02          10      LD  DE,FCB
+0000D5 01D5 0E10             7      LD  C,10H       ;FCLOSE FCB ÉtÉ@ÉCÉãÉNÉçÅ[ÉY CP/M
+0000D7 01D7 CD0500          17      CALL    SYSTEM
+0000DA 01DA 117C02          10      LD  DE,MSG_ERROR
+0000DD 01DD 1808            12      JR  SHOW_MESSAGE
+       01DF                     SHOW_INCORRECT:
+0000DF 01DF 116A02          10      LD  DE,MSG_INCORRECT
+0000E2 01E2 1803            12      JR  SHOW_MESSAGE
+       01E4                     SHOW_NOTFOUND:
+0000E4 01E4 115D02          10      LD  DE,MSG_NOT_FOUND
+       01E7                     SHOW_MESSAGE:
+0000E7 01E7 0E09             7      LD  C,9     ;STROUT ï∂éöóÒèoóÕ CP/M
+0000E9 01E9 CD0500          17      CALL    SYSTEM
+0000EC 01EC C30000          10      JP  0
+                                
+       01EF                     SHOW_STRN:
+0000EF 01EF 5E               7      LD  E,(HL)
+0000F0 01F0 23               6      INC HL
+0000F1 01F1 C5              11      PUSH    BC
+0000F2 01F2 E5              11      PUSH    HL
+0000F3 01F3 0E02             7      LD  C,2     ;ÉRÉìÉ\Å[ÉãèoóÕ(_CONOUT) CP/M MSX-DOS
+0000F5 01F5 CD0500          17      CALL    SYSTEM
+0000F8 01F8 E1              10      POP HL
+0000F9 01F9 C1              10      POP BC
+0000FA 01FA 10F3            13      DJNZ    SHOW_STRN
+0000FC 01FC C9              10      RET
+                                
+       01FD                     CPSTRN:
+0000FD 01FD 1A               7      LD  A,(DE)
+0000FE 01FE 13               6      INC DE
+0000FF 01FF BE               7      CP  (HL)
+000100 0200 C0              11      RET NZ
+000101 0201 23               6      INC HL
+000102 0202 10F9            13      DJNZ    CPSTRN
+000104 0204 C9              10      RET
+                                
+       0205                     PATCH_START:            ;ÉpÉbÉ`
+000105 0110                         ORG 00110H,PATCH_START-00100H
+                                
+000105 0110 3A0B00          13      LD  A,(0000BH)
+000108 0113 3D               4      DEC A
+000109 0114 011B00          10      LD  BC,27       ;for CDOS2
+00010C 0117 2824            12      JR  Z,CDOS2
+00010E 0119 E5              11      PUSH    HL
+00010F 011A D5              11      PUSH    DE
+000110 011B 0E6F             7      LD  C,06FH      ;(BDOS) MSX-DOS ÇÃÉoÅ[ÉWÉáÉìî‘çÜÇÃälìæ(_DOSVER) *1 MSX-DOS
+000112 011D CD0500          17      CALL    SYSTEM
+000115 0120 D1              10      POP DE
+000116 0121 E1              10      POP HL
+000117 0122 78               4      LD  A,B
+000118 0123 FE02             7      CP  2
+00011A 0125 3010            12      JR  NC,MSXDOS2  ;MSX-DOS2Ç≈ÇÕFCBÇ…É^ÉCÉÄÉXÉ^ÉìÉvÇÕñ≥Ç¢
+00011C 0127 D5              11      PUSH    DE
+00011D 0128 3E02             7      LD  A,2
+00011F 012A 011600          10      LD  BC,22       ;(FCB)ÉtÉ@ÉCÉãÇç≈å„Ç…ïœçXÇµÇΩéûçè 2ÉoÉCÉg
+000122 012D CD3F01          17      CALL    ADD_LDIR
+                                ;   LD  A,2     ;Ç±Ç±Ç≈A=2ÇÃÉnÉY
+000125 0130 01FCFF          10      LD  BC,20-(22+2)    ;(FCB)ÉtÉ@ÉCÉãÇç≈å„Ç…ïœçXÇµÇΩì˙ït 2ÉoÉCÉg
+000128 0133 CD3F01          17      CALL    ADD_LDIR
+00012B 0136 D1              10      POP DE
+       0137                     MSXDOS2:
+00012C 0137 210905          10      LD  HL,00509H
+00012F 013A 011000          10      LD  BC,16       ;(FCB)ÉtÉ@ÉCÉãÉTÉCÉY 4ÉoÉCÉg
+       013D                     CDOS2:
+000132 013D 3E04             7      LD  A,4
+       013F                     ADD_LDIR:
+000134 013F EB               4      EX  DE,HL
+000135 0140 09              11      ADD HL,BC
+000136 0141 EB               4      EX  DE,HL
+000137 0142 4F               4      LD  C,A
+000138 0143 0600             7      LD  B,0
+00013A 0145 EDB0                    LDIR
+00013C 0147 C9              10      RET
+                                
+00013D 023D                         ORG $$+00100H   ;$DEPHASE
+       023D                     PATCH_END:
+       023D                     OSNAME:
+00013D 023D 43444F53322F4D53        DB  "CDOS2/MSX-DOS/LD"
+            582D444F532F4C44    
+       024D                     OSNAME_END:
+       024D                     TITLE:
+00014D 024D 504D6578744C4420        DB  "PMextLD v1.10"
+            76312E3130          
+00015A 025A 0D0A                    DB  0DH,0AH
+00015C 025C 24                      DB  '$'
+       025D                     MSG_NOT_FOUND:
+00015D 025D 204E6F7420666F75        DB  " Not found"
+            6E64                
+000167 0267 0D0A                    DB  0DH,0AH
+000169 0269 24                      DB  '$'
+       026A                     MSG_INCORRECT:
+00016A 026A 20496E636F727265        DB  " Incorrect file"
+            63742066696C65      
+000179 0279 0D0A                    DB  0DH,0AH
+00017B 027B 24                      DB  '$'
+       027C                     MSG_ERROR:
+00017C 027C 204572726F7221          DB  " Error!"
+000183 0283 0D0A                    DB  0DH,0AH
+000185 0285 24                      DB  '$'
+       0286                     MSG_OK:
+000186 0286 204F4B                  DB  " OK"
+000189 0289 0D0A                    DB  0DH,0AH
+00018B 028B 24                      DB  '$'
+       028C                     FCB:                ;PMEXT.COMÇÃFCB
+00018C 028C 00504D4558542020        DB  0,"PMEXT   COM",0
             20434F4D00          
-00008B 018B 00 LEN:20               DW  0,0,0,0,0,0,0,0,0,0
-       019F                     RANDOM_RECORD:
-00009F 019F 00000000                DW  0,0
-       01A3                     PATCH_START:            ;„Éë„ÉÉ„ÉÅ
-0000A3 01A3 D5              11      PUSH    DE
-0000A4 01A4 DDE3            23      EX  (SP),IX
-0000A6 01A6 D1              10      POP DE
-0000A7 01A7 7E               7      LD  A,(HL)
-0000A8 01A8 23               6      INC HL
-0000A9 01A9 DD7716          19      LD  (IX+22),A   ;(FCB)„Éï„Ç°„Ç§„É´„ÇíÊúÄÂæå„Å´Â§âÊõ¥„Åó„ÅüÊôÇÂàª 2„Éê„Ç§„Éà
-0000AC 01AC 7E               7      LD  A,(HL)
-0000AD 01AD 23               6      INC HL
-0000AE 01AE DD7717          19      LD  (IX+23),A
-0000B1 01B1 7E               7      LD  A,(HL)
-0000B2 01B2 23               6      INC HL
-0000B3 01B3 DD7714          19      LD  (IX+20),A   ;(FCB)„Éï„Ç°„Ç§„É´„ÇíÊúÄÂæå„Å´Â§âÊõ¥„Åó„ÅüÊó•‰ªò 2„Éê„Ç§„Éà
-0000B6 01B6 7E               7      LD  A,(HL)
-0000B7 01B7 DD7715          19      LD  (IX+21),A
-0000BA 01BA 2A0905          16      LD  HL,(0509H)
-0000BD 01BD DD7510          19      LD  (IX+16),L   ;(FCB)„Éï„Ç°„Ç§„É´„Çµ„Ç§„Ç∫ 4„Éê„Ç§„Éà
-0000C0 01C0 DD7411          19      LD  (IX+17),H
-0000C3 01C3 2A0B05          16      LD  HL,(050BH)
-0000C6 01C6 DD7512          19      LD  (IX+18),L
-0000C9 01C9 DD7413          19      LD  (IX+19),H
-0000CC 01CC D5              11      PUSH    DE
-0000CD 01CD DDE3            23      EX  (SP),IX
-0000CF 01CF D1              10      POP DE
-0000D0 01D0 C9              10      RET
-       01D1                     PATCH_END:
-       01D1                     OSNAME:
-0000D1 01D1 4C53582D446F6467        DB  "LSX-Dodgers"
-            657273              
-       01DC                     OSNAME_END:
-       01DC                     TITLE:
-0000DC 01DC 504D4558544C4420        DB  "PMEXTLD v1.00 Lovers"
-            76312E3030204C6F    
-            76657273            
-0000F0 01F0 0D0A                    DB  0DH,0AH
-0000F2 01F2 24                      DB  '$'
-       01F3                     MSG_NOT_FOUND:
-0000F3 01F3 4E6F7420666F756E        DB  "Not found PMEXT.COM"
-            6420504D4558542E    
-            434F4D              
-000106 0206 0D0A                    DB  0DH,0AH
-000108 0208 24                      DB  '$'
-       0209                     MSG_ERROR:
-000109 0209 4572726F7221            DB  "Error!"
-00010F 020F 0D0A                    DB  0DH,0AH
-000111 0211 24                      DB  '$'
-[EOF:PMEXTLD.ASM:UTF_8]
+000199 0299 00 LEN:20               DW  0,0,0,0,0,0,0,0,0,0
+       02AD                     RANDOM_RECORD:
+0001AD 02AD 000000000000            DW  0,0,0
+[EOF:PMEXTLD.ASM:SHIFT_JIS]
