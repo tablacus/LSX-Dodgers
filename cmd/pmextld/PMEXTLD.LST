@@ -1,217 +1,301 @@
                                 ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.0.0, LST:Full:4
                                 ; pmextld
                                 ;
-                                ; PMEXT.COM にLSX-Dodgers用のタイムスタンプパッチをあてる
+                                ; PMEXT.COM にCDOS2/MSX-DOS/MSX-DOS2/Nextro/LSX-Dodgers用のタイムスタンプパッチをあてる
                                 
-       0005                     SYSTEM  EQU 0005H
-       005C                     FCB1    EQU 005CH
-       0080                     DTA EQU 0080H
+       0005                     SYSTEM  EQU 00005H
+       005C                     FCB1    EQU 0005CH
+       0080                     DTA EQU 00080H
                                 
-000000 0100                         ORG 0100H
+000000 0100                         ORG 00100H
+000000 0100 C30301          10      JP  START       ;0C3HはZ80ではJPだが、i8086ではRETなので
+       0103                     START:              ;間違えてMS-DOS環境で実行しても即終了できる
+000003 0103 ED7B0600        20      LD  SP,(SYSTEM+1)
+000007 0107 11BF02          10      LD  DE,TITLE
+00000A 010A 0E09             7      LD  C,9     ;(BDOS) STROUT 文字列出力 CP/M
+00000C 010C CD0500          17      CALL    SYSTEM
                                 
-000000 0100 ED7B0600        20      LD  SP,(SYSTEM+1)
-000004 0104 114D02          10      LD  DE,TITLE
-000007 0107 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-000009 0109 CD0500          17      CALL    SYSTEM
+00000F 010F 3A5C00          13      LD  A,(FCB1)
+000012 0112 32FE02          13      LD  (FCB),A
+000015 0115 3A5D00          13      LD  A,(FCB1+1)
+000018 0118 FE20             7      CP  020H
+00001A 011A 280B            12      JR  Z,SHOW_DRV
+00001C 011C 215C00          10      LD  HL,FCB1
+00001F 011F 11FE02          10      LD  DE,FCB
+000022 0122 011000          10      LD  BC,16
+000025 0125 EDB0                    LDIR
+       0127                     SHOW_DRV:
+000027 0127 3AFE02          13      LD  A,(FCB)
+00002A 012A B7               4      OR  A
+00002B 012B 2009            12      JR  NZ,SHOW_DRV1
                                 
-00000C 010C 3A5C00          13      LD  A,(FCB1)
-00000F 010F 328C02          13      LD  (FCB),A
-000012 0112 3A5D00          13      LD  A,(FCB1+1)
-000015 0115 FE20             7      CP  020H
-000017 0117 280B            12      JR  Z,SHOW_DRV
-000019 0119 215C00          10      LD  HL,FCB1
-00001C 011C 118C02          10      LD  DE,FCB
-00001F 011F 011000          10      LD  BC,16
-000022 0122 EDB0                    LDIR
-       0124                     SHOW_DRV:
-000024 0124 3A8C02          13      LD  A,(FCB)
-000027 0127 B7               4      OR  A
-000028 0128 2009            12      JR  NZ,SHOW_DRV1
+00002D 012D 0E19             7      LD  C,019H      ;(BDOS) カレントドライブ番号の獲得(_CURDRV) CP/M MSX-DOS
+00002F 012F CD0500          17      CALL    SYSTEM
+000032 0132 3C               4      INC A
+000033 0133 32FE02          13      LD  (FCB),A
+       0136                     SHOW_DRV1:
+000036 0136 3AFE02          13      LD  A,(FCB)
+000039 0139 C640             7      ADD A,040H
+00003B 013B 5F               4      LD  E,A
+00003C 013C 0E02             7      LD  C,2     ;(BDOS) コンソール出力(_CONOUT) CP/M MSX-DOS
+00003E 013E CD0500          17      CALL    SYSTEM
+000041 0141 1E3A             7      LD  E,':'
+000043 0143 0E02             7      LD  C,2     ;(BDOS) コンソール出力(_CONOUT) CP/M MSX-DOS
+000045 0145 CD0500          17      CALL    SYSTEM
+000048 0148 0608             7      LD  B,8
+00004A 014A 21FF02          10      LD  HL,FCB+1
+00004D 014D CDFE01          17      CALL    SHOW_STRN
+000050 0150 E5              11      PUSH    HL
+000051 0151 1E2E             7      LD  E,'.'
+000053 0153 0E02             7      LD  C,2     ;(BDOS) コンソール出力(_CONOUT) CP/M MSX-DOS
+000055 0155 CD0500          17      CALL    SYSTEM
+000058 0158 E1              10      POP HL
+000059 0159 0603             7      LD  B,3
+00005B 015B CDFE01          17      CALL    SHOW_STRN
                                 
-00002A 012A 0E19             7      LD  C,019H      ;カレントドライブ番号の獲得(_CURDRV) CP/M MSX-DOS
-00002C 012C CD0500          17      CALL    SYSTEM
-00002F 012F 3C               4      INC A
-000030 0130 328C02          13      LD  (FCB),A
-       0133                     SHOW_DRV1:
-000033 0133 3A8C02          13      LD  A,(FCB)
-000036 0136 C640             7      ADD A,040H
-000038 0138 5F               4      LD  E,A
-000039 0139 0E02             7      LD  C,2     ;コンソール出力(_CONOUT) CP/M MSX-DOS
-00003B 013B CD0500          17      CALL    SYSTEM
-00003E 013E 1E3A             7      LD  E,':'
-000040 0140 0E02             7      LD  C,2     ;コンソール出力(_CONOUT) CP/M MSX-DOS
-000042 0142 CD0500          17      CALL    SYSTEM
-000045 0145 0608             7      LD  B,8
-000047 0147 218D02          10      LD  HL,FCB+1
-00004A 014A CDEF01          17      CALL    SHOW_STRN
-00004D 014D E5              11      PUSH    HL
-00004E 014E 1E2E             7      LD  E,'.'
-000050 0150 0E02             7      LD  C,2     ;コンソール出力(_CONOUT) CP/M MSX-DOS
-000052 0152 CD0500          17      CALL    SYSTEM
-000055 0155 E1              10      POP HL
-000056 0156 0603             7      LD  B,3
-000058 0158 CDEF01          17      CALL    SHOW_STRN
+00005E 015E 11FE02          10      LD  DE,FCB
+000061 0161 0E0F             7      LD  C,00FH      ;(BDOS) FOPEN FCB ファイルオープン CP/M
+000063 0163 CD0500          17      CALL    SYSTEM
+000066 0166 3C               4      INC A
+000067 0167 CAF301          10      JP  Z,SHOW_NOTFOUND
+00006A 016A 118000          10      LD  DE,DTA
+00006D 016D 0E1A             7      LD  C,01AH      ;(BDOS) SETDTA ディスク転送アドレスの設定 CP/M
+00006F 016F CD0500          17      CALL    SYSTEM
+000072 0172 11FE02          10      LD  DE,FCB
+000075 0175 0E21             7      LD  C,021H      ;(BDOS) RDRND FCB ランダム読み出し CP/M
+000077 0177 CD0500          17      CALL    SYSTEM
+00007A 017A B7               4      OR  A
+00007B 017B 2064            12      JR  NZ,SHOW_ERROR
                                 
-00005B 015B 118C02          10      LD  DE,FCB
-00005E 015E 0E0F             7      LD  C,00FH      ;FOPEN FCB ファイルオープン CP/M
-000060 0160 CD0500          17      CALL    SYSTEM
-000063 0163 3C               4      INC A
-000064 0164 287E            12      JR  Z,SHOW_NOTFOUND
-000066 0166 118000          10      LD  DE,DTA
-000069 0169 0E1A             7      LD  C,01AH      ;SETDTA ディスク転送アドレスの設定 CP/M
-00006B 016B CD0500          17      CALL    SYSTEM
-00006E 016E 118C02          10      LD  DE,FCB
-000071 0171 0E21             7      LD  C,021H      ;RDRND FCB ランダム読み出し CP/M
-000073 0173 CD0500          17      CALL    SYSTEM
-000076 0176 B7               4      OR  A
-000077 0177 2059            12      JR  NZ,SHOW_ERROR
+00007D 017D 21BF02          10      LD  HL,TITLE
+000080 0180 118200          10      LD  DE,DTA+2
+000083 0183 0605             7      LD  B,5
+000085 0185 CD0C02          17      CALL    CPSTRN
+000088 0188 2064            12      JR  NZ,SHOW_INCORRECT
                                 
-000079 0179 214D02          10      LD  HL,TITLE
-00007C 017C 118200          10      LD  DE,DTA+2
-00007F 017F 0605             7      LD  B,5
-000081 0181 CDFD01          17      CALL    CPSTRN
-000084 0184 2059            12      JR  NZ,SHOW_INCORRECT
+00008A 018A 211402          10      LD  HL,PATCH_START
+00008D 018D 119000          10      LD  DE,DTA+010H
+000090 0190 015C00          10      LD  BC,PATCH_END-PATCH_START
+000093 0193 EDB0                    LDIR
                                 
-000086 0186 210502          10      LD  HL,PATCH_START
-000089 0189 119000          10      LD  DE,DTA+010H
-00008C 018C 013800          10      LD  BC,PATCH_END-PATCH_START
-00008F 018F EDB0                    LDIR
-000091 0191 118C02          10      LD  DE,FCB
-000094 0194 0E22             7      LD  C,022H      ;WRRND FCB ランダム書き込み CP/M
-000096 0196 CD0500          17      CALL    SYSTEM
-000099 0199 B7               4      OR  A
-00009A 019A 2036            12      JR  NZ,SHOW_ERROR
-00009C 019C 3E01             7      LD  A,001H
-00009E 019E 32AD02          13      LD  (RANDOM_RECORD),A
-0000A1 01A1 118C02          10      LD  DE,FCB
-0000A4 01A4 0E21             7      LD  C,021H      ;RDRND FCB ランダム読み出し CP/M
-0000A6 01A6 CD0500          17      CALL    SYSTEM
-0000A9 01A9 B7               4      OR  A
-0000AA 01AA 2026            12      JR  NZ,SHOW_ERROR
-0000AC 01AC 213D02          10      LD  HL,OSNAME
-0000AF 01AF 118200          10      LD  DE,DTA+2
-0000B2 01B2 011000          10      LD  BC,OSNAME_END-OSNAME
-0000B5 01B5 EDB0                    LDIR
-0000B7 01B7 118C02          10      LD  DE,FCB
-0000BA 01BA 0E22             7      LD  C,22H       ;WRRND FCB ランダム書き込み CP/M
-0000BC 01BC CD0500          17      CALL    SYSTEM
-0000BF 01BF B7               4      OR  A
-0000C0 01C0 2010            12      JR  NZ,SHOW_ERROR
-0000C2 01C2 118C02          10      LD  DE,FCB
-0000C5 01C5 0E10             7      LD  C,10H       ;FCLOSE FCB ファイルクローズ CP/M
-0000C7 01C7 CD0500          17      CALL    SYSTEM
-0000CA 01CA 3C               4      INC A
-0000CB 01CB 2805            12      JR  Z,SHOW_ERROR
-0000CD 01CD 118602          10      LD  DE,MSG_OK
-0000D0 01D0 1815            12      JR  SHOW_MESSAGE
-       01D2                     SHOW_ERROR:
-0000D2 01D2 118C02          10      LD  DE,FCB
-0000D5 01D5 0E10             7      LD  C,10H       ;FCLOSE FCB ファイルクローズ CP/M
-0000D7 01D7 CD0500          17      CALL    SYSTEM
-0000DA 01DA 117C02          10      LD  DE,MSG_ERROR
-0000DD 01DD 1808            12      JR  SHOW_MESSAGE
-       01DF                     SHOW_INCORRECT:
-0000DF 01DF 116A02          10      LD  DE,MSG_INCORRECT
-0000E2 01E2 1803            12      JR  SHOW_MESSAGE
-       01E4                     SHOW_NOTFOUND:
-0000E4 01E4 115D02          10      LD  DE,MSG_NOT_FOUND
-       01E7                     SHOW_MESSAGE:
-0000E7 01E7 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-0000E9 01E9 CD0500          17      CALL    SYSTEM
-0000EC 01EC C30000          10      JP  0
+000095 0195 11FE02          10      LD  DE,FCB
+000098 0198 0E22             7      LD  C,022H      ;(BDOS) WRRND FCB ランダム書き込み CP/M
+00009A 019A CD0500          17      CALL    SYSTEM
+00009D 019D B7               4      OR  A
+00009E 019E 2041            12      JR  NZ,SHOW_ERROR
+0000A0 01A0 3E01             7      LD  A,001H
+0000A2 01A2 321F03          13      LD  (RANDOM_RECORD),A
+0000A5 01A5 11FE02          10      LD  DE,FCB
+0000A8 01A8 0E21             7      LD  C,021H      ;(BDOS) RDRND FCB ランダム読み出し CP/M
+0000AA 01AA CD0500          17      CALL    SYSTEM
+0000AD 01AD B7               4      OR  A
+0000AE 01AE 2031            12      JR  NZ,SHOW_ERROR
                                 
-       01EF                     SHOW_STRN:
-0000EF 01EF 5E               7      LD  E,(HL)
-0000F0 01F0 23               6      INC HL
-0000F1 01F1 C5              11      PUSH    BC
-0000F2 01F2 E5              11      PUSH    HL
-0000F3 01F3 0E02             7      LD  C,2     ;コンソール出力(_CONOUT) CP/M MSX-DOS
-0000F5 01F5 CD0500          17      CALL    SYSTEM
-0000F8 01F8 E1              10      POP HL
-0000F9 01F9 C1              10      POP BC
-0000FA 01FA 10F3            13      DJNZ    SHOW_STRN
-0000FC 01FC C9              10      RET
+0000B0 01B0 21AF02          10      LD  HL,OSNAME
+0000B3 01B3 118200          10      LD  DE,DTA+2
+0000B6 01B6 011000          10      LD  BC,OSNAME_END-OSNAME
+0000B9 01B9 EDB0                    LDIR
                                 
-       01FD                     CPSTRN:
-0000FD 01FD 1A               7      LD  A,(DE)
-0000FE 01FE 13               6      INC DE
-0000FF 01FF BE               7      CP  (HL)
-000100 0200 C0              11      RET NZ
-000101 0201 23               6      INC HL
-000102 0202 10F9            13      DJNZ    CPSTRN
-000104 0204 C9              10      RET
+0000BB 01BB 217002          10      LD  HL,PATCH2_START
+0000BE 01BE 11C000          10      LD  DE,DTA+0C0H-080H
+0000C1 01C1 013F00          10      LD  BC,PATCH2_END-PATCH2_START
+0000C4 01C4 EDB0                    LDIR
                                 
-       0205                     PATCH_START:            ;パッチ
-000105 0110                         ORG 00110H,PATCH_START-00100H
+0000C6 01C6 11FE02          10      LD  DE,FCB
+0000C9 01C9 0E22             7      LD  C,22H       ;(BDOS) WRRND FCB ランダム書き込み CP/M
+0000CB 01CB CD0500          17      CALL    SYSTEM
+0000CE 01CE B7               4      OR  A
+0000CF 01CF 2010            12      JR  NZ,SHOW_ERROR
+0000D1 01D1 11FE02          10      LD  DE,FCB
+0000D4 01D4 0E10             7      LD  C,10H       ;(BDOS) FCLOSE FCB ファイルクローズ CP/M
+0000D6 01D6 CD0500          17      CALL    SYSTEM
+0000D9 01D9 3C               4      INC A
+0000DA 01DA 2805            12      JR  Z,SHOW_ERROR
+0000DC 01DC 11F802          10      LD  DE,MSG_OK
+0000DF 01DF 1815            12      JR  SHOW_MESSAGE
+       01E1                     SHOW_ERROR:
+0000E1 01E1 11FE02          10      LD  DE,FCB
+0000E4 01E4 0E10             7      LD  C,10H       ;(BDOS) FCLOSE FCB ファイルクローズ CP/M
+0000E6 01E6 CD0500          17      CALL    SYSTEM
+0000E9 01E9 11EE02          10      LD  DE,MSG_ERROR
+0000EC 01EC 1808            12      JR  SHOW_MESSAGE
+       01EE                     SHOW_INCORRECT:
+0000EE 01EE 11DC02          10      LD  DE,MSG_INCORRECT
+0000F1 01F1 1803            12      JR  SHOW_MESSAGE
+       01F3                     SHOW_NOTFOUND:
+0000F3 01F3 11CF02          10      LD  DE,MSG_NOT_FOUND
+       01F6                     SHOW_MESSAGE:
+0000F6 01F6 0E09             7      LD  C,9     ;(BDOS) STROUT 文字列出力 CP/M
+0000F8 01F8 CD0500          17      CALL    SYSTEM
+0000FB 01FB C30000          10      JP  0
                                 
-000105 0110 3A0B00          13      LD  A,(0000BH)
-000108 0113 3D               4      DEC A
-000109 0114 011B00          10      LD  BC,27       ;for CDOS2
-00010C 0117 2824            12      JR  Z,CDOS2
-00010E 0119 E5              11      PUSH    HL
-00010F 011A D5              11      PUSH    DE
-000110 011B 0E6F             7      LD  C,06FH      ;(BDOS) MSX-DOS のバージョン番号の獲得(_DOSVER) *1 MSX-DOS
-000112 011D CD0500          17      CALL    SYSTEM
-000115 0120 D1              10      POP DE
-000116 0121 E1              10      POP HL
-000117 0122 78               4      LD  A,B
-000118 0123 FE02             7      CP  2
-00011A 0125 3010            12      JR  NC,MSXDOS2  ;MSX-DOS2ではFCBにタイムスタンプは無い
-00011C 0127 D5              11      PUSH    DE
-00011D 0128 3E02             7      LD  A,2
-00011F 012A 011600          10      LD  BC,22       ;(FCB)ファイルを最後に変更した時刻 2バイト
-000122 012D CD3F01          17      CALL    ADD_LDIR
+       01FE                     SHOW_STRN:
+0000FE 01FE 5E               7      LD  E,(HL)
+0000FF 01FF 23               6      INC HL
+000100 0200 C5              11      PUSH    BC
+000101 0201 E5              11      PUSH    HL
+000102 0202 0E02             7      LD  C,2     ;(BDOS) コンソール出力(_CONOUT) CP/M MSX-DOS
+000104 0204 CD0500          17      CALL    SYSTEM
+000107 0207 E1              10      POP HL
+000108 0208 C1              10      POP BC
+000109 0209 10F3            13      DJNZ    SHOW_STRN
+00010B 020B C9              10      RET
+                                
+       020C                     CPSTRN:
+00010C 020C 1A               7      LD  A,(DE)
+00010D 020D 13               6      INC DE
+00010E 020E BE               7      CP  (HL)
+00010F 020F C0              11      RET NZ
+000110 0210 23               6      INC HL
+000111 0211 10F9            13      DJNZ    CPSTRN
+000113 0213 C9              10      RET
+                                
+       0214                     PATCH_START:            ;パッチ
+000114 0110                         ORG 00110H,PATCH_START-00100H
+                                
+000114 0110 3A0B00          13      LD  A,(0000BH)
+000117 0113 3D               4      DEC A
+000118 0114 011B00          10      LD  BC,27       ;for CDOS2
+00011B 0117 2824            12      JR  Z,CDOS2
+00011D 0119 E5              11      PUSH    HL
+00011E 011A D5              11      PUSH    DE
+00011F 011B 0E6F             7      LD  C,06FH      ;(BDOS) MSX-DOS のバージョン番号の獲得(_DOSVER) *1 MSX-DOS
+000121 011D CD0500          17      CALL    SYSTEM
+000124 0120 D1              10      POP DE
+000125 0121 E1              10      POP HL
+000126 0122 78               4      LD  A,B
+000127 0123 FE02             7      CP  2
+000129 0125 3021            12      JR  NC,MSXDOS2  ;MSX-DOS2
+00012B 0127 D5              11      PUSH    DE
+00012C 0128 3E02             7      LD  A,2
+00012E 012A 011600          10      LD  BC,22       ;(FCB)ファイルを最後に変更した時刻 2バイト
+000131 012D CD3F01          17      CALL    ADD_LDIR
                                 ;   LD  A,2     ;ここでA=2のハズ
-000125 0130 01FCFF          10      LD  BC,20-(22+2)    ;(FCB)ファイルを最後に変更した日付 2バイト
-000128 0133 CD3F01          17      CALL    ADD_LDIR
-00012B 0136 D1              10      POP DE
-       0137                     MSXDOS2:
-00012C 0137 210905          10      LD  HL,00509H
-00012F 013A 011000          10      LD  BC,16       ;(FCB)ファイルサイズ 4バイト
+000134 0130 01FCFF          10      LD  BC,20-(22+2)    ;(FCB)ファイルを最後に変更した日付 2バイト
+000137 0133 CD3F01          17      CALL    ADD_LDIR
+00013A 0136 D1              10      POP DE
+       0137                     SET_FILESIZE:
+00013B 0137 210905          10      LD  HL,00509H
+00013E 013A 011000          10      LD  BC,16       ;(FCB)ファイルサイズ 4バイト
        013D                     CDOS2:
-000132 013D 3E04             7      LD  A,4
+000141 013D 3E04             7      LD  A,4
        013F                     ADD_LDIR:
-000134 013F EB               4      EX  DE,HL
-000135 0140 09              11      ADD HL,BC
-000136 0141 EB               4      EX  DE,HL
-000137 0142 4F               4      LD  C,A
-000138 0143 0600             7      LD  B,0
-00013A 0145 EDB0                    LDIR
-00013C 0147 C9              10      RET
+000143 013F EB               4      EX  DE,HL
+000144 0140 09              11      ADD HL,BC
+000145 0141 EB               4      EX  DE,HL
+000146 0142 4F               4      LD  C,A
+000147 0143 0600             7      LD  B,0
+000149 0145 EDB0                    LDIR
+00014B 0147 C9              10      RET
                                 
-00013D 023D                         ORG $$+00100H   ;$DEPHASE
-       023D                     PATCH_END:
-       023D                     OSNAME:
-00013D 023D 43444F53322F4D53        DB  "CDOS2/MSX-DOS/LD"
+       0148                     MSXDOS2:
+00014C 0148 22F001          16      LD  (TIME),HL
+00014F 014B 23               6      INC HL
+000150 014C 23               6      INC HL
+000151 014D 22EC01          16      LD  (DATE),HL
+000154 0150 186F            12      JR  MSXDOS2_2
+                                
+       0152                     STRNSET:
+000156 0152 1A               7      LD  A,(DE)
+000157 0153 13               6      INC DE
+000158 0154 FE21             7      CP  021H
+00015A 0156 3802            12      JR  C,STRNSET1
+00015C 0158 77               7      LD  (HL),A
+00015D 0159 23               6      INC HL
+       015A                     STRNSET1:
+00015E 015A 10F6            13      DJNZ    STRNSET
+000160 015C C9              10      RET
+                                
+       015D                     PATH:
+000161 015D 413A46494C454E41        DB  "A:FILENAME.EXT"
+            4D452E455854        
+00016F 016B 00                      DB  0
+                                
+000170 0270                         ORG $$+00100H   ;$DEPHASE
+       0270                     PATCH_END:
+                                
+       0270                     PATCH2_START:           ;パッチ
+000170 01C0                         ORG 001C0H,PATCH2_START-00100H
+000170 01C0 C9              10      RET
+                                                ;MSX-DOS2の処理　タイムスタンプはファイルの日付および時刻の獲得・セットを使う
+       01C1                     MSXDOS2_2:
+000171 01C1 215D01          10      LD  HL,PATH     ;FCBからファイル名を取り出す (A:FILENAME.EXTの形式に)
+000174 01C4 E5              11      PUSH    HL
+000175 01C5 D5              11      PUSH    DE
+000176 01C6 1A               7      LD  A,(DE)
+000177 01C7 13               6      INC DE
+000178 01C8 B7               4      OR  A
+000179 01C9 2807            12      JR  Z,SET_NAME
+00017B 01CB C640             7      ADD A,040H      ;ドライブ名
+00017D 01CD 77               7      LD  (HL),A
+00017E 01CE 23               6      INC HL
+00017F 01CF 363A            10      LD  (HL),':'
+000181 01D1 23               6      INC HL
+       01D2                     SET_NAME:
+000182 01D2 0608             7      LD  B,8     ;ファイル名
+000184 01D4 CD5201          17      CALL    STRNSET
+000187 01D7 362E            10      LD  (HL),'.'
+000189 01D9 23               6      INC HL
+00018A 01DA 0603             7      LD  B,3     ;拡張子
+00018C 01DC CD5201          17      CALL    STRNSET
+00018F 01DF 70               7      LD  (HL),B      ;B=0
+000190 01E0 D1              10      POP DE
+000191 01E1 D5              11      PUSH    DE
+000192 01E2 CD3701          17      CALL    SET_FILESIZE    ;ファイルサイズ
+000195 01E5 D1              10      POP DE
+000196 01E6 0E10             7      LD  C,010H      ;(BDOS) ファイルのクローズ(_FCLOSE) CP/M MSX-DOS
+000198 01E8 CD0500          17      CALL    SYSTEM
+                                
+00019B 01EB 2A0000          16      LD  HL,(0)
+       01EC                     DATE    EQU $-2
+00019E 01EE DD2A0000        20      LD  IX,(0)
+       01F0                     TIME    EQU $-2
+0001A2 01F2 D1              10      POP DE
+0001A3 01F3 3E01             7      LD  A,1     ;日付と時刻のセット
+0001A5 01F5 0E51             7      LD  C,051H      ;(BDOS) ファイルの日付および時刻の獲得・セット(_FTIME) MSX-DOS2
+0001A7 01F7 E3              19      EX  (SP),HL
+0001A8 01F8 23               6      INC HL      ;LD DE,FCB
+0001A9 01F9 23               6      INC HL
+0001AA 01FA 23               6      INC HL
+0001AB 01FB 23               6      INC HL      ;LD C,010H
+0001AC 01FC 23               6      INC HL
+0001AD 01FD E3              19      EX  (SP),HL
+0001AE 01FE C9              10      RET
+                                
+0001AF 02AF                         ORG $$+00100H   ;$DEPHASE
+       02AF                     PATCH2_END:
+                                
+       02AF                     OSNAME:
+0001AF 02AF 43444F53322F4D53        DB  "CDOS2/MSX-DOS/LD"
             582D444F532F4C44    
-       024D                     OSNAME_END:
-       024D                     TITLE:
-00014D 024D 504D6578744C4420        DB  "PMextLD v1.10"
-            76312E3130          
-00015A 025A 0D0A                    DB  0DH,0AH
-00015C 025C 24                      DB  '$'
-       025D                     MSG_NOT_FOUND:
-00015D 025D 204E6F7420666F75        DB  " Not found"
+       02BF                     OSNAME_END:
+       02BF                     TITLE:
+0001BF 02BF 504D6578744C4420        DB  "PMextLD v1.20"
+            76312E3230          
+0001CC 02CC 0D0A                    DB  0DH,0AH
+0001CE 02CE 24                      DB  '$'
+       02CF                     MSG_NOT_FOUND:
+0001CF 02CF 204E6F7420666F75        DB  " Not found"
             6E64                
-000167 0267 0D0A                    DB  0DH,0AH
-000169 0269 24                      DB  '$'
-       026A                     MSG_INCORRECT:
-00016A 026A 20496E636F727265        DB  " Incorrect file"
+0001D9 02D9 0D0A                    DB  0DH,0AH
+0001DB 02DB 24                      DB  '$'
+       02DC                     MSG_INCORRECT:
+0001DC 02DC 20496E636F727265        DB  " Incorrect file"
             63742066696C65      
-000179 0279 0D0A                    DB  0DH,0AH
-00017B 027B 24                      DB  '$'
-       027C                     MSG_ERROR:
-00017C 027C 204572726F7221          DB  " Error!"
-000183 0283 0D0A                    DB  0DH,0AH
-000185 0285 24                      DB  '$'
-       0286                     MSG_OK:
-000186 0286 204F4B                  DB  " OK"
-000189 0289 0D0A                    DB  0DH,0AH
-00018B 028B 24                      DB  '$'
-       028C                     FCB:                ;PMEXT.COMのFCB
-00018C 028C 00504D4558542020        DB  0,"PMEXT   COM",0
+0001EB 02EB 0D0A                    DB  0DH,0AH
+0001ED 02ED 24                      DB  '$'
+       02EE                     MSG_ERROR:
+0001EE 02EE 204572726F7221          DB  " Error!"
+0001F5 02F5 0D0A                    DB  0DH,0AH
+0001F7 02F7 24                      DB  '$'
+       02F8                     MSG_OK:
+0001F8 02F8 204F4B                  DB  " OK"
+0001FB 02FB 0D0A                    DB  0DH,0AH
+0001FD 02FD 24                      DB  '$'
+       02FE                     FCB:                ;PMEXT.COMのFCB
+0001FE 02FE 00504D4558542020        DB  0,"PMEXT   COM",0
             20434F4D00          
-000199 0299 00 LEN:20               DW  0,0,0,0,0,0,0,0,0,0
-       02AD                     RANDOM_RECORD:
-0001AD 02AD 000000000000            DW  0,0,0
+00020B 030B 00 LEN:20               DW  0,0,0,0,0,0,0,0,0,0
+       031F                     RANDOM_RECORD:
+00021F 031F 000000000000            DW  0,0,0
 [EOF:PMEXTLD.ASM:SHIFT_JIS]
