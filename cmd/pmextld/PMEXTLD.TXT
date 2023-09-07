@@ -11,14 +11,9 @@
 PMextにCDOS2/MSX-DOS/MSX-DOS2/Nextor/LSX-Dodgersのタイムスタンプ機能及びサイズ補正機能を追加
 します。
 
-・CDOS2＋CP/Mエミュレータの場合
-
-タイムスタンプ機能のみが機能します。(PMchgCD2と同じ)
-CDOS2の判別は000BHが1の場合はCDOS2と判別しています。
-
-・MSX-DOS1/MSX-DOS2/Nextor/LSX-Dodgersの場合
-
 タイムスタンプ機能及びサイズ補正機能の両方が機能します。
 
+※CDOS2の場合はCP/Mエミュレータが必要です。
+CPMBの場合、サイズ補正機能がうまくいっていないので、他のCPME/CPMS/CPMXを使用してください。
 
 MIT License

@@ -12,6 +12,11 @@ START:				;間違えてMS-DOS環境で実行しても即終了できる
 	LD	HL,TITLE
 	CALL	MSX
 
+	LD	A,(0000BH)
+	CP	1
+	LD	A,3
+	JR	Z,CDOS2		;CDOS2+CP/Mエミュレータ+MSXEmu
+
 	LD	C,06FH	 	;(BDOS) MSX-DOS のバージョン番号の獲得(_DOSVER) *1 MSX-DOS
 	CALL	SYSTEM
 	JP	C,SHOW_ERROR_OS	;CP/M等はエラー
@@ -23,7 +28,8 @@ START:				;間違えてMS-DOS環境で実行しても即終了できる
 	DEC	A
 LSX0:
 	INC	A		;LSX-Dodgersの場合は 1 にする
-	LD	(MAJOR_VER),A
+CDOS2:
+	LD	(OS_TYPE),A
 
 	LD	A,(FCB2)
 	CP	1
@@ -52,45 +58,39 @@ LOOP1:
 	LD	C,01AH		;(BDOS) DTAの設定(_SETDTA) CP/M MSX-DOS
 	CALL	SYSTEM
 	LD	DE,FCB1
-	LD	HL,30		;ZIPのヘッダー
+	LD	HL,4		;ZIPのヘッダー
 	LD	C,027H		;(BDOS) ランダムブロック読み出し(_RDBLK) MSX-DOS
 	CALL	SYSTEM
 	CP	0FFH
 	JP	Z,EXIT1		;失敗したら終了
 				;ZIPのヘッダーPK 0x3 0x4かチェック
-	LD	HL,HEADER
-	LD	A,(HL)
-	INC	HL
-	CP	'P'
-	JP	NZ,EXIT1
-
-	LD	A,(HL)
-	INC	HL
-	CP	'K'
-	JP	NZ,EXIT1
-
-	LD	A,(HL)
-	INC	HL
-	CP	3
-	JP	NZ,EXIT1
-
-	LD	A,(HL)
-	INC	HL
-	CP	4
-	JP	NZ,EXIT1
-
-	LD	DE,BUFAD
 	LD	A,H		;HLに読み込んだサイズ
 	OR	L
 	JP	Z,EXIT1
+	LD	DE,HEADER_PK12
+	CALL	CPHEADER
+	JP	Z,PK12
+	LD	DE,HEADER_PK34
+	CALL	CPHEADER
+	JP	Z,SKIP34
+	JP	EXIT1
+PK12:
+	LD	DE,FCB1
+	LD	HL,42		;ZIPのヘッダー
+	LD	C,027H		;(BDOS) ランダムブロック読み出し(_RDBLK) MSX-DOS
+	CALL	SYSTEM
+	CP	0FFH
+	JP	Z,EXIT1		;失敗したら終了
+
+	LD	DE,BUFAD
 
 	CALL	PRTTMS		;タイムスタンプの表示
 
 	LD	A,020H
 	CALL	MSG_A
 
-	LD	HL,(HEADER+22)	;(ZIP) 非圧縮サイズ
-	LD	DE,(HEADER+24)
+	LD	HL,(HEADER+20)	;(ZIP12) 非圧縮サイズ
+	LD	DE,(HEADER+22)
 	CALL	PRDEC_DEHL
 
 	LD	A,020H
@@ -100,71 +100,59 @@ LOOP1:
 	LD	C,01AH		;(BDOS) DTAの設定(_SETDTA) CP/M MSX-DOS
 	CALL	SYSTEM
 	LD	DE,FCB1
-	LD	HL,(HEADER+26)	;(ZIP) ファイル名の長さ
+	LD	HL,(HEADER+24)	;(ZIP12) ファイル名の長さ
 	LD	C,027H		;(BDOS) ランダムブロック読み出し(_RDBLK) MSX-DOS
 	CALL	SYSTEM
 	INC	A
 	JP	Z,EXIT1		;失敗したら終了
 
-	LD	HL,(HEADER+26)	;(ZIP) ファイル名の長さ
+	LD	HL,(HEADER+24)	;(ZIP12) ファイル名の長さ
 	LD	DE,PATH
 	ADD	HL,DE
 	LD	(HL),0
 
 	LD	HL,PATH		;ファイル名を表示する
 	CALL	MSX
+
+	LD	DE,PATH-1	;パス区切りが「/」の場合は「\」に置き換える
+	LD	(PATH_A),DE
+FIXPATH1:
+	INC	DE
+	LD	A,(DE)
+	OR	A
+	JR	Z,FIXPATH3
+	CALL	IS_SPLITTER
+	JR	NZ,FIXPATH1
+	LD	A,05CH		;\
+	LD	(DE),A
+	LD	(PATH_A),DE
+	JR	FIXPATH1
+FIXPATH3:
 				;(LSX-Dodgers/MSX-DOS) タイムスタンプとファイルサイズを設定する
 	LD	HL,FDRV
 	LD	B,37
 	XOR	A
 	CALL	FILL_MEMORY
 
+	LD	DE,(PATH_A)
+	LD	A,':'
+	LD	(DE),A
+	DEC	DE
 	LD	A,(OUT_DRIVE)
 	ADD	A,040H
-	LD	(DRV_PATH),A
-	LD	A,':'
-	LD	(DRV_PATH+1),A
-
-	LD	DE,DRV_PATH
-	LD	A,(MAJOR_VER)
-	OR	A
-	JR	Z,MSXDOS1
-	DEC	A
-	JR	NZ,MSXDOS2
-				;LSX-Dodgers
-	LD	HL,FDRV
-	LD	C,029H		;(BDOS) ファイル名の解析
-	CALL	SYSTEM
-	JR	FOPEN
-MSXDOS2:			;MSX-DOS2
-	LD	C,05BH		;(BDOS) パス名の解析(_PARSE) MSX-DOS2
-	CALL	SYSTEM
-	EX	DE,HL
-	LD	HL,FNAME
-	LD	C,05CH		;(BDOS) ファイル名の解析(_PFILE) MSX-DOS2
-	CALL	SYSTEM
-	JR	FOPEN
-MSXDOS1:			;MSX-DOS1
+	LD	(DE),A
+	INC	DE
+	INC	DE
 	CALL	FILE
 FOPEN:
 	LD	DE,FDRV
 	LD	A,(OUT_DRIVE)
 	LD	(DE),A		;出力先のドライブに切り替える
-	LD	C,00FH		;(BDOS) ファイルのオープン(_FOPEN) CP/M MSX-DOS
-	CALL	SYSTEM
-	INC	A
-	JR	NZ,SET_SIZE
-	LD	A,(MAJOR_VER)
-	DEC	A
-	JP	NZ,SKIP1
 
-	LD	HL,0		;カレントディレクトリにする
-	LD	(FDRV+14),HL	;(FCB) レコードサイズ/アクセスするディレクトリのクラスタ番号+1
-	LD	DE,FDRV
 	LD	C,00FH		;(BDOS) ファイルのオープン(_FOPEN) CP/M MSX-DOS
 	CALL	SYSTEM
 	INC	A
-	JP	Z,SKIP1
+	JP	Z,SKIP12
 SET_SIZE:
 	LD	HL,1
 	LD	(FDRV+14),HL	;(FCB) レコードサイズを1にする
@@ -173,85 +161,148 @@ SET_SIZE:
 	LD	(FDRV+33),HL	;(FCB) ランダムレコードを0にする
 	LD	(FDRV+35),HL
 
-	LD	A,(MAJOR_VER)
-	DEC	A
-	LD	HL,0		;LSX-Dodgersの場合は0バイト書き込む
-	JR	Z,LSX2
-
 	LD	DE,BUFAD	;データの読み出し先
 	LD	C,01AH		;(BDOS) DTAの設定(_SETDTA) CP/M MSX-DOS
 	CALL	SYSTEM
 	LD	DE,FDRV
-	LD	HL,1		;MSX-DOS1/2の場合は1バイト読み込んで書き戻す
+
+	LD	A,(OS_TYPE)
+	CP	1
+	LD	HL,0		;LSX-Dodgersの場合は0バイト書き込む
+	JR	Z,LSX2
+
+	CP	3		;CDOS2
+	JR	Z,CDOS2_SETFCB
+
+	LD	HL,1		;(MSX-DOS1/2) 1バイト読み込んで書き戻す
 	LD	C,027H		;(BDOS) ランダムブロック読み出し(_RDBLK) MSX-DOS
 	CALL	SYSTEM
-	XOR	A		;HLに実際に読み込まれた数が入っている
-	LD	(FDRV+33),A	;(FCB) ランダムレコードを0にする
+	XOR	A
+	LD	(FDRV+33),A	;(FCB) ランダムレコードを0に戻す
 LSX2:
 	LD	DE,FDRV
 	LD	C,026H		;(BDOS) ランダムブロック書き込み(_WRBLK)
 	CALL	SYSTEM
 	INC	A
-	JR	Z,SKIP1
+	JP	Z,SKIP12
 
-	LD	HL,(HEADER+22)	;(ZIP) 非圧縮サイズ
+	LD	HL,(HEADER+20)	;(ZIP12) 非圧縮サイズ
 	LD	(FDRV+16),HL	;(FCB) ファイルのサイズ(バイト単位)
-	LD	HL,(HEADER+24)	;(ZIP) 非圧縮サイズ
+	LD	HL,(HEADER+22)	;(ZIP12) 非圧縮サイズ
 	LD	(FDRV+18),HL	;(FCB) ファイルのサイズ(バイト単位)
 
-	LD	A,(MAJOR_VER)
-	CP	2
-	JR	NC,FCLOSE
-	LD	HL,(HEADER+12)	;(ZIP) ファイルの最終変更日付
+	LD	A,(OS_TYPE)
+	CP	2		;MSX-DOS2
+	JP	Z,FCLOSE
+				;(MSX-DOS/LSX-Dodgers) タイムスタンプを設定する
+	LD	HL,(HEADER+10)	;(ZIP12) ファイルの最終変更日付
 	LD	(FDRV+20),HL	;(FCB) 更新年月日
-	LD	HL,(HEADER+10)	;(ZIP) ファイルの最終変更時間
+	LD	HL,(HEADER+8)	;(ZIP12) ファイルの最終変更時間
 	LD	(FDRV+22),HL	;(FCB) 更新時刻
+
+;	LD	A,(OS_TYPE)	;すでにAにはOS_TYPEが入っている
+	DEC	A
+	JR	NZ,FCLOSE
+				;(LSX-Dodgers) 属性を設定する
+	CALL	GET_ATTR
+	JR	C,FCLOSE
+	LD	(FDRV+13),A	;(FCB) 属性(アトリビュート)
+	JR	FCLOSE
+
+CDOS2_SETFCB:			;(CDOS2)
+	LD	BC,0
+	LD	HL,(HEADER+20)	;(ZIP12) 非圧縮サイズ
+	SCF
+	SBC	HL,BC
+	LD	(DECBF),HL
+	LD	HL,(HEADER+22)	;(ZIP12) 非圧縮サイズ
+	SBC	HL,BC
+	LD	(DECBF+2),HL
+	JR	C,CDOS2_1
+
+	LD	HL,(DECBF)
+	ADD	HL,HL
+	EX	DE,HL
+	LD	HL,(DECBF+2)
+	ADC	HL,HL
+	LD	A,D
+	LD	(FDRV+33),A	;(FCB) ランダムレコード
+	LD	(FDRV+34),HL	;(FCB) ランダムレコード
+CDOS2_1:
+	LD	DE,FDRV
+	LD	C,021H		;(BDOS) ランダムな読み出し(_RDRND) CP/M MSX-DOS
+	CALL	SYSTEM
+	OR	A
+	JR	NZ,FCLOSE
+
+	LD	DE,FDRV
+	LD	C,022H		;(BDOS) ランダムな書き込み(_WRRND) CP/M MSX-DOS
+	CALL	SYSTEM
+	OR	A
+	JR	NZ,FCLOSE
+
+	LD	HL,(HEADER+20)	;(ZIP12) 非圧縮サイズ
+	LD	A,H
+	AND	3
+	LD	H,A
+	LD	(FDRV+20),HL	;(FCB) 最終クラスタの使用バイト数
+	LD	(FDRV+24),HL	;(FCB) 最終クラスタの使用バイト数
+	OR	L
+	LD	HL,(DECBF+1)
+	SRL	H
+	RR	L
+	SRL	H
+	RR	L
+	LD	BC,0
+	ADD	A,0FFH
+	ADC	HL,BC
+	LD	(FDRV+22),HL	;(FCB) 使用クラスタ数
+
+	LD	HL,(HEADER+10)	;(ZIP12) ファイルの最終変更日付
+	LD	(FDRV+29),HL	;(FCB) 更新年月日
+	LD	HL,(HEADER+8)	;(ZIP12) ファイルの最終変更時間
+	LD	(FDRV+27),HL	;(FCB) 更新時刻
 FCLOSE:
 	LD	DE,FDRV
 	LD	C,010H		;(BDOS) ファイルのクローズ(_FCLOSE) CP/M MSX-DOS
 	CALL	SYSTEM
 	INC	A
-	JR	Z,SKIP1
+	JR	Z,SKIP12
 
-	LD	A,(MAJOR_VER)
+	LD	A,(OS_TYPE)
 	CP	2
-	JR	C,SKIP1
+	JR	NZ,SKIP12
 				;(MSX-DOS2) タイムスタンプを設定する
-	LD	DE,PATH
-	LD	C,05BH		;(BDOS) パス名の解析(_PARSE) MSX-DOS2
-	CALL	SYSTEM
-	DEC	HL
-	LD	(HL),':'
-	DEC	HL
-	LD	A,(OUT_DRIVE)
-	ADD	A,040H
-	LD	(HL),A
-	EX	DE,HL
-SETTMS:
-	LD	HL,(HEADER+12)	;(ZIP) ファイルの最終変更日付
-	LD	IX,(HEADER+10)	;(ZIP) ファイルの最終変更時間
+	LD	DE,(PATH_A)
+	DEC	DE
+	LD	HL,(HEADER+10)	;(ZIP12) ファイルの最終変更日付
+	LD	IX,(HEADER+8)	;(ZIP12) ファイルの最終変更時間
 	LD	C,051H		;(BDOS) ファイルの日付および時刻の獲得・セット(_FTIME) MSX-DOS2
 	LD	A,1
 	CALL	SYSTEM
-SKIP1:
+				;(MSX-DOS2) 属性を設定する
+	CALL	GET_ATTR
+	JR	C,SKIP12
+	LD	L,A
+	LD	DE,(PATH_A)
+	DEC	DE
+	LD	C,050H		;(BDOS) ファイル属性の獲得・セット(_ATTR) MSX-DOS2
+	LD	A,1
+	CALL	SYSTEM
 				;次のヘッダーまでランダムレコードを移動する
-	LD	DE,(HEADER+28)	;(ZIP) 拡張フィールドの長さ
+SKIP12:
+	XOR	A
 	LD	HL,(FCB1+33)	;(FCB) ランダムレコード
+	LD	DE,(HEADER+26)	;(ZIP34) 拡張フィールドの長さ
+	ADD	HL,DE
+	ADC	A,A
+	LD	DE,(HEADER+28)	;(ZIP34) コメントの長さ
 	ADD	HL,DE
 	LD	(FCB1+33),HL	;(FCB) ランダムレコード
 
 	LD	HL,(FCB1+35)	;(FCB) ランダムレコード
-	LD	DE,0
-	ADC	HL,DE
-	LD	(FCB1+35),HL	;(FCB) ランダムレコード
-
-	LD	DE,(HEADER+18)	;(ZIP) 圧縮サイズ
-	LD	HL,(FCB1+33)	;(FCB) ランダムレコード
-	ADD	HL,DE
-	LD	(FCB1+33),HL	;(FCB) ランダムレコード
-
-	LD	DE,(HEADER+20)	;(ZIP) 圧縮サイズ
-	LD	HL,(FCB1+35)	;(FCB) ランダムレコード
+	LD	E,A
+	LD	D,0
 	ADC	HL,DE
 	LD	(FCB1+35),HL	;(FCB) ランダムレコード
 
@@ -259,6 +310,44 @@ SKIP1:
 	CALL	MSG_A
 	LD	A,00AH
 	CALL	MSG_A
+	JP	LOOP1
+
+SKIP34:
+	LD	DE,HEADER	;データの読み出し先
+	LD	C,01AH		;(BDOS) DTAの設定(_SETDTA) CP/M MSX-DOS
+	CALL	SYSTEM
+	LD	DE,FCB1
+	LD	HL,26		;ZIPのヘッダー
+	LD	C,027H		;(BDOS) ランダムブロック読み出し(_RDBLK) MSX-DOS
+	CALL	SYSTEM
+	CP	0FFH
+	JP	Z,EXIT1		;失敗したら終了
+
+	XOR	A
+	LD	HL,(FCB1+33)	;(FCB) ランダムレコード
+	LD	DE,(HEADER+22)	;(ZIP34) ファイル名の長さ
+	ADD	HL,DE
+	ADC	A,A
+	LD	DE,(HEADER+24)	;(ZIP34) 拡張フィールドの長さ
+	ADD	HL,DE
+	LD	(FCB1+33),HL	;(FCB) ランダムレコード
+
+	LD	HL,(FCB1+35)	;(FCB) ランダムレコード
+	LD	E,A
+	LD	D,0
+	ADC	HL,DE
+	LD	(FCB1+35),HL	;(FCB) ランダムレコード
+
+	LD	DE,(HEADER+14)	;(ZIP34) 圧縮サイズ
+	LD	HL,(FCB1+33)	;(FCB) ランダムレコード
+	ADD	HL,DE
+	LD	(FCB1+33),HL	;(FCB) ランダムレコード
+
+	LD	DE,(HEADER+16)	;(ZIP34) 圧縮サイズ
+	LD	HL,(FCB1+35)	;(FCB) ランダムレコード
+	ADC	HL,DE
+	LD	(FCB1+35),HL	;(FCB) ランダムレコード
+
 	JP	LOOP1
 EXIT1:
 	LD	DE,FCB1
@@ -343,44 +432,12 @@ MSG_A:
 	RET
 
 FILE:
-	XOR	A
-	LD	(FDRV),A
-	LD	H,A
-	LD	L,A
-	LD	(FDRV+14),HL
-	CALL	SPCUT
-	CALL	CCHK3
-	JR	Z,DEVI1
-	INC	DE
-	LD	A,(DE)
-	DEC	DE
-	CP	':'
-	JR	NZ,DEVI1
-	LD	A,(DE)		;DRIVE
-	CALL	CAP
-	SUB	'@'
-	INC	DE
-	INC	DE
-	LD	(FDRV),A
-DEVI1:
-
-SETDIR:
-	CALL	FILED
-	LD	A,(DE)
-	CP	05CH		;\
-	RET	NZ
-	INC	DE
-	RET
-
-FILED:
 	CALL	FILEI
 
 	LD	B,8
 FILE2:
 	CALL	CCHKF
 	RET	Z
-	CP	'*'
-	JR	Z,FILE9
 	CP	'.'
 	JR	Z,FILE4
 	LD	(HL),A
@@ -400,22 +457,10 @@ FILE4:
 FILE4L:
 	CALL	CCHKF
 	RET	Z
-	CP	'.'
-	JR	NZ,FILE12
-	LD	(FNAME),A	;Parent directory(..)
-	LD	(FNAME+1),A
-	LD	A,020H
-FILE12:
-	CP	'*'
-	JR	Z,FILE10
 	LD	(HL),A
 	INC	HL
 	DJNZ	FILE4L
 	RET
-
-FILE9:				;名前の*処理、名前の残りを?で埋める
-	CALL	FILE10
-	JR	FILE3
 
 FILE10:
 	LD	A,'?'
@@ -465,14 +510,6 @@ CCHK3:				;ZF=1 で使えない文字
 	CP	A		;Z=1
 	RET
 
-SS1:
-	INC	DE
-SPCUT:				;スペースをカット
-	LD	A,(DE)
-	CP	020H
-	JR	Z,SS1
-	RET
-
 TOZERO:
 	PUSH	DE
 TZ1:
@@ -494,25 +531,11 @@ CAP:
 	RET	NC
 	SUB	020H
 	RET
-CAP2:
-	CALL	CAP
-CAP3:
-	CALL	CAP4
-	CP	021H
-	RET	NC
-	LD	A,020H
-	RET
-CAP4:
-	CP	5
-	RET	NZ
-	LD	A,0E5H
-	RET
 
-FKANC:
-	BIT	0,C
-	CALL	Z,CAP2
-	JR	FKANX
 FKAN:			;漢字チェック
+	BIT	0,C
+	CALL	Z,CAP
+
 	INC	DE
 FKANX:
 	BIT	0,C
@@ -530,10 +553,8 @@ FKAN1:
 	RET
 
 PRTTMS:
-	LD	HL,(HEADER+12)	;ファイルの最終変更日付
+	LD	HL,(HEADER+10)	;(ZIP12) ファイルの最終変更日付
 	LD	A,L
-	OR	A
-	RET	Z
 	SRL	H
 	RLA
 	RLA
@@ -554,8 +575,7 @@ PRTTMS:
 	AND	01FH
 	CALL	PRDEC_A
 
-	LD	HL,(HEADER+10)	;ファイルの最終変更時間
-
+	LD	HL,(HEADER+8)	;(ZIP12) ファイルの最終変更時間
 	LD	A,020H
 	CALL	MSG_A
 	LD	A,H
@@ -617,19 +637,62 @@ SHOW_USAGE:
 	CALL	MSX
 	JP	0
 
+CPHEADER:
+	LD	HL,HEADER
+	LD	B,4
+CPSTRN:
+	LD	A,(DE)
+	INC	DE
+	CP	(HL)
+	RET	NZ
+	INC	HL
+	DJNZ	CPSTRN
+	RET
+
+IS_SPLITTER:
+	CP	'/'
+	RET	Z
+	CP	':'
+	RET	Z
+	CP	05CH	;\
+	RET
+
+GET_ATTR:
+	LD	A,(HEADER+2)	;(ZIP12)ZIPファイル製作を行ったOS
+	CP	14		;VFAT
+	JR	Z,ATTR
+	CP	10		;Windows NTFS
+	JR	Z,ATTR
+	OR	A		;MS-DOS
+	SCF
+	RET	NZ
+ATTR:
+	LD	A,(HEADER+34)	;(ZIP12) ファイルの属性
+	AND	027H		;A--SHR
+	RET
+
 TITLE:
-	DB	"UNZIPFIX v1.00", 00DH, 00AH, 0
+	DB	"UNZIPFIX v1.20", 00DH, 00AH, 0
 ERROR_OS:
 	DB	"LSX-Dodgers or MSX-DOS required.", 00DH, 00AH, 0
 USAGE:
 	DB	"usage: UNZIPFIX filename [drive:]", 00DH, 00AH, 0
+HEADER_PK12:
+	DB	"PK",1,2
+HEADER_PK34:
+	DB	"PK",3,4
 
-MAJOR_VER:		;0:MSX-DOS1  1:LSX-Dodgers  2:MSX-DOS2
+OS_TYPE:		;0:MSX-DOS1  1:LSX-Dodgers  2:MSX-DOS2  3:CDOS2
 	DS	1
 OUT_DRIVE:
 	DS	1
+PATH_A:
+	DS	2
 HEADER:
-	DS	30
+	DS	4
+HEADER1:
+	DS	42
+
 DRV_PATH:
 	DS	2
 PATH:

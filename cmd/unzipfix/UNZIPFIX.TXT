@@ -1,0 +1,21 @@
+UNZIPFIX		UNXIP等で展開したファイルのタイムスタンプ等を補正する
+
+●書式
+
+ UNZIPFIX [ZIPファイル名] [ドライブ名:]
+
+●解説
+
+UNXIP等で展開したファイルのタイムスタンプ、ファイルサイズ、属性等を補正する
+CDOS2/MSX-DOS/MSX-DOS2/Nextor/LSX-Dodgersで動作します。
+
+※CDOS2の場合はCP/MエミュレータとMSXEmuが必要です。
+CPMBの場合、サイズ補正機能がうまくいっていないので、他のCPME/CPMS/CPMXを使用してください。
+
+・CDOS2用ＣＰ／Ｍエミュレータ全種
+http://www.pc88.gr.jp/softlib/index.php?action=list_file&anum=1&gnum=85
+
+・MSXEmu
+http://www.pc88.gr.jp/forum/viewtopic.php?p=32300&sid=22f7c506867b2e199c1363644da73d15
+
+MIT License
