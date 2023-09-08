@@ -10,8 +10,8 @@
                                 
 000000 0100 C30301          10      JP  START       ;0C3HはZ80ではJPだが、i8086ではRETなので
        0103                     START:              ;間違えてMS-DOS環境で実行しても即終了できる
-000003 0103 215305          10      LD  HL,TITLE
-000006 0106 CD1105          17      CALL    MSX
+000003 0103 219605          10      LD  HL,TITLE
+000006 0106 CD5405          17      CALL    MSX
                                 
 000009 0109 3A0B00          13      LD  A,(0000BH)
 00000C 010C FE01             7      CP  1
@@ -20,7 +20,7 @@
                                 
 000012 0112 0E6F             7      LD  C,06FH      ;(BDOS) MSX-DOS のバージョン番号の獲得(_DOSVER) *1 MSX-DOS
 000014 0114 CD0500          17      CALL    SYSTEM
-000017 0117 DA1705          10      JP  C,SHOW_ERROR_OS ;CP/M等はエラー
+000017 0117 DA5A05          10      JP  C,SHOW_ERROR_OS ;CP/M等はエラー
 00001A 011A 79               4      LD  A,C
 00001B 011B D61D             7      SUB 01DH
 00001D 011D 2804            12      JR  Z,LSX0
@@ -30,7 +30,7 @@
        0123                     LSX0:
 000023 0123 3C               4      INC A       ;LSX-Dodgersの場合は 1 にする
        0124                     CDOS2:
-000024 0124 32B305          13      LD  (OS_TYPE),A
+000024 0124 32F605          13      LD  (OS_TYPE),A
                                 
 000027 0127 3A6C00          13      LD  A,(FCB2)
 00002A 012A FE01             7      CP  1
@@ -39,13 +39,13 @@
 000030 0130 CD0500          17      CALL    SYSTEM
 000033 0133 3C               4      INC A
        0134                     SET_OUT_DRIVE:
-000034 0134 32B405          13      LD  (OUT_DRIVE),A
+000034 0134 32F705          13      LD  (OUT_DRIVE),A
                                 
 000037 0137 115C00          10      LD  DE,FCB1     ;引数が1つだけの場合はFCB1がそのまま使える
 00003A 013A 0E0F             7      LD  C,00FH      ;(BDOS) ファイルのオープン(_FOPEN) CP/M MSX-DOS
 00003C 013C CD0500          17      CALL    SYSTEM
 00003F 013F B7               4      OR  A
-000040 0140 C22005          10      JP  NZ,SHOW_USAGE
+000040 0140 C26305          10      JP  NZ,SHOW_USAGE
                                 
 000043 0143 210100          10      LD  HL,1
 000046 0146 226A00          16      LD  (FCB1+14),HL    ;レコードサイズを1にする
@@ -55,7 +55,7 @@
 00004F 014F 227F00          16      LD  (FCB1+35),HL
                                 
        0152                     LOOP1:
-000052 0152 11B705          10      LD  DE,HEADER   ;データの読み出し先
+000052 0152 11FA05          10      LD  DE,HEADER   ;データの読み出し先
 000055 0155 0E1A             7      LD  C,01AH      ;(BDOS) DTAの設定(_SETDTA) CP/M MSX-DOS
 000057 0157 CD0500          17      CALL    SYSTEM
 00005A 015A 115C00          10      LD  DE,FCB1
@@ -63,656 +63,689 @@
 000060 0160 0E27             7      LD  C,027H      ;(BDOS) ランダムブロック読み出し(_RDBLK) MSX-DOS
 000062 0162 CD0500          17      CALL    SYSTEM
 000065 0165 FEFF             7      CP  0FFH
-000067 0167 CAA303          10      JP  Z,EXIT1     ;失敗したら終了
+000067 0167 CAE603          10      JP  Z,EXIT1     ;失敗したら終了
                                                 ;ZIPのヘッダーPK 0x3 0x4かチェック
 00006A 016A 7C               4      LD  A,H     ;HLに読み込んだサイズ
 00006B 016B B5               4      OR  L
-00006C 016C CAA303          10      JP  Z,EXIT1
-00006F 016F 11AB05          10      LD  DE,HEADER_PK12
-000072 0172 CD2905          17      CALL    CPHEADER
+00006C 016C CAE603          10      JP  Z,EXIT1
+00006F 016F 11EE05          10      LD  DE,HEADER_PK12
+000072 0172 CD6C05          17      CALL    CPHEADER
 000075 0175 CA8401          10      JP  Z,PK12
-000078 0178 11AF05          10      LD  DE,HEADER_PK34
-00007B 017B CD2905          17      CALL    CPHEADER
-00007E 017E CA5403          10      JP  Z,SKIP34
-000081 0181 C3A303          10      JP  EXIT1
+000078 0178 11F205          10      LD  DE,HEADER_PK34
+00007B 017B CD6C05          17      CALL    CPHEADER
+00007E 017E CA9703          10      JP  Z,SKIP34
+000081 0181 C3E603          10      JP  EXIT1
        0184                     PK12:
 000084 0184 115C00          10      LD  DE,FCB1
 000087 0187 212A00          10      LD  HL,42       ;ZIPのヘッダー
 00008A 018A 0E27             7      LD  C,027H      ;(BDOS) ランダムブロック読み出し(_RDBLK) MSX-DOS
 00008C 018C CD0500          17      CALL    SYSTEM
 00008F 018F FEFF             7      CP  0FFH
-000091 0191 CAA303          10      JP  Z,EXIT1     ;失敗したら終了
+000091 0191 CAE603          10      JP  Z,EXIT1     ;失敗したら終了
                                 
-000094 0194 111108          10      LD  DE,BUFAD
+000094 0194 11560A          10      LD  DE,BUFAD
                                 
-000097 0197 CDA604          17      CALL    PRTTMS      ;タイムスタンプの表示
+000097 0197 CDE904          17      CALL    PRTTMS      ;タイムスタンプの表示
                                 
 00009A 019A 3E20             7      LD  A,020H
-00009C 019C CD0404          17      CALL    MSG_A
+00009C 019C CD4704          17      CALL    MSG_A
                                 
-00009F 019F 2ACB05          16      LD  HL,(HEADER+20)  ;(ZIP12) 非圧縮サイズ
-0000A2 01A2 ED5BCD05        20      LD  DE,(HEADER+22)
-0000A6 01A6 CDAE03          17      CALL    PRDEC_DEHL
+00009F 019F 2A0E06          16      LD  HL,(HEADER+20)  ;(ZIP12) 非圧縮サイズ
+0000A2 01A2 ED5B1006        20      LD  DE,(HEADER+22)
+0000A6 01A6 CDF103          17      CALL    PRDEC_DEHL
                                 
 0000A9 01A9 3E20             7      LD  A,020H
-0000AB 01AB CD0404          17      CALL    MSG_A
+0000AB 01AB CD4704          17      CALL    MSG_A
                                 
-0000AE 01AE 11E705          10      LD  DE,PATH     ;データの読み出し先
+0000AE 01AE 112A06          10      LD  DE,PATH     ;データの読み出し先
 0000B1 01B1 0E1A             7      LD  C,01AH      ;(BDOS) DTAの設定(_SETDTA) CP/M MSX-DOS
 0000B3 01B3 CD0500          17      CALL    SYSTEM
 0000B6 01B6 115C00          10      LD  DE,FCB1
-0000B9 01B9 2ACF05          16      LD  HL,(HEADER+24)  ;(ZIP12) ファイル名の長さ
+0000B9 01B9 2A1206          16      LD  HL,(HEADER+24)  ;(ZIP12) ファイル名の長さ
 0000BC 01BC 0E27             7      LD  C,027H      ;(BDOS) ランダムブロック読み出し(_RDBLK) MSX-DOS
 0000BE 01BE CD0500          17      CALL    SYSTEM
 0000C1 01C1 3C               4      INC A
-0000C2 01C2 CAA303          10      JP  Z,EXIT1     ;失敗したら終了
+0000C2 01C2 CAE603          10      JP  Z,EXIT1     ;失敗したら終了
                                 
-0000C5 01C5 2ACF05          16      LD  HL,(HEADER+24)  ;(ZIP12) ファイル名の長さ
-0000C8 01C8 11E705          10      LD  DE,PATH
+0000C5 01C5 2A1206          16      LD  HL,(HEADER+24)  ;(ZIP12) ファイル名の長さ
+0000C8 01C8 112A06          10      LD  DE,PATH
 0000CB 01CB 19              11      ADD HL,DE
 0000CC 01CC 3600            10      LD  (HL),0
                                 
-0000CE 01CE 21E705          10      LD  HL,PATH     ;ファイル名を表示する
-0000D1 01D1 CD1105          17      CALL    MSX
+0000CE 01CE 212A06          10      LD  HL,PATH     ;ファイル名を表示する
+0000D1 01D1 CD5405          17      CALL    MSX
                                 
-0000D4 01D4 11E605          10      LD  DE,PATH-1   ;パス区切りが「/」の場合は「\」に置き換える
-0000D7 01D7 ED53B505        20      LD  (PATH_A),DE
+0000D4 01D4 112906          10      LD  DE,PATH-1   ;パス区切りが「/」の場合は「\」に置き換える
+0000D7 01D7 ED53F805        20      LD  (PATH_A),DE
        01DB                     FIXPATH1:
 0000DB 01DB 13               6      INC DE
 0000DC 01DC 1A               7      LD  A,(DE)
 0000DD 01DD B7               4      OR  A
 0000DE 01DE 280E            12      JR  Z,FIXPATH3
-0000E0 01E0 CD3605          17      CALL    IS_SPLITTER
+0000E0 01E0 CD7905          17      CALL    IS_SPLITTER
 0000E3 01E3 20F6            12      JR  NZ,FIXPATH1
 0000E5 01E5 3E5C             7      LD  A,05CH      ;\
 0000E7 01E7 12               7      LD  (DE),A
-0000E8 01E8 ED53B505        20      LD  (PATH_A),DE
+0000E8 01E8 ED53F805        20      LD  (PATH_A),DE
 0000EC 01EC 18ED            12      JR  FIXPATH1
        01EE                     FIXPATH3:
+0000EE 01EE 212A06          10      LD  HL,PATH     ;フルパスを作成
+0000F1 01F1 112C08          10      LD  DE,FULLPATH+2
+0000F4 01F4 ED4B1206        20      LD  BC,(HEADER+24)  ;(ZIP12) ファイル名の長さ
+0000F8 01F8 03               6      INC BC
+0000F9 01F9 EDB0                    LDIR
                                                 ;(LSX-Dodgers/MSX-DOS) タイムスタンプとファイルサイズを設定する
-0000EE 01EE 21EC07          10      LD  HL,FDRV
-0000F1 01F1 0625             7      LD  B,37
-0000F3 01F3 AF               4      XOR A
-0000F4 01F4 CD4004          17      CALL    FILL_MEMORY
+0000FB 01FB 21310A          10      LD  HL,FDRV
+0000FE 01FE 0625             7      LD  B,37
+000100 0200 AF               4      XOR A
+000101 0201 CD8304          17      CALL    FILL_MEMORY
                                 
-0000F7 01F7 ED5BB505        20      LD  DE,(PATH_A)
-0000FB 01FB 3E3A             7      LD  A,':'
-0000FD 01FD 12               7      LD  (DE),A
-0000FE 01FE 1B               6      DEC DE
-0000FF 01FF 3AB405          13      LD  A,(OUT_DRIVE)
-000102 0202 C640             7      ADD A,040H
-000104 0204 12               7      LD  (DE),A
-000105 0205 13               6      INC DE
-000106 0206 13               6      INC DE
-000107 0207 CD1704          17      CALL    FILE
-       020A                     FOPEN:
-00010A 020A 11EC07          10      LD  DE,FDRV
-00010D 020D 3AB405          13      LD  A,(OUT_DRIVE)
-000110 0210 12               7      LD  (DE),A      ;出力先のドライブに切り替える
+000104 0204 ED5BF805        20      LD  DE,(PATH_A)
+000108 0208 3E3A             7      LD  A,':'
+00010A 020A 12               7      LD  (DE),A
+00010B 020B 322B08          13      LD  (FULLPATH+1),A
+00010E 020E 1B               6      DEC DE
+00010F 020F 3AF705          13      LD  A,(OUT_DRIVE)
+000112 0212 C640             7      ADD A,040H
+000114 0214 12               7      LD  (DE),A
+000115 0215 322A08          13      LD  (FULLPATH),A
+000118 0218 13               6      INC DE
+000119 0219 13               6      INC DE
+00011A 021A CD5A04          17      CALL    FILE
+       021D                     FOPEN:
+00011D 021D 11310A          10      LD  DE,FDRV
+000120 0220 3AF705          13      LD  A,(OUT_DRIVE)
+000123 0223 12               7      LD  (DE),A      ;出力先のドライブに切り替える
                                 
-000111 0211 0E0F             7      LD  C,00FH      ;(BDOS) ファイルのオープン(_FOPEN) CP/M MSX-DOS
-000113 0213 CD0500          17      CALL    SYSTEM
-000116 0216 3C               4      INC A
-000117 0217 CA2A03          10      JP  Z,SKIP12
-       021A                     SET_SIZE:
-00011A 021A 210100          10      LD  HL,1
-00011D 021D 22FA07          16      LD  (FDRV+14),HL    ;(FCB) レコードサイズを1にする
+000124 0224 0E0F             7      LD  C,00FH      ;(BDOS) ファイルのオープン(_FOPEN) CP/M MSX-DOS
+000126 0226 CD0500          17      CALL    SYSTEM
+000129 0229 3C               4      INC A
+00012A 022A CA4203          10      JP  Z,MSXDOS2SUBDIR
+       022D                     SET_SIZE:
+00012D 022D 210100          10      LD  HL,1
+000130 0230 223F0A          16      LD  (FDRV+14),HL    ;(FCB) レコードサイズを1にする
                                 
-000120 0220 210000          10      LD  HL,0
-000123 0223 220D08          16      LD  (FDRV+33),HL    ;(FCB) ランダムレコードを0にする
-000126 0226 220F08          16      LD  (FDRV+35),HL
+000133 0233 210000          10      LD  HL,0
+000136 0236 22520A          16      LD  (FDRV+33),HL    ;(FCB) ランダムレコードを0にする
+000139 0239 22540A          16      LD  (FDRV+35),HL
                                 
-000129 0229 111108          10      LD  DE,BUFAD    ;データの読み出し先
-00012C 022C 0E1A             7      LD  C,01AH      ;(BDOS) DTAの設定(_SETDTA) CP/M MSX-DOS
-00012E 022E CD0500          17      CALL    SYSTEM
-000131 0231 11EC07          10      LD  DE,FDRV
+00013C 023C 11560A          10      LD  DE,BUFAD    ;データの読み出し先
+00013F 023F 0E1A             7      LD  C,01AH      ;(BDOS) DTAの設定(_SETDTA) CP/M MSX-DOS
+000141 0241 CD0500          17      CALL    SYSTEM
+000144 0244 11310A          10      LD  DE,FDRV
                                 
-000134 0234 3AB305          13      LD  A,(OS_TYPE)
-000137 0237 FE01             7      CP  1
-000139 0239 210000          10      LD  HL,0        ;LSX-Dodgersの場合は0バイト書き込む
-00013C 023C 2810            12      JR  Z,LSX2
+000147 0247 3AF605          13      LD  A,(OS_TYPE)
+00014A 024A FE01             7      CP  1
+00014C 024C 210000          10      LD  HL,0        ;LSX-Dodgersの場合は0バイト書き込む
+00014F 024F 2810            12      JR  Z,LSX2
                                 
-00013E 023E FE03             7      CP  3       ;CDOS2
-000140 0240 2845            12      JR  Z,CDOS2_SETFCB
+000151 0251 FE03             7      CP  3       ;CDOS2
+000153 0253 2845            12      JR  Z,CDOS2_SETFCB
                                 
-000142 0242 210100          10      LD  HL,1        ;(MSX-DOS1/2) 1バイト読み込んで書き戻す
-000145 0245 0E27             7      LD  C,027H      ;(BDOS) ランダムブロック読み出し(_RDBLK) MSX-DOS
-000147 0247 CD0500          17      CALL    SYSTEM
-00014A 024A AF               4      XOR A
-00014B 024B 320D08          13      LD  (FDRV+33),A ;(FCB) ランダムレコードを0に戻す
-       024E                     LSX2:
-00014E 024E 11EC07          10      LD  DE,FDRV
-000151 0251 0E26             7      LD  C,026H      ;(BDOS) ランダムブロック書き込み(_WRBLK)
-000153 0253 CD0500          17      CALL    SYSTEM
-000156 0256 3C               4      INC A
-000157 0257 CA2A03          10      JP  Z,SKIP12
+000155 0255 210100          10      LD  HL,1        ;(MSX-DOS1/2) 1バイト読み込んで書き戻す
+000158 0258 0E27             7      LD  C,027H      ;(BDOS) ランダムブロック読み出し(_RDBLK) MSX-DOS
+00015A 025A CD0500          17      CALL    SYSTEM
+00015D 025D AF               4      XOR A
+00015E 025E 32520A          13      LD  (FDRV+33),A ;(FCB) ランダムレコードを0に戻す
+       0261                     LSX2:
+000161 0261 11310A          10      LD  DE,FDRV
+000164 0264 0E26             7      LD  C,026H      ;(BDOS) ランダムブロック書き込み(_WRBLK)
+000166 0266 CD0500          17      CALL    SYSTEM
+000169 0269 3C               4      INC A
+00016A 026A CA6D03          10      JP  Z,SKIP12
+                                                ;(MSX-DOS/MSX-DOS2/LSX-Dodgers) ファイルサイズの補正を行う
+00016D 026D 2A0E06          16      LD  HL,(HEADER+20)  ;(ZIP12) 非圧縮サイズ
+000170 0270 22410A          16      LD  (FDRV+16),HL    ;(FCB) ファイルのサイズ(バイト単位)
+000173 0273 2A1006          16      LD  HL,(HEADER+22)  ;(ZIP12) 非圧縮サイズ
+000176 0276 22430A          16      LD  (FDRV+18),HL    ;(FCB) ファイルのサイズ(バイト単位)
                                 
-00015A 025A 2ACB05          16      LD  HL,(HEADER+20)  ;(ZIP12) 非圧縮サイズ
-00015D 025D 22FC07          16      LD  (FDRV+16),HL    ;(FCB) ファイルのサイズ(バイト単位)
-000160 0260 2ACD05          16      LD  HL,(HEADER+22)  ;(ZIP12) 非圧縮サイズ
-000163 0263 22FE07          16      LD  (FDRV+18),HL    ;(FCB) ファイルのサイズ(バイト単位)
-                                
-000166 0266 3AB305          13      LD  A,(OS_TYPE)
-000169 0269 FE02             7      CP  2       ;MSX-DOS2
-00016B 026B CAF302          10      JP  Z,FCLOSE
+000179 0279 3AF605          13      LD  A,(OS_TYPE)
+00017C 027C FE02             7      CP  2       ;MSX-DOS2
+00017E 027E CA0603          10      JP  Z,FCLOSE
                                                 ;(MSX-DOS/LSX-Dodgers) タイムスタンプを設定する
-00016E 026E 2AC105          16      LD  HL,(HEADER+10)  ;(ZIP12) ファイルの最終変更日付
-000171 0271 220008          16      LD  (FDRV+20),HL    ;(FCB) 更新年月日
-000174 0274 2ABF05          16      LD  HL,(HEADER+8)   ;(ZIP12) ファイルの最終変更時間
-000177 0277 220208          16      LD  (FDRV+22),HL    ;(FCB) 更新時刻
+000181 0281 2A0406          16      LD  HL,(HEADER+10)  ;(ZIP12) ファイルの最終変更日付
+000184 0284 22450A          16      LD  (FDRV+20),HL    ;(FCB) 更新年月日
+000187 0287 2A0206          16      LD  HL,(HEADER+8)   ;(ZIP12) ファイルの最終変更時間
+00018A 028A 22470A          16      LD  (FDRV+22),HL    ;(FCB) 更新時刻
                                 
                                 ;   LD  A,(OS_TYPE) ;すでにAにはOS_TYPEが入っている
-00017A 027A 3D               4      DEC A
-00017B 027B 2076            12      JR  NZ,FCLOSE
+00018D 028D 3D               4      DEC A
+00018E 028E 2076            12      JR  NZ,FCLOSE
                                                 ;(LSX-Dodgers) 属性を設定する
-00017D 027D CD3F05          17      CALL    GET_ATTR
-000180 0280 3871            12      JR  C,FCLOSE
-000182 0282 32F907          13      LD  (FDRV+13),A ;(FCB) 属性(アトリビュート)
-000185 0285 186C            12      JR  FCLOSE
+000190 0290 CD8205          17      CALL    GET_ATTR
+000193 0293 3871            12      JR  C,FCLOSE
+000195 0295 323E0A          13      LD  (FDRV+13),A ;(FCB) 属性(アトリビュート)
+000198 0298 186C            12      JR  FCLOSE
                                 
-       0287                     CDOS2_SETFCB:           ;(CDOS2)
-000187 0287 010000          10      LD  BC,0
-00018A 028A 2ACB05          16      LD  HL,(HEADER+20)  ;(ZIP12) 非圧縮サイズ
-00018D 028D 37               4      SCF
-00018E 028E ED42            15      SBC HL,BC
-000190 0290 22E707          16      LD  (DECBF),HL
-000193 0293 2ACD05          16      LD  HL,(HEADER+22)  ;(ZIP12) 非圧縮サイズ
-000196 0296 ED42            15      SBC HL,BC
-000198 0298 22E907          16      LD  (DECBF+2),HL
-00019B 029B 3811            12      JR  C,CDOS2_1
+       029A                     CDOS2_SETFCB:           ;(CDOS2)
+00019A 029A 010000          10      LD  BC,0
+00019D 029D 2A0E06          16      LD  HL,(HEADER+20)  ;(ZIP12) 非圧縮サイズ
+0001A0 02A0 37               4      SCF
+0001A1 02A1 ED42            15      SBC HL,BC
+0001A3 02A3 222C0A          16      LD  (DECBF),HL
+0001A6 02A6 2A1006          16      LD  HL,(HEADER+22)  ;(ZIP12) 非圧縮サイズ
+0001A9 02A9 ED42            15      SBC HL,BC
+0001AB 02AB 222E0A          16      LD  (DECBF+2),HL
+0001AE 02AE 3811            12      JR  C,CDOS2_1
                                 
-00019D 029D 2AE707          16      LD  HL,(DECBF)
-0001A0 02A0 29              11      ADD HL,HL
-0001A1 02A1 EB               4      EX  DE,HL
-0001A2 02A2 2AE907          16      LD  HL,(DECBF+2)
-0001A5 02A5 ED6A            15      ADC HL,HL
-0001A7 02A7 7A               4      LD  A,D
-0001A8 02A8 320D08          13      LD  (FDRV+33),A ;(FCB) ランダムレコード
-0001AB 02AB 220E08          16      LD  (FDRV+34),HL    ;(FCB) ランダムレコード
-       02AE                     CDOS2_1:
-0001AE 02AE 11EC07          10      LD  DE,FDRV
-0001B1 02B1 0E21             7      LD  C,021H      ;(BDOS) ランダムな読み出し(_RDRND) CP/M MSX-DOS
-0001B3 02B3 CD0500          17      CALL    SYSTEM
-0001B6 02B6 B7               4      OR  A
-0001B7 02B7 203A            12      JR  NZ,FCLOSE
+0001B0 02B0 2A2C0A          16      LD  HL,(DECBF)
+0001B3 02B3 29              11      ADD HL,HL
+0001B4 02B4 EB               4      EX  DE,HL
+0001B5 02B5 2A2E0A          16      LD  HL,(DECBF+2)
+0001B8 02B8 ED6A            15      ADC HL,HL
+0001BA 02BA 7A               4      LD  A,D
+0001BB 02BB 32520A          13      LD  (FDRV+33),A ;(FCB) ランダムレコード
+0001BE 02BE 22530A          16      LD  (FDRV+34),HL    ;(FCB) ランダムレコード
+       02C1                     CDOS2_1:
+0001C1 02C1 11310A          10      LD  DE,FDRV
+0001C4 02C4 0E21             7      LD  C,021H      ;(BDOS) ランダムな読み出し(_RDRND) CP/M MSX-DOS
+0001C6 02C6 CD0500          17      CALL    SYSTEM
+0001C9 02C9 B7               4      OR  A
+0001CA 02CA 203A            12      JR  NZ,FCLOSE
                                 
-0001B9 02B9 11EC07          10      LD  DE,FDRV
-0001BC 02BC 0E22             7      LD  C,022H      ;(BDOS) ランダムな書き込み(_WRRND) CP/M MSX-DOS
-0001BE 02BE CD0500          17      CALL    SYSTEM
-0001C1 02C1 B7               4      OR  A
-0001C2 02C2 202F            12      JR  NZ,FCLOSE
+0001CC 02CC 11310A          10      LD  DE,FDRV
+0001CF 02CF 0E22             7      LD  C,022H      ;(BDOS) ランダムな書き込み(_WRRND) CP/M MSX-DOS
+0001D1 02D1 CD0500          17      CALL    SYSTEM
+0001D4 02D4 B7               4      OR  A
+0001D5 02D5 202F            12      JR  NZ,FCLOSE
                                 
-0001C4 02C4 2ACB05          16      LD  HL,(HEADER+20)  ;(ZIP12) 非圧縮サイズ
-0001C7 02C7 7C               4      LD  A,H
-0001C8 02C8 E603             7      AND 3
-0001CA 02CA 67               4      LD  H,A
-0001CB 02CB 220008          16      LD  (FDRV+20),HL    ;(FCB) 最終クラスタの使用バイト数
-0001CE 02CE 220408          16      LD  (FDRV+24),HL    ;(FCB) 最終クラスタの使用バイト数
-0001D1 02D1 B5               4      OR  L
-0001D2 02D2 2AE807          16      LD  HL,(DECBF+1)
-0001D5 02D5 CB3C             8      SRL H
-0001D7 02D7 CB1D             8      RR  L
-0001D9 02D9 CB3C             8      SRL H
-0001DB 02DB CB1D             8      RR  L
-0001DD 02DD 010000          10      LD  BC,0
-0001E0 02E0 C6FF             7      ADD A,0FFH
-0001E2 02E2 ED4A            15      ADC HL,BC
-0001E4 02E4 220208          16      LD  (FDRV+22),HL    ;(FCB) 使用クラスタ数
+0001D7 02D7 2A0E06          16      LD  HL,(HEADER+20)  ;(ZIP12) 非圧縮サイズ
+0001DA 02DA 7C               4      LD  A,H
+0001DB 02DB E603             7      AND 3
+0001DD 02DD 67               4      LD  H,A
+0001DE 02DE 22450A          16      LD  (FDRV+20),HL    ;(FCB) 最終クラスタの使用バイト数
+0001E1 02E1 22490A          16      LD  (FDRV+24),HL    ;(FCB) 最終クラスタの使用バイト数
+0001E4 02E4 B5               4      OR  L
+0001E5 02E5 2A2D0A          16      LD  HL,(DECBF+1)
+0001E8 02E8 CB3C             8      SRL H
+0001EA 02EA CB1D             8      RR  L
+0001EC 02EC CB3C             8      SRL H
+0001EE 02EE CB1D             8      RR  L
+0001F0 02F0 010000          10      LD  BC,0
+0001F3 02F3 C6FF             7      ADD A,0FFH
+0001F5 02F5 ED4A            15      ADC HL,BC
+0001F7 02F7 22470A          16      LD  (FDRV+22),HL    ;(FCB) 使用クラスタ数
                                 
-0001E7 02E7 2AC105          16      LD  HL,(HEADER+10)  ;(ZIP12) ファイルの最終変更日付
-0001EA 02EA 220908          16      LD  (FDRV+29),HL    ;(FCB) 更新年月日
-0001ED 02ED 2ABF05          16      LD  HL,(HEADER+8)   ;(ZIP12) ファイルの最終変更時間
-0001F0 02F0 220708          16      LD  (FDRV+27),HL    ;(FCB) 更新時刻
-       02F3                     FCLOSE:
-0001F3 02F3 11EC07          10      LD  DE,FDRV
-0001F6 02F6 0E10             7      LD  C,010H      ;(BDOS) ファイルのクローズ(_FCLOSE) CP/M MSX-DOS
-0001F8 02F8 CD0500          17      CALL    SYSTEM
-0001FB 02FB 3C               4      INC A
-0001FC 02FC 282C            12      JR  Z,SKIP12
+0001FA 02FA 2A0406          16      LD  HL,(HEADER+10)  ;(ZIP12) ファイルの最終変更日付
+0001FD 02FD 224E0A          16      LD  (FDRV+29),HL    ;(FCB) 更新年月日
+000200 0300 2A0206          16      LD  HL,(HEADER+8)   ;(ZIP12) ファイルの最終変更時間
+000203 0303 224C0A          16      LD  (FDRV+27),HL    ;(FCB) 更新時刻
+       0306                     FCLOSE:
+000206 0306 11310A          10      LD  DE,FDRV
+000209 0309 0E10             7      LD  C,010H      ;(BDOS) ファイルのクローズ(_FCLOSE) CP/M MSX-DOS
+00020B 030B CD0500          17      CALL    SYSTEM
+00020E 030E 3C               4      INC A
+00020F 030F 285C            12      JR  Z,SKIP12
                                 
-0001FE 02FE 3AB305          13      LD  A,(OS_TYPE)
-000201 0301 FE02             7      CP  2
-000203 0303 2025            12      JR  NZ,SKIP12
+000211 0311 3AF605          13      LD  A,(OS_TYPE)
+000214 0314 FE02             7      CP  2
+000216 0316 2055            12      JR  NZ,SKIP12
                                                 ;(MSX-DOS2) タイムスタンプを設定する
-000205 0305 ED5BB505        20      LD  DE,(PATH_A)
-000209 0309 1B               6      DEC DE
-00020A 030A 2AC105          16      LD  HL,(HEADER+10)  ;(ZIP12) ファイルの最終変更日付
-00020D 030D DD2ABF05        20      LD  IX,(HEADER+8)   ;(ZIP12) ファイルの最終変更時間
-000211 0311 0E51             7      LD  C,051H      ;(BDOS) ファイルの日付および時刻の獲得・セット(_FTIME) MSX-DOS2
-000213 0313 3E01             7      LD  A,1
-000215 0315 CD0500          17      CALL    SYSTEM
+000218 0318 ED5BF805        20      LD  DE,(PATH_A)
+00021C 031C 1B               6      DEC DE
+00021D 031D 2A0406          16      LD  HL,(HEADER+10)  ;(ZIP12) ファイルの最終変更日付
+000220 0320 DD2A0206        20      LD  IX,(HEADER+8)   ;(ZIP12) ファイルの最終変更時間
+000224 0324 0E51             7      LD  C,051H      ;(BDOS) ファイルの日付および時刻の獲得・セット(_FTIME) MSX-DOS2
+000226 0326 3E01             7      LD  A,1
+000228 0328 CD0500          17      CALL    SYSTEM
+00022B 032B B7               4      OR  A
+00022C 032C 2014            12      JR  NZ,MSXDOS2SUBDIR
                                                 ;(MSX-DOS2) 属性を設定する
-000218 0318 CD3F05          17      CALL    GET_ATTR
-00021B 031B 380D            12      JR  C,SKIP12
-00021D 031D 6F               4      LD  L,A
-00021E 031E ED5BB505        20      LD  DE,(PATH_A)
-000222 0322 1B               6      DEC DE
-000223 0323 0E50             7      LD  C,050H      ;(BDOS) ファイル属性の獲得・セット(_ATTR) MSX-DOS2
-000225 0325 3E01             7      LD  A,1
-000227 0327 CD0500          17      CALL    SYSTEM
+00022E 032E CD8205          17      CALL    GET_ATTR
+000231 0331 383A            12      JR  C,SKIP12
+000233 0333 6F               4      LD  L,A
+000234 0334 ED5BF805        20      LD  DE,(PATH_A)
+000238 0338 1B               6      DEC DE
+000239 0339 0E50             7      LD  C,050H      ;(BDOS) ファイル属性の獲得・セット(_ATTR) MSX-DOS2
+00023B 033B 3E01             7      LD  A,1
+00023D 033D CD0500          17      CALL    SYSTEM
+000240 0340 182B            12      JR  SKIP12
+       0342                     MSXDOS2SUBDIR:
+000242 0342 3AF605          13      LD  A,(OS_TYPE)
+000245 0345 FE02             7      CP  2
+000247 0347 2024            12      JR  NZ,SKIP12
+                                
+000249 0349 112A08          10      LD  DE,FULLPATH
+00024C 034C 2A0406          16      LD  HL,(HEADER+10)  ;(ZIP12) ファイルの最終変更日付
+00024F 034F DD2A0206        20      LD  IX,(HEADER+8)   ;(ZIP12) ファイルの最終変更時間
+000253 0353 0E51             7      LD  C,051H      ;(BDOS) ファイルの日付および時刻の獲得・セット(_FTIME) MSX-DOS2
+000255 0355 3E01             7      LD  A,1
+000257 0357 CD0500          17      CALL    SYSTEM
+00025A 035A B7               4      OR  A
+00025B 035B 2010            12      JR  NZ,SKIP12
+                                                ;(MSX-DOS2) 属性を設定する
+00025D 035D CD8205          17      CALL    GET_ATTR
+000260 0360 380B            12      JR  C,SKIP12
+000262 0362 6F               4      LD  L,A
+000263 0363 112A08          10      LD  DE,FULLPATH
+000266 0366 0E50             7      LD  C,050H      ;(BDOS) ファイル属性の獲得・セット(_ATTR) MSX-DOS2
+000268 0368 3E01             7      LD  A,1
+00026A 036A CD0500          17      CALL    SYSTEM
                                                 ;次のヘッダーまでランダムレコードを移動する
-       032A                     SKIP12:
-00022A 032A AF               4      XOR A
-00022B 032B 2A7D00          16      LD  HL,(FCB1+33)    ;(FCB) ランダムレコード
-00022E 032E ED5BD105        20      LD  DE,(HEADER+26)  ;(ZIP34) 拡張フィールドの長さ
-000232 0332 19              11      ADD HL,DE
-000233 0333 8F               4      ADC A,A
-000234 0334 ED5BD305        20      LD  DE,(HEADER+28)  ;(ZIP34) コメントの長さ
-000238 0338 19              11      ADD HL,DE
-000239 0339 227D00          16      LD  (FCB1+33),HL    ;(FCB) ランダムレコード
+       036D                     SKIP12:
+00026D 036D AF               4      XOR A
+00026E 036E 2A7D00          16      LD  HL,(FCB1+33)    ;(FCB) ランダムレコード
+000271 0371 ED5B1406        20      LD  DE,(HEADER+26)  ;(ZIP34) 拡張フィールドの長さ
+000275 0375 19              11      ADD HL,DE
+000276 0376 8F               4      ADC A,A
+000277 0377 ED5B1606        20      LD  DE,(HEADER+28)  ;(ZIP34) コメントの長さ
+00027B 037B 19              11      ADD HL,DE
+00027C 037C 227D00          16      LD  (FCB1+33),HL    ;(FCB) ランダムレコード
                                 
-00023C 033C 2A7F00          16      LD  HL,(FCB1+35)    ;(FCB) ランダムレコード
-00023F 033F 5F               4      LD  E,A
-000240 0340 1600             7      LD  D,0
-000242 0342 ED5A            15      ADC HL,DE
-000244 0344 227F00          16      LD  (FCB1+35),HL    ;(FCB) ランダムレコード
+00027F 037F 2A7F00          16      LD  HL,(FCB1+35)    ;(FCB) ランダムレコード
+000282 0382 5F               4      LD  E,A
+000283 0383 1600             7      LD  D,0
+000285 0385 ED5A            15      ADC HL,DE
+000287 0387 227F00          16      LD  (FCB1+35),HL    ;(FCB) ランダムレコード
                                 
-000247 0347 3E0D             7      LD  A,00DH
-000249 0349 CD0404          17      CALL    MSG_A
-00024C 034C 3E0A             7      LD  A,00AH
-00024E 034E CD0404          17      CALL    MSG_A
-000251 0351 C35201          10      JP  LOOP1
+00028A 038A 3E0D             7      LD  A,00DH
+00028C 038C CD4704          17      CALL    MSG_A
+00028F 038F 3E0A             7      LD  A,00AH
+000291 0391 CD4704          17      CALL    MSG_A
+000294 0394 C35201          10      JP  LOOP1
                                 
-       0354                     SKIP34:
-000254 0354 11B705          10      LD  DE,HEADER   ;データの読み出し先
-000257 0357 0E1A             7      LD  C,01AH      ;(BDOS) DTAの設定(_SETDTA) CP/M MSX-DOS
-000259 0359 CD0500          17      CALL    SYSTEM
-00025C 035C 115C00          10      LD  DE,FCB1
-00025F 035F 211A00          10      LD  HL,26       ;ZIPのヘッダー
-000262 0362 0E27             7      LD  C,027H      ;(BDOS) ランダムブロック読み出し(_RDBLK) MSX-DOS
-000264 0364 CD0500          17      CALL    SYSTEM
-000267 0367 FEFF             7      CP  0FFH
-000269 0369 CAA303          10      JP  Z,EXIT1     ;失敗したら終了
+       0397                     SKIP34:
+000297 0397 11FA05          10      LD  DE,HEADER   ;データの読み出し先
+00029A 039A 0E1A             7      LD  C,01AH      ;(BDOS) DTAの設定(_SETDTA) CP/M MSX-DOS
+00029C 039C CD0500          17      CALL    SYSTEM
+00029F 039F 115C00          10      LD  DE,FCB1
+0002A2 03A2 211A00          10      LD  HL,26       ;ZIPのヘッダー
+0002A5 03A5 0E27             7      LD  C,027H      ;(BDOS) ランダムブロック読み出し(_RDBLK) MSX-DOS
+0002A7 03A7 CD0500          17      CALL    SYSTEM
+0002AA 03AA FEFF             7      CP  0FFH
+0002AC 03AC CAE603          10      JP  Z,EXIT1     ;失敗したら終了
                                 
-00026C 036C AF               4      XOR A
-00026D 036D 2A7D00          16      LD  HL,(FCB1+33)    ;(FCB) ランダムレコード
-000270 0370 ED5BCD05        20      LD  DE,(HEADER+22)  ;(ZIP34) ファイル名の長さ
-000274 0374 19              11      ADD HL,DE
-000275 0375 8F               4      ADC A,A
-000276 0376 ED5BCF05        20      LD  DE,(HEADER+24)  ;(ZIP34) 拡張フィールドの長さ
-00027A 037A 19              11      ADD HL,DE
-00027B 037B 227D00          16      LD  (FCB1+33),HL    ;(FCB) ランダムレコード
+0002AF 03AF AF               4      XOR A
+0002B0 03B0 2A7D00          16      LD  HL,(FCB1+33)    ;(FCB) ランダムレコード
+0002B3 03B3 ED5B1006        20      LD  DE,(HEADER+22)  ;(ZIP34) ファイル名の長さ
+0002B7 03B7 19              11      ADD HL,DE
+0002B8 03B8 8F               4      ADC A,A
+0002B9 03B9 ED5B1206        20      LD  DE,(HEADER+24)  ;(ZIP34) 拡張フィールドの長さ
+0002BD 03BD 19              11      ADD HL,DE
+0002BE 03BE 227D00          16      LD  (FCB1+33),HL    ;(FCB) ランダムレコード
                                 
-00027E 037E 2A7F00          16      LD  HL,(FCB1+35)    ;(FCB) ランダムレコード
-000281 0381 5F               4      LD  E,A
-000282 0382 1600             7      LD  D,0
-000284 0384 ED5A            15      ADC HL,DE
-000286 0386 227F00          16      LD  (FCB1+35),HL    ;(FCB) ランダムレコード
+0002C1 03C1 2A7F00          16      LD  HL,(FCB1+35)    ;(FCB) ランダムレコード
+0002C4 03C4 5F               4      LD  E,A
+0002C5 03C5 1600             7      LD  D,0
+0002C7 03C7 ED5A            15      ADC HL,DE
+0002C9 03C9 227F00          16      LD  (FCB1+35),HL    ;(FCB) ランダムレコード
                                 
-000289 0389 ED5BC505        20      LD  DE,(HEADER+14)  ;(ZIP34) 圧縮サイズ
-00028D 038D 2A7D00          16      LD  HL,(FCB1+33)    ;(FCB) ランダムレコード
-000290 0390 19              11      ADD HL,DE
-000291 0391 227D00          16      LD  (FCB1+33),HL    ;(FCB) ランダムレコード
+0002CC 03CC ED5B0806        20      LD  DE,(HEADER+14)  ;(ZIP34) 圧縮サイズ
+0002D0 03D0 2A7D00          16      LD  HL,(FCB1+33)    ;(FCB) ランダムレコード
+0002D3 03D3 19              11      ADD HL,DE
+0002D4 03D4 227D00          16      LD  (FCB1+33),HL    ;(FCB) ランダムレコード
                                 
-000294 0394 ED5BC705        20      LD  DE,(HEADER+16)  ;(ZIP34) 圧縮サイズ
-000298 0398 2A7F00          16      LD  HL,(FCB1+35)    ;(FCB) ランダムレコード
-00029B 039B ED5A            15      ADC HL,DE
-00029D 039D 227F00          16      LD  (FCB1+35),HL    ;(FCB) ランダムレコード
+0002D7 03D7 ED5B0A06        20      LD  DE,(HEADER+16)  ;(ZIP34) 圧縮サイズ
+0002DB 03DB 2A7F00          16      LD  HL,(FCB1+35)    ;(FCB) ランダムレコード
+0002DE 03DE ED5A            15      ADC HL,DE
+0002E0 03E0 227F00          16      LD  (FCB1+35),HL    ;(FCB) ランダムレコード
                                 
-0002A0 03A0 C35201          10      JP  LOOP1
-       03A3                     EXIT1:
-0002A3 03A3 115C00          10      LD  DE,FCB1
-0002A6 03A6 0E10             7      LD  C,010H      ;(BDOS) ファイルのクローズ(_FCLOSE) CP/M MSX-DOS
-0002A8 03A8 CD0500          17      CALL    SYSTEM
-0002AB 03AB C30000          10      JP  0       ;プログラム終了
+0002E3 03E3 C35201          10      JP  LOOP1
+       03E6                     EXIT1:
+0002E6 03E6 115C00          10      LD  DE,FCB1
+0002E9 03E9 0E10             7      LD  C,010H      ;(BDOS) ファイルのクローズ(_FCLOSE) CP/M MSX-DOS
+0002EB 03EB CD0500          17      CALL    SYSTEM
+0002EE 03EE C30000          10      JP  0       ;プログラム終了
                                 
-       03AE                     PRDEC_DEHL:
-0002AE 03AE 3E02             7      LD  A,2
-0002B0 03B0 32F903          13      LD  (DEC6+1),A
-0002B3 03B3 AF               4      XOR A
-0002B4 03B4 E5              11      PUSH    HL
-0002B5 03B5 21E707          10      LD  HL,DECBF
-0002B8 03B8 0605             7      LD  B,5
-0002BA 03BA CD4004          17      CALL    FILL_MEMORY
-0002BD 03BD E1              10      POP HL
+       03F1                     PRDEC_DEHL:
+0002F1 03F1 3E02             7      LD  A,2
+0002F3 03F3 323C04          13      LD  (DEC6+1),A
+0002F6 03F6 AF               4      XOR A
+0002F7 03F7 E5              11      PUSH    HL
+0002F8 03F8 212C0A          10      LD  HL,DECBF
+0002FB 03FB 0605             7      LD  B,5
+0002FD 03FD CD8304          17      CALL    FILL_MEMORY
+000300 0400 E1              10      POP HL
                                 
-0002BE 03BE 0E20             7      LD  C,32
-       03C0                     DEC1:
-0002C0 03C0 29              11      ADD HL,HL
-0002C1 03C1 EB               4      EX  DE,HL
-0002C2 03C2 ED6A            15      ADC HL,HL
-0002C4 03C4 EB               4      EX  DE,HL
-0002C5 03C5 E5              11      PUSH    HL
-0002C6 03C6 21EB07          10      LD  HL,DECBF+4
-0002C9 03C9 0605             7      LD  B,5
-       03CB                     DEC2:
-0002CB 03CB 7E               7      LD  A,(HL)
-0002CC 03CC 8F               4      ADC A,A
-0002CD 03CD 27               4      DAA
-0002CE 03CE 77               7      LD  (HL),A
-0002CF 03CF 2B               6      DEC HL
-0002D0 03D0 10F9            13      DJNZ    DEC2
-0002D2 03D2 E1              10      POP HL
-0002D3 03D3 0D               4      DEC C
-0002D4 03D4 20EA            12      JR  NZ,DEC1
+000301 0401 0E20             7      LD  C,32
+       0403                     DEC1:
+000303 0403 29              11      ADD HL,HL
+000304 0404 EB               4      EX  DE,HL
+000305 0405 ED6A            15      ADC HL,HL
+000307 0407 EB               4      EX  DE,HL
+000308 0408 E5              11      PUSH    HL
+000309 0409 21300A          10      LD  HL,DECBF+4
+00030C 040C 0605             7      LD  B,5
+       040E                     DEC2:
+00030E 040E 7E               7      LD  A,(HL)
+00030F 040F 8F               4      ADC A,A
+000310 0410 27               4      DAA
+000311 0411 77               7      LD  (HL),A
+000312 0412 2B               6      DEC HL
+000313 0413 10F9            13      DJNZ    DEC2
+000315 0415 E1              10      POP HL
+000316 0416 0D               4      DEC C
+000317 0417 20EA            12      JR  NZ,DEC1
                                 
-0002D6 03D6 21E707          10      LD  HL,DECBF
-0002D9 03D9 3E20             7      LD  A,020H
-0002DB 03DB 0604             7      LD  B,4
-       03DD                     DEC3:
-0002DD 03DD CDEA03          17      CALL    DEC4
-0002E0 03E0 CDEA03          17      CALL    DEC4
-0002E3 03E3 23               6      INC HL
-0002E4 03E4 10F7            13      DJNZ    DEC3
-       03E6                     DECX:
-0002E6 03E6 CDEA03          17      CALL    DEC4
-0002E9 03E9 AF               4      XOR A
-       03EA                     DEC4:
-0002EA 03EA ED6F            18      RLD
-0002EC 03EC FE20             7      CP  020H
-0002EE 03EE 2808            12      JR  Z,DEC6
-0002F0 03F0 F630             7      OR  030H
-       03F2                     DEC5:
-0002F2 03F2 1810            12      JR  MSG_A
-       03F4                     DEC7:
-0002F4 03F4 3E20             7      LD  A,020H
-0002F6 03F6 180C            12      JR  MSG_A
-       03F8                     DEC6:
-0002F8 03F8 3E02             7      LD  A,2
-0002FA 03FA B7               4      OR  A
-0002FB 03FB 28F7            12      JR  Z,DEC7
-0002FD 03FD 3D               4      DEC A
-0002FE 03FE 32F903          13      LD  (DEC6+1),A
-000301 0401 3E20             7      LD  A,020H
-000303 0403 C9              10      RET
+000319 0419 212C0A          10      LD  HL,DECBF
+00031C 041C 3E20             7      LD  A,020H
+00031E 041E 0604             7      LD  B,4
+       0420                     DEC3:
+000320 0420 CD2D04          17      CALL    DEC4
+000323 0423 CD2D04          17      CALL    DEC4
+000326 0426 23               6      INC HL
+000327 0427 10F7            13      DJNZ    DEC3
+       0429                     DECX:
+000329 0429 CD2D04          17      CALL    DEC4
+00032C 042C AF               4      XOR A
+       042D                     DEC4:
+00032D 042D ED6F            18      RLD
+00032F 042F FE20             7      CP  020H
+000331 0431 2808            12      JR  Z,DEC6
+000333 0433 F630             7      OR  030H
+       0435                     DEC5:
+000335 0435 1810            12      JR  MSG_A
+       0437                     DEC7:
+000337 0437 3E20             7      LD  A,020H
+000339 0439 180C            12      JR  MSG_A
+       043B                     DEC6:
+00033B 043B 3E02             7      LD  A,2
+00033D 043D B7               4      OR  A
+00033E 043E 28F7            12      JR  Z,DEC7
+000340 0440 3D               4      DEC A
+000341 0441 323C04          13      LD  (DEC6+1),A
+000344 0444 3E20             7      LD  A,020H
+000346 0446 C9              10      RET
                                 
-       0404                     MSG_A:
-000304 0404 F5              11      PUSH    AF
-000305 0405 C5              11      PUSH    BC
-000306 0406 D5              11      PUSH    DE
-000307 0407 E5              11      PUSH    HL
-000308 0408 DDE5            15      PUSH    IX
-00030A 040A 5F               4      LD  E,A
-00030B 040B 0E02             7      LD  C,2
-00030D 040D CD0500          17      CALL    SYSTEM
-000310 0410 DDE1            14      POP IX
-000312 0412 E1              10      POP HL
-000313 0413 D1              10      POP DE
-000314 0414 C1              10      POP BC
-000315 0415 F1              10      POP AF
-000316 0416 C9              10      RET
+       0447                     MSG_A:
+000347 0447 F5              11      PUSH    AF
+000348 0448 C5              11      PUSH    BC
+000349 0449 D5              11      PUSH    DE
+00034A 044A E5              11      PUSH    HL
+00034B 044B DDE5            15      PUSH    IX
+00034D 044D 5F               4      LD  E,A
+00034E 044E 0E02             7      LD  C,2
+000350 0450 CD0500          17      CALL    SYSTEM
+000353 0453 DDE1            14      POP IX
+000355 0455 E1              10      POP HL
+000356 0456 D1              10      POP DE
+000357 0457 C1              10      POP BC
+000358 0458 F1              10      POP AF
+000359 0459 C9              10      RET
                                 
-       0417                     FILE:
-000317 0417 CD4504          17      CALL    FILEI
+       045A                     FILE:
+00035A 045A CD8804          17      CALL    FILEI
                                 
-00031A 041A 0608             7      LD  B,8
-       041C                     FILE2:
-00031C 041C CD5304          17      CALL    CCHKF
-00031F 041F C8              11      RET Z
-000320 0420 FE2E             7      CP  '.'
-000322 0422 280C            12      JR  Z,FILE4
-000324 0424 77               7      LD  (HL),A
-000325 0425 23               6      INC HL
-000326 0426 10F4            13      DJNZ    FILE2
+00035D 045D 0608             7      LD  B,8
+       045F                     FILE2:
+00035F 045F CD9604          17      CALL    CCHKF
+000362 0462 C8              11      RET Z
+000363 0463 FE2E             7      CP  '.'
+000365 0465 280C            12      JR  Z,FILE4
+000367 0467 77               7      LD  (HL),A
+000368 0468 23               6      INC HL
+000369 0469 10F4            13      DJNZ    FILE2
                                 
-       0428                     FILE3:
-000328 0428 CD5304          17      CALL    CCHKF
-00032B 042B C8              11      RET Z
-00032C 042C FE2E             7      CP  '.'
-00032E 042E 20F8            12      JR  NZ,FILE3
+       046B                     FILE3:
+00036B 046B CD9604          17      CALL    CCHKF
+00036E 046E C8              11      RET Z
+00036F 046F FE2E             7      CP  '.'
+000371 0471 20F8            12      JR  NZ,FILE3
                                 
-       0430                     FILE4:
-000330 0430 21F507          10      LD  HL,FNAME+8
-000333 0433 0603             7      LD  B,3
+       0473                     FILE4:
+000373 0473 213A0A          10      LD  HL,FNAME+8
+000376 0476 0603             7      LD  B,3
                                 
-       0435                     FILE4L:
-000335 0435 CD5304          17      CALL    CCHKF
-000338 0438 C8              11      RET Z
-000339 0439 77               7      LD  (HL),A
-00033A 043A 23               6      INC HL
-00033B 043B 10F8            13      DJNZ    FILE4L
-00033D 043D C9              10      RET
+       0478                     FILE4L:
+000378 0478 CD9604          17      CALL    CCHKF
+00037B 047B C8              11      RET Z
+00037C 047C 77               7      LD  (HL),A
+00037D 047D 23               6      INC HL
+00037E 047E 10F8            13      DJNZ    FILE4L
+000380 0480 C9              10      RET
                                 
-       043E                     FILE10:
-00033E 043E 3E3F             7      LD  A,'?'
+       0481                     FILE10:
+000381 0481 3E3F             7      LD  A,'?'
                                 
-       0440                     FILL_MEMORY:                ;HLからBバイトAで埋める
-000340 0440 77               7      LD  (HL),A
-000341 0441 23               6      INC HL
-000342 0442 10FC            13      DJNZ    FILL_MEMORY
-000344 0444 C9              10      RET
+       0483                     FILL_MEMORY:                ;HLからBバイトAで埋める
+000383 0483 77               7      LD  (HL),A
+000384 0484 23               6      INC HL
+000385 0485 10FC            13      DJNZ    FILL_MEMORY
+000387 0487 C9              10      RET
                                 
-       0445                     FILEI:              ;名前＋拡張子をスペースで初期化
-000345 0445 3E20             7      LD  A,020H
-000347 0447 01000B          10      LD  BC,11*256
-00034A 044A 21ED07          10      LD  HL,FNAME
-00034D 044D E5              11      PUSH    HL
-00034E 044E CD4004          17      CALL    FILL_MEMORY
-000351 0451 E1              10      POP HL
-000352 0452 C9              10      RET
+       0488                     FILEI:              ;名前＋拡張子をスペースで初期化
+000388 0488 3E20             7      LD  A,020H
+00038A 048A 01000B          10      LD  BC,11*256
+00038D 048D 21320A          10      LD  HL,FNAME
+000390 0490 E5              11      PUSH    HL
+000391 0491 CD8304          17      CALL    FILL_MEMORY
+000394 0494 E1              10      POP HL
+000395 0495 C9              10      RET
                                 
-       0453                     CCHKF:
-000353 0453 1A               7      LD  A,(DE)
-000354 0454 CD5B04          17      CALL    CCHK2
-000357 0457 C8              11      RET Z
-000358 0458 C38E04          10      JP  FKAN
+       0496                     CCHKF:
+000396 0496 1A               7      LD  A,(DE)
+000397 0497 CD9E04          17      CALL    CCHK2
+00039A 049A C8              11      RET Z
+00039B 049B C3D104          10      JP  FKAN
                                 
-       045B                     CCHK2:
-00035B 045B 0C               4      INC C
-00035C 045C 0D               4      DEC C
-00035D 045D C0              11      RET NZ
-       045E                     CCHK3:              ;ZF=1 で使えない文字
-00035E 045E FE2B             7      CP  '+'
-000360 0460 C8              11      RET Z
-000361 0461 FE2C             7      CP  ','
-000363 0463 C8              11      RET Z
-000364 0464 FE2F             7      CP  '/'
-000366 0466 C8              11      RET Z
-000367 0467 FE3A             7      CP  ':'
-000369 0469 C8              11      RET Z
-00036A 046A FE3B             7      CP  ';'
-00036C 046C C8              11      RET Z
-00036D 046D FE3D             7      CP  '='
-00036F 046F C8              11      RET Z
-000370 0470 FE5C             7      CP  05CH    ;\
-000372 0472 C8              11      RET Z
-000373 0473 FE20             7      CP  020H
-000375 0475 D0              11      RET NC
-000376 0476 BF               4      CP  A       ;Z=1
-000377 0477 C9              10      RET
+       049E                     CCHK2:
+00039E 049E 0C               4      INC C
+00039F 049F 0D               4      DEC C
+0003A0 04A0 C0              11      RET NZ
+       04A1                     CCHK3:              ;ZF=1 で使えない文字
+0003A1 04A1 FE2B             7      CP  '+'
+0003A3 04A3 C8              11      RET Z
+0003A4 04A4 FE2C             7      CP  ','
+0003A6 04A6 C8              11      RET Z
+0003A7 04A7 FE2F             7      CP  '/'
+0003A9 04A9 C8              11      RET Z
+0003AA 04AA FE3A             7      CP  ':'
+0003AC 04AC C8              11      RET Z
+0003AD 04AD FE3B             7      CP  ';'
+0003AF 04AF C8              11      RET Z
+0003B0 04B0 FE3D             7      CP  '='
+0003B2 04B2 C8              11      RET Z
+0003B3 04B3 FE5C             7      CP  05CH    ;\
+0003B5 04B5 C8              11      RET Z
+0003B6 04B6 FE20             7      CP  020H
+0003B8 04B8 D0              11      RET NC
+0003B9 04B9 BF               4      CP  A       ;Z=1
+0003BA 04BA C9              10      RET
                                 
-       0478                     TOZERO:
-000378 0478 D5              11      PUSH    DE
-       0479                     TZ1:
-000379 0479 1A               7      LD  A,(DE)
-00037A 047A FE20             7      CP  20H
-00037C 047C 3803            12      JR  C,TZ2
-00037E 047E 13               6      INC DE
-00037F 047F 18F8            12      JR  TZ1
-       0481                     TZ2:
-000381 0481 AF               4      XOR A
-000382 0482 12               7      LD  (DE),A
-000383 0483 D1              10      POP DE
-000384 0484 C9              10      RET
+       04BB                     TOZERO:
+0003BB 04BB D5              11      PUSH    DE
+       04BC                     TZ1:
+0003BC 04BC 1A               7      LD  A,(DE)
+0003BD 04BD FE20             7      CP  20H
+0003BF 04BF 3803            12      JR  C,TZ2
+0003C1 04C1 13               6      INC DE
+0003C2 04C2 18F8            12      JR  TZ1
+       04C4                     TZ2:
+0003C4 04C4 AF               4      XOR A
+0003C5 04C5 12               7      LD  (DE),A
+0003C6 04C6 D1              10      POP DE
+0003C7 04C7 C9              10      RET
                                 
-       0485                     CAP:
-000385 0485 FE61             7      CP  'a'
-000387 0487 D8              11      RET C
-000388 0488 FE7B             7      CP  'z'+1
-00038A 048A D0              11      RET NC
-00038B 048B D620             7      SUB 020H
-00038D 048D C9              10      RET
+       04C8                     CAP:
+0003C8 04C8 FE61             7      CP  'a'
+0003CA 04CA D8              11      RET C
+0003CB 04CB FE7B             7      CP  'z'+1
+0003CD 04CD D0              11      RET NC
+0003CE 04CE D620             7      SUB 020H
+0003D0 04D0 C9              10      RET
                                 
-       048E                     FKAN:           ;漢字チェック
-00038E 048E CB41             8      BIT 0,C
-000390 0490 CC8504          17      CALL    Z,CAP
+       04D1                     FKAN:           ;漢字チェック
+0003D1 04D1 CB41             8      BIT 0,C
+0003D3 04D3 CCC804          17      CALL    Z,CAP
                                 
-000393 0493 13               6      INC DE
-       0494                     FKANX:
-000394 0494 CB41             8      BIT 0,C
-000396 0496 CB81             8      RES 0,C
-000398 0498 C0              11      RET NZ
-000399 0499 FE80             7      CP  080H
-00039B 049B D8              11      RET C
-00039C 049C FEA0             7      CP  0A0H
-00039E 049E 3803            12      JR  C,FKAN1
-0003A0 04A0 FEE0             7      CP  0E0H
-0003A2 04A2 D8              11      RET C
-       04A3                     FKAN1:
-0003A3 04A3 0C               4      INC C
-0003A4 04A4 A7               4      AND A
-0003A5 04A5 C9              10      RET
+0003D6 04D6 13               6      INC DE
+       04D7                     FKANX:
+0003D7 04D7 CB41             8      BIT 0,C
+0003D9 04D9 CB81             8      RES 0,C
+0003DB 04DB C0              11      RET NZ
+0003DC 04DC FE80             7      CP  080H
+0003DE 04DE D8              11      RET C
+0003DF 04DF FEA0             7      CP  0A0H
+0003E1 04E1 3803            12      JR  C,FKAN1
+0003E3 04E3 FEE0             7      CP  0E0H
+0003E5 04E5 D8              11      RET C
+       04E6                     FKAN1:
+0003E6 04E6 0C               4      INC C
+0003E7 04E7 A7               4      AND A
+0003E8 04E8 C9              10      RET
                                 
-       04A6                     PRTTMS:
-0003A6 04A6 2AC105          16      LD  HL,(HEADER+10)  ;(ZIP12) ファイルの最終変更日付
-0003A9 04A9 7D               4      LD  A,L
-0003AA 04AA CB3C             8      SRL H
-0003AC 04AC 17               4      RLA
-0003AD 04AD 17               4      RLA
-0003AE 04AE 17               4      RLA
-0003AF 04AF 17               4      RLA
-0003B0 04B0 E60F             7      AND 00FH
-0003B2 04B2 57               4      LD  D,A
-0003B3 04B3 7C               4      LD  A,H
-0003B4 04B4 C650             7      ADD A,80
-0003B6 04B6 CDF904          17      CALL    PRDEC_A
-0003B9 04B9 3E2D             7      LD  A,'-'
-0003BB 04BB CD0404          17      CALL    MSG_A
-0003BE 04BE 7A               4      LD  A,D
-0003BF 04BF CDF904          17      CALL    PRDEC_A
-0003C2 04C2 3E2D             7      LD  A,'-'
-0003C4 04C4 CD0404          17      CALL    MSG_A
-0003C7 04C7 7D               4      LD  A,L
-0003C8 04C8 E61F             7      AND 01FH
-0003CA 04CA CDF904          17      CALL    PRDEC_A
+       04E9                     PRTTMS:
+0003E9 04E9 2A0406          16      LD  HL,(HEADER+10)  ;(ZIP12) ファイルの最終変更日付
+0003EC 04EC 7D               4      LD  A,L
+0003ED 04ED CB3C             8      SRL H
+0003EF 04EF 17               4      RLA
+0003F0 04F0 17               4      RLA
+0003F1 04F1 17               4      RLA
+0003F2 04F2 17               4      RLA
+0003F3 04F3 E60F             7      AND 00FH
+0003F5 04F5 57               4      LD  D,A
+0003F6 04F6 7C               4      LD  A,H
+0003F7 04F7 C650             7      ADD A,80
+0003F9 04F9 CD3C05          17      CALL    PRDEC_A
+0003FC 04FC 3E2D             7      LD  A,'-'
+0003FE 04FE CD4704          17      CALL    MSG_A
+000401 0501 7A               4      LD  A,D
+000402 0502 CD3C05          17      CALL    PRDEC_A
+000405 0505 3E2D             7      LD  A,'-'
+000407 0507 CD4704          17      CALL    MSG_A
+00040A 050A 7D               4      LD  A,L
+00040B 050B E61F             7      AND 01FH
+00040D 050D CD3C05          17      CALL    PRDEC_A
                                 
-0003CD 04CD 2ABF05          16      LD  HL,(HEADER+8)   ;(ZIP12) ファイルの最終変更時間
-0003D0 04D0 3E20             7      LD  A,020H
-0003D2 04D2 CD0404          17      CALL    MSG_A
-0003D5 04D5 7C               4      LD  A,H
-0003D6 04D6 65               4      LD  H,L
-0003D7 04D7 0603             7      LD  B,3
-       04D9                     PRTTMS1:
-0003D9 04D9 1F               4      RRA
-0003DA 04DA CB1D             8      RR  L
-0003DC 04DC 10FB            13      DJNZ    PRTTMS1
-0003DE 04DE E61F             7      AND 01FH
-0003E0 04E0 CDF904          17      CALL    PRDEC_A
-0003E3 04E3 3E3A             7      LD  A,':'
-0003E5 04E5 CD0404          17      CALL    MSG_A
-0003E8 04E8 7D               4      LD  A,L
-0003E9 04E9 0F               4      RRCA
-0003EA 04EA 0F               4      RRCA
-0003EB 04EB E63F             7      AND 03FH
-0003ED 04ED CDF904          17      CALL    PRDEC_A
-0003F0 04F0 3E3A             7      LD  A,':'
-0003F2 04F2 CD0404          17      CALL    MSG_A
-0003F5 04F5 7C               4      LD  A,H
-0003F6 04F6 E61F             7      AND 01FH
-0003F8 04F8 87               4      ADD A,A
+000410 0510 2A0206          16      LD  HL,(HEADER+8)   ;(ZIP12) ファイルの最終変更時間
+000413 0513 3E20             7      LD  A,020H
+000415 0515 CD4704          17      CALL    MSG_A
+000418 0518 7C               4      LD  A,H
+000419 0519 65               4      LD  H,L
+00041A 051A 0603             7      LD  B,3
+       051C                     PRTTMS1:
+00041C 051C 1F               4      RRA
+00041D 051D CB1D             8      RR  L
+00041F 051F 10FB            13      DJNZ    PRTTMS1
+000421 0521 E61F             7      AND 01FH
+000423 0523 CD3C05          17      CALL    PRDEC_A
+000426 0526 3E3A             7      LD  A,':'
+000428 0528 CD4704          17      CALL    MSG_A
+00042B 052B 7D               4      LD  A,L
+00042C 052C 0F               4      RRCA
+00042D 052D 0F               4      RRCA
+00042E 052E E63F             7      AND 03FH
+000430 0530 CD3C05          17      CALL    PRDEC_A
+000433 0533 3E3A             7      LD  A,':'
+000435 0535 CD4704          17      CALL    MSG_A
+000438 0538 7C               4      LD  A,H
+000439 0539 E61F             7      AND 01FH
+00043B 053B 87               4      ADD A,A
                                 
                                 ;   PRINT10
                                 
-       04F9                     PRDEC_A:
-0003F9 04F9 E5              11      PUSH    HL
-0003FA 04FA 0608             7      LD  B,8
-0003FC 04FC 4F               4      LD  C,A
-0003FD 04FD AF               4      XOR A
-       04FE                     PRTA1:
-0003FE 04FE CB01             4      RLC C
-000400 0500 8F               4      ADC A,A
-000401 0501 27               4      DAA
-000402 0502 10FA            13      DJNZ    PRTA1
-000404 0504 21E707          10      LD  HL,DECBF
-000407 0507 77               7      LD  (HL),A
-000408 0508 AF               4      XOR A
-000409 0509 CDE603          17      CALL    DECX
-00040C 050C E1              10      POP HL
-00040D 050D C9              10      RET
+       053C                     PRDEC_A:
+00043C 053C E5              11      PUSH    HL
+00043D 053D 0608             7      LD  B,8
+00043F 053F 4F               4      LD  C,A
+000440 0540 AF               4      XOR A
+       0541                     PRTA1:
+000441 0541 CB01             4      RLC C
+000443 0543 8F               4      ADC A,A
+000444 0544 27               4      DAA
+000445 0545 10FA            13      DJNZ    PRTA1
+000447 0547 212C0A          10      LD  HL,DECBF
+00044A 054A 77               7      LD  (HL),A
+00044B 054B AF               4      XOR A
+00044C 054C CD2904          17      CALL    DECX
+00044F 054F E1              10      POP HL
+000450 0550 C9              10      RET
                                 
-       050E                     MSX1:
-00040E 050E CD0404          17      CALL    MSG_A
-       0511                     MSX:
-000411 0511 7E               7      LD  A,(HL)
-000412 0512 23               6      INC HL
-000413 0513 B7               4      OR  A
-000414 0514 20F8            12      JR  NZ,MSX1
-000416 0516 C9              10      RET
+       0551                     MSX1:
+000451 0551 CD4704          17      CALL    MSG_A
+       0554                     MSX:
+000454 0554 7E               7      LD  A,(HL)
+000455 0555 23               6      INC HL
+000456 0556 B7               4      OR  A
+000457 0557 20F8            12      JR  NZ,MSX1
+000459 0559 C9              10      RET
                                 
-       0517                     SHOW_ERROR_OS:
-000417 0517 216405          10      LD  HL,ERROR_OS
-00041A 051A CD1105          17      CALL    MSX
-00041D 051D C30000          10      JP  0
-       0520                     SHOW_USAGE:
-000420 0520 218705          10      LD  HL,USAGE
-000423 0523 CD1105          17      CALL    MSX
-000426 0526 C30000          10      JP  0
+       055A                     SHOW_ERROR_OS:
+00045A 055A 21A705          10      LD  HL,ERROR_OS
+00045D 055D CD5405          17      CALL    MSX
+000460 0560 C30000          10      JP  0
+       0563                     SHOW_USAGE:
+000463 0563 21CA05          10      LD  HL,USAGE
+000466 0566 CD5405          17      CALL    MSX
+000469 0569 C30000          10      JP  0
                                 
-       0529                     CPHEADER:
-000429 0529 21B705          10      LD  HL,HEADER
-00042C 052C 0604             7      LD  B,4
-       052E                     CPSTRN:
-00042E 052E 1A               7      LD  A,(DE)
-00042F 052F 13               6      INC DE
-000430 0530 BE               7      CP  (HL)
-000431 0531 C0              11      RET NZ
-000432 0532 23               6      INC HL
-000433 0533 10F9            13      DJNZ    CPSTRN
-000435 0535 C9              10      RET
+       056C                     CPHEADER:
+00046C 056C 21FA05          10      LD  HL,HEADER
+00046F 056F 0604             7      LD  B,4
+       0571                     CPSTRN:
+000471 0571 1A               7      LD  A,(DE)
+000472 0572 13               6      INC DE
+000473 0573 BE               7      CP  (HL)
+000474 0574 C0              11      RET NZ
+000475 0575 23               6      INC HL
+000476 0576 10F9            13      DJNZ    CPSTRN
+000478 0578 C9              10      RET
                                 
-       0536                     IS_SPLITTER:
-000436 0536 FE2F             7      CP  '/'
-000438 0538 C8              11      RET Z
-000439 0539 FE3A             7      CP  ':'
-00043B 053B C8              11      RET Z
-00043C 053C FE5C             7      CP  05CH    ;\
-00043E 053E C9              10      RET
+       0579                     IS_SPLITTER:
+000479 0579 FE2F             7      CP  '/'
+00047B 057B C8              11      RET Z
+00047C 057C FE3A             7      CP  ':'
+00047E 057E C8              11      RET Z
+00047F 057F FE5C             7      CP  05CH    ;\
+000481 0581 C9              10      RET
                                 
-       053F                     GET_ATTR:
-00043F 053F 3AB905          13      LD  A,(HEADER+2)    ;(ZIP12)ZIPファイル製作を行ったOS
-000442 0542 FE0E             7      CP  14      ;VFAT
-000444 0544 2807            12      JR  Z,ATTR
-000446 0546 FE0A             7      CP  10      ;Windows NTFS
-000448 0548 2803            12      JR  Z,ATTR
-00044A 054A B7               4      OR  A       ;MS-DOS
-00044B 054B 37               4      SCF
-00044C 054C C0              11      RET NZ
-       054D                     ATTR:
-00044D 054D 3AD905          13      LD  A,(HEADER+34)   ;(ZIP12) ファイルの属性
-000450 0550 E627             7      AND 027H        ;A--SHR
-000452 0552 C9              10      RET
+       0582                     GET_ATTR:
+000482 0582 3AFC05          13      LD  A,(HEADER+2)    ;(ZIP12)ZIPファイル製作を行ったOS
+000485 0585 FE0E             7      CP  14      ;VFAT
+000487 0587 2807            12      JR  Z,ATTR
+000489 0589 FE0A             7      CP  10      ;Windows NTFS
+00048B 058B 2803            12      JR  Z,ATTR
+00048D 058D B7               4      OR  A       ;MS-DOS
+00048E 058E 37               4      SCF
+00048F 058F C0              11      RET NZ
+       0590                     ATTR:
+000490 0590 3A1C06          13      LD  A,(HEADER+34)   ;(ZIP12) ファイルの属性
+000493 0593 E627             7      AND 027H        ;A--SHR
+000495 0595 C9              10      RET
                                 
-       0553                     TITLE:
-000453 0553 554E5A4950464958        DB  "UNZIPFIX v1.20", 00DH, 00AH, 0
-            2076312E32300D0A    
+       0596                     TITLE:
+000496 0596 554E5A4950464958        DB  "UNZIPFIX v1.21", 00DH, 00AH, 0
+            2076312E32310D0A    
             00                  
-       0564                     ERROR_OS:
-000464 0564 4C53582D446F6467        DB  "LSX-Dodgers or MSX-DOS required.", 00DH, 00AH, 0
+       05A7                     ERROR_OS:
+0004A7 05A7 4C53582D446F6467        DB  "LSX-Dodgers or MSX-DOS required.", 00DH, 00AH, 0
             657273206F72204D    
             53582D444F532072    
             657175697265642E    
             0D0A00              
-       0587                     USAGE:
-000487 0587 75736167653A2055        DB  "usage: UNZIPFIX filename [drive:]", 00DH, 00AH, 0
+       05CA                     USAGE:
+0004CA 05CA 75736167653A2055        DB  "usage: UNZIPFIX filename [drive:]", 00DH, 00AH, 0
             4E5A495046495820    
             66696C656E616D65    
             205B64726976653A    
             5D0D0A00            
-       05AB                     HEADER_PK12:
-0004AB 05AB 504B0102                DB  "PK",1,2
-       05AF                     HEADER_PK34:
-0004AF 05AF 504B0304                DB  "PK",3,4
+       05EE                     HEADER_PK12:
+0004EE 05EE 504B0102                DB  "PK",1,2
+       05F2                     HEADER_PK34:
+0004F2 05F2 504B0304                DB  "PK",3,4
                                 
-       05B3                     OS_TYPE:        ;0:MSX-DOS1  1:LSX-Dodgers  2:MSX-DOS2  3:CDOS2
-       05B3                         DS  1
-       05B4                     OUT_DRIVE:
-       05B4                         DS  1
-       05B5                     PATH_A:
-       05B5                         DS  2
-       05B7                     HEADER:
-       05B7                         DS  4
-       05BB                     HEADER1:
-       05BB                         DS  42
+       05F6                     OS_TYPE:        ;0:MSX-DOS1  1:LSX-Dodgers  2:MSX-DOS2  3:CDOS2
+       05F6                         DS  1
+       05F7                     OUT_DRIVE:
+       05F7                         DS  1
+       05F8                     PATH_A:
+       05F8                         DS  2
+       05FA                     HEADER:
+       05FA                         DS  4
+       05FE                     HEADER1:
+       05FE                         DS  42
                                 
-       05E5                     DRV_PATH:
-       05E5                         DS  2
-       05E7                     PATH:
-       05E7                         DS  512
-       07E7                     DECBF:
-       07E7                         DS  5
-       07EC                     FDRV:
-       07EC                         DS  37
-       07ED                     FNAME   EQU FDRV+1
+       0628                     DRV_PATH:
+       0628                         DS  2
+       062A                     PATH:
+       062A                         DS  512
+       082A                     FULLPATH:
+       082A                         DS  514
+       0A2C                     DECBF:
+       0A2C                         DS  5
+       0A31                     FDRV:
+       0A31                         DS  37
+       0A32                     FNAME   EQU FDRV+1
                                 
-       0811                     BUFAD:
+       0A56                     BUFAD:
 [EOF:UNZIPFIX.ASM:SHIFT_JIS]
