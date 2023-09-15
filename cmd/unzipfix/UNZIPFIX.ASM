@@ -290,36 +290,15 @@ FCLOSE:
 	OR	A
 	JR	NZ,MSXDOS2SUBDIR
 				;(MSX-DOS2) 属性を設定する
-	CALL	GET_ATTR
-	JR	C,SKIP12
-	LD	L,A
 	LD	DE,(PATH_A)
 	DEC	DE
-	LD	C,050H		;(BDOS) ファイル属性の獲得・セット(_ATTR) MSX-DOS2
-	LD	A,1
-	CALL	SYSTEM
-	JR	SKIP12
+	CALL	MSXDOS2
 MSXDOS2SUBDIR:
 	LD	A,(OS_TYPE)
 	CP	2
 	JR	NZ,SKIP12
-
 	LD	DE,FULLPATH
-	LD	HL,(HEADER+10)	;(ZIP12) ファイルの最終変更日付
-	LD	IX,(HEADER+8)	;(ZIP12) ファイルの最終変更時間
-	LD	C,051H		;(BDOS) ファイルの日付および時刻の獲得・セット(_FTIME) MSX-DOS2
-	LD	A,1
-	CALL	SYSTEM
-	OR	A
-	JR	NZ,SKIP12
-				;(MSX-DOS2) 属性を設定する
-	CALL	GET_ATTR
-	JR	C,SKIP12
-	LD	L,A
-	LD	DE,FULLPATH
-	LD	C,050H		;(BDOS) ファイル属性の獲得・セット(_ATTR) MSX-DOS2
-	LD	A,1
-	CALL	SYSTEM
+	CALL	MSXDOS2
 				;次のヘッダーまでランダムレコードを移動する
 SKIP12:
 	XOR	A
@@ -385,6 +364,36 @@ EXIT1:
 	LD	C,010H		;(BDOS) ファイルのクローズ(_FCLOSE) CP/M MSX-DOS
 	CALL	SYSTEM
 	JP	0		;プログラム終了
+
+				;(MSX-DOS2) 属性を設定する
+MSXDOS2:
+	XOR	A		;オープンモード
+	LD	C,043H 		;(BDOS) ファイルハンドルのオープン(_OPEN) MSX-DOS2
+	CALL	SYSTEM
+	OR	A
+	RET	NZ
+
+	LD	HL,(HEADER+10)	;(ZIP12) ファイルの最終変更日付
+	LD	IX,(HEADER+8)	;(ZIP12) ファイルの最終変更時間
+	LD	A,1
+	PUSH	BC
+	LD	C,056H		;(BDOS) ファイルハンドルの日付および時刻の獲得・セット(_HFTIME ) MSX-DOS2
+	CALL	SYSTEM
+	POP	BC
+	OR	A
+	JR	NZ,MSXDDOS2CLOSE
+				;(MSX-DOS2) 属性を設定する
+	CALL	GET_ATTR
+	JR	C,MSXDDOS2CLOSE
+	LD	L,A
+	LD	A,1
+	PUSH	BC
+	LD	C,055H		;(BDOS) ファイルハンドルの属性の獲得・セット(_HATTR) MSX-DOS2
+	CALL	SYSTEM
+	POP	BC
+MSXDDOS2CLOSE:
+	LD	C,045H		;(BDOS) ファイルハンドルのクローズ(_CLOSE) MSX-DOS2
+	JP	SYSTEM
 
 PRDEC_DEHL:
 	LD	A,2
@@ -703,7 +712,7 @@ ATTR:
 	RET
 
 TITLE:
-	DB	"UNZIPFIX v1.21", 00DH, 00AH, 0
+	DB	"UNZIPFIX v1.22", 00DH, 00AH, 0
 ERROR_OS:
 	DB	"LSX-Dodgers or MSX-DOS required.", 00DH, 00AH, 0
 USAGE:
