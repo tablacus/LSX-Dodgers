@@ -5,7 +5,6 @@ DIZ1	EQU	$08
 DIZ2	EQU	$08
 WIDTH	EQU	40
 
-OSFLG	EQU	$0003
 SYSTEM	EQU	$0005
 JP_HL	EQU	$000F
 BIOS	EQU	$0018
@@ -31,7 +30,7 @@ PALBF	EQU	HEADBF+32
 	ORG	$0100
 	JP	START
 START:
-	LD	A,(000BH)
+	LD	A,($0002)
 	LD	(SMC01+2),A
 	LD	(SMC02+2),A
 	LD	(SMC03+2),A
@@ -65,8 +64,9 @@ USAGE:
 	CALL	SYSTEM
 	RST	0
 MAIN:
-	LD	HL,(OSFLG)
-	LD	A,H
+	LD	C,$6F 		;MSX-DOS ÇÃÉoÅ[ÉWÉáÉìî‘çÜÇÃälìæ(_DOSVER)
+	CALL	SYSTEM
+	LD	A,C
 	CP	$1D
 	RET	NZ
 	LD	A,L
@@ -992,7 +992,7 @@ XADD1:
 	RET
 
 TITLE:
-	DB	"X1 analog MAG loader v1.01",$0D,$0A
+	DB	"X1 analog MAG loader v1.02",$0D,$0A
 	DB	"$"
 MUSAGE:
 	DB	"usage: MAGA Ãß≤Ÿ»∞—[.MAG][Ω≤Ø¡]",$0D,$0A
