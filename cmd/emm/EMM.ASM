@@ -1,29 +1,26 @@
 ;
-;	EMM controler by Gaku Nakagawa
+;	EMM controler by Gaku
 ;
-OSFLG	EQU	$0003
 SYSTEM	EQU	$0005
-BASE	EQU	$000B
-[HL]	EQU	$000F
-BIOS	EQU	$0018
 DTA	EQU	$0080
 
 	ORG	$0100
 	JP	START
 START:
 	LD	DE,TITLE
-	LD	C,9
+	LD	C,9		;(BDOS)文字列出力(_STROUT)
 	CALL	SYSTEM
 	LD	A,(DTA)
 	OR	A
 	JP	Z,USAGE
 MAIN:
-	LD	HL,(OSFLG)
-	LD	A,H
+	LD	C,$6F 		;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
+	CALL	SYSTEM
+	LD	A,C
 	CP	$1D
 	RET	NZ
 	LD	A,L
-	CP	$80
+	AND	$7F
 	RET	NZ
 
 	LD	SP,(SYSTEM+1)
@@ -37,19 +34,19 @@ MAIN:
 	JP	NC,0
 
 	LD	A,(LEVEL)
-	LD	(IX+$0C),A
-	LD	(IX+$08),L
-	LD	(IX+$09),H
+	LD	(IX+$0C),A	;(DPB)フロッピーディスクのシリンダ数(DPB_MAXCYL)
+	LD	(IX+$08),L	;(DPB)総クラスタ数(DPB_MAXCL)
+	LD	(IX+$09),H	; 		//
 AREA:
 	LD	DE,MAREA
-	LD	C,9
+	LD	C,9		;(BDOS)文字列出力(_STROUT)
 	CALL	SYSTEM
 
-	LD	A,(IX+$0C)
+	LD	A,(IX+$0C)	;(DPB)フロッピーディスクのシリンダ数(DPB_MAXCYL)
 	CALL	PRTHX
 
 	LD	DE,CRLF
-	LD	C,9
+	LD	C,9		;(BDOS)文字列出力(_STROUT)
 	CALL	SYSTEM
 
 	JP	0
@@ -58,10 +55,12 @@ FIND:
 	XOR	A
 FIND1:
 	PUSH	AF
-	LD	HL,(BASE-1)
-	LD	L,$DC
-	CALL	[HL]
-	LD	A,(IX+$12)
+	LD	E,A
+	LD	C,$1F		;(BDOS)ディスク装置のパラメータの読み出し
+	CALL	SYSTEM
+
+	LD	A,(IX+$12)	;(DPB)デバイス情報(DPB_DEVICE)
+	AND	$0F
 	CP	$06
 	JR	Z,EXIT
 	POP	AF
@@ -116,7 +115,7 @@ EADR2:
 	LD	BC,(LEVEL-1)
 	LD	C,0
 	ADD	HL,BC
-	LD	C,(IX+$13)
+	LD	C,(IX+$13)	;(DPB)デバイスドライバ内におけるユニット番号(DPB_UNITNO)
 	LD	B,$0D
 	OUT	(C),C
 	INC	C
@@ -129,13 +128,13 @@ EADR2:
 	RET
 
 EADR0:
-	LD	C,(IX+$13)
+	LD	C,(IX+$13)	;(DPB)デバイスドライバ内におけるユニット番号(DPB_UNITNO)
 	LD	B,$0D
-	DB	$ED,$71
+	OUT	(C),0		;Z80未定義命令
 	INC	C
-	DB	$ED,$71
+	OUT	(C),0		;Z80未定義命令
 	INC	C
-	DB	$ED,$71
+	OUT	(C),0		;Z80未定義命令
 	INC	C
 	RET
 
@@ -221,7 +220,7 @@ PRTHX:
 PRTA2:
 	CALL	ASC
 	LD	E,A
-	LD	C,2
+	LD	C,2		;(BDOS)コンソール出力(_CONOUT)
 	JP	SYSTEM
 
 ASC:
@@ -234,13 +233,13 @@ ASC:
 
 USAGE:
 	LD	DE,MUSAGE
-	LD	C,9
+	LD	C,9		;(BDOS)文字列出力(_STROUT)
 	CALL	SYSTEM
 	CALL	FIND
 	JP	AREA
 
 TITLE:
-	DB	"X1 EMM controler v1.00 Lovers"
+	DB	"X1 EMM controler v1.01"
 CRLF:
 	DB	$0D,$0A
 	DB	"$"
@@ -251,4 +250,4 @@ MAREA:
 	DB	"EMM area: $"
 
 LEVEL:	DB	0
-
+

@@ -1,9 +1,8 @@
 ;
 ;	screen controler by Gaku
 ;
-OSFLG	EQU	$0003
 SYSTEM	EQU	$0005
-BASE	EQU	$000B
+BASE	EQU	$0002
 JP_HL	EQU	$000F
 DTA	EQU	$0080
 
@@ -20,8 +19,9 @@ START:
 	LD	C,9
 	JP	SYSTEM
 MAIN:
-	LD	HL,(OSFLG)
-	LD	A,H
+	LD	C,$6F 		;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
+	CALL	SYSTEM
+	LD	A,C
 	CP	$1D
 	RET	NZ
 	LD	A,L
@@ -113,7 +113,7 @@ SETCRT1:
 	LD	HL,_C8025H
 SETCRTC:
 	LD	DE,(BASE-1)
-	LD	E,$B1
+	LD	E,$B1		;_WIDTH
 	LD	A,(DE)
 	INC	HL
 	CP	(HL)
@@ -129,7 +129,7 @@ SETCRTC:
 	LDIR
 	LD	A,(HL)
 	LD	HL,(BASE-1)
-	LD	L,$97
+	LD	L,$97		;_LINE
 	LD	(HL),A
 	POP	HL
 SETCRT2:
@@ -186,7 +186,7 @@ VIDEOE:
 	POP	AF
 	CALL	S1FD0
 	LD	BC,$1FB0
-	DB	$ED,$71
+	OUT	(C),0		;Z80未定義命令
 	LD	A,$E7
 	CALL	COMOUT
 	LD	A,$1D
@@ -209,7 +209,7 @@ CLS:
 	RET	NZ
 CLS0:
 	LD	HL,(BASE-1)
-	LD	L,$BF
+	LD	L,$BF		;WK1FD0
 	ADD	A,A
 	ADD	A,A
 	ADD	A,A
@@ -229,7 +229,7 @@ CLS0:
 CLS1:
 	LD	B,H
 CLS2:
-	DB	$ED,$71
+	OUT	(C),0		;Z80未定義命令
 	INC	B
 	JR	NZ,CLS2
 ;
@@ -355,11 +355,11 @@ PALET1:
 	LD	BC,$12F0
 	OUT	(C),C
 	INC	B
-	DB	$ED,$71
+	OUT	(C),0		;Z80未定義命令
 G1FD0:
 	LD	A,(BASE)
 	LD	IYH,A
-	LD	IYL,$BF
+	LD	IYL,$BF		;WK1FD0
 	LD	A,(IY+0)
 	RET
 
@@ -415,7 +415,7 @@ CAP:
 	RET
 
 TITLE:
-	DB	"X1 screen controler v1.05"
+	DB	"X1 screen controler v1.06"
 	DB	$0D,$0A
 	DB	"$"
 USAGE:

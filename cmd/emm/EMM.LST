@@ -1,0 +1,260 @@
+                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.12.0, LST:Full:4
+                                ;
+                                ;   EMM controler by Gaku
+                                ;
+       0005                     SYSTEM  EQU $0005
+       0080                     DTA EQU $0080
+                                
+000000 0100                         ORG $0100
+000000 0100 C30301          10      JP  START
+       0103                     START:
+000003 0103 115902          10      LD  DE,TITLE
+000006 0106 0E09             7      LD  C,9     ;(BDOS)文字列出力(_STROUT)
+000008 0108 CD0500          17      CALL    SYSTEM
+00000B 010B 3A8000          13      LD  A,(DTA)
+00000E 010E B7               4      OR  A
+00000F 010F CA4B02          10      JP  Z,USAGE
+       0112                     MAIN:
+000012 0112 0E6F             7      LD  C,$6F       ;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
+000014 0114 CD0500          17      CALL    SYSTEM
+000017 0117 79               4      LD  A,C
+000018 0118 FE1D             7      CP  $1D
+00001A 011A C0              11      RET NZ
+00001B 011B 7D               4      LD  A,L
+00001C 011C E67F             7      AND $7F
+00001E 011E C0              11      RET NZ
+                                
+00001F 011F ED7B0600        20      LD  SP,(SYSTEM+1)
+000023 0123 118100          10      LD  DE,DTA+1
+000026 0126 CDEB01          17      CALL    AHEX
+000029 0129 DA4B02          10      JP  C,USAGE
+00002C 012C 329402          13      LD  (LEVEL),A
+                                
+00002F 012F CD5D01          17      CALL    FIND
+000032 0132 CD7901          17      CALL    EMM
+000035 0135 D20000          10      JP  NC,0
+                                
+000038 0138 3A9402          13      LD  A,(LEVEL)
+00003B 013B DD770C          19      LD  (IX+$0C),A  ;(DPB)フロッピーディスクのシリンダ数(DPB_MAXCYL)
+00003E 013E DD7508          19      LD  (IX+$08),L  ;(DPB)総クラスタ数(DPB_MAXCL)
+000041 0141 DD7409          19      LD  (IX+$09),H  ;       //
+       0144                     AREA:
+000044 0144 118902          10      LD  DE,MAREA
+000047 0147 0E09             7      LD  C,9     ;(BDOS)文字列出力(_STROUT)
+000049 0149 CD0500          17      CALL    SYSTEM
+                                
+00004C 014C DD7E0C          19      LD  A,(IX+$0C)  ;(DPB)フロッピーディスクのシリンダ数(DPB_MAXCYL)
+00004F 014F CD2F02          17      CALL    PRTHX
+                                
+000052 0152 116F02          10      LD  DE,CRLF
+000055 0155 0E09             7      LD  C,9     ;(BDOS)文字列出力(_STROUT)
+000057 0157 CD0500          17      CALL    SYSTEM
+                                
+00005A 015A C30000          10      JP  0
+                                
+       015D                     FIND:
+00005D 015D AF               4      XOR A
+       015E                     FIND1:
+00005E 015E F5              11      PUSH    AF
+00005F 015F 5F               4      LD  E,A
+000060 0160 0E1F             7      LD  C,$1F       ;(BDOS)ディスク装置のパラメータの読み出し
+000062 0162 CD0500          17      CALL    SYSTEM
+                                
+000065 0165 DD7E12          19      LD  A,(IX+$12)  ;(DPB)デバイス情報(DPB_DEVICE)
+000068 0168 E60F             7      AND $0F
+00006A 016A FE06             7      CP  $06
+00006C 016C 2809            12      JR  Z,EXIT
+00006E 016E F1              10      POP AF
+00006F 016F 3C               4      INC A
+000070 0170 FE08             7      CP  8
+000072 0172 38EA            12      JR  C,FIND1
+000074 0174 C30000          10      JP  0
+       0177                     EXIT:
+000077 0177 F1              10      POP AF
+000078 0178 C9              10      RET
+                                
+       0179                     EMM:
+000079 0179 CDCF01          17      CALL    EADR0
+00007C 017C ED78            12      IN  A,(C)
+00007E 017E F5              11      PUSH    AF
+                                
+00007F 017F 110000          10      LD  DE,0
+       0182                     ECHECK1:
+000082 0182 13               6      INC DE
+000083 0183 CDB301          17      CALL    EADR2
+000086 0186 ED60            12      IN  H,(C)
+000088 0188 CDB301          17      CALL    EADR2
+00008B 018B 7C               4      LD  A,H
+00008C 018C C6E5             7      ADD A,$E5
+00008E 018E ED79            12      OUT (C),A
+000090 0190 3C               4      INC A
+000091 0191 CDCF01          17      CALL    EADR0
+000094 0194 ED79            12      OUT (C),A
+000096 0196 3D               4      DEC A
+000097 0197 CDB301          17      CALL    EADR2
+00009A 019A ED68            12      IN  L,(C)
+00009C 019C CDB301          17      CALL    EADR2
+00009F 019F ED61            12      OUT (C),H
+0000A1 01A1 BD               4      CP  L
+0000A2 01A2 2004            12      JR  NZ,ECHECK2
+0000A4 01A4 CB5A             8      BIT 3,D
+0000A6 01A6 28DA            12      JR  Z,ECHECK1
+       01A8                     ECHECK2:
+0000A8 01A8 CDCF01          17      CALL    EADR0
+0000AB 01AB F1              10      POP AF
+0000AC 01AC ED79            12      OUT (C),A
+                                
+0000AE 01AE 21F7FF          10      LD  HL,-9
+0000B1 01B1 19              11      ADD HL,DE
+0000B2 01B2 C9              10      RET
+                                
+       01B3                     EADR2:
+0000B3 01B3 D5              11      PUSH    DE
+0000B4 01B4 EB               4      EX  DE,HL
+0000B5 01B5 29              11      ADD HL,HL
+0000B6 01B6 29              11      ADD HL,HL
+0000B7 01B7 ED4B9302        20      LD  BC,(LEVEL-1)
+0000BB 01BB 0E00             7      LD  C,0
+0000BD 01BD 09              11      ADD HL,BC
+0000BE 01BE DD4E13          19      LD  C,(IX+$13)  ;(DPB)デバイスドライバ内におけるユニット番号(DPB_UNITNO)
+0000C1 01C1 060D             7      LD  B,$0D
+0000C3 01C3 ED49            12      OUT (C),C
+0000C5 01C5 0C               4      INC C
+0000C6 01C6 ED69            12      OUT (C),L
+0000C8 01C8 0C               4      INC C
+0000C9 01C9 ED61            12      OUT (C),H
+0000CB 01CB 0C               4      INC C
+0000CC 01CC EB               4      EX  DE,HL
+0000CD 01CD D1              10      POP DE
+0000CE 01CE C9              10      RET
+                                
+       01CF                     EADR0:
+0000CF 01CF DD4E13          19      LD  C,(IX+$13)  ;(DPB)デバイスドライバ内におけるユニット番号(DPB_UNITNO)
+0000D2 01D2 060D             7      LD  B,$0D
+0000D4 01D4 ED71            12      OUT (C),0       ;Z80未定義命令
+0000D6 01D6 0C               4      INC C
+0000D7 01D7 ED71            12      OUT (C),0       ;Z80未定義命令
+0000D9 01D9 0C               4      INC C
+0000DA 01DA ED71            12      OUT (C),0       ;Z80未定義命令
+0000DC 01DC 0C               4      INC C
+0000DD 01DD C9              10      RET
+                                
+       01DE                     HLHEX4:
+0000DE 01DE 13               6      INC DE
+       01DF                     HLHEX5:
+0000DF 01DF 1A               7      LD  A,(DE)
+0000E0 01E0 FE20             7      CP  $20
+0000E2 01E2 28FA            12      JR  Z,HLHEX4
+       01E4                     HLHEX6:
+0000E4 01E4 1A               7      LD  A,(DE)
+0000E5 01E5 CD1302          17      CALL    HEX
+0000E8 01E8 D8              11      RET C
+0000E9 01E9 13               6      INC DE
+0000EA 01EA C9              10      RET
+       01EB                     AHEX:
+0000EB 01EB C5              11      PUSH    BC
+0000EC 01EC D5              11      PUSH    DE
+0000ED 01ED CDDF01          17      CALL    HLHEX5
+0000F0 01F0 3813            12      JR  C,AHEX3
+0000F2 01F2 4F               4      LD  C,A
+0000F3 01F3 CDE401          17      CALL    HLHEX6
+0000F6 01F6 3808            12      JR  C,AHEX1
+0000F8 01F8 47               4      LD  B,A
+0000F9 01F9 79               4      LD  A,C
+0000FA 01FA 07               4      RLCA
+0000FB 01FB 07               4      RLCA
+0000FC 01FC 07               4      RLCA
+0000FD 01FD 07               4      RLCA
+0000FE 01FE 80               4      ADD A,B
+0000FF 01FF 4F               4      LD  C,A
+       0200                     AHEX1:
+000100 0200 79               4      LD  A,C
+       0201                     AHEX2:
+000101 0201 C1              10      POP BC
+000102 0202 C1              10      POP BC
+000103 0203 B7               4      OR  A
+000104 0204 C9              10      RET
+       0205                     AHEX3:
+000105 0205 1A               7      LD  A,(DE)
+000106 0206 FE3B             7      CP  $3B
+000108 0208 2804            12      JR  Z,AHEX4
+00010A 020A D1              10      POP DE
+00010B 020B C1              10      POP BC
+00010C 020C 37               4      SCF
+00010D 020D C9              10      RET
+       020E                     AHEX4:
+00010E 020E 13               6      INC DE
+00010F 020F 1A               7      LD  A,(DE)
+000110 0210 13               6      INC DE
+000111 0211 18EE            12      JR  AHEX2
+                                
+       0213                     HEX:
+000113 0213 CD2602          17      CALL    CAP
+000116 0216 D630             7      SUB "0"
+000118 0218 D8              11      RET C
+000119 0219 FE0A             7      CP  10
+00011B 021B 3807            12      JR  C,HEX1
+00011D 021D FE11             7      CP  17
+00011F 021F D8              11      RET C
+000120 0220 D607             7      SUB 7
+000122 0222 FE10             7      CP  $10
+       0224                     HEX1:
+000124 0224 3F               4      CCF
+000125 0225 C9              10      RET
+                                
+       0226                     CAP:
+000126 0226 FE61             7      CP  "a"
+000128 0228 D8              11      RET C
+000129 0229 FE7B             7      CP  "z"+1
+00012B 022B D0              11      RET NC
+00012C 022C D620             7      SUB $20
+00012E 022E C9              10      RET
+                                
+       022F                     PRTHX:
+00012F 022F F5              11      PUSH    AF
+000130 0230 07               4      RLCA
+000131 0231 07               4      RLCA
+000132 0232 07               4      RLCA
+000133 0233 07               4      RLCA
+000134 0234 CD3802          17      CALL    PRTA2
+000137 0237 F1              10      POP AF
+       0238                     PRTA2:
+000138 0238 CD4102          17      CALL    ASC
+00013B 023B 5F               4      LD  E,A
+00013C 023C 0E02             7      LD  C,2     ;(BDOS)コンソール出力(_CONOUT)
+00013E 023E C30500          10      JP  SYSTEM
+                                
+       0241                     ASC:
+000141 0241 E60F             7      AND $0F
+000143 0243 F630             7      OR  $30
+000145 0245 FE3A             7      CP  $3A
+000147 0247 D8              11      RET C
+000148 0248 C607             7      ADD A,7
+00014A 024A C9              10      RET
+                                
+       024B                     USAGE:
+00014B 024B 117202          10      LD  DE,MUSAGE
+00014E 024E 0E09             7      LD  C,9     ;(BDOS)文字列出力(_STROUT)
+000150 0250 CD0500          17      CALL    SYSTEM
+000153 0253 CD5D01          17      CALL    FIND
+000156 0256 C34401          10      JP  AREA
+                                
+       0259                     TITLE:
+000159 0259 583120454D4D2063        DB  "X1 EMM controler v1.01"
+            6F6E74726F6C6572    
+            2076312E3031        
+       026F                     CRLF:
+00016F 026F 0D0A                    DB  $0D,$0A
+000171 0271 24                      DB  "$"
+       0272                     MUSAGE:
+000172 0272 75736167653A2045        DB  "usage: EMM ｴﾘｱ(0-FF)",$0D,$0A
+            4D4D20B4D8B12830    
+            2D4646290D0A        
+000188 0288 24                      DB  "$"
+       0289                     MAREA:
+000189 0289 454D4D2061726561        DB  "EMM area: $"
+            3A2024              
+                                
+000194 0294 00                  LEVEL:  DB  0
+                                
+[EOF:EMM.ASM:SHIFT_JIS]

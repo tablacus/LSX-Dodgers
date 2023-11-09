@@ -197,6 +197,10 @@ TYPE:
 	JR	Z,TYPE1
 	CP	'2'
 	JR	Z,TYPE2
+	CP	'3'
+	JR	Z,TYPE3
+	CP	'4'
+	JR	Z,TYPE4
 	CP	'L'
 	JP	Z,TYPEY
 	JR	TYPE
@@ -204,19 +208,29 @@ TYPE0:
 	LD	HL,M2D
 TYPE1X:
 	LD	BC,LGAP1
-	LD	DE,LSEC
+	LD	DE,SEC512
 	JR	TYPEX
 TYPE1:
 	LD	HL,M2DD
 	JR	TYPE1X
 TYPE2:
 	LD	BC,HGAP1
-	LD	DE,HSEC
+	LD	DE,SEC1024
 	LD	HL,M2HD
 	JR	TYPEX
+TYPE3:
+	LD	BC,HGAP1
+	LD	DE,SEC512
+	LD	HL,M2HC
+	JR	TYPEX
+TYPE4:
+	LD	BC,HGAP1
+	LD	DE,SEC512
+	LD	HL,M2HQ
+	JR	TYPEX
 TYPEX:
-	LD	(GAP1+1),BC
-	LD	(SEC+1),DE
+	LD	(GAP1),BC
+	LD	(SEC),DE
 	PUSH	HL
 	POP	IY
 
@@ -276,10 +290,17 @@ TYPEX:
 	CP	$FD
 	LD	HL,LIPL
 	JR	Z,IPL
-	CP	$F9
-	LD	HL,DIPL
-	JR	Z,IPL
+	CP	$FE
 	LD	HL,HIPL
+	JR	Z,IPL
+	CP	$F0
+	LD	HL,QIPL
+	JR	Z,IPL
+	LD	A,(IX+DPB_FDMODE)	;フロッピーディスクのモード
+	LD	HL,DIPL
+	INC	A
+	JR	Z,IPL
+	LD	HL,CIPL
 IPL:
 	LD	DE,FDATA
 	LD	C,$22
@@ -337,14 +358,16 @@ LOGICX:
 	LD	A,(IX+DPB_FATID)	;メディアバイト
 	LD	(HL),A		;FATID
 	INC	HL
-	DEC	(HL)		;LD (HL),$FF
+	LD	(HL),$FF
 	INC	HL
-	DEC	(HL)		;LD (HL),$FF
-	BIT	6,(IX+DPB_BPS)	;FAT情報と論理セクタのサイズ
-	JR	Z,FAT12
-	INC	HL		;FAT16の場合
-	DEC	(HL)		;LD (HL),$FF
-FAT12:
+	LD	(HL),$FF
+	INC	HL
+	LD	A,(IX+DPB_BPS)	;FAT情報と論理セクタのサイズ
+	ADD	A,A
+	ADD	A,A
+	ADD	A,A
+	SBC	A,A
+	LD	(HL),A			;FAT12=00 FAT16=FF
 	LD	E,(IX+DPB_FATPS)	;FAT領域の先頭論理セクタ番号
 	LD	D,0
 
@@ -506,10 +529,12 @@ WTTRKP:	CALL	$00E8		;_WTTRK
 MKDATA:
 	LD	H,0
 	EXX
-GAP1:	LD	HL,HGAP1
+	LD	HL,LGAP1
+GAP1	EQU	$-2
 	CALL	SETD
 MAKE1:
-SEC:	LD	HL,HSEC
+	LD	HL,SEC512
+SEC	EQU	$-2
 	CALL	SETD
 	EXX
 	LD	(IY+0),L		;CYLINDER
@@ -528,13 +553,10 @@ MAKES1:
 	LD	(IY+0),A		;SECTOR
 	PUSH	HL
 	INC	IY
-	LD	A,(IX+DPB_SECPCL)	;1クラスタの論理セクタ数
-	CP	1
-	JR	Z,SIZE1024	;1
-	JR	C,SIZE1024	;0(v1.29まで)
-SIZE512:			;2 or $29(v1.29まで)
-	LD	A,2
-	JR	SIZE
+	LD	A,(IX+DPB_BPS)	;FAT情報と論理セクタのサイズ
+	AND	7
+	CP	3
+	JR	C,SIZE
 SIZE1024:
 	LD	A,3
 SIZE:
@@ -571,12 +593,15 @@ VERIFY:
 	LD	DE,0
 	LD	A,(MAXCYL)
 	LD	B,A
+
 VE2:
 	PUSH	BC
 	PUSH	DE
 	LD	E,'v'
 	LD	C,2		;コンソール出力
 	CALL	SYSTEM
+	POP	DE
+	PUSH	DE
 	LD	A,(IX+DPB_MAXSEC)	;フロッピーディスクの1トラックのセクタ数
 	ADD	A,A
 	LD	H,A
@@ -754,7 +779,7 @@ EADR2:
 	ADD	HL,BC
 EADR1:
 	LD	BC,(EMMDV)
-	OUT (C),0		;Z80未定義命令
+	OUT	(C),0		;Z80未定義命令
 	INC	C
 	OUT	(C),L
 	INC	C
@@ -882,7 +907,7 @@ RESULTEX:
 AT_DSSE:
 
 TITLE:
-	DB	"format v1.19"
+	DB	"format v1.20"
 CRLF:
 	DB	$0D,$0A
 	DB	'$'
@@ -893,7 +918,7 @@ MUSAGE:
 FORMES:
 	DB	"format $"
 FOTMES:
-	DB	"format type (2D=0,2DD=1,2HD=2,logical only=L)? $"
+	DB	"format type (2D=0,2DD=1,2HD=2,2HC=3,2HQ=4,logical only=L)? $"
 FOTMESL:
 	DB	"format type (2D=0,2DD=1,logical only=L)? $"
 PHYMES:
@@ -912,7 +937,8 @@ ERRMES:
 ;	DPB Data
 ;
 
-M2D:	DW	2
+M2D:
+	DW	2
 	DB	$FD,2
 	DW	356
 	DB	$FF,7,40,9,1,$82
@@ -920,7 +946,8 @@ M2D:	DW	2
 M2DGSL:
 	DB	84
 
-M2DD:	DW	3
+M2DD:
+	DW	3
 	DB	$F9,2
 	DW	715
 	DB	$FF,7,80,9,1,$82
@@ -928,7 +955,8 @@ M2DD:	DW	3
 M2DDGSL:
 	DB	84
 
-M2HD:	DW	2
+M2HD:
+	DW	2
 	DB	$FE,1
 	DW	1223
 	DB	$FE,6,77,8,1,$84
@@ -936,32 +964,67 @@ M2HD:	DW	2
 M2HDGSL:
 	DB	116
 
+M2HC:
+	DW	7
+	DB	$F9,1
+	DW	2371
+	DB	$FE,14,80,15,1,$82
+	DW	5,$A7,27
+M2HCGSL:
+	DB	84
+
+M2HQ:
+	DW	9
+	DB	$F0,1
+	DW	2849
+	DB	$FE,14,80,18,1,$82
+	DW	5,$A7,31
+M2HQGSL:
+	DB	84
+
+;M2HDE:
+;	DW	2
+;	DB	$03,1
+;	DW	1429
+;	DB	$FE,6,80,9,1,$84
+;	DW	5,$A7,11
+;M2HDEGSL:
+;	DB	53
+
 ;M2HS:	DB	3
 ;	DW	$FB,8
 ;	DW	1432
 ;	DB	$FE,10,80,9,1,4,4,10
 ;
-;	Format Data 2D/2DD
+;	Format Data
 ;
-LGAP1:	DB	32,$4E,255
+LGAP1:
+	DB	32,$4E,255
+HGAP1:
+	DB	80,$4E,12,$00,3,$F6,1,$FC,50,$4E,255
+HGAP4:
+	DB	0,$4E,0,$4E,0,$4E,255
 ;
-LSEC:	DB	12,$00,3,$F5,1,$FE,255
+;	Sector Data
 ;
+SEC512:
+	DB	12,$00,3,$F5,1,$FE,255
+
 	DB	1,$F7,22,$4E,12,$00,3,$F5,1,$FB
 	DB	0,$E5,0,$E5
 	DB	1,$F7,84,$4E,255
-;
-;	Format Data 2HD
-;
-HGAP1:	DB	80,$4E,12,$00,3,$F6,1,$FC,50,$4E,255
-
-HSEC:	DB	12,$00,3,$F5,1,$FE,255
+SEC1024:
+	DB	12,$00,3,$F5,1,$FE,255
 
 	DB	1,$F7,22,$4E,12,$00,3,$F5,1,$FB
 	DB	0,$E5,0,$E5,0,$E5,0,$E5
 	DB	1,$F7,116,$4E,255
+;SEC1024E:
+;	DB	12,$00,3,$F5,1,$FE,255
 ;
-HGAP4:	DB	0,$4E,0,$4E,0,$4E,255
+;	DB	1,$F7,22,$4E,12,$00,3,$F5,1,$FB
+;	DB	0,$E5,0,$E5,0,$E5,0,$E5
+;	DB	1,$F7,53,$4E,255
 ;
 ;	Format Data 2HS
 ;
@@ -989,6 +1052,20 @@ HIPL:	DB	$EB,$FE,$90,'L','D',$20,$20,$20
 	DB	$20,$20,$20,$00,$04,$01,$01,$00
 	DB	$02,$C0,$00,$D0,$04,$FE,$02,$00
 	DB	$08,$00,$02,$00,$00,$00,$C9,$00
+	DB	$00,$00
+
+CIPL:
+	DB	$EB,$FE,$90,'L','D',$20,$20,$20
+	DB	$20,$20,$20,$00,$02,$01,$01,$00
+	DB	$02,$E0,$00,$60,$09,$F9,$07,$00
+	DB	$0F,$00,$02,$00,$00,$00,$C9,$00
+	DB	$00,$00
+
+QIPL:
+	DB	$EB,$FE,$90,'L','D',$20,$20,$20
+	DB	$20,$20,$20,$00,$02,$01,$01,$00
+	DB	$02,$E0,$00,$40,$0B,$F0,$09,$00
+	DB	$0F,$00,$02,$00,$00,$00,$C9,$00
 	DB	$00,$00
 
 ;SIPL:	DB	$EB,$1E,$90,'L','D',$20,$20,$20
