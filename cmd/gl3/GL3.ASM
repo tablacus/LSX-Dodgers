@@ -1,10 +1,8 @@
 ;
 ;	GL3 loader/saver  by Gaku
 ;
-OSFLG	EQU	$0003
+WBOOT	EQU	$0000
 SYSTEM	EQU	$0005
-JP_HL	EQU	$000F
-BIOS	EQU	$0018
 FCB1	EQU	$005C
 DTA	EQU	$0080
 
@@ -23,8 +21,9 @@ USAGE:
 	CALL	SYSTEM
 	RST	0
 MAIN:
-	LD	HL,(OSFLG)
-	LD	A,H
+	LD	C,$6F 		;(BDOS)MSX-DOS ÇÃÉoÅ[ÉWÉáÉìî‘çÜÇÃälìæ(_DOSVER)
+	CALL	SYSTEM
+	LD	A,C
 	CP	$1D
 	RET	NZ
 	LD	A,L
@@ -232,7 +231,7 @@ TEXT1:
 
 PSET1:
 	RES	7,B
-	LD	A,(IY+0)		;B
+	LD	A,(IY+0)	;B
 	OUT	(C),A
 ;
 	SET	7,B
@@ -364,7 +363,7 @@ SAVE3:
 	PUSH	DE
 ;
 	LD	C,$BF
-	LD	A,($000B)
+	LD	A,(WBOOT+2)
 	LD	B,A
 	LD	A,(BC)
 	LD	BC,$1FD0
@@ -488,7 +487,7 @@ EXT:
 	RET
 ;
 TITLE:
-	DB	"X1 GL3 loader/saver v1.01",$0D,$0A
+	DB	"X1 GL3 loader/saver v1.02",$0D,$0A
 	DB	"$"
 MUSAGE:
 	DB	"usage: GL3 Ãß≤Ÿ»∞—[Ω≤Ø¡]",$0D,$0A
@@ -496,7 +495,7 @@ MUSAGE:
 	DB	9,"/S æ∞Ãﬁ",$0D,$0A
 	DB	"$"
 
-COMP:	DB	" Ok",$0D,$0A,"$"
+COMP:	DB	" OK",$0D,$0A,"$"
 
 C4025L:	DB	$37,$28,$2D,$34,$1F,$02,$19,$1C
 	DB	$00,$07,$00,$00,$00,$00,$0D,$A0

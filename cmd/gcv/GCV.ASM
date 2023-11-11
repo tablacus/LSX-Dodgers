@@ -1,7 +1,7 @@
 ;	GCV	by Gaku
 ;
-OSFLG	EQU	3
-SYSTEM	EQU	5
+WBOOT	EQU	$0000
+SYSTEM	EQU	$0005
 BUFFA	EQU	$1000
 
 THOLD	EQU	11
@@ -10,8 +10,9 @@ CCTRL	EQU	4
 	ORG	$0100
 	JP	START
 START:
-	LD	HL,(OSFLG)
-	LD	A,H
+	LD	C,$6F 		;(BDOS)MSX-DOS ÇÃÉoÅ[ÉWÉáÉìî‘çÜÇÃälìæ(_DOSVER)
+	CALL	SYSTEM
+	LD	A,C
 	CP	$1D
 	RET	NZ
 	LD	A,L
@@ -525,14 +526,14 @@ _CAP:
 _G1FD0:
 	PUSH	BC
 	LD	C,$BF
-	LD	A,($000B)
+	LD	A,(WBOOT+2)
 	LD	B,A
 	LD	A,(BC)
 	POP	BC
 	RET
 _S1FD0:
 	PUSH	BC
-	LD	BC,($000B-1)
+	LD	BC,(WBOOT+1)
 	LD	C,$BF
 	LD	(BC),A
 	LD	BC,$1FD0
@@ -541,7 +542,7 @@ _S1FD0:
 	RET
 
 TITLE:
-	DB	"graphic converter v1.02",$0D,$0A,"$"
+	DB	"graphic converter v1.03",$0D,$0A,"$"
 TITLE1:
 	DB	"usage:",$0D,$0A
 	DB	" GCV [Ω≤Ø¡]",$0D,$0A
