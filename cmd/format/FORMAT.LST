@@ -289,19 +289,19 @@
 0001BD 02BD EDB0                    LDIR
 0001BF 02BF DD7E06          19      LD  A,(IX+DPB_FATID)    ;メディアバイト
 0001C2 02C2 FEFD             7      CP  $FD
-0001C4 02C4 216508          10      LD  HL,LIPL
+0001C4 02C4 216508          10      LD  HL,BPB_2D
 0001C7 02C7 281A            12      JR  Z,IPL
 0001C9 02C9 FEFE             7      CP  $FE
-0001CB 02CB 21A908          10      LD  HL,HIPL
+0001CB 02CB 21A908          10      LD  HL,BPB_2HD
 0001CE 02CE 2813            12      JR  Z,IPL
 0001D0 02D0 FEF0             7      CP  $F0
-0001D2 02D2 21ED08          10      LD  HL,QIPL
+0001D2 02D2 21ED08          10      LD  HL,BPB_2HQ
 0001D5 02D5 280C            12      JR  Z,IPL
 0001D7 02D7 DD7E0A          19      LD  A,(IX+DPB_FDMODE)   ;フロッピーディスクのモード
-0001DA 02DA 218708          10      LD  HL,DIPL
+0001DA 02DA 218708          10      LD  HL,BPB_2DD
 0001DD 02DD 3C               4      INC A
 0001DE 02DE 2803            12      JR  Z,IPL
-0001E0 02E0 21CB08          10      LD  HL,CIPL
+0001E0 02E0 21CB08          10      LD  HL,BPB_2HC
        02E3                     IPL:
 0001E3 02E3 113809          10      LD  DE,FDATA
 0001E6 02E6 0E22             7      LD  C,$22
@@ -908,8 +908,8 @@
        06AB                     AT_DSSE:
                                 
        06AB                     TITLE:
-0005AB 06AB 666F726D61742076        DB  "format v1.20"
-            312E3230            
+0005AB 06AB 666F726D61742076        DB  "format v1.21"
+            312E3231            
        06B7                     CRLF:
 0005B7 06B7 0D0A                    DB  $0D,$0A
 0005B9 06B9 24                      DB  '$'
@@ -995,7 +995,7 @@
        07F2                     M2HC:
 0006F2 07F2 0700                    DW  7
 0006F4 07F4 F901                    DB  $F9,1
-0006F6 07F6 4309                    DW  2371
+0006F6 07F6 4509                    DW  2373
 0006F8 07F8 FE0E500F0182            DB  $FE,14,80,15,1,$82
 0006FE 07FE 0500A7001B00            DW  5,$A7,27
        0804                     M2HCGSL:
@@ -1067,37 +1067,90 @@
                                 ;
                                 ;   BOOT-DATA
                                 ;
-000765 0865 EBFE904C44202020    LIPL:   DB  $EB,$FE,$90,'L','D',$20,$20,$20
-00076D 086D 2020200002020100        DB  $20,$20,$20,$00,$02,$02,$01,$00
-000775 0875 027000D002FD0200        DB  $02,$70,$00,$D0,$02,$FD,$02,$00
-00077D 087D 090002000000C900        DB  $09,$00,$02,$00,$00,$00,$C9,$00
-000785 0885 0000                    DB  $00,$00
+       0865                     BPB_2D:
+000765 0865 EBFE90                  DB  0EBH,0FEH,090H  ;BS_JmpBoot
+000768 0868 4C44202020202020        DB  "LD      "  ;BS_OEMName
+000770 0870 0002                    DW  512     ;BPB_BytsPerSec
+000772 0872 02                      DB  2       ;BPB_SecPerClus
+000773 0873 0100                    DW  1       ;BPB_RsvdSecCnt
+000775 0875 02                      DB  2       ;BPB_NumFATs
+000776 0876 7000                    DW  112     ;BPB_RootEntCnt
+000778 0878 D002                    DW  720     ;BPB_TotSec16
+00077A 087A FD                      DB  0FDH        ;BPB_Media
+00077B 087B 0200                    DW  2       ;BPB_FATSz16
+00077D 087D 0900                    DW  9       ;BPB_SecPerTrk
+00077F 087F 0200                    DW  2       ;BPB_NumHeads
+000781 0881 0000                    DW  0       ;BPB_HiddSec(2バイト)
+000783 0883 C9              10      RET         ;for MSX
+000784 0884 000000                  DB  0,0,0
                                 
-000787 0887 EBFE904C44202020    DIPL:   DB  $EB,$FE,$90,'L','D',$20,$20,$20
-00078F 088F 2020200002020100        DB  $20,$20,$20,$00,$02,$02,$01,$00
-000797 0897 027000A005F90300        DB  $02,$70,$00,$A0,$05,$F9,$03,$00
-00079F 089F 090002000000C900        DB  $09,$00,$02,$00,$00,$00,$C9,$00
-0007A7 08A7 0000                    DB  $00,$00
+       0887                     BPB_2DD:
+000787 0887 EBFE90                  DB  0EBH,0FEH,090H  ;BS_JmpBoot
+00078A 088A 4C44202020202020        DB  "LD      "  ;BS_OEMName
+000792 0892 0002                    DW  512     ;BPB_BytsPerSec
+000794 0894 02                      DB  2       ;BPB_SecPerClus
+000795 0895 0100                    DW  1       ;BPB_RsvdSecCnt
+000797 0897 02                      DB  2       ;BPB_NumFATs
+000798 0898 7000                    DW  112     ;BPB_RootEntCnt
+00079A 089A A005                    DW  1440        ;BPB_TotSec16
+00079C 089C F9                      DB  0F9H        ;BPB_Media
+00079D 089D 0300                    DW  3       ;BPB_FATSz16
+00079F 089F 0900                    DW  9       ;BPB_SecPerTrk
+0007A1 08A1 0200                    DW  2       ;BPB_NumHeads
+0007A3 08A3 0000                    DW  0       ;BPB_HiddSec(2バイト)
+0007A5 08A5 C9              10      RET         ;for MSX
+0007A6 08A6 000000                  DB  0,0,0
                                 
-0007A9 08A9 EBFE904C44202020    HIPL:   DB  $EB,$FE,$90,'L','D',$20,$20,$20
-0007B1 08B1 2020200004010100        DB  $20,$20,$20,$00,$04,$01,$01,$00
-0007B9 08B9 02C000D004FE0200        DB  $02,$C0,$00,$D0,$04,$FE,$02,$00
-0007C1 08C1 080002000000C900        DB  $08,$00,$02,$00,$00,$00,$C9,$00
-0007C9 08C9 0000                    DB  $00,$00
+       08A9                     BPB_2HD:
+0007A9 08A9 EBFE90                  DB  0EBH,0FEH,090H  ;BS_JmpBoot
+0007AC 08AC 4C44202020202020        DB  "LD      "  ;BS_OEMName
+0007B4 08B4 0004                    DW  1024        ;BPB_BytsPerSec
+0007B6 08B6 01                      DB  1       ;BPB_SecPerClus
+0007B7 08B7 0100                    DW  1       ;BPB_RsvdSecCnt
+0007B9 08B9 02                      DB  2       ;BPB_NumFATs
+0007BA 08BA C000                    DW  192     ;BPB_RootEntCnt
+0007BC 08BC D004                    DW  1232        ;BPB_TotSec16
+0007BE 08BE FE                      DB  0FEH        ;BPB_Media
+0007BF 08BF 0200                    DW  2       ;BPB_FATSz16
+0007C1 08C1 0800                    DW  8       ;BPB_SecPerTrk
+0007C3 08C3 0200                    DW  2       ;BPB_NumHeads
+0007C5 08C5 0000                    DW  0       ;BPB_HiddSec(2バイト)
+0007C7 08C7 C9              10      RET         ;for MSX
+0007C8 08C8 000000                  DB  0,0,0
                                 
-       08CB                     CIPL:
-0007CB 08CB EBFE904C44202020        DB  $EB,$FE,$90,'L','D',$20,$20,$20
-0007D3 08D3 2020200002010100        DB  $20,$20,$20,$00,$02,$01,$01,$00
-0007DB 08DB 02E0006009F90700        DB  $02,$E0,$00,$60,$09,$F9,$07,$00
-0007E3 08E3 0F0002000000C900        DB  $0F,$00,$02,$00,$00,$00,$C9,$00
-0007EB 08EB 0000                    DB  $00,$00
+       08CB                     BPB_2HC:
+0007CB 08CB EBFE90                  DB  0EBH,0FEH,090H  ;BS_JmpBoot
+0007CE 08CE 4C44202020202020        DB  "LD      "  ;BS_OEMName
+0007D6 08D6 0002                    DW  512     ;BPB_BytsPerSec
+0007D8 08D8 01                      DB  1       ;BPB_SecPerClus
+0007D9 08D9 0100                    DW  1       ;BPB_RsvdSecCnt
+0007DB 08DB 02                      DB  2       ;BPB_NumFATs
+0007DC 08DC E000                    DW  224     ;BPB_RootEntCnt
+0007DE 08DE 6009                    DW  2400        ;BPB_TotSec16
+0007E0 08E0 F9                      DB  0F9H        ;BPB_Media
+0007E1 08E1 0700                    DW  7       ;BPB_FATSz16
+0007E3 08E3 0F00                    DW  15      ;BPB_SecPerTrk
+0007E5 08E5 0200                    DW  2       ;BPB_NumHeads
+0007E7 08E7 0000                    DW  0       ;BPB_HiddSec(2バイト)
+0007E9 08E9 C9              10      RET         ;for MSX
+0007EA 08EA 000000                  DB  0,0,0
                                 
-       08ED                     QIPL:
-0007ED 08ED EBFE904C44202020        DB  $EB,$FE,$90,'L','D',$20,$20,$20
-0007F5 08F5 2020200002010100        DB  $20,$20,$20,$00,$02,$01,$01,$00
-0007FD 08FD 02E000400BF00900        DB  $02,$E0,$00,$40,$0B,$F0,$09,$00
-000805 0905 0F0002000000C900        DB  $0F,$00,$02,$00,$00,$00,$C9,$00
-00080D 090D 0000                    DB  $00,$00
+       08ED                     BPB_2HQ:
+0007ED 08ED EBFE90                  DB  0EBH,0FEH,090H  ;BS_JmpBoot
+0007F0 08F0 4C44202020202020        DB  "LD      "  ;BS_OEMName
+0007F8 08F8 0002                    DW  512     ;BPB_BytsPerSec
+0007FA 08FA 01                      DB  1       ;BPB_SecPerClus
+0007FB 08FB 0100                    DW  1       ;BPB_RsvdSecCnt
+0007FD 08FD 02                      DB  2       ;BPB_NumFATs
+0007FE 08FE E000                    DW  224     ;BPB_RootEntCnt
+000800 0900 400B                    DW  2880        ;BPB_TotSec16
+000802 0902 F0                      DB  0F0H        ;BPB_Media
+000803 0903 0900                    DW  9       ;BPB_FATSz16
+000805 0905 1200                    DW  18      ;BPB_SecPerTrk
+000807 0907 0200                    DW  2       ;BPB_NumHeads
+000809 0909 0000                    DW  0       ;BPB_HiddSec(2バイト)
+00080B 090B C9              10      RET         ;for MSX
+00080C 090C 000000                  DB  0,0,0
                                 
                                 ;SIPL:  DB  $EB,$1E,$90,'L','D',$20,$20,$20
                                 ;   DB  $20,$20,$20,"2","H","S",$20,$20

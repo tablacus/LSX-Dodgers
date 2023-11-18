@@ -288,19 +288,19 @@ TYPEX:
 	LDIR
 	LD	A,(IX+DPB_FATID)	;メディアバイト
 	CP	$FD
-	LD	HL,LIPL
+	LD	HL,BPB_2D
 	JR	Z,IPL
 	CP	$FE
-	LD	HL,HIPL
+	LD	HL,BPB_2HD
 	JR	Z,IPL
 	CP	$F0
-	LD	HL,QIPL
+	LD	HL,BPB_2HQ
 	JR	Z,IPL
 	LD	A,(IX+DPB_FDMODE)	;フロッピーディスクのモード
-	LD	HL,DIPL
+	LD	HL,BPB_2DD
 	INC	A
 	JR	Z,IPL
-	LD	HL,CIPL
+	LD	HL,BPB_2HC
 IPL:
 	LD	DE,FDATA
 	LD	C,$22
@@ -907,7 +907,7 @@ RESULTEX:
 AT_DSSE:
 
 TITLE:
-	DB	"format v1.20"
+	DB	"format v1.21"
 CRLF:
 	DB	$0D,$0A
 	DB	'$'
@@ -967,7 +967,7 @@ M2HDGSL:
 M2HC:
 	DW	7
 	DB	$F9,1
-	DW	2371
+	DW	2373
 	DB	$FE,14,80,15,1,$82
 	DW	5,$A7,27
 M2HCGSL:
@@ -1036,37 +1036,90 @@ SEC1024:
 ;
 ;	BOOT-DATA
 ;
-LIPL:	DB	$EB,$FE,$90,'L','D',$20,$20,$20
-	DB	$20,$20,$20,$00,$02,$02,$01,$00
-	DB	$02,$70,$00,$D0,$02,$FD,$02,$00
-	DB	$09,$00,$02,$00,$00,$00,$C9,$00
-	DB	$00,$00
+BPB_2D:
+	DB	0EBH,0FEH,090H	;BS_JmpBoot
+	DB	"LD      "	;BS_OEMName
+	DW	512		;BPB_BytsPerSec
+	DB	2		;BPB_SecPerClus
+	DW	1		;BPB_RsvdSecCnt
+	DB	2		;BPB_NumFATs
+	DW	112		;BPB_RootEntCnt
+	DW	720		;BPB_TotSec16
+	DB	0FDH		;BPB_Media
+	DW	2		;BPB_FATSz16
+	DW	9		;BPB_SecPerTrk
+	DW	2		;BPB_NumHeads
+	DW	0		;BPB_HiddSec(2バイト)
+	RET			;for MSX
+	DB	0,0,0
 
-DIPL:	DB	$EB,$FE,$90,'L','D',$20,$20,$20
-	DB	$20,$20,$20,$00,$02,$02,$01,$00
-	DB	$02,$70,$00,$A0,$05,$F9,$03,$00
-	DB	$09,$00,$02,$00,$00,$00,$C9,$00
-	DB	$00,$00
+BPB_2DD:
+	DB	0EBH,0FEH,090H	;BS_JmpBoot
+	DB	"LD      "	;BS_OEMName
+	DW	512		;BPB_BytsPerSec
+	DB	2		;BPB_SecPerClus
+	DW	1		;BPB_RsvdSecCnt
+	DB	2		;BPB_NumFATs
+	DW	112		;BPB_RootEntCnt
+	DW	1440		;BPB_TotSec16
+	DB	0F9H		;BPB_Media
+	DW	3		;BPB_FATSz16
+	DW	9		;BPB_SecPerTrk
+	DW	2		;BPB_NumHeads
+	DW	0		;BPB_HiddSec(2バイト)
+	RET			;for MSX
+	DB	0,0,0
 
-HIPL:	DB	$EB,$FE,$90,'L','D',$20,$20,$20
-	DB	$20,$20,$20,$00,$04,$01,$01,$00
-	DB	$02,$C0,$00,$D0,$04,$FE,$02,$00
-	DB	$08,$00,$02,$00,$00,$00,$C9,$00
-	DB	$00,$00
+BPB_2HD:
+	DB	0EBH,0FEH,090H	;BS_JmpBoot
+	DB	"LD      "	;BS_OEMName
+	DW	1024		;BPB_BytsPerSec
+	DB	1		;BPB_SecPerClus
+	DW	1		;BPB_RsvdSecCnt
+	DB	2		;BPB_NumFATs
+	DW	192		;BPB_RootEntCnt
+	DW	1232		;BPB_TotSec16
+	DB	0FEH		;BPB_Media
+	DW	2		;BPB_FATSz16
+	DW	8		;BPB_SecPerTrk
+	DW	2		;BPB_NumHeads
+	DW	0		;BPB_HiddSec(2バイト)
+	RET			;for MSX
+	DB	0,0,0
 
-CIPL:
-	DB	$EB,$FE,$90,'L','D',$20,$20,$20
-	DB	$20,$20,$20,$00,$02,$01,$01,$00
-	DB	$02,$E0,$00,$60,$09,$F9,$07,$00
-	DB	$0F,$00,$02,$00,$00,$00,$C9,$00
-	DB	$00,$00
+BPB_2HC:
+	DB	0EBH,0FEH,090H	;BS_JmpBoot
+	DB	"LD      "	;BS_OEMName
+	DW	512		;BPB_BytsPerSec
+	DB	1		;BPB_SecPerClus
+	DW	1		;BPB_RsvdSecCnt
+	DB	2		;BPB_NumFATs
+	DW	224		;BPB_RootEntCnt
+	DW	2400		;BPB_TotSec16
+	DB	0F9H		;BPB_Media
+	DW	7		;BPB_FATSz16
+	DW	15		;BPB_SecPerTrk
+	DW	2		;BPB_NumHeads
+	DW	0		;BPB_HiddSec(2バイト)
+	RET			;for MSX
+	DB	0,0,0
 
-QIPL:
-	DB	$EB,$FE,$90,'L','D',$20,$20,$20
-	DB	$20,$20,$20,$00,$02,$01,$01,$00
-	DB	$02,$E0,$00,$40,$0B,$F0,$09,$00
-	DB	$0F,$00,$02,$00,$00,$00,$C9,$00
-	DB	$00,$00
+BPB_2HQ:
+	DB	0EBH,0FEH,090H	;BS_JmpBoot
+	DB	"LD      "	;BS_OEMName
+	DW	512		;BPB_BytsPerSec
+	DB	1		;BPB_SecPerClus
+	DW	1		;BPB_RsvdSecCnt
+	DB	2		;BPB_NumFATs
+	DW	224		;BPB_RootEntCnt
+	DW	2880		;BPB_TotSec16
+	DB	0F0H		;BPB_Media
+	DW	9		;BPB_FATSz16
+	DW	18		;BPB_SecPerTrk
+	DW	2		;BPB_NumHeads
+	DW	0		;BPB_HiddSec(2バイト)
+	RET			;for MSX
+	DB	0,0,0
 
 ;SIPL:	DB	$EB,$1E,$90,'L','D',$20,$20,$20
 ;	DB	$20,$20,$20,"2","H","S",$20,$20
