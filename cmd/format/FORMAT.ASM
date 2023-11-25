@@ -68,7 +68,8 @@ START:
 	LD	C,9		;文字列出力
 	CALL	SYSTEM
 	LD	A,(WBOOT+2)
-	LD	(WTTRKP+2),A
+	LD	(WTTRKP),A
+	LD	(RDFATXP),A
 	LD	A,(FCB1)
 	OR	A
 	JR	NZ,MAIN
@@ -85,7 +86,15 @@ MAIN:
 	AND	A
 	SBC	HL,BC
 	JP	NZ,MSX
-	LD	SP,(SYSTEM+1)
+	LD	HL,(SYSTEM+1)
+	DEC	H
+	DEC	H
+	DEC	H
+	DEC	H
+	LD	SP,HL
+	LD	HL,0
+	PUSH	HL
+
 	LD	A,(FCB1)
 	DEC	A
 	LD	E,A
@@ -214,6 +223,7 @@ TYPE1:
 	LD	HL,M2DD
 	JR	TYPE1X
 TYPE2:
+	CALL	JAPAN2HD
 	LD	BC,HGAP1
 	LD	DE,SEC1024
 	LD	HL,M2HD
@@ -254,18 +264,18 @@ TYPEX:
 	LD	(MAXCYL),A
 
 	LD	HL,(WBOOT+1)
-	LD	L,$89
+	LD	L,$89			;_DSK
 	LD	(HL),$FF
 
 	LD	A,(FCB1)
 	DEC	A
 	PUSH	HL
-	LD	L,$D9		;CHGDRV
+	LD	L,$D9			;_CHGDRV
 	CALL	JP_HL
 	POP	HL
 	LD	A,(IX+DPB_UNITNO)	;デバイスドライバ内におけるユニット番号
 	AND	3
-	OR	$80
+	OR	$80			;_CYL0
 	LD	L,A
 	LD	(HL),$FF
 	CALL	SURE
@@ -331,12 +341,11 @@ TYPEY:
 LOGICY:
 	LD	A,(FCB1)
 	DEC	A
-	LD	HL,(WBOOT+1)
-	LD	L,$DC		;_GETDPB
-	CALL	JP_HL
-	LD	HL,(WBOOT+1)
-	LD	L,$E2		;_RDFATX
-	CALL	JP_HL
+	LD	E,A
+	LD	C,$1F		;(BDOS)ディスク装置のパラメータの読み出し
+	CALL	SYSTEM
+	CALL	$00E2		;_RDFATX
+RDFATXP	EQU	$-1
 	JP	C,ERROR
 LOGIC:
 	CALL	SURE
@@ -516,7 +525,8 @@ MAKE:
 GDATA:	LD	HL,FDATA
 WTTRK:
 	PUSH	DE
-WTTRKP:	CALL	$00E8		;_WTTRK
+	CALL	$00E8		;_WTTRK
+WTTRKP	EQU	$-1
 	POP	DE
 ;
 	LD	L,(IX+DPB_MAXSEC)	;フロッピーディスクの1トラックのセクタ数
@@ -816,6 +826,56 @@ MSX:
 	CALL	CALSLT
 	JP	0
 
+JAPAN2HD:
+	LD	HL,(1)
+	INC	H
+	LD	L,070H
+	PUSH	HL
+	POP	IY
+	LD	A,(IY+00BH)	;_MAX_SEC_SZ_H
+	CP	4
+	RET	Z
+
+	LD	E,(IY+00CH)	;_FATBF
+	LD	D,(IY+00DH)
+
+	LD	L,(IY+00EH)	;_DTBUF
+	LD	H,(IY+00FH)
+
+	AND	A
+	SBC	HL,DE
+
+	LD	DE,512*3
+	AND	A
+	SBC	HL,DE
+
+	RET	NZ		;_FATBFが1.5KBかチェック
+
+	LD	C,05FH	 	;ディスクバッファのフラッシュ(_FLUSH)
+	CALL	SYSTEM
+
+	LD	HL,(SYSTEM+1)
+	LD	A,(HL)
+	CP	0C3H		;JP
+	RET	NZ
+
+	DI
+
+	LD	E,L
+	LD	D,H
+	DEC	D
+	DEC	D
+	DEC	D
+	DEC	D
+	LD	(SYSTEM+1),DE
+	LD	BC,3
+	LDIR
+
+	LD	(IY+00BH),4	;_MAX_SEC_SZ_H
+	LD	(IY+00EH),E	;_DTBUF
+	LD	(IY+00FH),D
+	RET
+
 AT_DSS:
 	ORG	DSS,AT_DSS-$0100
 
@@ -907,7 +967,7 @@ RESULTEX:
 AT_DSSE:
 
 TITLE:
-	DB	"format v1.21"
+	DB	"format v1.22"
 CRLF:
 	DB	$0D,$0A
 	DB	'$'
@@ -938,56 +998,110 @@ ERRMES:
 ;
 
 M2D:
-	DW	2
-	DB	$FD,2
-	DW	356
-	DB	$FF,7,40,9,1,$82
-	DW	5,$A7,8
+	DW	2			;FAT領域のセクタ単位でのサイズ(DPB_FATLN)
+	DB	$FD			;メディアバイト(DPB_FATID)
+	DB	2			;1クラスタの論理セクタ数(DPB_SECPCL)
+	DW	356			;総クラスタ数(DPB_MAXCL)
+	DB	$FF			;フロッピーディスクのモード(DPB_FDMODE)
+	DB	7			;ルートディレクトリ領域の論理セクタ数(DPB_DIRSCNT)
+	DB	40			;フロッピーディスクのシリンダ数(DPB_MAXCYL)
+	DB	9			;フロッピーディスクの1トラックのセクタ数(DPB_MAXSEC)
+	DB	1			;FAT領域の先頭論理セクタ番号(DPB_FATPS)
+	DB	$82			;FAT情報と論理セクタのサイズ(DPB_BPS)
+	DW	5			;ルートディレクトリ領域の先頭論理セクタ番号(DPB_DIRPS)
+	DB	$A7			;デバイス情報(DPB_DEVICE)
+	DB	0			;デバイスドライバ内におけるユニット番号(DPB_UNITNO)
+	DW	8			;データ格納領域の先頭論理セクタ番号(DPB_ADDCL)
 M2DGSL:
 	DB	84
 
 M2DD:
-	DW	3
-	DB	$F9,2
-	DW	715
-	DB	$FF,7,80,9,1,$82
-	DW	7,$A7,10
+	DW	3			;FAT領域のセクタ単位でのサイズ(DPB_FATLN)
+	DB	$F9			;メディアバイト(DPB_FATID)
+	DB	2			;1クラスタの論理セクタ数(DPB_SECPCL)
+	DW	715			;総クラスタ数(DPB_MAXCL)
+	DB	$FF			;フロッピーディスクのモード(DPB_FDMODE)
+	DB	7			;ルートディレクトリ領域の論理セクタ数(DPB_DIRSCNT)
+	DB	80			;フロッピーディスクのシリンダ数(DPB_MAXCYL)
+	DB	9			;フロッピーディスクの1トラックのセクタ数(DPB_MAXSEC)
+	DB	1			;FAT領域の先頭論理セクタ番号(DPB_FATPS)
+	DB	$82			;FAT情報と論理セクタのサイズ(DPB_BPS)
+	DW	7			;ルートディレクトリ領域の先頭論理セクタ番号(DPB_DIRPS)
+	DB	$A7			;デバイス情報(DPB_DEVICE)
+	DB	0			;デバイスドライバ内におけるユニット番号(DPB_UNITNO)
+	DW	10			;データ格納領域の先頭論理セクタ番号(DPB_ADDCL)
 M2DDGSL:
 	DB	84
 
 M2HD:
-	DW	2
-	DB	$FE,1
-	DW	1223
-	DB	$FE,6,77,8,1,$84
-	DW	5,$A7,9
+	DW	2			;FAT領域のセクタ単位でのサイズ(DPB_FATLN)
+	DB	$FE			;メディアバイト(DPB_FATID)
+	DB	1			;1クラスタの論理セクタ数(DPB_SECPCL)
+	DW	1223			;総クラスタ数(DPB_MAXCL)
+	DB	$FE			;フロッピーディスクのモード(DPB_FDMODE)
+	DB	6			;ルートディレクトリ領域の論理セクタ数(DPB_DIRSCNT)
+	DB	77			;フロッピーディスクのシリンダ数(DPB_MAXCYL)
+	DB	8			;フロッピーディスクの1トラックのセクタ数(DPB_MAXSEC)
+	DB	1			;FAT領域の先頭論理セクタ番号(DPB_FATPS)
+	DB	$84			;FAT情報と論理セクタのサイズ(DPB_BPS)
+	DW	5			;ルートディレクトリ領域の先頭論理セクタ番号(DPB_DIRPS)
+	DB	$A7			;デバイス情報(DPB_DEVICE)
+	DB	0			;デバイスドライバ内におけるユニット番号(DPB_UNITNO)
+	DW	9			;データ格納領域の先頭論理セクタ番号(DPB_ADDCL)
 M2HDGSL:
 	DB	116
 
 M2HC:
-	DW	7
-	DB	$F9,1
-	DW	2373
-	DB	$FE,14,80,15,1,$82
-	DW	5,$A7,27
+	DW	7			;FAT領域のセクタ単位でのサイズ(DPB_FATLN)
+	DB	$F9			;メディアバイト(DPB_FATID)
+	DB	1			;1クラスタの論理セクタ数(DPB_SECPCL)
+	DW	2373			;総クラスタ数(DPB_MAXCL)
+	DB	$FE			;フロッピーディスクのモード(DPB_FDMODE)
+	DB	14			;ルートディレクトリ領域の論理セクタ数(DPB_DIRSCNT)
+	DB	80			;フロッピーディスクのシリンダ数(DPB_MAXCYL)
+	DB	15			;フロッピーディスクの1トラックのセクタ数(DPB_MAXSEC)
+	DB	1			;FAT領域の先頭論理セクタ番号(DPB_FATPS)
+	DB	$82			;FAT情報と論理セクタのサイズ(DPB_BPS)
+	DW	15			;ルートディレクトリ領域の先頭論理セクタ番号(DPB_DIRPS)
+	DB	$A7			;デバイス情報(DPB_DEVICE)
+	DB	0			;デバイスドライバ内におけるユニット番号(DPB_UNITNO)
+	DW	27			;データ格納領域の先頭論理セクタ番号(DPB_ADDCL)
 M2HCGSL:
 	DB	84
 
 M2HQ:
-	DW	9
-	DB	$F0,1
-	DW	2849
-	DB	$FE,14,80,18,1,$82
-	DW	5,$A7,31
+	DW	9			;FAT領域のセクタ単位でのサイズ(DPB_FATLN)
+	DB	$F0			;メディアバイト(DPB_FATID)
+	DB	1			;1クラスタの論理セクタ数(DPB_SECPCL)
+	DW	2849			;総クラスタ数(DPB_MAXCL)
+	DB	$FE			;フロッピーディスクのモード(DPB_FDMODE)
+	DB	14			;ルートディレクトリ領域の論理セクタ数(DPB_DIRSCNT)
+	DB	80			;フロッピーディスクのシリンダ数(DPB_MAXCYL)
+	DB	18			;フロッピーディスクの1トラックのセクタ数(DPB_MAXSEC)
+	DB	1			;FAT領域の先頭論理セクタ番号(DPB_FATPS)
+	DB	$82			;FAT情報と論理セクタのサイズ(DPB_BPS)
+	DW	19			;ルートディレクトリ領域の先頭論理セクタ番号(DPB_DIRPS)
+	DB	$A7			;デバイス情報(DPB_DEVICE)
+	DB	0			;デバイスドライバ内におけるユニット番号(DPB_UNITNO)
+	DW	31
 M2HQGSL:
 	DB	84
 
 ;M2HDE:
-;	DW	2
-;	DB	$03,1
-;	DW	1429
-;	DB	$FE,6,80,9,1,$84
-;	DW	5,$A7,11
+;	DW	3			;FAT領域のセクタ単位でのサイズ(DPB_FATLN)
+;	DB	$03			;メディアバイト(DPB_FATID)
+;	DB	1			;1クラスタの論理セクタ数(DPB_SECPCL)
+;	DW	1429			;総クラスタ数(DPB_MAXCL)
+;	DB	$FE			;フロッピーディスクのモード(DPB_FDMODE)
+;	DB	6			;ルートディレクトリ領域の論理セクタ数(DPB_DIRSCNT)
+;	DB	80			;フロッピーディスクのシリンダ数(DPB_MAXCYL)
+;	DB	89			;フロッピーディスクの1トラックのセクタ数(DPB_MAXSEC)
+;	DB	1			;FAT領域の先頭論理セクタ番号(DPB_FATPS)
+;	DB	$84			;FAT情報と論理セクタのサイズ(DPB_BPS)
+;	DW	7			;ルートディレクトリ領域の先頭論理セクタ番号(DPB_DIRPS)
+;	DB	$A7			;デバイス情報(DPB_DEVICE)
+;	DB	0			;デバイスドライバ内におけるユニット番号(DPB_UNITNO)
+;	DW	11			;データ格納領域の先頭論理セクタ番号(DPB_ADDCL)
 ;M2HDEGSL:
 ;	DB	53
 
