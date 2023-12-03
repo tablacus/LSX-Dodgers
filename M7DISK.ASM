@@ -26,10 +26,10 @@ DIV2:
 	CCF
 	RET	C
 	OR	084H		;Motor on + ドライブセレクト有効
-	OUT	(0DCH),A
+	OUT	(0DCH),A	;モータ/ドライブセレクト制御レジスタ
 	SRL	D		;CYLINDER
 	SBC	A,A
-	OUT	(0DDH),A	;SIDE
+	OUT	(0DDH),A	;ヘッドセレクト制御レジスタ
 
 	CALL	SETMODE
 	RET	C
@@ -38,7 +38,7 @@ DIV2:
 	CP	0FFH		;A=0FFH Unknown CYLINDER
 	CALL	Z,FDCRES	;Restore
 	CPL			;データバスが負論理
-	OUT	(0D9H),A	;Currrent CYLINDER
+	OUT	(0D9H),A	;MB8876 トラックレジスタ
 	CPL			;データバスが負論理
 	SUB	D
 	RET	Z		;No seek
@@ -53,18 +53,18 @@ DIV2:
 
 	LD	A,D
 	CPL			;データバスが負論理
-	OUT	(0DBH),A
+	OUT	(0DBH),A	;MB8876 データレジスタ
 	LD	(HL),D
 
-	LD	C,018H		;Seek
+	LD	C,018H		;FDC TypeIコマンド Seek
 FDCCMD2:
 	LD	A,(_SEEKSP)
 	OR	C
 
 FDCCMD:
 	CALL	COMSET
-FDCSMC	EQU	$+1
 	LD	A,080H		;FDC COMMAND(Self-modifying code)
+FDCSMC	EQU	$-1
 	AND	020H		;Write data Write track
 	INC	A
 
@@ -84,23 +84,16 @@ SETMODE:
 READY:
 	LD	B,128
 READY2:
-	IN	A,(0D8H)
+	IN	A,(0D8H)	;MB8876 ステータス/コマンドレジスタ
 	CPL			;データバスが負論理
 	AND	C		;NOT READY,BUSY
 	RET	Z
 	CALL	RD556VSYNC
-	ADD	A,A
+	RLCA
+	XOR	B
+	RRCA
 	JR	NC,READY2
-READY3:
-	IN	A,(0D8H)
-	CPL			;データバスが負論理
-	AND	C		;NOT READY,BUSY
-	RET	Z
-	CALL	RD556VSYNC
-	ADD	A,A
-	JR	C,READY3
 	DJNZ	READY2
-	SCF
 	RET
 
 FDCRES:
@@ -111,19 +104,21 @@ FDCRES:
 FDMOFF:
 	PUSH	AF
 	XOR	A		;Motor off(ドライブセレクト無効)
-	OUT	(0DCH),A
+	OUT	(0DCH),A	;モータ/ドライブセレクト制御レジスタ
 	POP	AF
 	RET
 
+SECSET_FDCCMD:
+	LD	A,(FDCSMC)
 SECSET:
 	PUSH	AF
 	LD	A,E
 	CPL			;データバスが負論理
-	OUT	(0DAH),A
+	OUT	(0DAH),A	;MB8876 セクタレジスタ
 	POP	AF
 COMSET:
 	CPL			;データバスが負論理
-	OUT	(0D8H),A
+	OUT	(0D8H),A	;MB8876 ステータス/コマンドレジスタ
 DELAY0:
 	LD	A,26
 DELAY:
@@ -150,10 +145,10 @@ RETRY:	DB	2
 
 WTTRK:
 	LD	B,1
-	LD	A,0F4H
+	LD	A,0F4H		;FDC TypeIIIコマンド Write Track
 	JR	WTTRK1
 FDWT:
-	LD	A,0A0H
+	LD	A,0A0H		;FDC TypeIIコマンド Write Sector
 WTTRK1:
 	LD	(FDCSMC),A
 DWTBL:
@@ -169,23 +164,22 @@ DWT0:
 	POP	HL
 	JR	C,ERRDW
 	DI
-	LD	A,(FDCSMC)
-	CALL	SECSET
-	LD	C,0DBH
+	CALL	SECSET_FDCCMD
+	LD	C,0DBH		;MB8876 データレジスタ
 DWT1:
 	LD	A,(HL)
 	CPL			;データバスが負論理
 	LD	D,A
 
 DWT2:
-	IN	A,(0D8H)
+	IN	A,(0D8H)	;MB8876 ステータス/コマンドレジスタ
 	CPL			;データバスが負論理
 	RRCA
 	JR	NC,DWT4
 	RRCA
 	JR	NC,DWT2
 DWT3:
-	OUT	(C),D
+	OUT	(C),D		;MB8876 データレジスタ
 	INC	HL
 	JR	DWT1
 
@@ -204,15 +198,15 @@ DWT4:
 	JR	NZ,ERRW
 
 DISKOK_WT:
-WTBSMC	EQU	$+1
 	LD	B,1
+WTBSMC	EQU	$-1
 	DJNZ	DWTBL
 	RET
 
 ERRW:
 	LD	A,0FFH
 ERRZ:
-	CP	A
+	CP	A		;ZF=1
 	SCF
 	JP	FDMOFF
 
@@ -225,7 +219,7 @@ ERRDW:
 	RET
 
 FDRD:
-	LD	A,080H
+	LD	A,080H		;FDC TypeIIコマンド Read Sector
 	LD	(FDCSMC),A
 DRDBL:
 	LD	A,B
@@ -239,16 +233,15 @@ DRD0:
 	POP	HL
 	JR	C,ERRDR
 	DI
-	LD	A,(FDCSMC)
-	CALL	SECSET
+	CALL	SECSET_FDCCMD
 DRD1:
-	IN	A,(0D8H)
+	IN	A,(0D8H)	;MB8876 ステータス/コマンドレジスタ
 	CPL			;データバスが負論理
 	RRCA
 	JR	NC,DRD3
 	RRCA
 	JR	NC,DRD1
-	IN	A,(0DBH)
+	IN	A,(0DBH)	;MB8876 データレジスタ
 	CPL			;データバスが負論理
 	LD	(HL),A
 	INC	HL
@@ -267,8 +260,8 @@ DRD3:
 	JR	NZ,ERRW
 
 DISKOK_RD:
-RDBSMC	EQU	$+1
 	LD	B,1
+RDBSMC	EQU	$-1
 	DJNZ	DRDBL
 	RET
 

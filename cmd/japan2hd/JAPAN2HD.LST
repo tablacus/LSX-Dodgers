@@ -1,0 +1,95 @@
+                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.0.0, LST:Full:4
+                                ; JAPAN2HD
+                                ;
+                                ; ディスクバッファを1024バイト確保して1セクタ1024バイトのメディアに対応
+                                
+       0005                     SYSTEM  EQU 00005H
+       005C                     FCB1    EQU 0005CH
+       0080                     DTA EQU 00080H
+                                
+000000 0100                         ORG 00100H
+000000 0100 C30301          10      JP  START       ;0C3HはZ80ではJPだが、i8086ではRETなので
+       0103                     START:              ;間違えてMS-DOS環境で実行しても即終了できる
+000003 0103 2A0600          16      LD  HL,(SYSTEM+1)
+000006 0106 25               4      DEC H
+000007 0107 25               4      DEC H
+000008 0108 25               4      DEC H
+000009 0109 25               4      DEC H
+00000A 010A F9               6      LD  SP,HL
+00000B 010B 210000          10      LD  HL,0
+00000E 010E E5              11      PUSH    HL
+                                
+00000F 010F 117401          10      LD  DE,TITLE
+000012 0112 0E09             7      LD  C,9     ;(BDOS) STROUT 文字列出力 CP/M
+000014 0114 CD0500          17      CALL    SYSTEM
+                                
+000017 0117 0E6F             7      LD  C,06FH      ;(BDOS) MSX-DOS のバージョン番号の獲得(_DOSVER) *1 MSX-DOS
+000019 0119 CD0500          17      CALL    SYSTEM
+00001C 011C D8              11      RET C       ;CP/M等
+00001D 011D 79               4      LD  A,C
+00001E 011E FE1D             7      CP  01DH
+000020 0120 C0              11      RET NZ      ;LSX-Dodgersではない
+                                
+000021 0121 2A0100          16      LD  HL,(1)
+000024 0124 24               4      INC H
+000025 0125 2E70             7      LD  L,070H
+000027 0127 E5              11      PUSH    HL
+000028 0128 DDE1            14      POP IX
+00002A 012A DD7E0B          19      LD  A,(IX+00BH) ;_MAX_SEC_SZ_H
+00002D 012D FE04             7      CP  4
+00002F 012F C8              11      RET Z
+                                
+000030 0130 DD5E0C          19      LD  E,(IX+00CH) ;_FATBF
+000033 0133 DD560D          19      LD  D,(IX+00DH)
+                                
+000036 0136 DD6E0E          19      LD  L,(IX+00EH) ;_DTBUF
+000039 0139 DD660F          19      LD  H,(IX+00FH)
+                                
+00003C 013C A7               4      AND A
+00003D 013D ED52            15      SBC HL,DE
+                                
+00003F 013F 110006          10      LD  DE,512*3
+000042 0142 A7               4      AND A
+000043 0143 ED52            15      SBC HL,DE
+                                
+000045 0145 C0              11      RET NZ      ;_FATBFが1.5KBかチェック
+                                
+000046 0146 0E5F             7      LD  C,05FH      ;ディスクバッファのフラッシュ(_FLUSH)
+000048 0148 CD0500          17      CALL    SYSTEM
+                                
+00004B 014B 2A0600          16      LD  HL,(SYSTEM+1)
+00004E 014E 7E               7      LD  A,(HL)
+00004F 014F FEC3             7      CP  0C3H        ;JP
+000051 0151 C0              11      RET NZ
+                                
+000052 0152 F3               4      DI
+                                
+000053 0153 5D               4      LD  E,L
+000054 0154 54               4      LD  D,H
+000055 0155 15               4      DEC D
+000056 0156 15               4      DEC D
+000057 0157 15               4      DEC D
+000058 0158 15               4      DEC D
+000059 0159 ED530600        20      LD  (SYSTEM+1),DE
+00005D 015D 010300          10      LD  BC,3
+000060 0160 EDB0                    LDIR
+                                
+000062 0162 DD360B04        19      LD  (IX+00BH),4 ;_MAX_SEC_SZ_H
+000066 0166 DD730E          19      LD  (IX+00EH),E ;_DTBUF
+000069 0169 DD720F          19      LD  (IX+00FH),D
+                                
+00006C 016C 118501          10      LD  DE,MSG_OK
+00006F 016F 0E09             7      LD  C,9     ;(BDOS) STROUT 文字列出力 CP/M
+000071 0171 C30500          10      JP  SYSTEM
+                                
+       0174                     TITLE:
+000074 0174 4A6170616E324844        DB  "Japan2HD v1.00"
+            2076312E3030        
+000082 0182 0D0A                    DB  0DH,0AH
+000084 0184 24                      DB  '$'
+                                
+       0185                     MSG_OK:
+000085 0185 4F4B                    DB  "OK"
+000087 0187 0D0A                    DB  0DH,0AH
+000089 0189 24                      DB  '$'
+[EOF:JAPAN2HD.ASM:SHIFT_JIS]

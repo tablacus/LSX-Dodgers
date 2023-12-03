@@ -26,12 +26,10 @@ DIV2:
 	LD	C,A
 
 	LD	A,(_DRIVE)
-	CP	4
-	CCF
-	RET	C
+	AND	3
 	OR	C
-	LD	(MOPAT+1),A	;Motor off data
-	LD	BC,00FFCH
+	LD	(_DRIVE),A	;サイド選択とドライブを保存
+	LD	BC,00FFCH	;モーター制御、サイド選択、 ドライブ選択
 	OR	080H		;Motor on
 	OUT	(C),A
 
@@ -41,7 +39,7 @@ DIV2:
 	CALL	DRIVE
 	CP	0FFH		;A=0FFH Unknown CYLINDER
 	CALL	Z,FDCRES	;Restore
-	LD	C,0F9H
+	LD	C,0F9H		;MB8877A トラックレジスタ
 	OUT	(C),A		;Currrent CYLINDER
 	SUB	D
 	RET	Z		;No seek
@@ -57,15 +55,15 @@ DIV2:
 	CP	C		;for Built-in 2DD
 	JR	C,SETM2
 	LD	A,B		;B=00FH
-	IN	A,(0FEH)		;2HD mode for 2DD seek
+	IN	A,(0FEH)	;2HD mode for 2DD seek/1.6M(2HD) タイプ指定
 SETM2:
 	LD	A,B
-	IN	A,(0FDH)		;MFM mode
+	IN	A,(0FDH)	;MFM 方式指定
 
-	LD	C,0FBH
+	LD	C,0FBH		;MB8877A データレジスタ
 	OUT	(C),D
 	LD	(HL),D
-	LD	C,018H		;Seek
+	LD	C,018H		;FDC TypeIコマンド Seek
 FDCCMD2:
 	LD	A,(_SEEKSP)
 	OR	C
@@ -73,7 +71,8 @@ FDCCMD2:
 FDCCMD:
 	CALL	COMSET
 
-FDCPAT:	LD	A,080H		;FDC COMMAND(Self-modifying code)
+	LD	A,080H		;FDC COMMAND(Self-modifying code)
+FDCSWC	EQU	$-1
 	AND	020H		;Write data Write track
 	INC	A
 
@@ -92,34 +91,27 @@ SETMODE:
 	IN	A,(C)
 
 	LD	A,B
-	IN	A,(0FDH)	;MFM mode
+	IN	A,(0FDH)	;MFM 方式指定
 
 	CALL	DELAY0		;Head select time
 	LD	A,081H		;NOT READY,BUSY
 READY:
 	PUSH	HL
-	LD	L,0
 	LD	H,A
-	LD	C,0F8H
+	LD	C,0F8H		;MB8877A ステータス／コマンドレジスタ
+	LD	L,C
 READY2:
 	IN	A,(C)
 	AND	H
 	JR	Z,READYE
 	LD	A,1AH
 	IN	A,(01H)
-	ADD	A,A
+	RLCA
+	XOR	L
+	RRCA
 	JR	NC,READY2
-READY3:
-	IN	A,(C)
-	AND	H
-	JR	Z,READYE
-	LD	A,1AH
-	IN	A,(01H)
-	ADD	A,A
-	JR	C,READY3
 	DEC	L
 	JR	NZ,READY2
-	SCF
 READYE:
 	POP	HL
 	RET
@@ -131,19 +123,21 @@ FDCRES:
 
 FDMOFF:
 	PUSH	AF
-	PUSH	BC
-	LD	BC,00FFCH	;Motor off
-MOPAT:	LD	A,000H		;(Self-rewriting)
+	PUSH	BC		;Motor off
+	LD	BC,00FFCH	;モーター制御、サイド選択、 ドライブ選択
+	LD	A,(_DRIVE)
 	OUT	(C),A
 	POP	BC
 	POP	AF
 	RET
 
+SECSET_FDCCMD:
+	LD	A,(FDCSWC)
 SECSET:
-	LD	BC,00FFAH
+	LD	BC,00FFAH	;MB8877A セレクタレジスタ
 	OUT	(C),E
 COMSET:
-	LD	C,0F8H
+	LD	C,0F8H		;MB8877A ステータス／コマンドレジスタ
 	OUT	(C),A
 DELAY0:
 	LD	A,26
@@ -153,7 +147,7 @@ DELAY:
 	RET
 
 DRIVE:
-	LD	HL,(_DRIVE)
+	LD	L,(IX+DPB_UNITNO)
 	LD	H,_CYL0/256
 	SET	7,L
 	LD	A,(HL)
@@ -172,31 +166,32 @@ RETRY:	DB	2
 
 WTTRK:
 	LD	B,1
-	LD	A,0F4H
+	LD	A,0F4H		;FDC TypeIIIコマンド Write Track
 	JR	WTTRK1
 FDWT:
-	LD	A,0A0H
+	LD	A,0A0H		;FDC TypeIIコマンド Write Sector
 WTTRK1:
-	LD	(FDCPAT+1),A
-	LD	A,16
+	LD	(FDCSWC),A
+	LD	A,DMA_WRITE-DMAD
 	JR	DISK
 
 DISKOK:
-FDCNT:	LD	B,1
+	LD	B,1
+FDCNT	EQU	$-1
 	DJNZ	DISK1
 	RET
 
 FDRD:
-	LD	A,080H
-	LD	(FDCPAT+1),A
-	LD	A,14
+	LD	A,080H		;FDC TypeIIコマンド Read Sector
+	LD	(FDCSWC),A
+	LD	A,DMA_READ-DMAD
 
 DISK:
-	LD	(DMAPAT+1),A
+	LD	(DMASWC),A
 DISK1:
 	LD	A,B
-	LD	(FDCNT+1),A
-	LD	(DMAD+11),HL
+	LD	(FDCNT),A
+	LD	(DMAHL),HL
 DISKR:
 	LD	A,2		;Retry count
 	LD	(RETRY),A
@@ -206,13 +201,13 @@ DISK2:
 	JR	C,ERRF
 	DI
 
-DMAPAT:	LD	A,14		;自己書き換え
+	LD	A,14		;自己書き換え
+DMASWC	EQU	$-1
 	LD	HL,DMAD
 	CALL	SETDMA
 	OUT	(C),C		;OUT 01F87H,087H WR6 イネーブル
-	LD	A,(FDCPAT+1)
 	PUSH	BC
-	CALL	SECSET
+	CALL	SECSET_FDCCMD
 	LD	HL,(DMAHL)
 	INC	HL
 	LD	DE,0BB06H	;READ DMA
@@ -254,10 +249,10 @@ ERR:
 	SCF
 	RET
 
-			;X1turbo DISK DMA
-DMAD:	DB	0C3H	;WR6 リセット
+DMAD:			;X1turbo DISK DMA
+	DB	0C3H	;WR6 リセット
 	DB	07DH	;WR0 ポートA→ポートB 転送
-	DW	00FFBH	;ポートA開始アドレス FDC データレジスタ
+	DW	00FFBH	;ポートA開始アドレス (FDC MB8877A データレジスタ)
 	DW	0FFFFH	;ブロック長(転送サイズ-1)
 	DB	02CH	;WR1 ポートAアドレス固定 I/O
 	DB	010H	;WR2 ポートBインクリメント
@@ -266,9 +261,10 @@ DMAD:	DB	0C3H	;WR6 リセット
 	DB	08DH	;WR4 バイト ポートB開始アドレス(LH)
 DMAHL:	DW	0	;ポートB開始アドレス
 	DB	0CFH	;WR6 ロード
-	DB	001H	;WR0 ポートB←ポートB 転送
+DMA_READ:
+	DB	001H	;WR0 ポートB←ポートB 転送	（書き込みの際に転送方向を逆にする）
 	DB	0CFH	;WR6 ロード
-
+DMA_WRITE:
 DMAE:
 
 AT_R	EQU	WTTRK-AT_DWT

@@ -36,6 +36,7 @@ INIT:
 	CALL	FILL_MEMORY
 	LD	B,0A4H
 	XOR	A
+	LD	(_DVSW),A
 	CALL	FILL_MEMORY
 
 	LD	A,0C3H		;JP
@@ -43,9 +44,6 @@ INIT:
 	LD	(00000H),A
 	LD	(00001H),HL	;IPL
 
-	LD	HL,MACW		;3 bit7  DPB Compatible LA(1)
-	LD	(00003H),HL	;  bit6-0 Machine
-;				;4 LSX-Dodgers(01DH)
 	LD	HL,BDOS
 	LD	(00005H),A
 	LD	(00006H),HL	;BDOS
@@ -134,8 +132,8 @@ AUTODV:	DB	"A:",0
 INIMES:	DB	00CH,"LSX-Dodgers for MZ-700/1500 v"
 	DB	030H + VER_1, '.'
 	DB	030H + VER_2 ,030H + VER_3
-	DB	"E"
-	DB	' Gaku',0DH,0AH
+	DB	''
+	DB	" Gaku",0DH,0AH
 	DB	0
 
 M7BEEPD:

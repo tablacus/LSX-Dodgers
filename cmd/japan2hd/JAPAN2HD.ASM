@@ -1,0 +1,92 @@
+; JAPAN2HD
+;
+; ディスクバッファを1024バイト確保して1セクタ1024バイトのメディアに対応
+
+SYSTEM	EQU	00005H
+FCB1	EQU	0005CH
+DTA	EQU	00080H
+
+	ORG	00100H
+	JP	START		;0C3HはZ80ではJPだが、i8086ではRETなので
+START:				;間違えてMS-DOS環境で実行しても即終了できる
+	LD	HL,(SYSTEM+1)
+	DEC	H
+	DEC	H
+	DEC	H
+	DEC	H
+	LD	SP,HL
+	LD	HL,0
+	PUSH	HL
+
+	LD	DE,TITLE
+	LD	C,9		;(BDOS) STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	C,06FH	 	;(BDOS) MSX-DOS のバージョン番号の獲得(_DOSVER) *1 MSX-DOS
+	CALL	SYSTEM
+	RET	C		;CP/M等
+	LD	A,C
+	CP	01DH
+	RET	NZ		;LSX-Dodgersではない
+
+	LD	HL,(1)
+	INC	H
+	LD	L,070H
+	PUSH	HL
+	POP	IX
+	LD	A,(IX+00BH)	;_MAX_SEC_SZ_H
+	CP	4
+	RET	Z
+
+	LD	E,(IX+00CH)	;_FATBF
+	LD	D,(IX+00DH)
+
+	LD	L,(IX+00EH)	;_DTBUF
+	LD	H,(IX+00FH)
+
+	AND	A
+	SBC	HL,DE
+
+	LD	DE,512*3
+	AND	A
+	SBC	HL,DE
+
+	RET	NZ		;_FATBFが1.5KBかチェック
+
+	LD	C,05FH	 	;ディスクバッファのフラッシュ(_FLUSH)
+	CALL	SYSTEM
+
+	LD	HL,(SYSTEM+1)
+	LD	A,(HL)
+	CP	0C3H		;JP
+	RET	NZ
+
+	DI
+
+	LD	E,L
+	LD	D,H
+	DEC	D
+	DEC	D
+	DEC	D
+	DEC	D
+	LD	(SYSTEM+1),DE
+	LD	BC,3
+	LDIR
+
+	LD	(IX+00BH),4	;_MAX_SEC_SZ_H
+	LD	(IX+00EH),E	;_DTBUF
+	LD	(IX+00FH),D
+
+	LD	DE,MSG_OK
+	LD	C,9		;(BDOS) STROUT 文字列出力 CP/M
+	JP	SYSTEM
+
+TITLE:
+	DB	"Japan2HD v1.00"
+	DB	0DH,0AH
+	DB	'$'
+
+MSG_OK:
+	DB	"OK"
+	DB	0DH,0AH
+	DB	'$'

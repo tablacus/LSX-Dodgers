@@ -38,7 +38,7 @@ S26X1:
 	LDIR
 	LD	(DTAX),HL
 
-	CALL	SWTDBF		;バッファデータは更新された
+	CALL	WTDB		;バッファデータは更新された
 
 	LD	HL,(LEFTX)
 	POP	DE
@@ -70,7 +70,7 @@ RBWC:
 	JR	C,RBWERR
 	LD	DE,(_DTBUF)
 	LDIR
-	CALL	SWTDBF		;バッファデータは更新された
+	CALL	WTDB		;バッファデータは更新された
 RBWEND:
 	CALL	RBXEND
 
@@ -159,7 +159,7 @@ _SYS27:		;(BDOS)ランダムブロック読み込み
 RBR1:
 	SBC	A,A
 	AND	1
-	LD	(RBRAP+1),A
+	LD	(RBRA_SWC),A
 
 	LD	A,H
 	OR	L
@@ -215,7 +215,8 @@ RBREND0:
 	POP	DE
 	POP	AF	;(HL)
 	XOR	A
-RBRAP:	LD	A,000H
+	LD	A,000H
+RBRA_SWC	EQU	$-1
 	RET
 
 RBRDIR:
@@ -226,7 +227,7 @@ RBRDIR:
 	LD	H,A
 	LD	L,A
 	INC	A
-	LD	(RBRAP+1),A
+	LD	(RBRA_SWC),A
 	JR	RBREND0
 
 RBX0:
@@ -437,4 +438,30 @@ DRWF_MODE	EQU	$-2
 DRDF1:
 	POP	DE
 	POP	BC
+	RET
+
+SET_RR_AHL:
+	LD	(IY+33),L	;(FCB)Random record
+	LD	(IY+34),H
+	LD	(IY+35),A
+	RET
+
+SETSEQ1:
+	PUSH	AF
+	PUSH	HL		;AHL=Random record
+	CALL	GET_RR_AHL
+	LD	B,A		;AHL→HLA
+	LD	A,L		;(IY+33)(FCB)ランダムレコード
+	LD	L,H		;(IY+34)
+	LD	H,B		;(IY+35)
+	LD	B,0
+
+	CALL	GET_CPM_R_SIZE
+
+	ADD	HL,HL
+	SRL	L		;L=L/2
+	LD	(IY+32),L	;(FCB)カレントレコード
+	LD	(IY+12),H	;(FCB)カレントブロック
+	POP	HL
+	POP	AF
 	RET

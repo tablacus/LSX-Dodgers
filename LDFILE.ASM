@@ -1,6 +1,8 @@
 
 ;	LSX-Dodgers FILE
 
+;	【注意】バイナリサイズを下位1バイトを0丁度に調整する必要あり
+
 FILEC:
 	CALL	FILE
 FILEC2:
@@ -719,7 +721,6 @@ SNAME3:
 WTDB:
 	LD	A,0FFH
 	LD	(SFILE),A
-SWTDBF:
 	LD	A,1
 	LD	(_WTDBF),A
 	XOR	A
@@ -1008,11 +1009,6 @@ GET_RR_AHL:
 	LD	H,(IY+34)	;
 	LD	A,(IY+35)	;
 	RET
-SET_RR_AHL:
-	LD	(IY+33),L	;(FCB)Random record
-	LD	(IY+34),H
-	LD	(IY+35),A
-	RET
 INIT_SEQ:
 	LD	A,1		;LD BC,????
 	LD	HL,SETSEQ
@@ -1028,25 +1024,6 @@ GETSEQ:
 	RR	L	;
 	RET
 
-SETSEQ1:
-	PUSH	AF
-	PUSH	HL		;AHL=Random record
-	CALL	GET_RR_AHL
-	LD	B,A		;AHL→HLA
-	LD	A,L		;(IY+33)(FCB)ランダムレコード
-	LD	L,H		;(IY+34)
-	LD	H,B		;(IY+35)
-	LD	B,0
-
-	CALL	GET_CPM_R_SIZE
-
-	ADD	HL,HL
-	SRL	L		;L=L/2
-	LD	(IY+32),L	;(FCB)カレントレコード
-	LD	(IY+12),H	;(FCB)カレントブロック
-	POP	HL
-	POP	AF
-	RET
 SETSEQ:
 	CALL	SETSEQ1
 POPRR:

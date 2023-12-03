@@ -9,12 +9,9 @@ BDOS0:
 	LD	A,03CH
 DOS1:
 	ADD	A,A
-	LD	L,A
-	LD	H,STABLE/256
-	LD	A,(HL)
-	INC	L
-	LD	H,(HL)
-	LD	L,A
+	LD	(DOS1_SWC),A
+	LD	HL,(STABLE)
+DOS1_SWC	EQU	$-2
 	EX	(SP),HL
 	LD	A,C
 ;確認用
@@ -24,7 +21,7 @@ _DOS2:
 	CP	05AH		;(BDOS)カレントディレクトリの変更(_CHDIR)
 	JP	Z,_SYS5A
 	CP	05CH		;(BDOS)ファイル名の解析(_PFILE)
-	JP	Z,_SYS29
+	JP	Z,_SYS5C
 	CP	05FH		;(BDOS)ディスクバッファのフラッシュ(_FLUSH)
 	JP	Z,_SYS5F
 	CP	06FH		;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
@@ -424,6 +421,8 @@ _SYS24:		;(BDOS)ランダムレコードフィールドの設定
 	CALL	GETSEQ
 	JR	_S24X1		;^^^^^^^^^^^^^^^^^^^^^^^^
 
+_SYS5C:		;(BDOS)ファイル名の解析(_PFILE)
+	DEC	HL
 _SYS29:		;(BDOS)ファイル名の解析(_PPATH)
 	PUSH	BC
 	PUSH	HL
@@ -453,7 +452,7 @@ _SYS2F:
 	PUSH	BC
 	LD	BC,DRD24B
 S2FX:
-	LD	(S2FPAT+1),BC
+	LD	(S2F_SWC),BC
 	CALL	_FFLUSH
 
 	PUSH	DE
@@ -465,7 +464,8 @@ S2FX:
 	LD	HL,(_DTA)
 
 	LD	C,0
-S2FPAT:	CALL	DRD24B
+	CALL	DRD24B
+S2F_SWC	EQU	$-2
 S30X2:
 	POP	HL
 	POP	DE
@@ -478,8 +478,11 @@ _SYS5A:		;(BDOS)カレントディレクトリの変更
 	PUSH	DE
 	PUSH	HL
 	CALL	FILEC
-	LD	HL,0
+	LD	HL,S30X2
+	PUSH	HL
+	LD	A,(FDRV+13)	;(FCB)属性(アトリビュート))
+	AND	010H		;ディレクトリ
+	RET	Z
 	LD	DE,FDRV
 	LD	HL,(STABLE+2*027H)	;ランダムブロック読み込み
-	CALL	JP_HL
-	JR	S30X2
+	JP	(HL)

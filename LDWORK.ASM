@@ -57,9 +57,10 @@ _CYL1:	DB	0FFH	;Cylinder
 _CYL2:	DB	0FFH	;Cylinder
 _CYL3:	DB	0FFH	;Cylinder
 _DRIVE:	DB	0	;unit number
-_SEEKSP:DB	0	;Seek speed
+_SEEKSP:
+	DB	0	;Seek speed
 _ISEEK:	DB	0FFH	;
-_DVSW:	DB	0
+	DS	1
 _DRV:	DB	0
 _DSK:	DB	0FFH
 _DTA:	DW	00080H
@@ -68,7 +69,8 @@ _TXADR:	DW	0
 _KEYPS:	DW	0
 _KEYD:	DW	0FF00H	;キーデータ
 _KEYSP:	DB	KEYSP_L,KEYSP_H	;オートリピートの速度
-_COLORF:DB	COLORF	;色
+_COLORF:
+	DB	COLORF	;色
 _LINE:	DB	LINE
 
 _FCB:	DW	0	;SEARCH FILES
@@ -78,7 +80,8 @@ _FBCNT:	DB	0	;    //
 _FILEN:	DB	0	;    //
 _DIRF:	DB	0	;bit7:ディレクトリ bit0-6:セクタインデックス
 	DS	1
-_WTFATF:DB	0	;FATバッファの更新フラグ
+_WTFATF:
+	DB	0	;FATバッファの更新フラグ
 	DS	1
 _WTDBF:	DB	0	;データバッファの更新フラグ
 _DBDRV:	DB	0FFH	;データバッファにあるデータを読み込んだドライブ
@@ -152,6 +155,7 @@ GNCPAT	EQU	$-2
 _SNCL:
 	JP	SNCL		; self-modifying code
 SNCPAT	EQU	$-2
-_COMANL:JP	COMANL
+_COMANL:
+	JP	COMANL
 
 _WE:

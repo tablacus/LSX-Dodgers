@@ -27,9 +27,13 @@ STABLE:
 ;DOS2
 	DW	_DOS2
 
-	DS	2
-_FATBF:	DW	FATBF
-_DTBUF:	DW	DTBUF
+	DS	1
+_MAX_SEC_SZ_H:
+	DB	MAX_SEC_SZ_H
+_FATBF:
+	DW	FATBF
+_DTBUF:
+	DW	DTBUF
 
 ;	コントロールコードテーブル
 ;	CTRLTB:アドレス下位1バイトが080Hになるように
