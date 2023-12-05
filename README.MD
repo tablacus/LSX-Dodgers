@@ -22,6 +22,10 @@ https://github.com/tablacus/LSX-Dodgers/releases
 
 FD0にセットしたらIPLからキーボードでF→0→0(X1turbo実機ROM)/F→0(X1実機ROM)/0(互換ROM)として`ldsys.d88`を入れたディスクを起動してもOKです。
 
+## LSX-DodgersをX1のHDDからブートさせる手順
+https://github.com/ho-ogino/LD-hdd/tree/main/ld-hddboot
+
+
 # MZ-700/1500版の起動方法
 1. Lコマンドでテープ(やQD)から読み込む体勢にする
 2. FD1に`ldsys.d88`をセット
