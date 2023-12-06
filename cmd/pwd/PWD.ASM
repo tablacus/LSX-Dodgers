@@ -1,5 +1,5 @@
 ;
-;	PWD v1.00	カレントディレクトリの表示
+;	PWD v1.01	カレントディレクトリの表示
 ;
 SYSTEM	EQU	$0005
 FCB1	EQU	$005C
@@ -13,9 +13,8 @@ START:				;間違えてMS-DOS環境で実行しても即終了できる
 	LD	A,B
 	CP	2
 	JP	NC,DOS2
-	AND	A
-	LD	HL,$011D
-	SBC	HL,BC
+	LD	A,C
+	CP	$1D
 	JP	NZ,DOS1
 
 	LD	DE,DIR_MATCH

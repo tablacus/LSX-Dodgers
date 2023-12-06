@@ -1,6 +1,6 @@
-                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.0.0, LST:Full:4
+                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.13.0, LST:Full:4
                                 ;
-                                ;   PWD v1.00   カレントディレクトリの表示
+                                ;   PWD v1.01   カレントディレクトリの表示
                                 ;
        0005                     SYSTEM  EQU $0005
        005C                     FCB1    EQU $005C
@@ -10,180 +10,179 @@
        0103                     START:              ;間違えてMS-DOS環境で実行しても即終了できる
 000003 0103 0E6F             7      LD  C,$6F       ;MSX-DOS のバージョン番号の獲得(_DOSVER)
 000005 0105 CD0500          17      CALL    SYSTEM
-000008 0108 DAA801          10      JP  C,DOS1
+000008 0108 DAA501          10      JP  C,DOS1
 00000B 010B 78               4      LD  A,B
 00000C 010C FE02             7      CP  2
-00000E 010E D29201          10      JP  NC,DOS2
-000011 0111 A7               4      AND A
-000012 0112 211D01          10      LD  HL,$011D
-000015 0115 ED42            15      SBC HL,BC
-000017 0117 C2A801          10      JP  NZ,DOS1
+00000E 010E D28F01          10      JP  NC,DOS2
+000011 0111 79               4      LD  A,C
+000012 0112 FE1D             7      CP  $1D
+000014 0114 C2A501          10      JP  NZ,DOS1
                                 
-00001A 011A 118E02          10      LD  DE,DIR_MATCH
-00001D 011D 0E1A             7      LD  C,$1A       ;DTAの設定(_SETDTA)
-00001F 011F CD0500          17      CALL    SYSTEM
-       0122                     LOOP1:
-000022 0122 3E10             7      LD  A,$10
-000024 0124 323B02          13      LD  (FCB_PARENT+13),A
-000027 0127 112E02          10      LD  DE,FCB_PARENT
-00002A 012A 0E0F             7      LD  C,$0F       ;ファイルのオープン(_FOPEN)
-00002C 012C CD0500          17      CALL    SYSTEM
-00002F 012F FEFF             7      CP  $FF
-000031 0131 CAAD01          10      JP  Z,SHOW
-000034 0134 3A3B02          13      LD  A,(FCB_PARENT+13)
-000037 0137 CB67             8      BIT 4,A
-000039 0139 2872            12      JR  Z,SHOW
-       013B                     SETED:
-00003B 013B 3A2E02          13      LD  A,(FCB_PARENT)  ;ドライブ番号
-00003E 013E 325E02          13      LD  (FCB_SEARCH),A
+000017 0117 118B02          10      LD  DE,DIR_MATCH
+00001A 011A 0E1A             7      LD  C,$1A       ;DTAの設定(_SETDTA)
+00001C 011C CD0500          17      CALL    SYSTEM
+       011F                     LOOP1:
+00001F 011F 3E10             7      LD  A,$10
+000021 0121 323802          13      LD  (FCB_PARENT+13),A
+000024 0124 112B02          10      LD  DE,FCB_PARENT
+000027 0127 0E0F             7      LD  C,$0F       ;ファイルのオープン(_FOPEN)
+000029 0129 CD0500          17      CALL    SYSTEM
+00002C 012C FEFF             7      CP  $FF
+00002E 012E CAAA01          10      JP  Z,SHOW
+000031 0131 3A3802          13      LD  A,(FCB_PARENT+13)
+000034 0134 CB67             8      BIT 4,A
+000036 0136 2872            12      JR  Z,SHOW
+       0138                     SETED:
+000038 0138 3A2B02          13      LD  A,(FCB_PARENT)  ;ドライブ番号
+00003B 013B 325B02          13      LD  (FCB_SEARCH),A
                                 
-000041 0141 2A4802          16      LD  HL,(FCB_PARENT+26)  ;ファイルの先頭クラスタ
-000044 0144 23               6      INC HL
-000045 0145 226C02          16      LD  (FCB_SEARCH+14),HL  ;アクセスするディレクトリのクラスタ番号+1
-000048 0148 3E10             7      LD  A,$10
-00004A 014A 326B02          13      LD  (FCB_SEARCH+13),A
+00003E 013E 2A4502          16      LD  HL,(FCB_PARENT+26)  ;ファイルの先頭クラスタ
+000041 0141 23               6      INC HL
+000042 0142 226902          16      LD  (FCB_SEARCH+14),HL  ;アクセスするディレクトリのクラスタ番号+1
+000045 0145 3E10             7      LD  A,$10
+000047 0147 326802          13      LD  (FCB_SEARCH+13),A
                                 
-00004D 014D 115E02          10      LD  DE,FCB_SEARCH
-000050 0150 0E11             7      LD  C,$11       ;ファイル検索(_SFIRST)
-000052 0152 CD0500          17      CALL    SYSTEM
-       0155                     LOOP2:
-000055 0155 FEFF             7      CP  $FF
-000057 0157 2854            12      JR  Z,SHOW
-000059 0159 3A9002          13      LD  A,(DIR_MATCH+2)
-00005C 015C FE2E             7      CP  '.'         ;..
-00005E 015E 280C            12      JR  Z,SKIP
-000060 0160 2A3C02          16      LD  HL,(FCB_PARENT+14)  ;アクセスするディレクトリのクラスタ番号+1
-000063 0163 ED5BA902        20      LD  DE,(DIR_MATCH+1+$1A)    ;ファイルの先頭クラスタ
-000067 0167 37               4      SCF
-000068 0168 ED52            15      SBC HL,DE
-00006A 016A 2807            12      JR  Z,FOUND
-       016C                     SKIP:
-00006C 016C 0E12             7      LD  C,$12       ;次のファイル検索(_SNEXT)
-00006E 016E CD0500          17      CALL    SYSTEM
-000071 0171 18E2            12      JR  LOOP2
-       0173                     FOUND:
-000073 0173 218F02          10      LD  HL,DIR_MATCH+1  ;ファイル名
-000076 0176 ED5B2C02        20      LD  DE,(PATH_IX)
-00007A 017A 010B00          10      LD  BC,11
-00007D 017D EDB0                    LDIR
-00007F 017F 2A2C02          16      LD  HL,(PATH_IX)
-000082 0182 010B00          10      LD  BC,11
-000085 0185 09              11      ADD HL,BC
-000086 0186 222C02          16      LD  (PATH_IX),HL
+00004A 014A 115B02          10      LD  DE,FCB_SEARCH
+00004D 014D 0E11             7      LD  C,$11       ;ファイル検索(_SFIRST)
+00004F 014F CD0500          17      CALL    SYSTEM
+       0152                     LOOP2:
+000052 0152 FEFF             7      CP  $FF
+000054 0154 2854            12      JR  Z,SHOW
+000056 0156 3A8D02          13      LD  A,(DIR_MATCH+2)
+000059 0159 FE2E             7      CP  '.'         ;..
+00005B 015B 280C            12      JR  Z,SKIP
+00005D 015D 2A3902          16      LD  HL,(FCB_PARENT+14)  ;アクセスするディレクトリのクラスタ番号+1
+000060 0160 ED5BA602        20      LD  DE,(DIR_MATCH+1+$1A)    ;ファイルの先頭クラスタ
+000064 0164 37               4      SCF
+000065 0165 ED52            15      SBC HL,DE
+000067 0167 2807            12      JR  Z,FOUND
+       0169                     SKIP:
+000069 0169 0E12             7      LD  C,$12       ;次のファイル検索(_SNEXT)
+00006B 016B CD0500          17      CALL    SYSTEM
+00006E 016E 18E2            12      JR  LOOP2
+       0170                     FOUND:
+000070 0170 218C02          10      LD  HL,DIR_MATCH+1  ;ファイル名
+000073 0173 ED5B2902        20      LD  DE,(PATH_IX)
+000077 0177 010B00          10      LD  BC,11
+00007A 017A EDB0                    LDIR
+00007C 017C 2A2902          16      LD  HL,(PATH_IX)
+00007F 017F 010B00          10      LD  BC,11
+000082 0182 09              11      ADD HL,BC
+000083 0183 222902          16      LD  (PATH_IX),HL
                                 
-000089 0189 2A6C02          16      LD  HL,(FCB_SEARCH+14)  ;アクセスするディレクトリのクラスタ番号
-00008C 018C 223C02          16      LD  (FCB_PARENT+14),HL
+000086 0186 2A6902          16      LD  HL,(FCB_SEARCH+14)  ;アクセスするディレクトリのクラスタ番号
+000089 0189 223902          16      LD  (FCB_PARENT+14),HL
                                 
-00008F 018F C32201          10      JP  LOOP1
-       0192                     DOS2:               ;MSX-DOS2
-000092 0192 CD0802          17      CALL    SHOW_DRIVE
-000095 0195 11AF02          10      LD  DE,PATH_STACK
-000098 0198 0E59             7      LD  C,$59       ;カレントディレクトリの獲得(_GETCD)
-00009A 019A CD0500          17      CALL    SYSTEM
-00009D 019D 21AF02          10      LD  HL,PATH_STACK
-0000A0 01A0 010000          10      LD  BC,0
-0000A3 01A3 CDEE01          17      CALL    SHOWX
-0000A6 01A6 1877            12      JR  FIN
-       01A8                     DOS1:               ;CP/M MSX-DOS1
-0000A8 01A8 CD0802          17      CALL    SHOW_DRIVE
-0000AB 01AB 1872            12      JR  FIN
-       01AD                     SHOW:
-0000AD 01AD CD0802          17      CALL    SHOW_DRIVE
-0000B0 01B0 2A2C02          16      LD  HL,(PATH_IX)
-0000B3 01B3 11AF02          10      LD  DE,PATH_STACK
-0000B6 01B6 A7               4      AND A
-0000B7 01B7 ED52            15      SBC HL,DE
-0000B9 01B9 2864            12      JR  Z,FIN
-       01BB                     SHOW1:
-0000BB 01BB 2A2C02          16      LD  HL,(PATH_IX)
-0000BE 01BE 11AF02          10      LD  DE,PATH_STACK
-0000C1 01C1 A7               4      AND A
-0000C2 01C2 ED52            15      SBC HL,DE
-0000C4 01C4 2859            12      JR  Z,FIN
+00008C 018C C31F01          10      JP  LOOP1
+       018F                     DOS2:               ;MSX-DOS2
+00008F 018F CD0502          17      CALL    SHOW_DRIVE
+000092 0192 11AC02          10      LD  DE,PATH_STACK
+000095 0195 0E59             7      LD  C,$59       ;カレントディレクトリの獲得(_GETCD)
+000097 0197 CD0500          17      CALL    SYSTEM
+00009A 019A 21AC02          10      LD  HL,PATH_STACK
+00009D 019D 010000          10      LD  BC,0
+0000A0 01A0 CDEB01          17      CALL    SHOWX
+0000A3 01A3 1877            12      JR  FIN
+       01A5                     DOS1:               ;CP/M MSX-DOS1
+0000A5 01A5 CD0502          17      CALL    SHOW_DRIVE
+0000A8 01A8 1872            12      JR  FIN
+       01AA                     SHOW:
+0000AA 01AA CD0502          17      CALL    SHOW_DRIVE
+0000AD 01AD 2A2902          16      LD  HL,(PATH_IX)
+0000B0 01B0 11AC02          10      LD  DE,PATH_STACK
+0000B3 01B3 A7               4      AND A
+0000B4 01B4 ED52            15      SBC HL,DE
+0000B6 01B6 2864            12      JR  Z,FIN
+       01B8                     SHOW1:
+0000B8 01B8 2A2902          16      LD  HL,(PATH_IX)
+0000BB 01BB 11AC02          10      LD  DE,PATH_STACK
+0000BE 01BE A7               4      AND A
+0000BF 01BF ED52            15      SBC HL,DE
+0000C1 01C1 2859            12      JR  Z,FIN
                                 
-       01C7                     SEPSMC  EQU $+1
-0000C6 01C6 3E00             7      LD  A,0
-0000C8 01C8 B7               4      OR  A
-0000C9 01C9 C4FB01          17      CALL    NZ,CONOUT_A
-0000CC 01CC 3E5C             7      LD  A,$5C       ;\
-0000CE 01CE 32C701          13      LD  (SEPSMC),A
+       01C4                     SEPSMC  EQU $+1
+0000C3 01C3 3E00             7      LD  A,0
+0000C5 01C5 B7               4      OR  A
+0000C6 01C6 C4F801          17      CALL    NZ,CONOUT_A
+0000C9 01C9 3E5C             7      LD  A,$5C       ;\
+0000CB 01CB 32C401          13      LD  (SEPSMC),A
                                 
-0000D1 01D1 11A402          10      LD  DE,PATH_STACK-11
-0000D4 01D4 19              11      ADD HL,DE
-0000D5 01D5 222C02          16      LD  (PATH_IX),HL
-0000D8 01D8 0608             7      LD  B,8
-0000DA 01DA 0E2E             7      LD  C,'.'
-0000DC 01DC CDEE01          17      CALL    SHOWX
-0000DF 01DF 2A2C02          16      LD  HL,(PATH_IX)
-0000E2 01E2 110800          10      LD  DE,8
-0000E5 01E5 19              11      ADD HL,DE
-0000E6 01E6 010003          10      LD  BC,$0300
-0000E9 01E9 CDEE01          17      CALL    SHOWX
-0000EC 01EC 18CD            12      JR  SHOW1
-       01EE                     SHOWX:
-0000EE 01EE 7E               7      LD  A,(HL)
-0000EF 01EF 23               6      INC HL
-0000F0 01F0 FE21             7      CP  $21
-0000F2 01F2 D8              11      RET C
-0000F3 01F3 CDFB01          17      CALL    CONOUT_A
-0000F6 01F6 10F6            13      DJNZ    SHOWX
-0000F8 01F8 79               4      LD  A,C
-0000F9 01F9 B7               4      OR  A
-0000FA 01FA C8              11      RET Z
-       01FB                     CONOUT_A:
-0000FB 01FB C5              11      PUSH    BC
-0000FC 01FC D5              11      PUSH    DE
-0000FD 01FD E5              11      PUSH    HL
-0000FE 01FE 5F               4      LD  E,A
-0000FF 01FF 0E02             7      LD  C,$02       ;コンソール出力(_CONOUT)
-000101 0201 CD0500          17      CALL    SYSTEM
-000104 0204 E1              10      POP HL
-000105 0205 D1              10      POP DE
-000106 0206 C1              10      POP BC
-000107 0207 C9              10      RET
-       0208                     SHOW_DRIVE:
-000108 0208 0E19             7      LD  C,$19       ;カレントドライブ番号の獲得(_CURDRV)
-00010A 020A CD0500          17      CALL    SYSTEM
-00010D 020D F5              11      PUSH    AF
-00010E 020E C641             7      ADD A,'A'
-000110 0210 CDFB01          17      CALL    CONOUT_A
-000113 0213 3E3A             7      LD  A,':'
-000115 0215 CDFB01          17      CALL    CONOUT_A
-000118 0218 3E5C             7      LD  A,$05C      ;\
-00011A 021A CDFB01          17      CALL    CONOUT_A
-00011D 021D C1              10      POP BC
-00011E 021E C9              10      RET
+0000CE 01CE 11A102          10      LD  DE,PATH_STACK-11
+0000D1 01D1 19              11      ADD HL,DE
+0000D2 01D2 222902          16      LD  (PATH_IX),HL
+0000D5 01D5 0608             7      LD  B,8
+0000D7 01D7 0E2E             7      LD  C,'.'
+0000D9 01D9 CDEB01          17      CALL    SHOWX
+0000DC 01DC 2A2902          16      LD  HL,(PATH_IX)
+0000DF 01DF 110800          10      LD  DE,8
+0000E2 01E2 19              11      ADD HL,DE
+0000E3 01E3 010003          10      LD  BC,$0300
+0000E6 01E6 CDEB01          17      CALL    SHOWX
+0000E9 01E9 18CD            12      JR  SHOW1
+       01EB                     SHOWX:
+0000EB 01EB 7E               7      LD  A,(HL)
+0000EC 01EC 23               6      INC HL
+0000ED 01ED FE21             7      CP  $21
+0000EF 01EF D8              11      RET C
+0000F0 01F0 CDF801          17      CALL    CONOUT_A
+0000F3 01F3 10F6            13      DJNZ    SHOWX
+0000F5 01F5 79               4      LD  A,C
+0000F6 01F6 B7               4      OR  A
+0000F7 01F7 C8              11      RET Z
+       01F8                     CONOUT_A:
+0000F8 01F8 C5              11      PUSH    BC
+0000F9 01F9 D5              11      PUSH    DE
+0000FA 01FA E5              11      PUSH    HL
+0000FB 01FB 5F               4      LD  E,A
+0000FC 01FC 0E02             7      LD  C,$02       ;コンソール出力(_CONOUT)
+0000FE 01FE CD0500          17      CALL    SYSTEM
+000101 0201 E1              10      POP HL
+000102 0202 D1              10      POP DE
+000103 0203 C1              10      POP BC
+000104 0204 C9              10      RET
+       0205                     SHOW_DRIVE:
+000105 0205 0E19             7      LD  C,$19       ;カレントドライブ番号の獲得(_CURDRV)
+000107 0207 CD0500          17      CALL    SYSTEM
+00010A 020A F5              11      PUSH    AF
+00010B 020B C641             7      ADD A,'A'
+00010D 020D CDF801          17      CALL    CONOUT_A
+000110 0210 3E3A             7      LD  A,':'
+000112 0212 CDF801          17      CALL    CONOUT_A
+000115 0215 3E5C             7      LD  A,$05C      ;\
+000117 0217 CDF801          17      CALL    CONOUT_A
+00011A 021A C1              10      POP BC
+00011B 021B C9              10      RET
                                 
-       021F                     FIN:
-00011F 021F 3E0D             7      LD  A,$0D
-000121 0221 CDFB01          17      CALL    CONOUT_A
-000124 0224 3E0A             7      LD  A,$0A
-000126 0226 CDFB01          17      CALL    CONOUT_A
-000129 0229 C30000          10      JP  0
+       021C                     FIN:
+00011C 021C 3E0D             7      LD  A,$0D
+00011E 021E CDF801          17      CALL    CONOUT_A
+000121 0221 3E0A             7      LD  A,$0A
+000123 0223 CDF801          17      CALL    CONOUT_A
+000126 0226 C30000          10      JP  0
                                 
-00012C 022C AF02                PATH_IX:    DW  PATH_STACK
+000129 0229 AC02                PATH_IX:    DW  PATH_STACK
                                 
-       022E                     FCB_PARENT:
-00012E 022E 002E2E2020202020        DB  0,"..         "
+       022B                     FCB_PARENT:
+00012B 022B 002E2E2020202020        DB  0,"..         "
             20202020            
-00013A 023A 0010000000000000        DB  0,$10,0,0, 0,0,0,0, 0,0,0,0 ;残りは0で埋める
+000137 0237 0010000000000000        DB  0,$10,0,0, 0,0,0,0, 0,0,0,0 ;残りは0で埋める
             00000000            
-000146 0246 0000000000000000        DB  0,0,0,0, 0,0,0,0, 0,0,0,0, 0
+000143 0243 0000000000000000        DB  0,0,0,0, 0,0,0,0, 0,0,0,0, 0
             0000000000          
                                 
-000153 0253                         DS  11
+000150 0250                         DS  11
                                 
-       025E                     FCB_SEARCH:
-00015E 025E 003F3F3F3F3F3F3F        DB  0,"???????????"
+       025B                     FCB_SEARCH:
+00015B 025B 003F3F3F3F3F3F3F        DB  0,"???????????"
             3F3F3F3F            
-00016A 026A 0010000000000000        DB  0,$10,0,0, 0,0,0,0, 0,0,0,0 ;残りは0で埋める
+000167 0267 0010000000000000        DB  0,$10,0,0, 0,0,0,0, 0,0,0,0 ;残りは0で埋める
             00000000            
-000176 0276 0000000000000000        DB  0,0,0,0, 0,0,0,0, 0,0,0,0, 0
+000173 0273 0000000000000000        DB  0,0,0,0, 0,0,0,0, 0,0,0,0, 0
             0000000000          
                                 
-       0283                         DS  11
+       0280                         DS  11
                                 
-       028E                     DIR_MATCH:
-       028E                         DS  33
-       02AF                     PATH_STACK:
+       028B                     DIR_MATCH:
+       028B                         DS  33
+       02AC                     PATH_STACK:
 [EOF:PWD.ASM:SHIFT_JIS]
