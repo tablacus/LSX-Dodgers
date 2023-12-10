@@ -59,7 +59,7 @@ _CYL3:	DB	0FFH	;Cylinder
 _DRIVE:	DB	0	;unit number
 _SEEKSP:
 	DB	0	;Seek speed
-_ISEEK:	DB	0FFH	;
+_ISEEK:	DB	50	;
 	DS	1
 _DRV:	DB	0
 _DSK:	DB	0FFH

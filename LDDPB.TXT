@@ -87,10 +87,12 @@ $0B	*2*3 1バイト	ルートディレクトリ領域の論理セクタ数(DPB_D
           $05:G-RAM
           $06:EMM
           $07:フロッピー
-		  $09:ハードディスク
+          $09:ハードディスク
           $0B:B-RAM/EMEM
-		  $0C:CMOS
-		  $0F:RAM FILE
+          $0C:CMOS
+          $0D:DISK
+          $0E:ROM DISK
+          $0F:RAM FILE
 
 
 +$13	1バイト	デバイスドライバ内におけるユニット番号(DPB_UNITNO)

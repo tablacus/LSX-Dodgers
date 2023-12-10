@@ -1,4 +1,4 @@
-﻿                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.12.0, LST:Full:4
+﻿                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.13.0, LST:Full:4
                                 ;   SYS by Gaku
                                 
        0005                     SYSTEM  EQU 00005H
@@ -24,975 +24,1083 @@
        001C                     DPB_NAME    EQU 1CH
                                 
        001E                     IPL_BOOT_MSX    EQU 1EH
-       0024                     IPL_MAXCYL  EQU 24H
-       0025                     IPL_SECPCL  EQU 25H
-       0026                     IPL_DIRPS_H EQU 26H
-       0027                     IPL_MAXSEC  EQU 27H
-       0028                     IPL_FATPS   EQU 28H
-       0029                     IPL_FATLN   EQU 29H
-       002A                     IPL_DIRPS   EQU 2AH
-       002B                     IPL_DIRSCNT EQU 2BH
-       002C                     IPL_DIRITEMS    EQU 2CH
-       002D                     IPL_ADDCL   EQU 2DH
-       002E                     IPL_ADDCL_H EQU 2EH
-       002F                     IPL_HEAD_SZ EQU 2FH
+       002D                     IPL_FATPS   EQU 2DH
+       002E                     IPL_MAXSEC  EQU 2EH
+       002F                     IPL_MAXCYL  EQU 2FH
+       0030                     IPL_HEAD_SZ EQU 30H
                                 
        000D                     CR  EQU 0DH
        000A                     LF  EQU 0AH
                                 
-       0000                     DTBUF   EQU 0000H
+       8000                     DTBUF   EQU 08000H
        D000                     FATBF   EQU 0D000H
        FE00                     IPL EQU 0FE00H
        C000                     MSX_IPL EQU 0C000H
                                 
 000000 0100                         ORG 0100H
-000000 0100 C35601          10      JP  START
+000000 0100 C35401          10      JP  START
        0103                     TITLE:
-000003 0103 5831207379737465        DB  "X1 systemcopy v1.06"
-            6D636F7079207631    
-            2E3036              
-000016 0116 0D0A24                  DB  CR,LF,"$"
-       0119                     USAGE:
-000019 0119 75736167653A            DB  "usage:"
-00001F 011F 2053595320647269        DB  " SYS drive:",CR,LF,"$"
+000003 0103 73797374656D636F        DB  "systemcopy v1.07"
+            70792076312E3037    
+000013 0113 0D0A24                  DB  CR,LF,"$"
+       0116                     USAGE:
+000016 0116 75736167653A            DB  "usage:"
+00001C 011C 2053595320647269        DB  " SYS drive:",CR,LF,"$"
             76653A0D0A24        
-       012D                     OK:
-00002D 012D 204F4B0D0A24            DB  " OK",CR,LF,"$"
-       0133                     ERROR:
-000033 0133 204572726F720D0A        DB  " Error",CR,LF,"$"
-            24                  
-       013C                     SKIP:
-00003C 013C 20536B69700D0A24        DB  " Skip",CR,LF,"$"
-       0144                     WIPL:
-000044 0144 5772697465204950        DB  "Write IPL $"
+       012A                     OK:
+00002A 012A 204F4B0D0A24            DB  " OK",CR,LF,"$"
+       0130                     ERROR:
+000030 0130 204572726F72210D        DB  " Error!",CR,LF,"$"
+            0A24                
+       013A                     SKIP:
+00003A 013A 20536B69700D0A24        DB  " Skip",CR,LF,"$"
+       0142                     WIPL:
+000042 0142 5772697465204950        DB  "Write IPL $"
             4C2024              
-       014F                     MFDD:
-00004F 014F 464424                  DB  "FD$"
-       0152                     MEMM:
-000052 0152 454D4D24                DB  "EMM$"
+       014D                     MFDD:
+00004D 014D 464424                  DB  "FD$"
+       0150                     MEMM:
+000050 0150 454D4D24                DB  "EMM$"
                                 
-       0156                     START:
-000056 0156 110301          10      LD  DE,TITLE
-000059 0159 0E09             7      LD  C,9
-00005B 015B CD0500          17      CALL    SYSTEM
+       0154                     START:
+000054 0154 110301          10      LD  DE,TITLE
+000057 0157 0E09             7      LD  C,9
+000059 0159 CD0500          17      CALL    SYSTEM
                                 
-00005E 015E 0E6F             7      LD  C,06FH      ;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
-000060 0160 CD0500          17      CALL    SYSTEM
-000063 0163 79               4      LD  A,C
-000064 0164 FE1D             7      CP  01DH        ;LSX-Dodgersの場合、01DH
-000066 0166 C20000          10      JP  NZ,0
+00005C 015C 0E6F             7      LD  C,06FH      ;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
+00005E 015E CD0500          17      CALL    SYSTEM
+000061 0161 79               4      LD  A,C
+000062 0162 FE1D             7      CP  01DH        ;LSX-Dodgersの場合、01DH
+000064 0164 C20000          10      JP  NZ,0
                                 
-000069 0169 116F07          10      LD  DE,DATA
-00006C 016C 0E1A             7      LD  C,1AH       ;(BDOS)DTAの設定(_SETDTA)
-00006E 016E CD0500          17      CALL    SYSTEM
+000067 0167 111708          10      LD  DE,DATA
+00006A 016A 0E1A             7      LD  C,1AH       ;(BDOS)DTAの設定(_SETDTA)
+00006C 016C CD0500          17      CALL    SYSTEM
                                 
-000071 0171 3A5C00          13      LD  A,(FCB1)
-000074 0174 B7               4      OR  A
-000075 0175 200B            12      JR  NZ,INIT
+00006F 016F 3A5C00          13      LD  A,(FCB1)
+000072 0172 B7               4      OR  A
+000073 0173 200B            12      JR  NZ,INIT
                                 
-000077 0177 111901          10      LD  DE,USAGE
-00007A 017A 0E09             7      LD  C,9
-00007C 017C CD0500          17      CALL    SYSTEM
-00007F 017F C30000          10      JP  0
-       0182                     INIT:
-000082 0182 324607          13      LD  (FCB3),A
+000075 0175 111601          10      LD  DE,USAGE
+000078 0178 0E09             7      LD  C,9
+00007A 017A CD0500          17      CALL    SYSTEM
+00007D 017D C30000          10      JP  0
+       0180                     INIT:
+000080 0180 32EE07          13      LD  (FCB3),A
                                 
-000085 0185 CDA903          17      CALL    COPY_FILE
-       0188                     CCHECK:
-000088 0188 CDAF02          17      CALL    CHECK
-       018B                     WTIPL:
-00008B 018B 3A4607          13      LD  A,(FCB3)
-00008E 018E 5F               4      LD  E,A
-00008F 018F 0E1B             7      LD  C,1BH           ;ディスク情報の獲得(_ALLOC) MSX-DOS
-000091 0191 CD0500          17      CALL    SYSTEM
-000094 0194 3C               4      INC A
-000095 0195 CA0000          10      JP  Z,0
+000083 0183 0E6F             7      LD  C,06FH      ;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
+000085 0185 CD0500          17      CALL    SYSTEM
+000088 0188 7D               4      LD  A,L     ;機種ID
+000089 0189 FE00             7      CP  0       ;X1
+00008B 018B 280F            12      JR  Z,COPY_X1
+00008D 018D FE03             7      CP  3       ;MSX
+00008F 018F 2011            12      JR  NZ,WTIPL
                                 
-000098 0198 DD7E12          19      LD  A,(IX+DPB_DEVICE)   ;(DPB)デバイス情報
-00009B 019B E60F             7      AND 00FH
-00009D 019D FE06             7      CP  6           ;EMM
-00009F 019F CAC302          10      JP  Z,WEMM
+000091 0191 21E907          10      LD  HL,MSX_FNAME
+000094 0194 11C507          10      LD  DE,FCB2NAME
+000097 0197 010500          10      LD  BC,MSX_FNAME_E-MSX_FNAME
+00009A 019A EDB0                    LDIR
+       019C                     COPY_X1:
+00009C 019C CD1404          17      CALL    COPY_FILE
+       019F                     CCHECK:
+00009F 019F CD1B03          17      CALL    CHECK
+       01A2                     WTIPL:
+0000A2 01A2 3AEE07          13      LD  A,(FCB3)
+0000A5 01A5 5F               4      LD  E,A
+0000A6 01A6 0E1B             7      LD  C,1BH           ;ディスク情報の獲得(_ALLOC) MSX-DOS
+0000A8 01A8 CD0500          17      CALL    SYSTEM
+0000AB 01AB 3C               4      INC A
+0000AC 01AC CA0000          10      JP  Z,0
                                 
-0000A2 01A2 FE07             7      CP  7           ;フロッピー
-0000A4 01A4 C20000          10      JP  NZ,0
-0000A7 01A7 DD7E0F          19      LD  A,(IX+DPB_BPS)      ;(DPB)FAT情報と論理セクタのサイズ
-0000AA 01AA CB6F             8      BIT 5,A         ;FAT16
-0000AC 01AC C20000          10      JP  NZ,0
+0000AF 01AF DD7E12          19      LD  A,(IX+DPB_DEVICE)   ;(DPB)デバイス情報
+0000B2 01B2 E60F             7      AND 00FH
+0000B4 01B4 FE06             7      CP  6           ;EMM
+0000B6 01B6 CA2F03          10      JP  Z,WEMM
                                 
-0000AF 01AF 114401          10      LD  DE,WIPL
-0000B2 01B2 0E09             7      LD  C,9
-0000B4 01B4 CD0500          17      CALL    SYSTEM
-0000B7 01B7 114F01          10      LD  DE,MFDD
-0000BA 01BA 0E09             7      LD  C,9
-0000BC 01BC CD0500          17      CALL    SYSTEM
+0000B9 01B9 FE07             7      CP  7           ;フロッピー
+0000BB 01BB 2805            12      JR  Z,WTIPL1
+0000BD 01BD FE0D             7      CP  00DH            ;DISK
+0000BF 01BF C20000          10      JP  NZ,0
                                 
-0000BF 01BF 216F07          10      LD  HL,DATA
-0000C2 01C2 117007          10      LD  DE,DATA+1
-0000C5 01C5 01FF03          10      LD  BC,1023
-0000C8 01C8 3600            10      LD  (HL),0
-0000CA 01CA EDB0                    LDIR
+       01C2                     WTIPL1:
+0000C2 01C2 DD7E0F          19      LD  A,(IX+DPB_BPS)      ;(DPB)FAT情報と論理セクタのサイズ
+0000C5 01C5 CB6F             8      BIT 5,A         ;FAT16
+0000C7 01C7 C20000          10      JP  NZ,0
                                 
-0000CC 01CC 110000          10      LD  DE,0
-0000CF 01CF 2A4607          16      LD  HL,(FCB3)
-0000D2 01D2 2D               4      DEC L
-0000D3 01D3 2601             7      LD  H,1
-0000D5 01D5 0E2F             7      LD  C,2FH           ;論理セクタを用いた読み出し(_RDABS)
+0000CA 01CA 114201          10      LD  DE,WIPL
+0000CD 01CD 0E09             7      LD  C,9
+0000CF 01CF CD0500          17      CALL    SYSTEM
+0000D2 01D2 114D01          10      LD  DE,MFDD
+0000D5 01D5 0E09             7      LD  C,9
 0000D7 01D7 CD0500          17      CALL    SYSTEM
                                 
-0000DA 01DA 3A7B07          13      LD  A,(DATA+12)     ;BPB_BytsPerSec
-0000DD 01DD FE04             7      CP  4
-0000DF 01DF 286D            12      JR  Z,BPB_OK        ;1セクタ1024バイト
-0000E1 01E1 3D               4      DEC A
-0000E2 01E2 286A            12      JR  Z,BPB_OK        ;1セクタ256バイト
-0000E4 01E4 2D               4      DEC L
-0000E5 01E5 2867            12      JR  Z,BPB_OK        ;1セクタ512バイト
+0000DA 01DA 211708          10      LD  HL,DATA
+0000DD 01DD 111808          10      LD  DE,DATA+1
+0000E0 01E0 01FF03          10      LD  BC,1023
+0000E3 01E3 3600            10      LD  (HL),0
+0000E5 01E5 EDB0                    LDIR
                                 
-0000E7 01E7 214404          10      LD  HL,BPB_2D
-0000EA 01EA 116F07          10      LD  DE,DATA
-0000ED 01ED 011E00          10      LD  BC,IPL_BOOT_MSX
-0000F0 01F0 EDB0                    LDIR
+0000E7 01E7 110000          10      LD  DE,0
+0000EA 01EA 2AEE07          16      LD  HL,(FCB3)
+0000ED 01ED 2D               4      DEC L
+0000EE 01EE 2601             7      LD  H,1
+0000F0 01F0 0E2F             7      LD  C,2FH           ;論理セクタを用いた読み出し(_RDABS)
+0000F2 01F2 CD0500          17      CALL    SYSTEM
+0000F5 01F5 B7               4      OR  A
+0000F6 01F6 C21503          10      JP  NZ,DISERR
+0000F9 01F9 3A1708          13      LD  A,(DATA)
+0000FC 01FC FE01             7      CP  1
+0000FE 01FE CA1503          10      JP  Z,DISERR
+                                
+000101 0201 21D604          10      LD  HL,BPB_FDD+BOOT_MSX_FD_ENTRY-BPB_FDD_IPL
+000104 0204 113508          10      LD  DE,DATA+BOOT_MSX_FD_ENTRY-BPB_FDD_IPL
+000107 0207 011200          10      LD  BC,BPB_FDD_IPL_E-BOOT_MSX_FD_ENTRY
+00010A 020A EDB0                    LDIR
+                                
+00010C 020C 3A2308          13      LD  A,(DATA+12)     ;BPB_BytsPerSec
+00010F 020F FE04             7      CP  4
+000111 0211 286D            12      JR  Z,BPB_OK        ;1セクタ1024バイト
+000113 0213 3D               4      DEC A
+000114 0214 286A            12      JR  Z,BPB_OK        ;1セクタ256バイト
+000116 0216 2D               4      DEC L
+000117 0217 2867            12      JR  Z,BPB_OK        ;1セクタ512バイト
+                                
+000119 0219 21B804          10      LD  HL,BPB_FDD
+00011C 021C 111708          10      LD  DE,DATA
+00011F 021F 011E00          10      LD  BC,IPL_BOOT_MSX
+000122 0222 EDB0                    LDIR
                                                     ;DPBからBPBを作成する
-0000F2 01F2 DD7E0F          19      LD  A,(IX+DPB_BPS)      ;(DPB)FAT情報と論理セクタのサイズ
-0000F5 01F5 E607             7      AND 7
-0000F7 01F7 327B07          13      LD  (DATA+12),A     ;BPB_BytsPerSec
+000124 0224 DD7E0F          19      LD  A,(IX+DPB_BPS)      ;(DPB)FAT情報と論理セクタのサイズ
+000127 0227 E607             7      AND 7
+000129 0229 322308          13      LD  (DATA+12),A     ;BPB_BytsPerSec
                                 
-0000FA 01FA DD7E07          19      LD  A,(IX+DPB_SECPCL)   ;(DPB)1クラスタの論理セクタ数
-0000FD 01FD 327C07          13      LD  (DATA+13),A     ;BPB_SecPerClus
+00012C 022C DD7E07          19      LD  A,(IX+DPB_SECPCL)   ;(DPB)1クラスタの論理セクタ数
+00012F 022F 322408          13      LD  (DATA+13),A     ;BPB_SecPerClus
                                 
-000100 0200 DD7E0E          19      LD  A,(IX+DPB_FATPS)    ;FAT領域の先頭論理セクタ番号
-000103 0203 327D07          13      LD  (DATA+14),A     ;BPB_RsvdSecCnt
+000132 0232 DD7E0E          19      LD  A,(IX+DPB_FATPS)    ;FAT領域の先頭論理セクタ番号
+000135 0235 322508          13      LD  (DATA+14),A     ;BPB_RsvdSecCnt
                                 
-000106 0206 DD7E0F          19      LD  A,(IX+DPB_BPS)      ;(DPB)FAT情報と論理セクタのサイズ
-000109 0209 87               4      ADD A,A
-00010A 020A 3E01             7      LD  A,1
-00010C 020C CE00             7      ADC A,0
-00010E 020E 327F07          13      LD  (DATA+16),A     ;BPB_NumFATs
+000138 0238 DD7E0F          19      LD  A,(IX+DPB_BPS)      ;(DPB)FAT情報と論理セクタのサイズ
+00013B 023B 87               4      ADD A,A
+00013C 023C 3E01             7      LD  A,1
+00013E 023E CE00             7      ADC A,0
+000140 0240 322708          13      LD  (DATA+16),A     ;BPB_NumFATs
                                 
-000111 0211 DD7E0B          19      LD  A,(IX+DPB_DIRSCNT)  ;ルートディレクトリ領域の論理セクタ数
+000143 0243 DD7E0B          19      LD  A,(IX+DPB_DIRSCNT)  ;ルートディレクトリ領域の論理セクタ数
                                 
-000114 0214 6F               4      LD  L,A
-000115 0215 2600             7      LD  H,0
+000146 0246 6F               4      LD  L,A
+000147 0247 2600             7      LD  H,0
                                 
-000117 0217 29              11      ADD HL,HL           ;*2
-000118 0218 29              11      ADD HL,HL           ;*4
-000119 0219 29              11      ADD HL,HL           ;*8
+000149 0249 29              11      ADD HL,HL           ;*2
+00014A 024A 29              11      ADD HL,HL           ;*4
+00014B 024B 29              11      ADD HL,HL           ;*8
                                 
-00011A 021A DD7E0F          19      LD  A,(IX+DPB_BPS)      ;(DPB)FAT情報と論理セクタのサイズ
-00011D 021D CDBE02          17      CALL    DBL_HL_A
+00014C 024C DD7E0F          19      LD  A,(IX+DPB_BPS)      ;(DPB)FAT情報と論理セクタのサイズ
+00014F 024F CD2A03          17      CALL    DBL_HL_A
                                 
-000120 0220 228007          16      LD  (DATA+17),HL        ;BPB_RootEntCnt
+000152 0252 222808          16      LD  (DATA+17),HL        ;BPB_RootEntCnt
                                 
-000123 0223 DD6E08          19      LD  L,(IX+DPB_MAXCL)    ;(DPB)総クラスタ数
-000126 0226 DD6609          19      LD  H,(IX+DPB_MAXCL+1)  ;
-000129 0229 DD7E07          19      LD  A,(IX+DPB_SECPCL)   ;(DPB)1クラスタの論理セクタ数
-00012C 022C CDBE02          17      CALL    DBL_HL_A        ;総クラスタ数×1クラスタの論理セクタ数
+000155 0255 DD6E08          19      LD  L,(IX+DPB_MAXCL)    ;(DPB)総クラスタ数
+000158 0258 DD6609          19      LD  H,(IX+DPB_MAXCL+1)  ;
+00015B 025B DD7E07          19      LD  A,(IX+DPB_SECPCL)   ;(DPB)1クラスタの論理セクタ数
+00015E 025E CD2A03          17      CALL    DBL_HL_A        ;総クラスタ数×1クラスタの論理セクタ数
                                 
-00012F 022F DD4E14          19      LD  C,(IX+DPB_ADDCL)    ;(DPB)データ格納領域の先頭論理セクタ番号
-000132 0232 DD4615          19      LD  B,(IX+DPB_ADDCL+1)  ;
-000135 0235 09              11      ADD HL,BC
-000136 0236 228207          16      LD  (DATA+19),HL        ;BPB_TotSec16
+000161 0261 DD4E14          19      LD  C,(IX+DPB_ADDCL)    ;(DPB)データ格納領域の先頭論理セクタ番号
+000164 0264 DD4615          19      LD  B,(IX+DPB_ADDCL+1)  ;
+000167 0267 09              11      ADD HL,BC
+000168 0268 222A08          16      LD  (DATA+19),HL        ;BPB_TotSec16
                                 
-000139 0239 DD7E06          19      LD  A,(IX+DPB_FATID)    ;(DPB)メディアバイト
-00013C 023C 328407          13      LD  (DATA+21),A     ;BPB_Media
+00016B 026B DD7E06          19      LD  A,(IX+DPB_FATID)    ;(DPB)メディアバイト
+00016E 026E 322C08          13      LD  (DATA+21),A     ;BPB_Media
                                 
-00013F 023F DD6E00          19      LD  L,(IX+DPB_FATLN)    ;(DPB)FAT領域のセクタ単位でのサイズ
-000142 0242 DD6601          19      LD  H,(IX+DPB_FATLN+1)
-000145 0245 228507          16      LD  (DATA+22),HL
+000171 0271 DD6E00          19      LD  L,(IX+DPB_FATLN)    ;(DPB)FAT領域のセクタ単位でのサイズ
+000174 0274 DD6601          19      LD  H,(IX+DPB_FATLN+1)
+000177 0277 222D08          16      LD  (DATA+22),HL
                                 
-000148 0248 DD7E0D          19      LD  A,(IX+DPB_MAXSEC)   ;(DPB)1トラックのセクタ数
-00014B 024B 328707          13      LD  (DATA+24),A     ;BPB_SecPerTrk
-       024E                     BPB_OK:
-00014E 024E 2A6204          16      LD  HL,(BPB_2D+IPL_BOOT_MSX)
-000151 0251 228D07          16      LD  (DATA+IPL_BOOT_MSX),HL
+00017A 027A DD7E0D          19      LD  A,(IX+DPB_MAXSEC)   ;(DPB)1トラックのセクタ数
+00017D 027D 322F08          13      LD  (DATA+24),A     ;BPB_SecPerTrk
+       0280                     BPB_OK:
+000180 0280 2AD604          16      LD  HL,(BPB_FDD+IPL_BOOT_MSX)
+000183 0283 223508          16      LD  (DATA+IPL_BOOT_MSX),HL
                                 
-000154 0254 119E07          10      LD  DE,DATA+IPL_HEAD_SZ
-000157 0257 DDCB0A46        20      BIT 0,(IX+DPB_FDMODE)
-00015B 025B 2813            12      JR  Z,M2HD1
-00015D 025D 21A204          10      LD  HL,MSX_FD
-000160 0260 013F00          10      LD  BC,MSX_FD_E-MSX_FD
-000163 0263 EDB0                    LDIR
+000186 0286 114708          10      LD  DE,DATA+IPL_HEAD_SZ
+000189 0289 DDCB0A46        20      BIT 0,(IX+DPB_FDMODE)
+00018D 028D 283C            12      JR  Z,M2HD1
+00018F 028F 211705          10      LD  HL,MSX_FD
+000192 0292 013F00          10      LD  BC,MSX_FD_E-MSX_FD
+000195 0295 EDB0                    LDIR
                                 
-000165 0265 21E104          10      LD  HL,MAIN
-000168 0268 016F01          10      LD  BC,RDDLE-MAIN
-00016B 026B EDB0                    LDIR
-00016D 026D AF               4      XOR A
-00016E 026E 181A            12      JR  WJUMP0
-       0270                     M2HD1:
-000170 0270 21C206          10      LD  HL,BOOT_DMA
-000173 0273 013F00          10      LD  BC,BOOT_DMA_E-BOOT_DMA
-000176 0276 EDB0                    LDIR
+000197 0297 21D405          10      LD  HL,MAIN
+00019A 029A 014401          10      LD  BC,MAINE-MAIN
+00019D 029D EDB0                    LDIR
                                 
-000178 0278 21E104          10      LD  HL,MAIN
-00017B 027B 014701          10      LD  BC,MAINE-MAIN
-00017E 027E EDB0                    LDIR
+00019F 029F DD7E0C          19      LD  A,(IX+DPB_MAXCYL)
+0001A2 02A2 FE32             7      CP  50
+0001A4 02A4 3010            12      JR  NC,M2DD
+                                ;2D
+0001A6 02A6 211807          10      LD  HL,DRD_2D
+0001A9 02A9 012400          10      LD  BC,DRD_2D_E-DRD_2D
+0001AC 02AC EDB0                    LDIR
+0001AE 02AE 3EFF             7      LD  A,0FFH      ;0FFFH 500K(2D)/1M(2DD) タイプ指定 (turbo/Z/CZ-8BF1のみ)
+0001B0 02B0 328609          13      LD  (DATA+FD_MODE-IPL),A
+0001B3 02B3 AF               4      XOR A
+0001B4 02B4 1834            12      JR  WJUMP0
+       02B6                     M2DD:
+0001B6 02B6 213C07          10      LD  HL,DRD_2DD
+0001B9 02B9 012D00          10      LD  BC,DRD_2DD_E-DRD_2DD
+0001BC 02BC EDB0                    LDIR
+0001BE 02BE 3EFF             7      LD  A,0FFH      ;0FFFH 500K(2D)/1M(2DD) タイプ指定 (turbo/Z/CZ-8BF1のみ)
+0001C0 02C0 328609          13      LD  (DATA+FD_MODE-IPL),A
+0001C3 02C3 3EFE             7      LD  A,0FEH      ;0FFEH 1.6M(2HD) タイプ指定 (turbo/Z/CZ-8BF1のみ)
+0001C5 02C5 32A509          13      LD  (DATA+SEEK_2DD-IPL),A
+0001C8 02C8 AF               4      XOR A
+0001C9 02C9 181F            12      JR  WJUMP0
+       02CB                     M2HD1:
+0001CB 02CB 215605          10      LD  HL,BOOT_DMA
+0001CE 02CE 013F00          10      LD  BC,BOOT_DMA_E-BOOT_DMA
+0001D1 02D1 EDB0                    LDIR
                                 
-000180 0280 215006          10      LD  HL,RDDH
-000183 0283 011200          10      LD  BC,RDDHE-RDDH
-000186 0286 EDB0                    LDIR
+0001D3 02D3 21D405          10      LD  HL,MAIN
+0001D6 02D6 014401          10      LD  BC,MAINE-MAIN
+0001D9 02D9 EDB0                    LDIR
                                 
-000188 0288 3E02             7      LD  A,2         ;2HD
-       028A                     WJUMP0:
-00018A 028A 32FB08          13      LD  (DATA+0018CH),A
+0001DB 02DB 216907          10      LD  HL,DRD_2HD
+0001DE 02DE 011200          10      LD  BC,DRD_2HD_E-DRD_2HD
+0001E1 02E1 EDB0                    LDIR
                                 
-00018D 028D CD5703          17      CALL    EAREA
-       0290                     WJUMP:
-000190 0290 210107          10      LD  HL,JUMP
-000193 0293 114F09          10      LD  DE,DATA+01E0H
-000196 0296 012000          10      LD  BC,32
-000199 0299 EDB0                    LDIR
+0001E3 02E3 3EFE             7      LD  A,0FEH      ;0FFEH 1.6M(2HD) タイプ指定 (turbo/Z/CZ-8BF1のみ)
+0001E5 02E5 328609          13      LD  (DATA+FD_MODE-IPL),A
+0001E8 02E8 3E02             7      LD  A,2         ;2HD
+       02EA                     WJUMP0:
+0001EA 02EA 32A309          13      LD  (DATA+0018CH),A
                                 
-00019B 029B 110000          10      LD  DE,0
-00019E 029E 2A4607          16      LD  HL,(FCB3)
-0001A1 02A1 2D               4      DEC L
-0001A2 02A2 2601             7      LD  H,1
-0001A4 02A4 0E30             7      LD  C,30H           ;論理セクタを用いた書き込み(_WRABS)
-0001A6 02A6 CD0500          17      CALL    SYSTEM
+       02ED                     WJ1:
+0001ED 02ED 21F709          10      LD  HL,DATA+01E0H
+0001F0 02F0 AF               4      XOR A
+0001F1 02F1 ED52            15      SBC HL,DE
+0001F3 02F3 3804            12      JR  C,WJE
+0001F5 02F5 12               7      LD  (DE),A
+0001F6 02F6 13               6      INC DE
+0001F7 02F7 18F4            12      JR  WJ1
+       02F9                     WJE:
+0001F9 02F9 CDC503          17      CALL    EAREA
+       02FC                     WJUMP:
+0001FC 02FC 21A407          10      LD  HL,JUMP
+0001FF 02FF 11F709          10      LD  DE,DATA+01E0H
+000202 0302 012000          10      LD  BC,32
+000205 0305 EDB0                    LDIR
                                 
-0001A9 02A9 CDAF02          17      CALL    CHECK
-0001AC 02AC C30000          10      JP  0
-       02AF                     CHECK:
-0001AF 02AF B7               4      OR  A
-0001B0 02B0 112D01          10      LD  DE,OK
-0001B3 02B3 2803            12      JR  Z,CHECK2
-       02B5                     DISERR:
-0001B5 02B5 113301          10      LD  DE,ERROR
-       02B8                     CHECK2:
-0001B8 02B8 0E09             7      LD  C,9
-0001BA 02BA CD0500          17      CALL    SYSTEM
-0001BD 02BD C9              10      RET
+000207 0307 110000          10      LD  DE,0
+00020A 030A 2AEE07          16      LD  HL,(FCB3)
+00020D 030D 2D               4      DEC L
+00020E 030E 2601             7      LD  H,1
+000210 0310 0E30             7      LD  C,30H           ;論理セクタを用いた書き込み(_WRABS)
+000212 0312 CD0500          17      CALL    SYSTEM
+       0315                     DISERR:
+000215 0315 CD1B03          17      CALL    CHECK
+000218 0318 C30000          10      JP  0
+       031B                     CHECK:
+00021B 031B B7               4      OR  A
+00021C 031C 113001          10      LD  DE,ERROR
+00021F 031F 2003            12      JR  NZ,CHECK2
+000221 0321 112A01          10      LD  DE,OK
+       0324                     CHECK2:
+000224 0324 0E09             7      LD  C,9
+000226 0326 CD0500          17      CALL    SYSTEM
+000229 0329 C9              10      RET
                                 
-       02BE                     DBL_HL_A:           ;HLをA倍する Aは1,2,4,8
-0001BE 02BE 1F               4      RRA         ;->CF
-0001BF 02BF D8              11      RET C
-0001C0 02C0 29              11      ADD HL,HL       ;*2
-0001C1 02C1 18FB            12      JR  DBL_HL_A
+       032A                     DBL_HL_A:           ;HLをA倍する Aは1,2,4,8
+00022A 032A 1F               4      RRA         ;->CF
+00022B 032B D8              11      RET C
+00022C 032C 29              11      ADD HL,HL       ;*2
+00022D 032D 18FB            12      JR  DBL_HL_A
                                 
-       02C3                     WEMM:
-0001C3 02C3 0E6F             7      LD  C,06FH      ;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
-0001C5 02C5 CD0500          17      CALL    SYSTEM
-0001C8 02C8 7D               4      LD  A,L     ;機種ID
-0001C9 02C9 FE00             7      CP  0       ;X1
-0001CB 02CB C20000          10      JP  NZ,0
+       032F                     WEMM:
+00022F 032F 0E6F             7      LD  C,06FH      ;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
+000231 0331 CD0500          17      CALL    SYSTEM
+000234 0334 7D               4      LD  A,L     ;機種ID
+000235 0335 FE00             7      CP  0       ;X1
+000237 0337 C20000          10      JP  NZ,0
                                 
-0001CE 02CE 114401          10      LD  DE,WIPL
-0001D1 02D1 0E09             7      LD  C,9
-0001D3 02D3 CD0500          17      CALL    SYSTEM
-0001D6 02D6 115201          10      LD  DE,MEMM
-0001D9 02D9 0E09             7      LD  C,9
-0001DB 02DB CD0500          17      CALL    SYSTEM
+00023A 033A 114201          10      LD  DE,WIPL
+00023D 033D 0E09             7      LD  C,9
+00023F 033F CD0500          17      CALL    SYSTEM
+000242 0342 115001          10      LD  DE,MEMM
+000245 0345 0E09             7      LD  C,9
+000247 0347 CD0500          17      CALL    SYSTEM
                                 
-0001DE 02DE 216F07          10      LD  HL,DATA
-0001E1 02E1 117007          10      LD  DE,DATA+1
-0001E4 02E4 01FF03          10      LD  BC,1023
-0001E7 02E7 3600            10      LD  (HL),0
-0001E9 02E9 EDB0                    LDIR
+00024A 034A 211708          10      LD  HL,DATA
+00024D 034D 111808          10      LD  DE,DATA+1
+000250 0350 01FF03          10      LD  BC,1023
+000253 0353 3600            10      LD  (HL),0
+000255 0355 EDB0                    LDIR
                                 
-0001EB 02EB 217304          10      LD  HL,IPL_EMM
-0001EE 02EE 116F07          10      LD  DE,DATA
-0001F1 02F1 012F00          10      LD  BC,IPL_EMM_E-IPL_EMM
-0001F4 02F4 EDB0                    LDIR
+000257 0357 21E804          10      LD  HL,IPL_EMM
+00025A 035A 111708          10      LD  DE,DATA
+00025D 035D 012F00          10      LD  BC,IPL_EMM_E-IPL_EMM
+000260 0360 EDB0                    LDIR
                                 
-0001F6 02F6 21C206          10      LD  HL,BOOT_DMA
-0001F9 02F9 013F00          10      LD  BC,BOOT_DMA_E-BOOT_DMA
-0001FC 02FC EDB0                    LDIR
+000262 0362 219505          10      LD  HL,BOOT_EMM
+000265 0365 013F00          10      LD  BC,BOOT_EMM_E-BOOT_EMM
+000268 0368 EDB0                    LDIR
                                 
-0001FE 02FE 21E104          10      LD  HL,MAIN
-000201 0301 014701          10      LD  BC,MAINE-MAIN
-000204 0304 EDB0                    LDIR
+00026A 036A 21D405          10      LD  HL,MAIN
+00026D 036D 01DD00          10      LD  BC,SEEK-FNAME
+000270 0370 EDB0                    LDIR
                                 
-000206 0306 216206          10      LD  HL,RDDE
-000209 0309 013500          10      LD  BC,RDDEE-RDDE
-00020C 030C EDB0                    LDIR
+000272 0372 2146FE          10      LD  HL,DRD_EMM
+000275 0375 225A09          16      LD  (DATA+DRD_SWC-IPL),HL
                                 
-00020E 030E 21                      DB  021H        ;LD HL,?
-00020F 030F 3E04             7      LD  A,4
-000211 0311 22F907          16      LD  (DATA+INIT_DRV-IPL),HL
+000278 0378 21                      DB  021H        ;LD HL,?
+000279 0379 3E04             7      LD  A,4
+00027B 037B 22A508          16      LD  (DATA+INIT_DRV-IPL),HL
                                 
-000214 0314 CD5703          17      CALL    EAREA
+00027E 037E CDC503          17      CALL    EAREA
                                 
-000217 0317 DDCB0F6E        20      BIT 5,(IX+DPB_BPS)
-00021B 031B 2816            12      JR  Z,FAT12
+000281 0381 DDCB0F6E        20      BIT 5,(IX+DPB_BPS)
+000285 0385 281A            12      JR  Z,FAT12
                                                 ;FAT16
-00021D 031D 219706          10      LD  HL,GNCL16
-000220 0320 118C08          10      LD  DE,GNCL-IPL+DATA
-000223 0323 012B00          10      LD  BC,GNCL16E-GNCL16
-000226 0326 EDB0                    LDIR
-000228 0328 2146FF          10      LD  HL,DRDSB16
-00022B 032B 223F08          16      LD  (READ_FAT-IPL+DATA),HL
-00022E 032E 3EFF             7      LD  A,0FFH
-000230 0330 328808          13      LD  (END_OF_FILE-IPL+DATA),A
-       0333                     FAT12:
-000233 0333 AF               4      XOR A
-000234 0334 01000D          10      LD  BC,0D00H
-000237 0337 ED79            12      OUT (C),A
-000239 0339 0C               4      INC C
-00023A 033A ED79            12      OUT (C),A
-00023C 033C 0C               4      INC C
-00023D 033D ED79            12      OUT (C),A
-00023F 033F 0C               4      INC C
+000287 0387 217B07          10      LD  HL,GNCL16
+00028A 038A 112409          10      LD  DE,GNCL-IPL+DATA
+00028D 038D 012900          10      LD  BC,GNCL16E-GNCL16
+000290 0390 EDB0                    LDIR
+000292 0392 3E                      DB  03EH        ;LD A,?
+000293 0393 AF               4      XOR A       ;EMMでFAT16の場合はダイレクトに読み込むのでバッファは使わない。
+000294 0394 6F               4      LD  L,A
+000295 0395 6C               4      LD  L,H
+000296 0396 32DE08          13      LD  (READ_FAT-IPL+DATA),A
+000299 0399 22DF08          16      LD  (READ_FAT-IPL+DATA+1),HL
+00029C 039C 3EFF             7      LD  A,0FFH
+00029E 039E 322009          13      LD  (END_OF_FILE-IPL+DATA),A
+       03A1                     FAT12:
+0002A1 03A1 AF               4      XOR A
+0002A2 03A2 01000D          10      LD  BC,0D00H
+0002A5 03A5 ED79            12      OUT (C),A
+0002A7 03A7 0C               4      INC C
+0002A8 03A8 ED79            12      OUT (C),A
+0002AA 03AA 0C               4      INC C
+0002AB 03AB ED79            12      OUT (C),A
+0002AD 03AD 0C               4      INC C
                                 
-000240 0340 216F07          10      LD  HL,DATA
-       0343                     EMML:
-000243 0343 04               4      INC B
-000244 0344 EDA3            16      OUTI
-000246 0346 04               4      INC B
-000247 0347 EDA3            16      OUTI
-000249 0349 3D               4      DEC A
-00024A 034A 20F7            12      JR  NZ,EMML
+0002AE 03AE 211708          10      LD  HL,DATA
+       03B1                     EMML:
+0002B1 03B1 04               4      INC B
+0002B2 03B2 EDA3            16      OUTI
+0002B4 03B4 04               4      INC B
+0002B5 03B5 EDA3            16      OUTI
+0002B7 03B7 3D               4      DEC A
+0002B8 03B8 20F7            12      JR  NZ,EMML
                                 
-00024C 034C 112D01          10      LD  DE,OK
-00024F 034F 0E09             7      LD  C,9
-000251 0351 CD0500          17      CALL    SYSTEM
-000254 0354 C30000          10      JP  0
-                                
-       0357                     EAREA:
-000257 0357 DD7E0C          19      LD  A,(IX+DPB_MAXCYL)
-00025A 035A 329307          13      LD  (DATA+IPL_MAXCYL),A
-                                
-00025D 035D DD7E07          19      LD  A,(IX+DPB_SECPCL)   ;(DPB)1クラスタの論理セクタ数
-000260 0360 329407          13      LD  (DATA+IPL_SECPCL),A
-                                
-000263 0363 DD7E0D          19      LD  A,(IX+DPB_MAXSEC)   ;(DPB)1トラックのセクタ数
-000266 0366 329607          13      LD  (DATA+IPL_MAXSEC),A
-                                
-000269 0369 DD7E0E          19      LD  A,(IX+DPB_FATPS)    ;(DPB)FAT領域の先頭論理セクタ番号
-00026C 036C 329707          13      LD  (DATA+IPL_FATPS),A
-                                
-00026F 036F DD7E00          19      LD  A,(IX+DPB_FATLN)    ;(DPB)FAT領域のセクタ単位でのサイズ
-000272 0372 329807          13      LD  (DATA+IPL_FATLN),A
-                                
-000275 0375 DD7E10          19      LD  A,(IX+DPB_DIRPS)    ;(DPB)ルートディレクトリ領域の先頭論理セクタ番号
-                                
-000278 0378 DD7E10          19      LD  A,(IX+DPB_DIRPS)    ;(DPB)ルートディレクトリ領域の先頭論理セクタ番号
-00027B 037B 329907          13      LD  (DATA+IPL_DIRPS),A
-00027E 037E DD7E11          19      LD  A,(IX+DPB_DIRPS+1)
-000281 0381 329507          13      LD  (DATA+IPL_DIRPS_H),A
-                                
-000284 0384 DD7E0B          19      LD  A,(IX+DPB_DIRSCNT)  ;ルートディレクトリ領域の論理セクタ数
-000287 0387 329A07          13      LD  (DATA+IPL_DIRSCNT),A
-                                
-00028A 038A 6F               4      LD  L,A
-00028B 038B 2600             7      LD  H,0
-                                
-00028D 038D 29              11      ADD HL,HL           ;*2
-00028E 038E 29              11      ADD HL,HL           ;*4
-00028F 038F 29              11      ADD HL,HL           ;*8
-000290 0390 DD7E0F          19      LD  A,(IX+DPB_BPS)      ;(DPB)FAT情報と論理セクタのサイズ
-000293 0393 CDBE02          17      CALL    DBL_HL_A
-000296 0396 7C               4      LD  A,H
-000297 0397 D601             7      SUB 1
-000299 0399 9F               4      SBC A,A
-00029A 039A A5               4      AND L
-00029B 039B 329B07          13      LD  (DATA+IPL_DIRITEMS),A
-                                
-00029E 039E DD6E14          19      LD  L,(IX+DPB_ADDCL)    ;(DPB)データ格納領域の先頭論理セクタ番号
-0002A1 03A1 DD6615          19      LD  H,(IX+DPB_ADDCL+1)
-0002A4 03A4 229C07          16      LD  (DATA+IPL_ADDCL),HL
-                                
-0002A7 03A7 AF               4      XOR A
-0002A8 03A8 C9              10      RET
-                                
-       03A9                     COPY_FILE:
-0002A9 03A9 212207          10      LD  HL,FCB2+1
-0002AC 03AC 114707          10      LD  DE,FCB3+1
-0002AF 03AF 012400          10      LD  BC,36
-0002B2 03B2 EDB0                    LDIR
-                                
-0002B4 03B4 212207          10      LD  HL,FCB2+1
-0002B7 03B7 060B             7      LD  B,11
-       03B9                     CF1:
-0002B9 03B9 5E               7      LD  E,(HL)
-0002BA 03BA 23               6      INC HL
-0002BB 03BB C5              11      PUSH    BC
-0002BC 03BC E5              11      PUSH    HL
-0002BD 03BD 0E02             7      LD  C,002H      ;(BDOS)コンソール出力(_CONOUT)
+0002BA 03BA 112A01          10      LD  DE,OK
+0002BD 03BD 0E09             7      LD  C,9
 0002BF 03BF CD0500          17      CALL    SYSTEM
-0002C2 03C2 E1              10      POP HL
-0002C3 03C3 C1              10      POP BC
-0002C4 03C4 10F3            13      DJNZ    CF1
+0002C2 03C2 C30000          10      JP  0
                                 
-0002C6 03C6 112107          10      LD  DE,FCB2
-0002C9 03C9 0E0F             7      LD  C,0FH
-0002CB 03CB CD0500          17      CALL    SYSTEM
-0002CE 03CE B7               4      OR  A
-0002CF 03CF C0              11      RET NZ
+       03C5                     EAREA:
+0002C5 03C5 DD7E0C          19      LD  A,(IX+DPB_MAXCYL)
+0002C8 03C8 324608          13      LD  (DATA+IPL_MAXCYL),A
                                 
-0002D0 03D0 2A2F07          16      LD  HL,(FCB2+14)
-0002D3 03D3 226B07          16      LD  (SDIR),HL
-0002D6 03D6 210100          10      LD  HL,1
-0002D9 03D9 222F07          16      LD  (FCB2+14),HL
-0002DC 03DC 225407          16      LD  (FCB3+14),HL
+0002CB 03CB DD7E07          19      LD  A,(IX+DPB_SECPCL)   ;(DPB)1クラスタの論理セクタ数
+0002CE 03CE 324909          13      LD  (DATA+IPL_SECPCL-IPL),A
                                 
-0002DF 03DF 2A0600          16      LD  HL,(SYSTEM+1)
-0002E2 03E2 25               4      DEC H
-0002E3 03E3 25               4      DEC H
-0002E4 03E4 116F07          10      LD  DE,DATA
-0002E7 03E7 ED52            15      SBC HL,DE
-0002E9 03E9 112107          10      LD  DE,FCB2
-0002EC 03EC 0E27             7      LD  C,27H
-0002EE 03EE CD0500          17      CALL    SYSTEM
-0002F1 03F1 3D               4      DEC A
-0002F2 03F2 C0              11      RET NZ
-0002F3 03F3 226D07          16      LD  (SIZE),HL
+0002D1 03D1 DD7E0D          19      LD  A,(IX+DPB_MAXSEC)   ;(DPB)1トラックのセクタ数
+0002D4 03D4 324508          13      LD  (DATA+IPL_MAXSEC),A
                                 
-0002F6 03F6 112107          10      LD  DE,FCB2
-0002F9 03F9 0E10             7      LD  C,10H
-0002FB 03FB CD0500          17      CALL    SYSTEM
-0002FE 03FE B7               4      OR  A
-0002FF 03FF C0              11      RET NZ
+0002D7 03D7 DD7E0E          19      LD  A,(IX+DPB_FATPS)    ;(DPB)FAT領域の先頭論理セクタ番号
+0002DA 03DA 324408          13      LD  (DATA+IPL_FATPS),A
                                 
-000300 0400 3A2107          13      LD  A,(FCB2)
-000303 0403 214607          10      LD  HL,FCB3
-000306 0406 BE               7      CP  (HL)
-000307 0407 200B            12      JR  NZ,CREATE
+0002DD 03DD DD7E00          19      LD  A,(IX+DPB_FATLN)    ;(DPB)FAT領域のセクタ単位でのサイズ
+0002E0 03E0 32DD08          13      LD  (DATA+IPL_FATLN-IPL),A
                                 
-000309 0409 113C01          10      LD  DE,SKIP
-00030C 040C 0E09             7      LD  C,9
-00030E 040E CD0500          17      CALL    SYSTEM
-000311 0411 C38B01          10      JP  WTIPL
+0002E3 03E3 DD7E10          19      LD  A,(IX+DPB_DIRPS)    ;(DPB)ルートディレクトリ領域の先頭論理セクタ番号
                                 
-       0414                     CREATE:
-000314 0414 114607          10      LD  DE,FCB3
-000317 0417 0E16             7      LD  C,16H
-000319 0419 CD0500          17      CALL    SYSTEM
-00031C 041C B7               4      OR  A
-00031D 041D C0              11      RET NZ
+0002E6 03E6 DD6E10          19      LD  L,(IX+DPB_DIRPS)    ;(DPB)ルートディレクトリ領域の先頭論理セクタ番号
+0002E9 03E9 DD6611          19      LD  H,(IX+DPB_DIRPS+1)
+0002EC 03EC 22E608          16      LD  (DATA+IPL_DIRPS-IPL),HL
                                 
-00031E 041E 210100          10      LD  HL,1
-000321 0421 225407          16      LD  (FCB3+14),HL
+0002EF 03EF DD7E0B          19      LD  A,(IX+DPB_DIRSCNT)  ;ルートディレクトリ領域の論理セクタ数
+0002F2 03F2 32E908          13      LD  (DATA+IPL_DIRSCNT-IPL),A
                                 
-000324 0424 114607          10      LD  DE,FCB3
-000327 0427 2A6D07          16      LD  HL,(SIZE)
-00032A 042A 0E26             7      LD  C,26H
-00032C 042C CD0500          17      CALL    SYSTEM
-00032F 042F B7               4      OR  A
-000330 0430 C0              11      RET NZ
+0002F5 03F5 6F               4      LD  L,A
+0002F6 03F6 2600             7      LD  H,0
                                 
-000331 0431 213507          10      LD  HL,FCB2+20
-000334 0434 115A07          10      LD  DE,FCB3+20
-000337 0437 010400          10      LD  BC,4
-00033A 043A EDB0                    LDIR
+0002F8 03F8 29              11      ADD HL,HL           ;*2
+0002F9 03F9 29              11      ADD HL,HL           ;*4
+0002FA 03FA 29              11      ADD HL,HL           ;*8
+0002FB 03FB DD7E0F          19      LD  A,(IX+DPB_BPS)      ;(DPB)FAT情報と論理セクタのサイズ
+0002FE 03FE CD2A03          17      CALL    DBL_HL_A
+000301 0401 7C               4      LD  A,H
+000302 0402 D601             7      SUB 1
+000304 0404 9F               4      SBC A,A
+000305 0405 A5               4      AND L
+000306 0406 32F108          13      LD  (DATA+IPL_DIRITEMS-IPL),A
                                 
-00033C 043C 114607          10      LD  DE,FCB3
-00033F 043F 0E10             7      LD  C,10H
-000341 0441 C30500          10      JP  SYSTEM
+000309 0409 DD6E14          19      LD  L,(IX+DPB_ADDCL)    ;(DPB)データ格納領域の先頭論理セクタ番号
+00030C 040C DD6615          19      LD  H,(IX+DPB_ADDCL+1)
+00030F 040F 225209          16      LD  (DATA+IPL_ADDCL-IPL),HL
+                                
+000312 0412 AF               4      XOR A
+000313 0413 C9              10      RET
+                                
+       0414                     COPY_FILE:
+000314 0414 21C507          10      LD  HL,FCB2NAME
+000317 0417 11EF07          10      LD  DE,FCB3+1
+00031A 041A 012400          10      LD  BC,36
+00031D 041D EDB0                    LDIR
+                                
+00031F 041F 21C507          10      LD  HL,FCB2NAME
+000322 0422 060B             7      LD  B,11
+       0424                     CF1:
+000324 0424 5E               7      LD  E,(HL)
+000325 0425 23               6      INC HL
+000326 0426 C5              11      PUSH    BC
+000327 0427 E5              11      PUSH    HL
+000328 0428 0E02             7      LD  C,002H      ;(BDOS)コンソール出力(_CONOUT)
+00032A 042A CD0500          17      CALL    SYSTEM
+00032D 042D E1              10      POP HL
+00032E 042E C1              10      POP BC
+00032F 042F 10F3            13      DJNZ    CF1
+                                
+000331 0431 11C407          10      LD  DE,FCB2
+000334 0434 0E0F             7      LD  C,0FH
+000336 0436 CD0500          17      CALL    SYSTEM
+000339 0439 B7               4      OR  A
+00033A 043A C0              11      RET NZ
+                                
+00033B 043B 2AD207          16      LD  HL,(FCB2+14)
+00033E 043E 221308          16      LD  (SDIR),HL
+000341 0441 210100          10      LD  HL,1
+000344 0444 22D207          16      LD  (FCB2+14),HL
+000347 0447 22FC07          16      LD  (FCB3+14),HL
+                                
+00034A 044A 2A0600          16      LD  HL,(SYSTEM+1)
+00034D 044D 25               4      DEC H
+00034E 044E 25               4      DEC H
+00034F 044F 111708          10      LD  DE,DATA
+000352 0452 ED52            15      SBC HL,DE
+000354 0454 11C407          10      LD  DE,FCB2
+000357 0457 0E27             7      LD  C,27H
+000359 0459 CD0500          17      CALL    SYSTEM
+00035C 045C 3D               4      DEC A
+00035D 045D C0              11      RET NZ
+00035E 045E 221508          16      LD  (SIZE),HL
+                                
+000361 0461 11C407          10      LD  DE,FCB2
+000364 0464 0E10             7      LD  C,10H
+000366 0466 CD0500          17      CALL    SYSTEM
+000369 0469 B7               4      OR  A
+00036A 046A C0              11      RET NZ
+                                
+00036B 046B 3AC407          13      LD  A,(FCB2)
+00036E 046E B7               4      OR  A
+00036F 046F 2006            12      JR  NZ,CF2
+000371 0471 0E19             7      LD  C,019H      ;カレントドライブ番号の獲得(_CURDRV)
+000373 0473 CD0500          17      CALL    SYSTEM
+000376 0476 3C               4      INC A
+       0477                     CF2:
+000377 0477 21EE07          10      LD  HL,FCB3
+00037A 047A BE               7      CP  (HL)
+00037B 047B 200B            12      JR  NZ,CREATE
+                                
+00037D 047D 113A01          10      LD  DE,SKIP
+000380 0480 0E09             7      LD  C,9
+000382 0482 CD0500          17      CALL    SYSTEM
+000385 0485 C3A201          10      JP  WTIPL
+                                
+       0488                     CREATE:
+000388 0488 11EE07          10      LD  DE,FCB3
+00038B 048B 0E16             7      LD  C,16H
+00038D 048D CD0500          17      CALL    SYSTEM
+000390 0490 B7               4      OR  A
+000391 0491 C0              11      RET NZ
+                                
+000392 0492 210100          10      LD  HL,1
+000395 0495 22FC07          16      LD  (FCB3+14),HL
+                                
+000398 0498 11EE07          10      LD  DE,FCB3
+00039B 049B 2A1508          16      LD  HL,(SIZE)
+00039E 049E 0E26             7      LD  C,26H
+0003A0 04A0 CD0500          17      CALL    SYSTEM
+0003A3 04A3 B7               4      OR  A
+0003A4 04A4 C0              11      RET NZ
+                                
+0003A5 04A5 21D807          10      LD  HL,FCB2+20
+0003A8 04A8 110208          10      LD  DE,FCB3+20
+0003AB 04AB 010400          10      LD  BC,4
+0003AE 04AE EDB0                    LDIR
+                                
+0003B0 04B0 11EE07          10      LD  DE,FCB3
+0003B3 04B3 0E10             7      LD  C,10H
+0003B5 04B5 C30500          10      JP  SYSTEM
                                 
                                 ;
                                 ;   BPB
                                 ;
-       0444                     BPB_2D:             ;2D
-000344 C000                         ORG MSX_IPL,BPB_2D-100H ;$PHASE
+       04B8                     BPB_FDD:                ;2D
+0003B8 C000                         ORG MSX_IPL,BPB_FDD-100H    ;$PHASE
+       C000                     BPB_FDD_IPL:
+0003B8 C000 EBFE90                  DB  0EBH,0FEH,090H  ;BS_JmpBoot
+0003BB C003 4C44202020202020        DB  "LD      "  ;BS_OEMName
+0003C3 C00B 0002                    DW  512     ;BPB_BytsPerSec
+0003C5 C00D 02                      DB  2       ;BPB_SecPerClus
+0003C6 C00E 0100                    DW  1       ;BPB_RsvdSecCnt
+0003C8 C010 02                      DB  2       ;BPB_NumFATs
+0003C9 C011 7000                    DW  112     ;BPB_RootEntCnt
+0003CB C013 D002                    DW  720     ;BPB_TotSec16
+0003CD C015 FD                      DB  0FDH        ;BPB_Media
+0003CE C016 0200                    DW  2       ;BPB_FATSz16
+0003D0 C018 0900                    DW  9       ;BPB_SecPerTrk
+0003D2 C01A 0200                    DW  2       ;BPB_NumHeads
+0003D4 C01C 0000                    DW  0       ;BPB_HiddSec(2バイト)
+       C01E                     BOOT_MSX_FD_ENTRY:
+0003D6 C01E 1810            12      JR  BOOT_MSX_FD
+0003D8 C020 4C4420202020            DB  "LD    "    ;MSX-DOS2判別用(VOL_IDじゃなければDOS1)
+0003DE C026 00                      DB  0       ;ダーティディスクフラグ
+0003DF C027 46444420                DB  "FDD "      ;ボリュームID(適当な4バイト)
+0003E3 C02B                         DS  2
+0003E5 C02D 01                      DB  1       ;IPL_FATPS
+0003E6 C02E 09                      DB  9       ;IPL_MAXSEC
+0003E7 C02F 00                      DB  0       ;IPL_MAXCYL
+       C030                     BPB_FDD_IPL_E:
+0003E8 04E8                         ORG $$+0100H,$$ ;$DEPHASE
+       04E8                     BPB_FDD_E:
                                 
-000344 C000 EBFE90                  DB  0EBH,0FEH,090H  ;BS_JmpBoot
-000347 C003 4C44202020202020        DB  "LD      "  ;BS_OEMName
-00034F C00B 0002                    DW  512     ;BPB_BytsPerSec
-000351 C00D 02                      DB  2       ;BPB_SecPerClus
-000352 C00E 0100                    DW  1       ;BPB_RsvdSecCnt
-000354 C010 02                      DB  2       ;BPB_NumFATs
-000355 C011 7000                    DW  112     ;BPB_RootEntCnt
-000357 C013 D002                    DW  720     ;BPB_TotSec16
-000359 C015 FD                      DB  0FDH        ;BPB_Media
-00035A C016 0200                    DW  2       ;BPB_FATSz16
-00035C C018 0900                    DW  9       ;BPB_SecPerTrk
-00035E C01A 0200                    DW  2       ;BPB_NumHeads
-000360 C01C 0000                    DW  0       ;BPB_HiddSec(2バイト)
-000362 C01E 180F            12      JR  BOOT_MSX_FD
-000364 C020                         DS  4       ;BPB_TotSec32
-000368 C024 00                      DB  0       ;IPL_MAXCYL
-000369 C025 02                      DB  2       ;IPL_SECPCL
-00036A C026 00                      DB  0       ;ダーティディスクフラグ/IPL_DIRPS_H
-00036B C027 09                      DB  9       ;IPL_MAXSEC
-00036C C028 01                      DB  1       ;IPL_FATPS
-00036D C029 02                      DB  2       ;IPL_FATLN
-00036E C02A 05                      DB  5       ;IPL_DIRPS
-00036F C02B 07                      DB  7       ;IPL_DIRSCNT
-000370 C02C 70                      DB  112     ;IPL_DIRITEMS
-000371 C02D 0800                    DW  8       ;IPL_ADDCL
-000373 0473                         ORG $$+0100H,$$ ;$DEPHASE
-       0473                     BPB_2D_E:
+       04E8                     IPL_EMM:
+0003E8 C000                         ORG MSX_IPL,IPL_EMM-100H    ;$PHASE
                                 
-       0473                     IPL_EMM:
-000373 C000                         ORG MSX_IPL,IPL_EMM-100H    ;$PHASE
-                                
-000373 C000 014C53582D446F64        DB  01H,"LSX-Dodgers  Sy"
+0003E8 C000 014C53582D446F64        DB  01H,"LSX-Dodgers  Sy"
             6765727320205379    
-000383 C010 7320EA01                DB  "s",20H,EED,01H
-000387 C014 00FCD7FD                DW  0FC00H,ESA-0200H
-00038B C018                         DS  15
-00039A C027 08                      DB  8       ;IPL_MAXSEC
-00039B C028 01                      DB  1       ;IPL_FATPS
-00039C C029 02                      DB  2       ;IPL_FATLN
-00039D C02A 05                      DB  5       ;IPL_DIRPS
-00039E C02B 06                      DB  6       ;IPL_DIRSCNT
-00039F C02C C0                      DB  192     ;IPL_DIRITEMS
-0003A0 C02D 0900                    DW  9       ;IPL_ADDCL
-0003A2 04A2                         ORG $$+0100H,$$ ;$DEPHASE
-       04A2                     IPL_EMM_E:
+0003F8 C010 7320                    DB  "s",20H
+0003FA C012 4C01                    DW  SEEK-IPL
+0003FC C014 00FC30FC                DW  IPL-0200H,BOOT_EMM_START-200H
+000400 C018                         DS  13
+00040D C025 00                      DB  0       ;ダーティディスクフラグ
+00040E C026 454D4D20                DB  "EMM "      ;ボリュームID(適当な4バイト)
+000412 C02A                         DS  2
+000414 C02C 01                      DB  1       ;IPL_FATPS
+000415 C02D 08                      DB  8       ;IPL_MAXSEC
+000416 C02E 00                      DB  0       ;IPL_MAXCYL
+000417 0517                         ORG $$+0100H,$$ ;$DEPHASE
+       0517                     IPL_EMM_E:
                                 
-       04A2                     MSX_FD:
-0003A2 C02F                         ORG MSX_IPL+IPL_HEAD_SZ,MSX_FD-100H ;$PHASE
-       C02F                     BOOT_MSX_FD:
-0003A2 C02F D0              11      RET NC
-0003A3 C030 CD6BF3          17      CALL    0F36BH      ;ページ1をメインRAMに切り替える
+                                ;   MSX_FD / BOOT_DMA / BOOT_EMM のサイズは揃える
                                 
-0003A6 C033 115EC0          10      LD  DE,FCB_MSX
-0003A9 C036 0E0F             7      LD  C,00FH      ;(BDOS)ファイルのオープン(_FOPEN)
-0003AB C038 CD7DF3          17      CALL    MSX_BDOS
+       0517                     MSX_FD:
+000417 C030                         ORG MSX_IPL+IPL_HEAD_SZ,MSX_FD-100H ;$PHASE
+       C030                     BOOT_MSX_FD:
+000417 C030 D0              11      RET NC
+000418 C031 EB               4      EX  DE,HL
+000419 C032 CDBCC0          17      CALL    JP_HL-IPL+MSX_IPL
+00041C C035 115FC0          10      LD  DE,FCB_MSX
+00041F C038 0E0F             7      LD  C,00FH      ;(BDOS)ファイルのオープン(_FOPEN)
+000421 C03A CD7DF3          17      CALL    MSX_BDOS
                                 
-0003AE C03B 110080          10      LD  DE,08000H
-0003B1 C03E 0E1A             7      LD  C,01AH      ;(BDOS)DTAの設定
-0003B3 C040 CD7DF3          17      CALL    MSX_BDOS
+000424 C03D 110080          10      LD  DE,08000H
+000427 C040 0E1A             7      LD  C,01AH      ;(BDOS)DTAの設定
+000429 C042 CD7DF3          17      CALL    MSX_BDOS
                                 
-0003B6 C043 210000          10      LD  HL,0
-0003B9 C046 227FC0          16      LD  (FCB_MSX+33),HL
-0003BC C049 2281C0          16      LD  (FCB_MSX+35),HL
-0003BF C04C 2C               4      INC L
-0003C0 C04D 226CC0          16      LD  (FCB_MSX+14),HL
+00042C C045 210100          10      LD  HL,1
+00042F C048 226DC0          16      LD  (FCB_MSX+14),HL
+000432 C04B 2D               4      DEC L
+000433 C04C 2280C0          16      LD  (FCB_MSX+33),HL
+000436 C04F 2282C0          16      LD  (FCB_MSX+35),HL
                                 
-0003C3 C050 115EC0          10      LD  DE,FCB_MSX
-0003C6 C053 210040          10      LD  HL,04000H
-0003C9 C056 0E27             7      LD  C,027H      ;(BDOS)ランダム・ブロック・リード
-0003CB C058 CD7DF3          17      CALL    MSX_BDOS
+000439 C052 115FC0          10      LD  DE,FCB_MSX
+00043C C055 2640             7      LD  H,040H      ;HL=04000H
+00043E C057 0E27             7      LD  C,027H      ;(BDOS)ランダム・ブロック・リード
+000440 C059 CD7DF3          17      CALL    MSX_BDOS
                                 
-0003CE C05B C31080          10      JP  08010H
+000443 C05C C31080          10      JP  08010H
                                 
-       C05E                     FCB_MSX:
-0003D1 C05E 004C444D53582020        DB  0, "LDMSX   BIN",0,0,0,0
+       C05F                     FCB_MSX:
+000446 C05F 004C444D53582020        DB  0, "LDMSX   BIN",0,0,0,0
             2042494E00000000    
-       C06E                     BOOT_MSX_FD_E:
-0003E1 04E1                         ORG $$+0100H,$$ ;$DEPHASE
-       04E1                     MSX_FD_E:
+       C06F                     BOOT_MSX_FD_E:
+000456 0556                         ORG $$+0100H,$$ ;$DEPHASE
+       0556                     MSX_FD_E:
                                 
-       04E1                     MAIN:
-0003E1 FE6E                         ORG IPL+IPL_HEAD_SZ+MSX_FD_E-MSX_FD,MAIN-0100H
-       FE6E                     FNAME:
-0003E1 FE6E 4C44202020202020        DB  "LD",20H,20H,20H,20H,20H,20H
-0003E9 FE76 42494E                  DB  "BIN"
+       0556                     BOOT_DMA:
+000456 FE30                         ORG IPL+IPL_HEAD_SZ,BOOT_DMA-100H   ;$PHASE
+000456 FE30 C9              10      RET
+       FE31                     SDMA:
+000457 FE31 04               4      INC B       ;BC=1F87H
+000458 FE32 EDA3            16      OUTI
+00045A FE34 3D               4      DEC A
+00045B FE35 20FA            12      JR  NZ,SDMA
+00045D FE37 3E80             7      LD  A,80H
+00045F FE39 C5              11      PUSH    BC
+000460 FE3A 01FA0F          10      LD  BC,0FFAH    ;MB8877A セレクタレジスタ
+000463 FE3D ED59            12      OUT (C),E
+000465 FE3F 0EF8             7      LD  C,0F8H      ;MB8877A セレクタレジスタ
+000467 FE41 ED79            12      OUT (C),A
                                 
-       FE79                     SA:
-0003EC FE79 F3               4      DI
-0003ED FE7A 310000          10      LD  SP,0
-0003F0 FE7D DD2100FE        14      LD  IX,IPL
-0003F4 FE81 3E1E             7      LD  A,1EH
-0003F6 FE83 D300            11      OUT (0),A
-0003F8 FE85 012430          10      LD  BC,3000H+36
-0003FB FE88 ED78            12      IN  A,(C)
-       FE8A                     INIT_DRV:
-0003FD FE8A E603             7      AND 3
-0003FF FE8C 3278FF          13      LD  (DRIVE+1),A
-000402 FE8F 3287FF          13      LD  (0FF87H),A
-000405 FE92 CDC4FE          17      CALL    FILE
-000408 FE95 381E            12      JR  C,IPLERR
-00040A FE97 2A0300          16      LD  HL,(DTBUF+3)
-00040D FE9A ED5B0100        20      LD  DE,(DTBUF+1)
-000411 FE9E ED52            15      SBC HL,DE
-000413 FEA0 44               4      LD  B,H
-000414 FEA1 4D               4      LD  C,L
-000415 FEA2 03               6      INC BC
-000416 FEA3 210700          10      LD  HL,DTBUF+7
-000419 FEA6 EDB0                    LDIR
+000469 FE43 CD99FF          17      CALL    BUSY
+00046C FE46 ED78            12      IN  A,(C)
                                 
-00041B FEA8 01031A          10      LD  BC,1A03H
-00041E FEAB 3E82             7      LD  A,82H
-000420 FEAD ED79            12      OUT (C),A
-000422 FEAF ED5E             8      IM  2
-000424 FEB1 2A0500          16      LD  HL,(0005H)
-000427 FEB4 E9               4      JP  (HL)
-       FEB5                     IPLERR:
-000428 FEB5 3A78FF          13      LD  A,(DRIVE+1)
-00042B FEB8 01FC0F          10      LD  BC,0FFCH    ;モーター停止
-00042E FEBB ED79            12      OUT (C),A
-000430 FEBD 3E1D             7      LD  A,1DH       ;ROMに切り替え
-000432 FEBF D300            11      OUT (0),A
-000434 FEC1 C36600          10      JP  0066H       ;NMIリセット
-       FEC4                     FILE:
-000437 FEC4 1600             7      LD  D,0
-000439 FEC6 DD5E28          19      LD  E,(IX+IPL_FATPS)
-00043C FEC9 2100D0          10      LD  HL,FATBF
-00043F FECC DD4629          19      LD  B,(IX+IPL_FATLN)
-000442 FECF CD53FF          17      CALL    DRDSB
-       FED0                     READ_FAT    EQU $-2
-000445 FED2 D8              11      RET C
+00046E FE48 2A67FE          16      LD  HL,(DMAHL)
+000471 FE4B 23               6      INC HL
+000472 FE4C 1106BB          10      LD  DE,0BB06H   ;READ DMA
                                 
-000446 FED3 210000          10      LD  HL,DTBUF
-000449 FED6 DD5E2A          19      LD  E,(IX+IPL_DIRPS)
-00044C FED9 DD5626          19      LD  D,(IX+IPL_DIRPS_H)
-00044F FEDC E5              11      PUSH    HL
-000450 FEDD DD462B          19      LD  B,(IX+IPL_DIRSCNT)
-000453 FEE0 CD53FF          17      CALL    DRDSB
-000456 FEE3 E1              10      POP HL
-000457 FEE4 D8              11      RET C
+000475 FE4F C1              10      POP BC      ;BC=1F87H Z80DMA
+000476 FE50 ED51            12      OUT (C),D
+000478 FE52 ED59            12      OUT (C),E
+00047A FE54 ED58            12      IN  E,(C)
+00047C FE56 ED50            12      IN  D,(C)
+00047E FE58 19              11      ADD HL,DE
+00047F FE59 C6FF             7      ADD A,0FFH
+000481 FE5B C9              10      RET
+                                            ;X1turbo DISK DMA
+       FE5C                     DMAD:
+000482 FE5C C3                      DB  0C3H    ;WR6 リセット
+000483 FE5D 7D                      DB  07DH    ;WR0 ポートA→ポートB 転送
+000484 FE5E FB0F                    DW  00FFBH  ;ポートA開始アドレス FDC データレジスタ
+000486 FE60 FFFF                    DW  0FFFFH  ;ブロック長(転送サイズ-1)
+000488 FE62 2C                      DB  02CH    ;WR1 ポートAアドレス固定 I/O
+000489 FE63 10                      DB  010H    ;WR2 ポートBインクリメント
+00048A FE64 80                      DB  080H    ;WR3
+00048B FE65 92                      DB  092H    ;WR5 WAIT RDY:LOW
+00048C FE66 8D                      DB  08DH    ;WR4 バイト ポートB開始アドレス(LH)
+00048D FE67 0000                DMAHL:  DW  0   ;ポートB開始アドレス
+00048F FE69 CF                      DB  0CFH    ;WR6 ロード
+000490 FE6A 87                      DB  087H    ;WR6 イネーブル
+       FE6B                     DMAD_E:
+000491 FE6B                         DS  4
+       FE6F                     DMAD_E2:
+000495 0595                         ORG $$+0100H,$$ ;$DEPHASE
+       0595                     BOOT_DMA_E:
                                 
-000458 FEE5 DD4E2C          19      LD  C,(IX+IPL_DIRITEMS) ;ディレクトリの全項目数
-       FEE8                     FILE1:
-00045B FEE8 060B             7      LD  B,11
-00045D FEEA 116EFE          10      LD  DE,FNAME
-000460 FEED E5              11      PUSH    HL
-       FEEE                     COMP:
-000461 FEEE 1A               7      LD  A,(DE)
-000462 FEEF BE               7      CP  (HL)
-000463 FEF0 2004            12      JR  NZ,COMP1
-000465 FEF2 13               6      INC DE
-000466 FEF3 23               6      INC HL
-000467 FEF4 10F8            13      DJNZ    COMP
-       FEF6                     COMP1:
-000469 FEF6 E1              10      POP HL
-00046A FEF7 2809            12      JR  Z,FILE2
-00046C FEF9 112000          10      LD  DE,20H
-00046F FEFC 19              11      ADD HL,DE
-000470 FEFD 0D               4      DEC C
-000471 FEFE 20E8            12      JR  NZ,FILE1
-000473 FF00 37               4      SCF
-000474 FF01 C9              10      RET
+       0595                     BOOT_EMM:
+000495 FE30                         ORG IPL+IPL_HEAD_SZ,BOOT_EMM-100H   ;$PHASE
+       FE30                     BOOT_EMM_START:
+000495 FE30 01FC0F          10      LD  BC,0FFCH    ;念のためにFDDのモーターを停止
+000498 FE33 3A87FF          13      LD  A,(0FF87H)  ;ドライブ(IPL READ)
+00049B FE36 ED79            12      OUT (C),A
+00049D FE38 2100FC          10      LD  HL,IPL-200H
+0004A0 FE3B 1100FE          10      LD  DE,IPL
+0004A3 FE3E 014C01          10      LD  BC,SEEK-IPL
+0004A6 FE41 EDB0                    LDIR
+0004A8 FE43 C37BFE          10      JP  SA
+       FE46                     DRD_EMM:
+0004AB FE46 EB               4      EX  DE,HL
+0004AC FE47 29              11      ADD HL,HL
+0004AD FE48 DD462F          19      LD  B,(IX+IPL_MAXCYL)   ;EMMのオフセット
+0004B0 FE4B DD4E2E          19      LD  C,(IX+IPL_MAXSEC)   ;ブートレコードを避ける為
+0004B3 FE4E 09              11      ADD HL,BC
+0004B4 FE4F 01000D          10      LD  BC,00D00H       ;EMM0 アドレス下位指定
+0004B7 FE52 ED49            12      OUT (C),C
+0004B9 FE54 0C               4      INC C           ;EMM0 アドレス中位指定
+0004BA FE55 ED69            12      OUT (C),L
+0004BC FE57 0C               4      INC C           ;EMM0 アドレス上位指定
+0004BD FE58 ED61            12      OUT (C),H
+0004BF FE5A 0C               4      INC C           ;EMM0 データのリード／ライト、アクセス後にアドレス＋１加算
+0004C0 FE5B EB               4      EX  DE,HL
+0004C1 FE5C AF               4      XOR A
+       FE5D                     EDRDC1:
+0004C2 FE5D EDA2            16      INI
+0004C4 FE5F 04               4      INC B
+0004C5 FE60 EDA2            16      INI
+0004C7 FE62 04               4      INC B
+0004C8 FE63 3D               4      DEC A
+0004C9 FE64 20F7            12      JR  NZ,EDRDC1
+0004CB FE66 AF               4      XOR A
+0004CC FE67 C9              10      RET
+0004CD FE68                         DS  7
+       FE6F                     ESA_E:
+0004D4 05D4                         ORG $$+0100H,$$ ;$DEPHASE
+       05D4                     BOOT_EMM_E:
                                 
-       FF02                     FILE2:
-000475 FF02 111A00          10      LD  DE,1AH
-000478 FF05 19              11      ADD HL,DE
-000479 FF06 5E               7      LD  E,(HL)
-00047A FF07 23               6      INC HL
-00047B FF08 56               7      LD  D,(HL)
+       05D4                     MAIN:
+0004D4 FE6F                         ORG IPL+IPL_HEAD_SZ+MSX_FD_E-MSX_FD,MAIN-0100H
+       FE6F                     FNAME:
+0004D4 FE6F 4C44202020202020        DB  "LD      BIN",0
+            42494E00            
                                 
-00047C FF09 210000          10      LD  HL,DTBUF
-       FF0C                     RDD1:
-00047F FF0C D5              11      PUSH    DE
-000480 FF0D CD40FF          17      CALL    DRDC
-000483 FF10 D1              10      POP DE
-000484 FF11 D8              11      RET C
-000485 FF12 E5              11      PUSH    HL
-000486 FF13 CD1DFF          17      CALL    GNCL
-000489 FF16 E1              10      POP HL
-00048A FF17 7A               4      LD  A,D
-00048B FF18 FE0F             7      CP  0FH
-       FF19                     END_OF_FILE EQU $-1
-00048D FF1A 38F0            12      JR  C,RDD1
-00048F FF1C C9              10      RET
+       FE7B                     SA:
+0004E0 FE7B F3               4      DI
+0004E1 FE7C 310000          10      LD  SP,0
+0004E4 FE7F DD2100FE        14      LD  IX,IPL
+0004E8 FE83 ED79            12      OUT (C),A
+0004EA FE85 3E82             7      LD  A,82H
+0004EC FE87 D300            11      OUT (0),A
+0004EE FE89 012430          10      LD  BC,3000H+36
+0004F1 FE8C ED78            12      IN  A,(C)
+       FE8E                     INIT_DRV:
+0004F3 FE8E E603             7      AND 3
+0004F5 FE90 3265FF          13      LD  (DRIVE_SWC),A
+0004F8 FE93 3287FF          13      LD  (0FF87H),A
+0004FB FE96 CDBDFE          17      CALL    FILE
+0004FE FE99 3A87FF          13      LD  A,(0FF87H)
+000501 FE9C 01FC0F          10      LD  BC,0FFCH    ;モーター停止
+000504 FE9F ED79            12      OUT (C),A
+000506 FEA1 DA5200          10      JP  C,0052H     ;IPLに戻る
+000509 FEA4 3E1E             7      LD  A,01EH      ;IPL ROM OFF
+00050B FEA6 D300            11      OUT (0),A
+00050D FEA8 2A0380          16      LD  HL,(DTBUF+3)
+000510 FEAB ED5B0180        20      LD  DE,(DTBUF+1)
+000514 FEAF ED52            15      SBC HL,DE
+000516 FEB1 44               4      LD  B,H
+000517 FEB2 4D               4      LD  C,L
+000518 FEB3 03               6      INC BC
+000519 FEB4 210780          10      LD  HL,DTBUF+7
+00051C FEB7 EDB0                    LDIR
+00051E FEB9 2A0580          16      LD  HL,(DTBUF+5)
+       FEBC                     JP_HL:
+000521 FEBC E9               4      JP  (HL)
+       FEBD                     FILE:
+000522 FEBD 1600             7      LD  D,0
+000524 FEBF DD5E2D          19      LD  E,(IX+IPL_FATPS)
+000527 FEC2 2100D0          10      LD  HL,FATBF
+00052A FEC5 0600             7      LD  B,0
+       FEC6                     IPL_FATLN   EQU $-1
+       FEC7                     READ_FAT:
+00052C FEC7 CD40FF          17      CALL    DRDSB
+00052F FECA D8              11      RET C
                                 
-       FF1D                     GNCL:
-000490 FF1D 6B               4      LD  L,E     ;GET NEXT CLUSTER
-000491 FF1E 62               4      LD  H,D
-000492 FF1F CB3C             8      SRL H
-000494 FF21 CB1D             8      RR  L
-000496 FF23 0100D0          10      LD  BC,FATBF
-000499 FF26 3809            12      JR  C,GNC1
-00049B FF28 19              11      ADD HL,DE
-00049C FF29 09              11      ADD HL,BC
-00049D FF2A 5E               7      LD  E,(HL)
-00049E FF2B 23               6      INC HL
-00049F FF2C 7E               7      LD  A,(HL)
-0004A0 FF2D E60F             7      AND 0FH
-0004A2 FF2F 57               4      LD  D,A
-0004A3 FF30 C9              10      RET
-       FF31                     GNC1:
-0004A4 FF31 19              11      ADD HL,DE
-0004A5 FF32 09              11      ADD HL,BC
-0004A6 FF33 7E               7      LD  A,(HL)
-0004A7 FF34 23               6      INC HL
-0004A8 FF35 56               7      LD  D,(HL)
-0004A9 FF36 0604             7      LD  B,4
-       FF38                     GNC1L:
-0004AB FF38 CB3A             8      SRL D   ;DA=DA/2
-0004AD FF3A 1F               4      RRA     ;
-0004AE FF3B 10FB            13      DJNZ    GNC1L
+000530 FECB 210080          10      LD  HL,DTBUF
+000533 FECE 110000          10      LD  DE,0
+       FECF                     IPL_DIRPS   EQU $-2
+000536 FED1 0600             7      LD  B,0
+       FED2                     IPL_DIRSCNT EQU $-1
+000538 FED3 E5              11      PUSH    HL
+000539 FED4 CD40FF          17      CALL    DRDSB
+00053C FED7 E1              10      POP HL
+00053D FED8 D8              11      RET C
                                 
-0004B0 FF3D 5F               4      LD  E,A
-0004B1 FF3E A7               4      AND A
-0004B2 FF3F C9              10      RET
+00053E FED9 0600             7      LD  B,0     ;ディレクトリの全項目数
+       FEDA                     IPL_DIRITEMS    EQU $-1
+       FEDB                     FILE1:
+000540 FEDB 116FFE          10      LD  DE,FNAME
+000543 FEDE E5              11      PUSH    HL
+       FEDF                     COMP:
+000544 FEDF 1A               7      LD  A,(DE)
+000545 FEE0 B7               4      OR  A
+000546 FEE1 280E            12      JR  Z,FILE2
+000548 FEE3 BE               7      CP  (HL)
+000549 FEE4 13               6      INC DE
+00054A FEE5 23               6      INC HL
+00054B FEE6 28F7            12      JR  Z,COMP
+       FEE8                     COMP1:
+00054D FEE8 E1              10      POP HL
+00054E FEE9 112000          10      LD  DE,00020H
+000551 FEEC 19              11      ADD HL,DE
+000552 FEED 10EC            13      DJNZ    FILE1
+000554 FEEF 37               4      SCF
+000555 FEF0 C9              10      RET
+       FEF1                     FILE2:
+000556 FEF1 E1              10      POP HL
+000557 FEF2 111A00          10      LD  DE,0001AH
+00055A FEF5 19              11      ADD HL,DE
+00055B FEF6 5E               7      LD  E,(HL)
+00055C FEF7 23               6      INC HL
+00055D FEF8 56               7      LD  D,(HL)
+00055E FEF9 210080          10      LD  HL,DTBUF
+       FEFC                     RDD1:
+000561 FEFC D5              11      PUSH    DE
+000562 FEFD CD2FFF          17      CALL    DRDC
+000565 FF00 D1              10      POP DE
+000566 FF01 D8              11      RET C
+000567 FF02 E5              11      PUSH    HL
+000568 FF03 CD0DFF          17      CALL    GNCL
+00056B FF06 E1              10      POP HL
+00056C FF07 7A               4      LD  A,D
+00056D FF08 FE0F             7      CP  0FH
+       FF09                     END_OF_FILE EQU $-1
+00056F FF0A 38F0            12      JR  C,RDD1
+000571 FF0C C9              10      RET
                                 
-       FF40                     DRDC:
-0004B3 FF40 E5              11      PUSH    HL
-0004B4 FF41 EB               4      EX  DE,HL
-0004B5 FF42 3A25FE          13      LD  A,(IPL+IPL_SECPCL)
-0004B8 FF45 47               4      LD  B,A
-       FF46                     L_CLDBL:
-0004B9 FF46 1F               4      RRA         ;->CF
-0004BA FF47 3803            12      JR  C,E_CLDBL
-0004BC FF49 29              11      ADD HL,HL       ;*2
-0004BD FF4A 18FA            12      JR  L_CLDBL
-       FF4C                     E_CLDBL:
-0004BF FF4C ED5B2DFE        20      LD  DE,(IPL+IPL_ADDCL)
-0004C3 FF50 19              11      ADD HL,DE
-0004C4 FF51 EB               4      EX  DE,HL
-0004C5 FF52 E1              10      POP HL
-       FF53                     DRDSB:
-0004C6 FF53 C5              11      PUSH    BC
-0004C7 FF54 D5              11      PUSH    DE
-0004C8 FF55 CDB5FF          17      CALL    DRD
-0004CB FF58 D1              10      POP DE
-0004CC FF59 C1              10      POP BC
-0004CD FF5A D8              11      RET C
-0004CE FF5B 13               6      INC DE
-0004CF FF5C 10F5            13      DJNZ    DRDSB
-0004D1 FF5E C9              10      RET
+       FF0D                     GNCL:
+000572 FF0D 6B               4      LD  L,E     ;GET NEXT CLUSTER
+000573 FF0E 62               4      LD  H,D
+000574 FF0F CB3C             8      SRL H
+000576 FF11 CB1D             8      RR  L
+000578 FF13 0100D0          10      LD  BC,FATBF
+00057B FF16 3809            12      JR  C,GNC1
+00057D FF18 19              11      ADD HL,DE
+00057E FF19 09              11      ADD HL,BC
+00057F FF1A 5E               7      LD  E,(HL)
+000580 FF1B 23               6      INC HL
+000581 FF1C 7E               7      LD  A,(HL)
+000582 FF1D E60F             7      AND 0FH
+000584 FF1F 57               4      LD  D,A
+000585 FF20 C9              10      RET
+       FF21                     GNC1:
+000586 FF21 19              11      ADD HL,DE
+000587 FF22 09              11      ADD HL,BC
+000588 FF23 7E               7      LD  A,(HL)
+000589 FF24 23               6      INC HL
+00058A FF25 56               7      LD  D,(HL)
+00058B FF26 0604             7      LD  B,4
+       FF28                     GNC1L:
+00058D FF28 CB3A             8      SRL D   ;DA=DA/2
+00058F FF2A 1F               4      RRA     ;
+000590 FF2B 10FB            13      DJNZ    GNC1L
                                 
-       FF5F                     SEEK:
-0004D2 FF5F 0610             7      LD  B,16
-0004D4 FF61 DD4E18          19      LD  C,(IX+24)   ;BPB_SecPerTrk
-0004D7 FF64 AF               4      XOR A
-0004D8 FF65 EB               4      EX  DE,HL
-       FF66                     DIV1:
-0004D9 FF66 29              11      ADD HL,HL
-0004DA FF67 8F               4      ADC A,A
-0004DB FF68 B9               4      CP  C
-0004DC FF69 3802            12      JR  C,DIV2
-0004DE FF6B 91               4      SUB C
-0004DF FF6C 2C               4      INC L
-       FF6D                     DIV2:
-0004E0 FF6D 10F7            13      DJNZ    DIV1
+000592 FF2D 5F               4      LD  E,A
+000593 FF2E C9              10      RET
                                 
-0004E2 FF6F 3C               4      INC A       ;最小のセクタは１固定
-0004E3 FF70 5F               4      LD  E,A     ;余り
+       FF2F                     DRDC:
+000594 FF2F E5              11      PUSH    HL
+000595 FF30 EB               4      EX  DE,HL
+000596 FF31 3E00             7      LD  A,0
+       FF32                     IPL_SECPCL  EQU $-1
+000598 FF33 47               4      LD  B,A
+       FF34                     L_CLDBL:
+000599 FF34 1F               4      RRA         ;->CF
+00059A FF35 3803            12      JR  C,E_CLDBL
+00059C FF37 29              11      ADD HL,HL       ;*2
+00059D FF38 18FA            12      JR  L_CLDBL
+       FF3A                     E_CLDBL:
+00059F FF3A 110000          10      LD  DE,0
+       FF3B                     IPL_ADDCL   EQU $-2
+0005A2 FF3D 19              11      ADD HL,DE
+0005A3 FF3E EB               4      EX  DE,HL
+0005A4 FF3F E1              10      POP HL
+       FF40                     DRDSB:
+0005A5 FF40 C5              11      PUSH    BC
+0005A6 FF41 D5              11      PUSH    DE
+0005A7 FF42 CDB3FF          17      CALL    DRD
+       FF43                     DRD_SWC EQU $-2
+0005AA FF45 D1              10      POP DE
+0005AB FF46 C1              10      POP BC
+0005AC FF47 D8              11      RET C
+0005AD FF48 13               6      INC DE
+0005AE FF49 10F5            13      DJNZ    DRDSB
+0005B0 FF4B C9              10      RET
                                 
-0004E4 FF71 55               4      LD  D,L     ;商
-0004E5 FF72 CB3A             8      SRL D
-0004E7 FF74 9F               4      SBC A,A
-0004E8 FF75 E610             7      AND 10H     ;SIDE
-0004EA FF77 F600             7  DRIVE:  OR  00H
-0004EC FF79 01FC0F          10      LD  BC,0FFCH    ;モーター制御、サイド選択、 ドライブ選択
-0004EF FF7C F680             7      OR  80H     ;モーターオン
-0004F1 FF7E ED79            12      OUT (C),A
-0004F3 FF80 CD9BFF          17      CALL    BUSY
-0004F6 FF83 D8              11      RET C
-0004F7 FF84 1807            12      JR  SKIPBUF
-0004F9 FF86 07                      DB  7       ;0FF86H IPLカラー
-0004FA FF87 00                      DB  0       ;0FF87H ドライブ(IPL READ)
-0004FB FF88 79FE                    DW  SA      ;0FF88H スタックオーバーライド(IPL READ)
-0004FD FF8A 0000                    DW  0       ;0FF8AH
-0004FF FF8C 00                      DB  0       ;0FF8CH デバイス: 0:2D 2:2HD
+       FF4C                     SEEK:
+0005B1 FF4C 0610             7      LD  B,16
+0005B3 FF4E DD4E18          19      LD  C,(IX+24)   ;BPB_SecPerTrk
+0005B6 FF51 AF               4      XOR A
+0005B7 FF52 EB               4      EX  DE,HL
+       FF53                     DIV1:
+0005B8 FF53 29              11      ADD HL,HL
+0005B9 FF54 8F               4      ADC A,A
+0005BA FF55 B9               4      CP  C
+0005BB FF56 3802            12      JR  C,DIV2
+0005BD FF58 91               4      SUB C
+0005BE FF59 2C               4      INC L
+       FF5A                     DIV2:
+0005BF FF5A 10F7            13      DJNZ    DIV1
+                                
+0005C1 FF5C 3C               4      INC A       ;最小のセクタは１固定
+0005C2 FF5D 5F               4      LD  E,A     ;余り
+                                
+0005C3 FF5E 55               4      LD  D,L     ;商
+0005C4 FF5F CB3A             8      SRL D
+0005C6 FF61 9F               4      SBC A,A
+0005C7 FF62 E610             7      AND 10H     ;SIDE
+0005C9 FF64 F600             7      OR  00H
+       FF65                     DRIVE_SWC   EQU $-1
+0005CB FF66 01FC0F          10      LD  BC,0FFCH    ;モーター制御、サイド選択、 ドライブ選択
+0005CE FF69 F680             7      OR  80H     ;モーターオン
+0005D0 FF6B ED79            12      OUT (C),A
+0005D2 FF6D 78               4      LD  A,B
+0005D3 FF6E DBFF            11      IN  A,(0FFH)
+       FF6F                     FD_MODE EQU $-1
+0005D5 FF70 CD99FF          17      CALL    BUSY
+0005D8 FF73 D8              11      RET C
+0005D9 FF74 218AFF          10      LD  HL,CYLINDER
+0005DC FF77 7A               4      LD  A,D
+0005DD FF78 AE               7      XOR (HL)
+0005DE FF79 72               7      LD  (HL),D
+0005DF FF7A 2F               4      CPL
+0005E0 FF7B C8              11      RET Z       ;シークの必要なし
+0005E1 FF7C 7A               4      LD  A,D
+0005E2 FF7D C6FF             7      ADD A,0FFH
+0005E4 FF7F 9F               4      SBC A,A
+0005E5 FF80 E618             7      AND 18H     ;シーク(0)/リストア($18)
+0005E7 FF82 280D            12      JR  Z,SET_CYL
+0005E9 FF84 1807            12      JR  SKIPBUF
+0005EB FF86 07                      DB  7       ;0FF86H IPLカラー
+0005EC FF87 00                      DB  0       ;0FF87H ドライブ(IPL READ)
+0005ED FF88 7BFE                    DW  SA      ;0FF88H スタックオーバーライド(IPL READ)
+       FF8A                     CYLINDER:
+0005EF FF8A FF                      DB  0FFH        ;0FF8AH
+0005F0 FF8B 00                      DB  0       ;0FF8BH
+0005F1 FF8C 00                      DB  0       ;0FF8CH デバイス: 0:2D 2:2HD
+                                ;   DB  0       ;ダミー(JR SKIPBUFが7になるように)
        FF8D                     SKIPBUF:
-000500 FF8D 0EFB             7      LD  C,0FBH      ;MB8877A データレジスタ
-000502 FF8F ED51            12      OUT (C),D
-000504 FF91 7A               4      LD  A,D
-000505 FF92 C6FF             7      ADD A,0FFH
-000507 FF94 9F               4      SBC A,A
-000508 FF95 E618             7      AND 18H     ;シーク/リストア
-00050A FF97 0EF8             7      LD  C,0F8H      ;MB8877A ステータス／コマンドレジスタ
-00050C FF99 ED79            12      OUT (C),A
-       FF9B                     BUSY:
-00050E FF9B 3E1A             7      LD  A,26
-       FF9D                     BUSY1:
-000510 FF9D 3D               4      DEC A
-000511 FF9E 20FD            12      JR  NZ,BUSY1
+0005F2 FF8D 0EFD             7      LD  C,0FDH
+       FF8E                     SEEK_2DD    EQU $-1
+0005F4 FF8F ED48            12      IN  C,(C)
+       FF91                     SET_CYL:
+0005F6 FF91 0EFB             7      LD  C,0FBH      ;MB8877A データレジスタ
+0005F8 FF93 ED51            12      OUT (C),D
+0005FA FF95 0EF8             7      LD  C,0F8H      ;MB8877A ステータス／コマンドレジスタ
+0005FC FF97 ED79            12      OUT (C),A
+       FF99                     BUSY:
+0005FE FF99 3E1A             7      LD  A,26
+       FF9B                     BUSY1:
+000600 FF9B 3D               4      DEC A
+000601 FF9C 20FD            12      JR  NZ,BUSY1
                                 
-000513 FFA0 0EF8             7      LD  C,0F8H      ;MB8877A ステータス／コマンドレジスタ
-       FFA2                     READY:
-000515 FFA2 61               4      LD  H,C
-       FFA3                     READY2:
-000516 FFA3 ED78            12      IN  A,(C)
-000518 FFA5 E681             7      AND 081H
-00051A FFA7 C8              11      RET Z
-00051B FFA8 3E1A             7      LD  A,1AH
-00051D FFAA DB01            11      IN  A,(01H)     ;8255 ポートB
-00051F FFAC 07               4      RLCA
-000520 FFAD AC               4      XOR H
-000521 FFAE 0F               4      RRCA
-000522 FFAF 30F2            12      JR  NC,READY2
-000524 FFB1 25               4      DEC H
-000525 FFB2 20EF            12      JR  NZ,READY2
-000527 FFB4 C9              10      RET
+000603 FF9E 0EF8             7      LD  C,0F8H      ;MB8877A ステータス／コマンドレジスタ
+       FFA0                     READY:
+000605 FFA0 61               4      LD  H,C
+       FFA1                     READY2:
+000606 FFA1 ED78            12      IN  A,(C)
+000608 FFA3 E681             7      AND 081H
+00060A FFA5 C8              11      RET Z
+00060B FFA6 3E1A             7      LD  A,1AH
+00060D FFA8 DB01            11      IN  A,(01H)     ;8255 ポートB
+00060F FFAA 07               4      RLCA
+000610 FFAB AC               4      XOR H
+000611 FFAC 0F               4      RRCA
+000612 FFAD 30F2            12      JR  NC,READY2
+000614 FFAF 25               4      DEC H
+000615 FFB0 20EF            12      JR  NZ,READY2
+000617 FFB2 C9              10      RET
                                 
-       FFB5                     DRD:
-000528 0628                         ORG $$+0100H,$$ ;$DEPHASE
-       0628                     MAINE:
+       FFB3                     DRD:
+000618 0718                         ORG $$+0100H,$$ ;$DEPHASE
+       0718                     MAINE:
                                 ;
                                 ;   2Dフロッピー
                                 ;
-       0628                     RDDL:
-000528 FFB5                         ORG DRD,RDDL-100H
-       FFB5                     DRDL:
-000528 FFB5 E5              11      PUSH    HL
-000529 FFB6 CD5FFF          17      CALL    SEEK        ;ディスクリード
-00052C FFB9 E1              10      POP HL
-00052D FFBA D8              11      RET C
-00052E FFBB 3E80             7      LD  A,80H
-000530 FFBD 0EFA             7      LD  C,0FAH      ;MB8877A セレクタレジスタ
-000532 FFBF ED59            12      OUT (C),E
-000534 FFC1 0EF8             7      LD  C,0F8H      ;MB8877A ステータス／コマンドレジスタ
-000536 FFC3 ED79            12      OUT (C),A
-000538 FFC5 3E1A             7      LD  A,26
-       FFC7                     DELAY:
-00053A FFC7 3D               4      DEC A
-00053B FFC8 20FD            12      JR  NZ,DELAY
+       0718                     DRD_2D:
+000618 FFB3                         ORG DRD,DRD_2D-100H
+000618 FFB3 E5              11      PUSH    HL
+000619 FFB4 CD4CFF          17      CALL    SEEK        ;ディスクリード
+00061C FFB7 E1              10      POP HL
+00061D FFB8 D8              11      RET C
+00061E FFB9 3E80             7      LD  A,80H
+000620 FFBB 0EFA             7      LD  C,0FAH      ;MB8877A セレクタレジスタ
+000622 FFBD ED59            12      OUT (C),E
+000624 FFBF 0EF8             7      LD  C,0F8H      ;MB8877A ステータス／コマンドレジスタ
+000626 FFC1 ED79            12      OUT (C),A
+000628 FFC3 3E1A             7      LD  A,26
+       FFC5                     DELAY:
+00062A FFC5 3D               4      DEC A
+00062B FFC6 20FD            12      JR  NZ,DELAY
                                 
-00053D FFCA 0EFB             7      LD  C,0FBH
-       FFCC                     DRD1:
-00053F FFCC 78               4      LD  A,B
-000540 FFCD DBF8            11      IN  A,(0F8H)    ;MB8877A ステータス／コマンドレジスタ
-000542 FFCF 0F               4      RRCA
-000543 FFD0 3008            12      JR  NC,DRD3
-000545 FFD2 0F               4      RRCA
-000546 FFD3 30F7            12      JR  NC,DRD1
-000548 FFD5 EDA2            16      INI
-00054A FFD7 04               4      INC B
-00054B FFD8 18F2            12      JR  DRD1
+00062D FFC8 0EFB             7      LD  C,0FBH
+       FFCA                     DRD1:
+00062F FFCA 78               4      LD  A,B
+000630 FFCB DBF8            11      IN  A,(0F8H)    ;MB8877A ステータス／コマンドレジスタ
+000632 FFCD 0F               4      RRCA
+000633 FFCE D0              11      RET NC
+000634 FFCF 0F               4      RRCA
+000635 FFD0 30F8            12      JR  NC,DRD1
+000637 FFD2 EDA2            16      INI
+000639 FFD4 04               4      INC B
+00063A FFD5 18F3            12      JR  DRD1
                                 
-       FFDA                     DRD3:
-00054D FFDA C6FF             7      ADD A,0FFH
-00054F FFDC C9              10      RET
-000550 0650                         ORG $$+0100H,$$ ;$DEPHASE
-       0650                     RDDLE:
+00063C 073C                         ORG $$+0100H,$$ ;$DEPHASE
+       073C                     DRD_2D_E:
+                                
+                                ;
+                                ;   2DDフロッピー
+                                ;
+       073C                     DRD_2DD:
+00063C FFB3                         ORG DRD,DRD_2DD-100H
+00063C FFB3 E5              11      PUSH    HL
+00063D FFB4 CD4CFF          17      CALL    SEEK        ;ディスクリード
+000640 FFB7 3C               4      INC A
+000641 FFB8 2806            12      JR  Z,NOCHG
+000643 FFBA 78               4      LD  A,B
+000644 FFBB DBFF            11      IN  A,(0FFH)    ;500K(2D)/1M(2DD) タイプ指定 (turbo/Z/CZ-8BF1のみ)
+000646 FFBD CD99FF          17      CALL    BUSY
+       FFC0                     NOCHG:
+000649 FFC0 E1              10      POP HL
+00064A FFC1 D8              11      RET C
+00064B FFC2 3E80             7      LD  A,80H
+00064D FFC4 0EFA             7      LD  C,0FAH      ;MB8877A セレクタレジスタ
+00064F FFC6 ED59            12      OUT (C),E
+000651 FFC8 0EF8             7      LD  C,0F8H      ;MB8877A ステータス／コマンドレジスタ
+000653 FFCA ED79            12      OUT (C),A
+000655 FFCC 3E1A             7      LD  A,26
+       FFCE                     DELAYD:
+000657 FFCE 3D               4      DEC A
+000658 FFCF 20FD            12      JR  NZ,DELAYD
+                                
+00065A FFD1 0EFB             7      LD  C,0FBH
+       FFD3                     DRD1D:
+00065C FFD3 78               4      LD  A,B
+00065D FFD4 DBF8            11      IN  A,(0F8H)    ;MB8877A ステータス／コマンドレジスタ
+00065F FFD6 0F               4      RRCA
+000660 FFD7 D0              11      RET NC
+000661 FFD8 0F               4      RRCA
+000662 FFD9 30F8            12      JR  NC,DRD1D
+000664 FFDB EDA2            16      INI
+000666 FFDD 04               4      INC B
+000667 FFDE 18F3            12      JR  DRD1D
+                                
+000669 0769                         ORG $$+0100H,$$ ;$DEPHASE
+       0769                     DRD_2DD_E:
                                 ;
                                 ;   2HD/2HCフロッピー
                                 ;
-       0650                     RDDH:
-000550 FFB5                         ORG DRD,RDDH-100H
-       FFB5                     DRDH:
-000550 FFB5 2266FE          16      LD  (DMAHL),HL
-000553 FFB8 CD5FFF          17      CALL    SEEK
-000556 FFBB D8              11      RET C
+       0769                     DRD_2HD:
+000669 FFB3                         ORG DRD,DRD_2HD-100H
+000669 FFB3 2267FE          16      LD  (DMAHL),HL
+00066C FFB6 CD4CFF          17      CALL    SEEK
+00066F FFB9 D8              11      RET C
                                 
-000557 FFBC 3E0F             7      LD  A,DMAD_E-DMAD
-000559 FFBE 215BFE          10      LD  HL,DMAD
+000670 FFBA 3E0F             7      LD  A,DMAD_E-DMAD
+000672 FFBC 215CFE          10      LD  HL,DMAD
                                 
-00055C FFC1 01871F          10      LD  BC,01F87H   ;(1F8*H)Z80DMA
-00055F FFC4 C330FE          10      JP  SDMA
-000562 0662                         ORG $$+0100H,$$ ;$DEPHASE
-       0662                     RDDHE:
-                                ;
-                                ;   EMM
-                                ;
-       0662                     RDDE:
-000562 FFB5                         ORG DRD,RDDE-100H
-       FFB5                     DRDE:
-000562 FFB5 EB               4      EX  DE,HL
-000563 FFB6 29              11      ADD HL,HL
-000564 FFB7 DD4624          19      LD  B,(IX+IPL_MAXCYL)   ;EMMのオフセット
-000567 FFBA DD4E27          19      LD  C,(IX+IPL_MAXSEC)   ;ブートレコードを避ける為
-00056A FFBD 09              11      ADD HL,BC
-00056B FFBE 01000D          10      LD  BC,00D00H       ;EMM0 アドレス下位指定
-00056E FFC1 ED49            12      OUT (C),C
-000570 FFC3 0C               4      INC C           ;EMM0 アドレス中位指定
-000571 FFC4 ED69            12      OUT (C),L
-000573 FFC6 0C               4      INC C           ;EMM0 アドレス上位指定
-000574 FFC7 ED61            12      OUT (C),H
-000576 FFC9 0C               4      INC C           ;EMM0 データのリード／ライト、アクセス後にアドレス＋１加算
-000577 FFCA EB               4      EX  DE,HL
-000578 FFCB AF               4      XOR A
-       FFCC                     EDRDC1:
-000579 FFCC EDA2            16      INI
-00057B FFCE 04               4      INC B
-00057C FFCF EDA2            16      INI
-00057E FFD1 04               4      INC B
-00057F FFD2 3D               4      DEC A
-000580 FFD3 20F7            12      JR  NZ,EDRDC1
-000582 FFD5 AF               4      XOR A
-000583 FFD6 C9              10      RET
-       FFD7                     ESA:
-000584 FFD7 2100FC          10      LD  HL,0FC00H
-000587 FFDA 1100FE          10      LD  DE,IPL
-00058A FFDD 01D701          10      LD  BC,ESA-IPL
-00058D FFE0 EDB0                    LDIR
-00058F FFE2 01FC0F          10      LD  BC,0FFCH    ;念のためにFDDのモーターを停止
-000592 FFE5 ED71            12      OUT (C),0       ;Z80未定義命令
-000594 FFE7 C379FE          10      JP  SA
-       FFEA                     EED:
-000597 0697                         ORG $$+0100H,$$ ;$DEPHASE
-       0697                     RDDEE:
+000675 FFBF 01871F          10      LD  BC,01F87H   ;(1F8*H)Z80DMA
+000678 FFC2 C331FE          10      JP  SDMA
+00067B 077B                         ORG $$+0100H,$$ ;$DEPHASE
+       077B                     DRD_2HD_E:
                                 ;
                                 ;   EMM専用FAT16
                                 ;
-       0697                     GNCL16:
-000597 FF1D                         ORG GNCL,GNCL16-100H
+       077B                     GNCL16:
+00067B FF0D                         ORG GNCL,GNCL16-100H
                                 
-000597 FF1D EB               4      EX  DE,HL
-000598 FF1E 29              11      ADD HL,HL
-000599 FF1F 0E00             7      LD  C,0         ;EMMのオフセット
-00059B FF21 DD4627          19      LD  B,(IX+IPL_MAXSEC)   ;ブートレコードを避ける為のオフセット
-00059E FF24 AF               4      XOR A
-00059F FF25 09              11      ADD HL,BC
-0005A0 FF26 DD8E24          19      ADC A,(IX+IPL_MAXCYL)
-0005A3 FF29 DD4628          19      LD  B,(IX+IPL_FATPS)    ;FATの位置
-0005A6 FF2C CB20             8      SLA B       ;*2 ;1セクタ=512バイト
-0005A8 FF2E CE00             7      ADC A,0
-0005AA FF30 0E00             7      LD  C,0
-0005AC FF32 09              11      ADD HL,BC
-0005AD FF33 CE00             7      ADC A,0
+00067B FF0D EB               4      EX  DE,HL
+00067C FF0E 29              11      ADD HL,HL
+00067D FF0F 0E00             7      LD  C,0         ;EMMのオフセット
+00067F FF11 DD462E          19      LD  B,(IX+IPL_MAXSEC)   ;ブートレコードを避ける為のオフセット
+000682 FF14 AF               4      XOR A
+000683 FF15 09              11      ADD HL,BC
+000684 FF16 DD8E2F          19      ADC A,(IX+IPL_MAXCYL)
+000687 FF19 DD462D          19      LD  B,(IX+IPL_FATPS)    ;FATの位置
+00068A FF1C CB20             8      SLA B       ;*2 ;1セクタ=512バイト
+00068C FF1E CE00             7      ADC A,0
+00068E FF20 0E00             7      LD  C,0
+000690 FF22 09              11      ADD HL,BC
+000691 FF23 CE00             7      ADC A,0
                                 
-0005AF FF35 01000D          10      LD  BC,00D00H   ;EMM0 アドレス下位指定
-0005B2 FF38 ED69            12      OUT (C),L
-0005B4 FF3A 0C               4      INC C       ;EMM0 アドレス中位指定
-0005B5 FF3B ED61            12      OUT (C),H
-0005B7 FF3D 0C               4      INC C       ;EMM0 アドレス上位指定
-0005B8 FF3E ED79            12      OUT (C),A
-0005BA FF40 0C               4      INC C       ;EMM0 データのリード／ライト、アクセス後にアドレス＋１加算
+000693 FF25 01000D          10      LD  BC,00D00H   ;EMM0 アドレス下位指定
+000696 FF28 ED69            12      OUT (C),L
+000698 FF2A 0C               4      INC C       ;EMM0 アドレス中位指定
+000699 FF2B ED61            12      OUT (C),H
+00069B FF2D 0C               4      INC C       ;EMM0 アドレス上位指定
+00069C FF2E ED79            12      OUT (C),A
+00069E FF30 0C               4      INC C       ;EMM0 データのリード／ライト、アクセス後にアドレス＋１加算
                                 
-0005BB FF41 ED58            12      IN  E,(C)
-0005BD FF43 ED50            12      IN  D,(C)
-0005BF FF45 C9              10      RET
+00069F FF31 ED58            12      IN  E,(C)
+0006A1 FF33 ED50            12      IN  D,(C)
+0006A3 FF35 C9              10      RET
                                 
-       FF46                     DRDSB16:
-0005C0 FF46 A7               4      AND A   ;EMMでFAT16の場合はダイレクトに読み込むのでバッファは使わない。
-0005C1 FF47 C9              10      RET
+0006A4 07A4                         ORG $$+0100H,$$ ;$DEPHASE
+       07A4                     GNCL16E:
                                 
-0005C2 06C2                         ORG $$+0100H,$$ ;$DEPHASE
-       06C2                     GNCL16E:
+                                        ;スタックオーバーライド
+       07A4                     JUMP:
+0006A4 07A4 7BFE7BFE7BFE7BFE        DW  SA,SA,SA,SA,SA,SA,SA,SA
+            7BFE7BFE7BFE7BFE    
+0006B4 07B4 7BFE7BFE7BFE7BFE        DW  SA,SA,SA,SA,SA,SA,SA,SA
+            7BFE7BFE7BFE7BFE    
                                 
-       06C2                     BOOT_DMA:
-0005C2 FE2F                         ORG IPL+IPL_HEAD_SZ,BOOT_DMA-100H   ;$PHASE
-0005C2 FE2F C9              10      RET
-       FE30                     SDMA:
-0005C3 FE30 04               4      INC B       ;BC=1F87H
-0005C4 FE31 EDA3            16      OUTI
-0005C6 FE33 3D               4      DEC A
-0005C7 FE34 20FA            12      JR  NZ,SDMA
+       07C4                     FCB2:
+0006C4 07C4 00                      DB  0
+       07C5                     FCB2NAME:
+0006C5 07C5 4C44202020202020        DB  "LD      BIN"
+            42494E              
+0006D0 07D0                         DS  25,0
+       07E9                     MSX_FNAME:
+0006E9 07E9 4C444D5358              DB  "LDMSX"
+       07EE                     MSX_FNAME_E:
                                 
-0005C9 FE36 3E80             7      LD  A,80H
-0005CB FE38 C5              11      PUSH    BC
-0005CC FE39 01FA0F          10      LD  BC,0FFAH    ;MB8877A セレクタレジスタ
-0005CF FE3C ED59            12      OUT (C),E
-0005D1 FE3E 0EF8             7      LD  C,0F8H      ;MB8877A セレクタレジスタ
-0005D3 FE40 ED79            12      OUT (C),A
+       07EE                     FCB3:
+0006EE 07EE                         DS  37
                                 
-0005D5 FE42 CD9BFF          17      CALL    BUSY
-0005D8 FE45 ED78            12      IN  A,(C)
-                                
-0005DA FE47 2A66FE          16      LD  HL,(DMAHL)
-0005DD FE4A 23               6      INC HL
-0005DE FE4B 1106BB          10      LD  DE,0BB06H   ;READ DMA
-                                
-0005E1 FE4E C1              10      POP BC      ;BC=1F87H Z80DMA
-0005E2 FE4F ED51            12      OUT (C),D
-0005E4 FE51 ED59            12      OUT (C),E
-0005E6 FE53 ED58            12      IN  E,(C)
-0005E8 FE55 ED50            12      IN  D,(C)
-0005EA FE57 19              11      ADD HL,DE
-0005EB FE58 C6FF             7      ADD A,0FFH
-0005ED FE5A C9              10      RET
-                                            ;X1turbo DISK DMA
-       FE5B                     DMAD:
-0005EE FE5B C3                      DB  0C3H    ;WR6 リセット
-0005EF FE5C 7D                      DB  07DH    ;WR0 ポートA→ポートB 転送
-0005F0 FE5D FB0F                    DW  00FFBH  ;ポートA開始アドレス FDC データレジスタ
-0005F2 FE5F FFFF                    DW  0FFFFH  ;ブロック長(転送サイズ-1)
-0005F4 FE61 2C                      DB  02CH    ;WR1 ポートAアドレス固定 I/O
-0005F5 FE62 10                      DB  010H    ;WR2 ポートBインクリメント
-0005F6 FE63 80                      DB  080H    ;WR3
-0005F7 FE64 92                      DB  092H    ;WR5 WAIT RDY:LOW
-0005F8 FE65 8D                      DB  08DH    ;WR4 バイト ポートB開始アドレス(LH)
-0005F9 FE66 0000                DMAHL:  DW  0   ;ポートB開始アドレス
-0005FB FE68 CF                      DB  0CFH    ;WR6 ロード
-0005FC FE69 87                      DB  087H    ;WR6 イネーブル
-       FE6A                     DMAD_E:
-0005FD FE6A                         DS  4
-000601 0701                         ORG $$+0100H,$$ ;$DEPHASE
-       0701                     BOOT_DMA_E:
-                                            ;スタックオーバーライド
-       0701                     JUMP:
-000601 0701 79FE79FE79FE79FE        DW  SA,SA,SA,SA,SA,SA,SA,SA
-            79FE79FE79FE79FE    
-000611 0711 79FE79FE79FE79FE        DW  SA,SA,SA,SA,SA,SA,SA,SA
-            79FE79FE79FE79FE    
-                                
-       0721                     FCB2:
-000621 0721 004C442020202020        DB  0,"LD      BIN"
-            2042494E            
-00062D 072D                         DS  25,0
-                                
-       0746                     FCB3:
-000646 0746                         DS  37
-                                
-       076B                     SDIR:
-00066B 076B 0000                    DW  0
-       076D                     SIZE:
-00066D 076D 0000                    DW  0
-       076F                     DATA:
+       0813                     SDIR:
+000713 0813 0000                    DW  0
+       0815                     SIZE:
+000715 0815 0000                    DW  0
+       0817                     DATA:
 [EOF:SYS.ASM:UTF_8]

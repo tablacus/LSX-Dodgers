@@ -74,13 +74,12 @@ MSG_CR:
 
 _SYS02:		;(BDOS)コンソール出力
 	CALL	BREAK
-	JR	PRINTX
+	JP	_PRINT
 
 _SYS06:		;(BDOS)コンソール直接入出力
 	LD	A,E
 	INC	A
 	JP	Z,_INKEY
-PRINTX:
 	JP	_PRINT
 
 _SYS08:		;(BDOS)エコーなしコンソール入力
@@ -289,19 +288,72 @@ CONSTX:
 	RET
 
 _SYS2A:		;(BDOS)日付の獲得
-	XOR	A
-	LD	D,A
-	LD	E,A
-	LD	H,A
+	LD	C,11		;年/Year→HL
+	CALL	RDCLK_BCD
 	LD	L,A
+	LD	H,0
+	LD	A,(EXBRSA)
+	OR	A
+	JR	Z,SX2A1
+	LD	DE,1980		;1980年～2079年
+	ADD	HL,DE
+SX2A1:
+	LD	C,9		;月/Month→D
+	CALL	RDCLK_BCD
+	LD	D,A
+
+	LD	C,7		;日/Day→E
+	CALL	RDCLK_BCD
+	LD	E,A
+
+	LD	C,6		;曜日/Week→A
+RDCLK:
+	PUSH	IX
+	LD	IX,REDCLK
+WRCLK1:
+	LD	A,(EXBRSA)
+	OR	A
+	JR	Z,RDCLK1	;MSX1
+	PUSH	IY
+	LD	IYH,A
+	LD	A,B
+	CALL	CALSLTR
+	POP	IY
+RDCLK1:
+	POP	IX
+	RET
+WRCLK:
+	PUSH	IX
+	LD	IX,WRTCLK
+	JR	WRCLK1
+
+RDCLK_BCD:
+	CALL	RDCLK		;1の位
+	LD	B,A
+	INC	C
+	CALL	RDCLK		;10の位
+	ADD	A,A		;*2
+	LD	C,A
+	ADD	A,A		;*4
+	ADD	A,A		;*8
+	ADD	A,C		;*10(8+2)
+	ADD	A,B		;1の位
 	RET
 
 _SYS2C:		;(BDOS)時刻の獲得
-	XOR	A
-	LD	D,A
-	LD	E,A
+	LD	BC,00115H		;12時間計/24時間計の設定を24時間計に
+	CALL	WRCLK
+	LD	C,4		;H=時/Hour
+	CALL	RDCLK_BCD
 	LD	H,A
+	LD	C,2		;L=分/Minute
+	CALL	RDCLK_BCD
 	LD	L,A
+	LD	C,0		;D=秒/Second
+	CALL	RDCLK_BCD
+	LD	D,A
+	XOR	A		;E=1/100秒
+	LD	E,A
 	RET
 
 POS:

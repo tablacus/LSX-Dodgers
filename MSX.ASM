@@ -4,9 +4,10 @@
 
 	INCLUDE	"MSXDEF.ASM"
 	INCLUDE	"LDDEF.ASM"
+#LIST	#FALSE
 	INCLUDE	"msx_cbios\\hardware.asm"
 	INCLUDE "msx_cbios\\systemvars.asm"
-
+#LIST	#TRUE
 	ORG	RUN
 
 ; MSX ROM header
@@ -21,7 +22,9 @@
 	INCLUDE	"LDCCP.ASM"
 	INCLUDE	"LDOS.ASM"
 	INCLUDE	"MSXIO.ASM"
+#LIST	#FALSE
 	INCLUDE "msx_cbios\\slot.asm"
+#LIST	#TRUE
 	INCLUDE	"LDFILE.ASM"
 	INCLUDE	"LDFILE2.ASM"
 	INCLUDE	"LDDIO.ASM"

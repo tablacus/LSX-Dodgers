@@ -42,7 +42,7 @@ DIV2:
 	LD	C,0F9H		;MB8877A トラックレジスタ
 	OUT	(C),A		;Currrent CYLINDER
 	SUB	D
-	RET	Z		;No seek
+	RET	Z		;No seek シークの必要なし
 
 	LD	A,(_ISEEK)
 	LD	C,A
@@ -52,14 +52,13 @@ DIV2:
 	CP	D		;Over CYLINDER
 	RET	C
 
-	CP	C		;for Built-in 2DD
-	JR	C,SETM2
-	LD	A,B		;B=00FH
-	IN	A,(0FEH)	;2HD mode for 2DD seek/1.6M(2HD) タイプ指定
+	CP	C
+	JR	C,SETM2		;2D
+	BIT	0,(IX+DPB_FDMODE)
+	JR	Z,SETM2		;2HD
+	LD	A,B		;2DD
+	IN	A,(0FEH)	;1.6M(2HD) タイプ指定 (turbo/Z/CZ-8BF1のみ)
 SETM2:
-	LD	A,B
-	IN	A,(0FDH)	;MFM 方式指定
-
 	LD	C,0FBH		;MB8877A データレジスタ
 	OUT	(C),D
 	LD	(HL),D

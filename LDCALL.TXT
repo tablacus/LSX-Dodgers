@@ -568,7 +568,9 @@ $2A	日付の獲得(_GDATE)	*1 MSX-DOS
   HL←年  D←月  E←日  A←曜日(0:日～6:土)
 
   備考:
+  X1/turbo/Z:曜日はサポートしていない
   MZ-700/1500:サポートしていない
+  MSX:MSX1はサポートしていない
 
 
 $2B	日付の設定(_SDATE)	*1 *4 MSX-DOS
@@ -596,6 +598,7 @@ $2C	時刻の獲得(_GTIME)	*1 MSX-DOS
   備考:
   X1/turbo/Z PC-8801mkIISR:仕様によりE←0
   MZ-700/1500:サポートしていない
+  MSX:MSX1はサポートしていない
 
 
 $2D	時刻の設定(_STIME)	*1 *4 MSX-DOS
@@ -744,6 +747,7 @@ $6F MSX-DOS のバージョン番号の獲得(_DOSVER) *1 MSX-DOS
   0: X1/turbo/Z
   1: MZ-700/1500
   2: PC-8801mkIISR
+  3: MSX
 
   備考:
   MSX-DOS1の場合はBが2未満で判別するのだが、0か否かで判別しているものがあった。

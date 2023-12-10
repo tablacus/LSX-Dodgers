@@ -50,6 +50,9 @@ INIT2:
 	JP	_COMANL
 
 INIT:
+	LD	BC,1A03H
+	LD	A,82H
+	OUT	(C),A
 	LD	A,01EH
 	OUT	(0),A
 
@@ -218,7 +221,7 @@ INIDRV:
 	JP	(HL)
 	LD	(0000FH),A
 				;KEY
-	LD	A,0E6H
+	LD	A,0E6H		;キーデータ読み出し
 	CALL	COMOUT
 	CALL	IN49SB
 	PUSH	AF
@@ -302,7 +305,7 @@ CRT1:
 	JR	NZ,BANK
 
 ;	XOR	A		;すでに0のハズ
-TZ1:				;IPL DEVICEが2HDの場合はMFMモードを2HDにしておく
+TZ1:				;DPBのモードを2HDにしておく
 	PUSH	AF
 	CALL	_GETDPB
 	LD	A,(IX+DPB_DEVICE)
@@ -429,7 +432,6 @@ KEYR1:
 	CALL	MSX
 
 	DI
-	EX	AF,AF'
 	LD	L,0-2		;CALLのスタック分減らす
 	ADD	HL,SP
 	LD	DE,0FF00H
@@ -446,11 +448,8 @@ KEYR1:
 	LD	DE,TRAP38
 	LD	BC,AT_TRAPE-AT_TRAP38
 	LDIR
-	EX	AF,AF'
-	OR	A
-	RET	Z
 
-	LD	A,0E6H
+	LD	A,0E6H		;キーデータ読み出し
 	CALL	COMOUT
 	CALL	IN49SB
 	CALL	IN49SB
@@ -536,7 +535,7 @@ AUTODV:	DB	"A:",0
 INIMES:	DB	"LSX-Dodgers for X1/turbo version "
 	DB	030H + VER_1, '.'
 	DB	030H + VER_2 ,030H + VER_3
-	DB	''
+	DB	'b'
 	DB	" Gaku",0DH,0AH
 	DB	0
 

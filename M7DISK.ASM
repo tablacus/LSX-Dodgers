@@ -43,9 +43,6 @@ DIV2:
 	SUB	D
 	RET	Z		;No seek
 
-	LD	A,(_ISEEK)
-	LD	C,A
-
 	LD	A,(IX+DPB_MAXCYL)
 	DEC	A
 	CP	D		;Over CYLINDER

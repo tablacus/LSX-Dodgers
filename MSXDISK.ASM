@@ -69,7 +69,7 @@ ASCII16K3	EQU	$-1
 	CP	0C1H
 	JR	NC,DRD2
 	LD	(DRD_SWC1),HL	;被っている場合はデータバッファをフラッシュして一時的に使う
-	LD	HL,DTBUF
+	LD	HL,(_DTBUF)
 	DB	03EH
 	SCF
 	LD	(DRD_SWC3),A
@@ -90,7 +90,7 @@ DRD_SWC3:
 	AND	A		;自己書き換え)被っている場合はSCFになる
 	JR	NC,DRD3
 
-	LD	HL,DTBUF
+	LD	HL,(_DTBUF)
 	LD	DE,0
 DRD_SWC1	EQU	$-2
 	LD	A,(IX+DPB_BPS)	;BCは読み出すセクタサイズ
@@ -121,7 +121,7 @@ PDWT:
 PDWT1:
 	PUSH	BC
 	PUSH	DE
-	LD	DE,DTBUF
+	LD	DE,(_DTBUF)
 	LD	A,(IX+DPB_BPS)	;BCは読み出すセクタサイズ
 	AND	7
 	LD	B,A
@@ -130,7 +130,7 @@ PDWT1:
 	EX	(SP),HL
 	EX	DE,HL
 	PUSH	DE
-	LD	HL,DTBUF
+	LD	HL,(_DTBUF)
 	LD	B,1
 	SCF
 	CALL	PDWX
@@ -150,12 +150,12 @@ PDRD1:
 	PUSH	BC
 	PUSH	DE
 	PUSH	HL
-	LD	HL,DTBUF
+	LD	HL,(_DTBUF)
 	LD	B,1
 	CALL	PDWXR
 	JR	C,PDRWERR
 	POP	DE
-	LD	HL,DTBUF
+	LD	HL,(_DTBUF)
 	LD	A,(IX+DPB_BPS)	;BCは読み出すセクタサイズ
 	AND	7
 	LD	B,A
