@@ -54,6 +54,14 @@ https://github.com/tablacus/dosformsx
 1. フロッピードライブに`ldsys.dsk`をセット
 2. リセットする
 
+## WebMSX
+
+ROM版  
+https://webmsx.org/?MACHINE=MSX1J&CARTRIDGE1_URL=https://github.com/tablacus/LSX-Dodgers/raw/master/disk/LDMSX.ROM
+
+ディスク版  
+https://webmsx.org/?MACHINE=MSX1J&DISKA=https://github.com/tablacus/LSX-Dodgers/raw/master/disk/ldsys.dsk
+
 
 # 手引書
 
