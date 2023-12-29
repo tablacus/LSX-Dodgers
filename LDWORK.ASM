@@ -24,11 +24,14 @@ DECBF:				;10進数表示時のバッファ(5バイト)
 RR_BUF_HL	EQU	DECBF	;CP/M互換ファイルアクセスの際のランダムレコードの一時的な保管場所
 RR_BUF_A	EQU	DECBF+2	;計3バイト
 
-FDRV:	DB	0
-FNAME:	DS	36
-SFILE:	DS	33		;DRV FILENAME
-
-	DS	3
+FDRV:
+	DB	0
+FNAME:
+	DS	36
+SFILE:
+	DS	33		;DRV FILENAME
+_DISKE:
+	JP	SHOW_ERROR
 
 LEFTX:	DW	0
 DTAX:	DW	0
@@ -45,51 +48,80 @@ RTC_MM	EQU	BEEPD+5
 RTC_SS	EQU	BEEPD+6
 ROM_SLT	EQU	BEEPD+1
 
-CHECK:	DB	0
+CHECK:
+	DB	0
 
-OK:	DB	"OK$"
+OK:
+	DB	"OK$"
 	DS	5
-COMERM:	DB	"Error!$"
+COMERM:
+	DB	"Error!$"
 ;	システムワークエリア
 ;	_CYL0:アドレス下位1バイトが080Hになるように
-_CYL0:	DB	0FFH	;Cylinder
-_CYL1:	DB	0FFH	;Cylinder
-_CYL2:	DB	0FFH	;Cylinder
-_CYL3:	DB	0FFH	;Cylinder
-_DRIVE:	DB	0	;unit number
+_CYL0:
+	DB	0FFH	;Cylinder
+_CYL1:
+	DB	0FFH	;Cylinder
+_CYL2:
+	DB	0FFH	;Cylinder
+_CYL3:
+	DB	0FFH	;Cylinder
+_DRIVE:
+	DB	0	;unit number
 _SEEKSP:
 	DB	0	;Seek speed
-_ISEEK:	DB	50	;
+_ISEEK:
+	DB	50	;
 	DS	1
-_DRV:	DB	0
-_DSK:	DB	0FFH
-_DTA:	DW	00080H
-_CTC:	DW	0
-_TXADR:	DW	0
-_KEYPS:	DW	0
-_KEYD:	DW	0FF00H	;キーデータ
-_KEYSP:	DB	KEYSP_L,KEYSP_H	;オートリピートの速度
+_DRV:
+	DB	0
+_DSK:
+	DB	0FFH
+_DTA:
+	DW	00080H
+_CTC:
+	DW	0
+_TXADR:
+	DW	0
+_KEYPS:
+	DW	0
+_KEYD:
+	DW	0FF00H	;キーデータ
+_KEYSP:
+	DB	KEYSP_L,KEYSP_H	;オートリピートの速度
 _COLORF:
 	DB	COLORF	;色
-_LINE:	DB	LINE
+_LINE:
+	DB	LINE
 
-_FCB:	DW	0	;SEARCH FILES
-_FBPS:	DW	0	;    //
-_FBAD:	DW	0	;    //
-_FBCNT:	DB	0	;    //
-_FILEN:	DB	0	;    //
-_DIRF:	DB	0	;bit7:ディレクトリ bit0-6:セクタインデックス
+_FCB:
+	DW	0	;SEARCH FILES
+_FBPS:
+	DW	0	;    //
+_FBAD:
+	DW	0	;    //
+_FBCNT:
+	DB	0	;    //
+_FILEN:
+	DB	0	;    //
+_DIRF:
+	DB	0	;bit7:ディレクトリ bit0-6:セクタインデックス
 	DS	1
 _WTFATF:
 	DB	0	;FATバッファの更新フラグ
 	DS	1
-_WTDBF:	DB	0	;データバッファの更新フラグ
-_DBDRV:	DB	0FFH	;データバッファにあるデータを読み込んだドライブ
-_DBSEC:	DW	0	;データバッファにあるデータを読み込んだセクタ番号
-_DPB:	DW	0
+_WTDBF:
+	DB	0	;データバッファの更新フラグ
+_DBDRV:
+	DB	0FFH	;データバッファにあるデータを読み込んだドライブ
+_DBSEC:
+	DW	0	;データバッファにあるデータを読み込んだセクタ番号
+_DPB:
+	DW	0
 _FATDRV:
 	DB	0FFH	;FATバッファに読み込んでいるドライブ
-_FATIX:	DB	0	;FATバッファに読み込んでいるインデックス
+_FATIX:
+	DB	0	;FATバッファに読み込んでいるインデックス
 _FAKEFREE:
 	DW	0	;偽の残量（FATサイズが大きくなると重くなるのでその対策）
 

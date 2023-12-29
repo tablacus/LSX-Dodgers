@@ -95,8 +95,8 @@ DWTF0:
 RBWERR:
 	PUSH	IY
 	POP	DE
-	LD	HL,(STABLE+2*010H)
-	CALL	JP_HL
+	LD	C,010H		;(BDOS)ファイルのクローズ
+	CALL	BDOS0
 RBRERR1:
 	LD	A,001H
 RBRERR2:
@@ -128,11 +128,6 @@ RBRFL2:
 	LD	A,E
 	POP	DE
 	LD	(RBRFLP+1),A
-	RET
-DDX:
-	LD	A,(IY+1)	;(FCB)主ファイル名
-	CALL	CAP
-	CP	'A'
 	RET
 
 				;Read random block
@@ -229,7 +224,7 @@ RBRDIR:
 	INC	A
 	LD	(RBRA_SWC),A
 	JR	RBREND0
-
+;(15)
 RBX0:
 	LD	HL,(_DTA)
 	LD	(DTAX),HL
@@ -255,7 +250,7 @@ RBX1:				;ファイルサイズとランダムレコードを比べる
 	SBC	A,B
 	POP	DE
 	RET
-RBX1R:
+RBX1R:				;(8)
 	LD	B,A
 	OR	C
 	EX	DE,HL	;BCDE=File byte	HL=Record byte
@@ -274,7 +269,7 @@ RBX2:				;Cluster settings
 	LD	B,(IY+36)
 RBX3:
 	CALL	RWXR
-	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
+	LD	A,(SECSZ_H)	;1024=4 / 512=2 / 256=1
 	DEC	A
 	AND	(IY+34)
 	OR	(IY+33)
@@ -292,7 +287,9 @@ RBXA:
 	LD	(_CLPS),DE
 
 	LD	C,(IY+33)	;(FCB)ランダムレコード
-SECSZ:	LD	HL,0400H	;自己書き換え 1024=0400H / 512=0200H ここに1セクタのサイズが格納される
+	LD	HL,0400H	;自己書き換え 1024=0400H / 512=0200H ここに1セクタのサイズが格納される
+SECSZ	EQU	$-2
+SECSZ_H	EQU	$-1
 	LD	A,H
 	DEC	A		;1024=3 / 512=1
 	AND	(IY+34)		;(FCB)ランダムレコード
@@ -317,7 +314,7 @@ RBXB:
 	LD	DE,(_CLPS)
 	LD	A,(LEFTX+1)
 	LD	B,A
-	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
+	LD	A,(SECSZ_H)	;1024=4 / 512=2 / 256=1
 RBXB1:
 	RRA		;->CF
 	JR	C,RBXB2
@@ -327,38 +324,14 @@ RBXB2:
 	LD	A,B
 	OR	A
 	RET
-
+;(12)
 RBXC:
 	LD	BC,(LEFTX)
-	LD	A,(SECSZ+2)	;1024=4 / 512=2 / 256=1
+	LD	A,(SECSZ_H)	;1024=4 / 512=2 / 256=1
 	DEC	A
 	AND	B
 	LD	B,A		;1セクタ以下の端数がない場合はZ
 	OR	C
-	RET
-
-RBXEND:				;レコード数だけランダムレコードを進める
-	LD	DE,0		;進めるレコード数(RBSIZE)
-RBSIZE	EQU	$-2
-	CALL	GET_RR_AHL
-	ADD	HL,DE
-	ADC	A,0
-	CALL	SET_RR_AHL
-	EX	DE,HL		;HL=進めるレコード数
-	RET	NC
-	BIT	7,(IY+32)	;(FCB)カレントレコード
-	RET	NZ
-	INC	(IY+36)
-	RET
-
-GET_RR_BCDE:			;BCDE=Random record
-	LD	E,(IY+33)	;(FCB)ランダムレコード
-	LD	D,(IY+34)
-	LD	C,(IY+35)
-	LD	B,0		;CP/M互換のアクセスの場合はFCBは36バイト
-	BIT	7,(IY+32)	;(FCB)カレントレコード
-	RET	NZ
-	LD	B,(IY+36)
 	RET
 
 ;	ランダムブロックアクセスの連続したセクタをまとめる
@@ -405,7 +378,7 @@ DRDC1:
 	INC	(HL)
 	POP	HL
 INC_HL_DRWC:
-	LD	A,(SECSZ+2)		;1セクタのサイズの上位1バイト
+	LD	A,(SECSZ_H)		;1セクタのサイズの上位1バイト
 	ADD	A,H
 	LD	H,A
 	RET
@@ -440,28 +413,52 @@ DRDF1:
 	POP	BC
 	RET
 
-SET_RR_AHL:
-	LD	(IY+33),L	;(FCB)Random record
-	LD	(IY+34),H
-	LD	(IY+35),A
+RB_WRITE:
+	PUSH	BC
+	LD	C,026H		;(BDOS)ランダムブロック書き込み
+	JR	RBRW
+RB_READ:
+	PUSH	BC
+	LD	C,027H		;(BDOS)ランダムブロック読み込み
+RBRW:
+	RRA		;AHL = AHL*128
+	LD	A,H	;AHL = AHL0/2
+	RRA		;A
+	LD	H,L	;
+	RR	H	;H
+	LD	L,0	;
+	RR	L	;L
+	CALL	SET_RR_AHL
+	LD	HL,128
+	PUSH	BC
+SETSEQ_SWC_RND:
+	CALL	SETSEQ1		;CALL SETSEQ1 or LD BC,SETSEQ1
+	POP	BC
+	SET	7,(IY+32)	;(FCB)カレントレコード
+	PUSH	IY
+	POP	DE
+	PUSH	DE
+	CALL	BDOS0
+	POP	IY
+	CALL	SETSEQ		;SETSEQ or POPRR
+SETSEQ_SWC_SEQ_RR	EQU $-2
+	RES	7,(IY+32)	;(FCB)カレントレコード
+
+	POP	BC
 	RET
 
-SETSEQ1:
-	PUSH	AF
-	PUSH	HL		;AHL=Random record
-	CALL	GET_RR_AHL
-	LD	B,A		;AHL→HLA
-	LD	A,L		;(IY+33)(FCB)ランダムレコード
-	LD	L,H		;(IY+34)
-	LD	H,B		;(IY+35)
-	LD	B,0
+;(22)
+INIT_SEQ:
+	LD	A,1		;LD BC,????
+	LD	HL,SETSEQ
+	CALL	PUSHRR
+GETSEQ:
+	LD	L,(IY+32)	;(FCB)カレントレコード
+	LD	H,(IY+12)	;(FCB)カレントブロック
+	XOR	A
 
-	CALL	GET_CPM_R_SIZE
+	SLA	L	;L=L*2
 
-	ADD	HL,HL
-	SRL	L		;L=L/2
-	LD	(IY+32),L	;(FCB)カレントレコード
-	LD	(IY+12),H	;(FCB)カレントブロック
-	POP	HL
-	POP	AF
+	SRL	H	;HL=HL/2
+	RR	L	;
 	RET

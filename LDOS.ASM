@@ -343,7 +343,7 @@ _SYS18:		;(BDOS)ログインベクトルの獲得
 	RET
 
 _SYS19:		;(BDOS)カレントドライブ番号の獲得
-	LD	A,(_DVSW)
+	LD	A,(_DVSW)	;from LDOS
 	AND	A
 	RET
 
@@ -385,8 +385,8 @@ _SYS1F:		;(BDOS)ディスク装置のパラメータの読み出し
 
 _SYS23:		;(BDOS)ファイルサイズの獲得
 	PUSH	HL
-	LD	HL,(STABLE+2*00FH)	;ファイルのオープン
-	CALL	JP_HL
+	LD	C,00FH		;(BDOS)ファイルのオープン
+	CALL	BDOS0
 	JR	C,_S23X1
 
 	PUSH	DE		;EX DE,IY
@@ -459,14 +459,14 @@ S2FX:
 	PUSH	HL
 	LD	A,L		;Drive
 	CALL	_CHGDRV
-	JR	C,S30X2
+	JR	C,POP_HL_DE_BC_SBCAA_RET
 	LD	B,H		;Number of clusters
 	LD	HL,(_DTA)
 
 	LD	C,0
 	CALL	DRD24B
 S2F_SWC	EQU	$-2
-S30X2:
+POP_HL_DE_BC_SBCAA_RET:
 	POP	HL
 	POP	DE
 	POP	BC
@@ -478,11 +478,18 @@ _SYS5A:		;(BDOS)カレントディレクトリの変更
 	PUSH	DE
 	PUSH	HL
 	CALL	FILEC
-	LD	HL,S30X2
+	LD	HL,POP_HL_DE_BC_SBCAA_RET
 	PUSH	HL
 	LD	A,(FDRV+13)	;(FCB)属性(アトリビュート))
 	AND	010H		;ディレクトリ
+	SCF
 	RET	Z
 	LD	DE,FDRV
-	LD	HL,(STABLE+2*027H)	;ランダムブロック読み込み
+	LD	HL,(STABLE+2*027H)	;(BDOS)ランダムブロック読み込み
+JPHL:
 	JP	(HL)
+
+SHOW_ERROR:			;(9)
+	LD	DE,COMERM
+	CALL	_SYS09		;(BDOS)文字列出力
+	JP	CPM_BOOT

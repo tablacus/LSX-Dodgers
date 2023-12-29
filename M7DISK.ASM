@@ -95,7 +95,7 @@ READY2:
 
 FDCRES:
 	LD	(HL),0
-	LD	C,8
+	LD	C,8		;FDC TypeIコマンド Restore
 	JR	FDCCMD2
 
 FDMOFF:
@@ -123,14 +123,14 @@ DELAY:
 	JR	NZ,DELAY
 	RET
 
-DRIVE:
+DRIVE:					;ドライブのシリンダを得る
 	LD	HL,(_DRIVE)
 	LD	H,_CYL0/256
 	SET	7,L
 	LD	A,(HL)
 	RET
 
-RNF:
+RNF:					;ドライブのシリンダをリセット
 	CALL	DRIVE
 	LD	(HL),0FFH
 	RET

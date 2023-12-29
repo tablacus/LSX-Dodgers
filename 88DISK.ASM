@@ -181,7 +181,7 @@ FDWT:
 	INC	A
 	LD	H,A
 	POP	DE
-	LD	A,(SECSZ+2)	;1セクタのサイズの上位1バイト
+	LD	A,(SECSZ_H)	;1セクタのサイズの上位1バイト
 	LD	C,A
 	XOR	A
 FDWT2:
@@ -228,7 +228,7 @@ FDWT_TRACK	EQU	$-1
 	CALL	PUTDAT
 	LD	A,(IX+DPB_FDMODE)	;フロッピーディスクのモード
 	CALL	PUTDAT
-	LD	A,(SECSZ+2)	;1セクタのサイズの上位1バイト
+	LD	A,(SECSZ_H)	;1セクタのサイズの上位1バイト
 	CALL	PUTDAT
 	LD	A,C
 	CALL	PUTDAT		;バイト数H
@@ -275,7 +275,7 @@ FDRD:
 	POP	DE
 	LD	A,(IX+DPB_FDMODE)	;フロッピーディスクのモード
 	CALL	PUTDAT
-	LD	A,(SECSZ+2)	;1セクタのサイズの上位1バイト
+	LD	A,(SECSZ_H)	;1セクタのサイズの上位1バイト
 	CALL	PUTDAT
 	LD	C,A
 	XOR	A

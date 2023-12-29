@@ -265,12 +265,12 @@ NON:
 	LD	(_FDWT+1),HL
 	LD	HL,AT_SCRN+AT_RS
 	LD	(_SCRN+1),HL
-
-	LD	A,027H			;ノンターボはMFM切り替えを行わない
-	LD	(_DEVICE+012H),A	;Aドライブ
-	LD	(_DEVICE+012H+32),A	;Bドライブ
-	LD	(_DEVICE+012H+32*2),A	;Cドライブ
-	LD	(_DEVICE+012H+32*3),A	;Dドライブ
+						;ノンターボは2D/2HD切り替えを行わない
+	LD	IX,_DEVICE
+	RES	7,(IX+DPB_DEVICE)		;Aドライブ
+	RES	7,(IX+DPB_DEVICE+32),A		;Bドライブ
+	RES	7,(IX+DPB_DEVICE+32*2),A	;Cドライブ
+	RES	7,(IX+DPB_DEVICE+32*3),A	;Dドライブ
 
 	LD	HL,0
 	LD	(X1PAT),HL
@@ -535,7 +535,7 @@ AUTODV:	DB	"A:",0
 INIMES:	DB	"LSX-Dodgers for X1/turbo version "
 	DB	030H + VER_1, '.'
 	DB	030H + VER_2 ,030H + VER_3
-	DB	'b'
+	DB	'c'
 	DB	" Gaku",0DH,0AH
 	DB	0
 
