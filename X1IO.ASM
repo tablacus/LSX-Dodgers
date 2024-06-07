@@ -296,6 +296,7 @@ _SYS2C:		;(BDOS)Žž‚ÌŠl“¾
 	LD	D,A
 	POP	BC
 	XOR	A
+	LD	E,A
 	RET
 
 IN49SB_BCD:

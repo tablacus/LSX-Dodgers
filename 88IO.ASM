@@ -98,9 +98,11 @@ _SYS2C:		;(BDOS)éûçèÇÃälìæ
 	CALL	BCD
 	LD	L,A
 	LD	A,(RTC_SS)
+	CALL	BCD
 	LD	D,A
 	POP	BC
 	XOR	A
+	LD	E,A
 	RET
 
 RTCREAD:
