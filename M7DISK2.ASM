@@ -48,7 +48,7 @@ EADR2:
 	LD	B,(IX+DPB_MAXCYL)
 	ADD	HL,BC
 	LD	C,(IX+DPB_UNITNO)
-	DB	0EDH,071H	;OUT (C),0	Z80未定義命令
+	OUT	(C),0		;Z80未定義命令
 	INC	C
 	OUT	(C),L
 	INC	C
@@ -98,7 +98,7 @@ RDWT:
 RDRD:
 	LD	A,0B2H		;INIR
 RDRW:
-	LD	(RDRW1+1),A
+	LD	(RDRW_SWC),A
 
 	LD	A,B
 	LD	B,E		;B=アドレスカウンタ上位(X1の様な16bitのI/Oアクセス)
@@ -108,6 +108,7 @@ RDRW:
 	LD	B,0
 RDRW1:
 	INIR			;自己書き換え(INIR/OTIR)
+RDRW_SWC	EQU	$-1
 	INC	DE
 	DEC	A
 	JR	NZ,RDRW1
