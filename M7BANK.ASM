@@ -195,7 +195,7 @@ INITINT:
 	DEC	L		;0E005H 8253 Ch.1 カウンタ
 	LD	(HL),A
 	LD	(HL),0
-	LD	A,5
+	LD	A,L		;L=5
 	LD	(0E003H),A	;8255 コントロールポートでポートC(0E002H)のINTMSKを1にする
 	OUT	(0E1H),A	;DRAM(D000H-FFFFH)
 	RET

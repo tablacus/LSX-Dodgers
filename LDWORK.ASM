@@ -3,8 +3,7 @@
 ;
 ;	CP/M互換BIOS
 ;	BOOT:アドレス下位1バイトが0になるように
-AT_WORK:
-	DS	WORKAD-AT_WORK
+	ALIGN	256
 
 CPM_BOOT:
 	JP	0

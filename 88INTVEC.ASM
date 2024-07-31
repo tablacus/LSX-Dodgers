@@ -1,8 +1,7 @@
 
 ;	LSX-Dodgers TABLE 割り込みベクタとI/Oルーチン
 
-AT_TABLE:
-	DS	INTAD-AT_TABLE
+	ALIGN	256
 
 ;
 ;	割り込みベクタ:アドレス下位1バイトが0になるように
@@ -24,6 +23,8 @@ IFDINT1:
 	DW	INTE88
 IFDINT2:
 	DW	INTE88
+KEYBF:
+	DS	020H
 
 	DS	030H-18
 EXTSP:

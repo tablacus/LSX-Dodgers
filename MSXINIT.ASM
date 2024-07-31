@@ -37,7 +37,9 @@ FDD_INIT1:
 START:
 	DI
 	IM	1
-	LD	A,1
+	XOR	A				;A=0
+	LD	(BANK0_SEL),A			;éóîÒRAMëŒçÙÇ≈ÉoÉìÉN0Çê›íË
+	INC	A				;A=1
 	LD	(BANK1_SEL),A
 	LD	HL,AT_START2
 	LD	DE,START2
@@ -407,7 +409,7 @@ AUTODV:	DB	"A:",0
 INIMES:	DB	00CH,"LSX-Dodgers for MSX v"
 	DB	030H + VER_1, '.'
 	DB	030H + VER_2 ,030H + VER_3
-	DB	'c'
+	DB	'f'
 	DB	" Gaku",0DH,0AH
 	DB	0
 
