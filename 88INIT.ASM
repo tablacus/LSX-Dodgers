@@ -260,7 +260,7 @@ AUTODV:	DB	"A:",0
 INIMES:	DB	00CH,"LSX-Dodgers for PC-8801mkIISR v"
 	DB	030H + VER_1, '.'
 	DB	030H + VER_2 ,030H + VER_3
-	DB	'f'
+	DB	'g'
 	DB	" Gaku",0DH,0AH
 	DB	0
 

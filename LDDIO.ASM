@@ -184,7 +184,7 @@ NCL3:
 	RRCA
 	JR	NC,NCL3X1
 	LD	A,(SECSZ_H)
-	CP	4		;1セクタ1024バイトの場合は奇数インデックスの場合に先頭を512バイトずらす
+	CP	4		;1セクタ1024バイトの場合は奇数インデックスの際に先頭を512バイトずらす
 	JR	NZ,NCL3X1
 	LD	BC,512
 	ADD	HL,BC
@@ -350,16 +350,15 @@ RDFAT1:
 	CCF
 	RET	C
 	RR	(IX+DPB_FDMODE)
-	CCF			;フロッピーディスクのFDモードを切り替える
+	CCF			;フロッピーディスクのFDモード(2D/2HD)を切り替える
 	RL	(IX+DPB_FDMODE)
-	LD	A,0FFH
-	LD	(_DSK),A
 	LD	A,(_DRIVE)
 	AND	3
 	OR	080H
 	LD	L,A
 	LD	H,_CYL0/256
 	LD	A,0FFH
+	LD	(_DSK),A
 	LD	(HL),A
 	JR	RDFAT1
 GETBPB:
