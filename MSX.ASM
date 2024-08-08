@@ -17,6 +17,31 @@
 	DW	0      ; DEVICE
 	DW	0      ; TEXT
 	DW	0,0,0  ; Reserved
+
+	INCLUDE	"MSXFDIPL.ASM"
+
+	ORG	041BDH
+	RET
+
+	;MBR_Partition1 (2DDのデータ)
+	DB	0		;ブートフラグ
+	DB	0,0,0		;パーティションの最初のセクタ番号(CHS方式)
+	DB	1		;識別子(FAT12)
+	DB	0,0,0		;パーティションの最後のセクタ番号(CHS方式)
+	DW	32,0		;パーティションの最初のセクタ番号(LBA方式)
+	DW	1440,0		;パーティション内のセクタ数(LBA方式)
+
+	;MBR_Partition2 (2DDのデータ)
+	DB	0		;ブートフラグ
+	DB	0,0,0		;パーティションの最初のセクタ番号(CHS方式)
+	DB	1		;識別子(FAT12)
+	DB	0,0,0		;パーティションの最後のセクタ番号(CHS方式)
+	DW	32+1440,0	;パーティションの最初のセクタ番号(LBA方式)
+	DW	1440,0		;パーティション内のセクタ数(LBA方式)
+
+	ORG	041FEH
+	DB	055H,0AAH	;MBR_Sig
+
 	INCLUDE	"MSXINIT.ASM"
 	INCLUDE	"MSXCCP.ASM"
 	INCLUDE	"LDCCP.ASM"

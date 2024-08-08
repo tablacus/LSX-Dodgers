@@ -23,9 +23,12 @@ IFDINT1:
 	DW	INTE88
 IFDINT2:
 	DW	INTE88
+
+;	先行キー入力バッファ
 KEYBF:
 	DS	020H
 
+;	バンク切り替え時のスタック
 	DS	030H-18
 EXTSP:
 

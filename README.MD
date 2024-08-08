@@ -29,7 +29,9 @@ https://github.com/ho-ogino/LD-hdd/tree/main/ld-hddboot
 # MZ-700/1500版の起動方法
 1. Lコマンドでテープ(やQD)から読み込む体勢にする
 2. FD1に`ldsys.d88`をセット
-3. CMTに`LD.MZT`をセットする
+3. CMTに`LD.MZT`もしくは`LDI.MZT`をセットする
+
+※`LD.MZT`は割り込み未使用で、`LDI.MZT`は先行キー入力あり版になります。
 
 # PC-8801mkIISR版の起動方法
 1. N88-V2 modeにする(すでにV2モードの場合はここは省略可)
