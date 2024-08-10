@@ -7,4 +7,4 @@ rem MZ-700/1500
 set ASM=\tool\AILSZ80\AILZ80ASM.exe
 
 %ASM% -lst -bin LD.MZT -i M7.ASM -f -gap 0 -sym
-
+%ASM% -lst -bin LDI.MZT -i M7I.ASM -f -gap 0 -sym

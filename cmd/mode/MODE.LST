@@ -1,0 +1,294 @@
+                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.21.0, LST:Full:4
+                                ;
+                                ;   MODE by Gaku
+                                ;
+       0000                     WBOOT   EQU $0000
+       0005                     SYSTEM  EQU $0005
+       005C                     FCB1    EQU $005C
+       006C                     FCB2    EQU $006C
+       0080                     DTA EQU $0080
+                                
+       00B1                     _WIDTH  EQU $B1
+       0097                     _HEIGHT EQU $97
+       00B0                     CRTCD   EQU $B0
+       00BA                     _PAGE_MINUS EQU $BA
+       00BC                     _WIDTH_MINUS    EQU $BC
+       00BF                     WK1FD0  EQU $BF
+                                
+                                            ;X1
+       1800                     X1CRTC  EQU $1800
+                                
+                                            ;MSX
+       001C                     CALSLT  EQU $001C
+       006C                     INITXT  EQU $006C
+       006F                     INIT32  EQU $006F
+       0078                     SETTXT  EQU $0078
+       007B                     SETT32  EQU $007B
+                                
+       F3AE                     LINL40  EQU $F3AE
+       F3AF                     LINL32  EQU $F3AF
+       F3B0                     LINLEN  EQU $F3B0
+       F55E                     BUF EQU $F55E
+       FC9B                     INTFLG  EQU $FC9B
+       FCC1                     EXPTBL  EQU $FCC1
+       FAF8                     EXBRSA  EQU $FAF8
+                                
+000000 0100                         ORG $0100
+000000 0100 C30301          10      JP  START
+       0103                     START:
+000003 0103 115D02          10      LD  DE,TITLE
+000006 0106 0E09             7      LD  C,9
+000008 0108 CD0500          17      CALL    SYSTEM
+00000B 010B 3A8000          13      LD  A,(DTA)
+00000E 010E B7               4      OR  A
+00000F 010F 2008            12      JR  NZ,MAIN
+000011 0111 116A02          10      LD  DE,USAGE
+000014 0114 0E09             7      LD  C,9
+000016 0116 C30500          10      JP  SYSTEM
+       0119                     MAIN:
+000019 0119 115D00          10      LD  DE,FCB1+1
+00001C 011C CD4002          17      CALL    GETNUM
+00001F 011F 22CA02          16      LD  (NEW_W),HL
+000022 0122 116D00          10      LD  DE,FCB2+1
+000025 0125 CD4002          17      CALL    GETNUM
+000028 0128 22CC02          16      LD  (NEW_H),HL
+00002B 012B 7D               4      LD  A,L
+00002C 012C B7               4      OR  A
+00002D 012D 2012            12      JR  NZ,MAIN1
+00002F 012F 2ACA02          16      LD  HL,(NEW_W)
+000032 0132 7D               4      LD  A,L
+000033 0133 CD5702          17      CALL    IS_HEIGHT_OK
+000036 0136 2009            12      JR  NZ,MAIN1
+000038 0138 22CC02          16      LD  (NEW_H),HL
+00003B 013B 210000          10      LD  HL,0
+00003E 013E 22CA02          16      LD  (NEW_W),HL
+       0141                     MAIN1:
+000041 0141 0E6F             7      LD  C,$6F       ;(BDOS)MSX-DOS のバージョン番号の獲得(_DOSVER)
+000043 0143 CD0500          17      CALL    SYSTEM
+000046 0146 79               4      LD  A,C
+000047 0147 FE1D             7      CP  $1D
+000049 0149 C0              11      RET NZ
+00004A 014A 7D               4      LD  A,L
+00004B 014B B7               4      OR  A
+00004C 014C 2810            12      JR  Z,X1
+00004E 014E FE01             7      CP  1
+000050 0150 2873            12      JR  Z,MZ7
+000052 0152 FE02             7      CP  2
+000054 0154 286F            12      JR  Z,PC88
+000056 0156 FE03             7      CP  3
+000058 0158 CA0202          10      JP  Z,MSX
+                                
+00005B 015B C30000          10      JP  WBOOT
+       015E                     X1:             ;X1
+00005E 015E CD3902          17      CALL    CLS
+000061 0161 3A0200          13      LD  A,(WBOOT+2)
+000064 0164 2EBF             7      LD  L,WK1FD0
+000066 0166 67               4      LD  H,A
+000067 0167 4E               7      LD  C,(HL)
+000068 0168 3ACA02          13      LD  A,(NEW_W)
+00006B 016B FE50             7      CP  80
+00006D 016D 2811            12      JR  Z,X1_80
+00006F 016F FE28             7      CP  40
+000071 0171 C29501          10      JP  NZ,X1_HEIGHT
+       0174                     X1_40:              ;X1 40桁
+000074 0174 219A02          10      LD  HL,X4024L
+000077 0177 CB41             8      BIT 0,C
+000079 0179 2803            12      JR  Z,X1_40L
+00007B 017B 21BA02          10      LD  HL,X4024H
+       017E                     X1_40L:
+00007E 017E 180A            12      JR  X1_WIDTH
+       0180                     X1_80:              ;X1 80桁
+000080 0180 218A02          10      LD  HL,X8024L
+000083 0183 CB41             8      BIT 0,C
+000085 0185 2803            12      JR  Z,X1_WIDTH
+000087 0187 21AA02          10      LD  HL,X8024H
+       018A                     X1_WIDTH:
+00008A 018A 3A0200          13      LD  A,(WBOOT+2)
+00008D 018D 1EB0             7      LD  E,CRTCD
+00008F 018F 57               4      LD  D,A
+000090 0190 011000          10      LD  BC,(WK1FD0-CRTCD)+1
+000093 0193 EDB0                    LDIR
+       0195                     X1_HEIGHT:
+000095 0195 CDC801          17      CALL    SET_HEIGHT
+                                
+       0198                     X1SETCRTC:
+000098 0198 2EB0             7      LD  L,CRTCD
+00009A 019A 3A0200          13      LD  A,(WBOOT+2)
+00009D 019D 67               4      LD  H,A
+00009E 019E 010018          10      LD  BC,X1CRTC
+0000A1 01A1 AF               4      XOR A
+       01A2                     SETCRTL:
+0000A2 01A2 56               7      LD  D,(HL)
+0000A3 01A3 ED79            12      OUT (C),A
+0000A5 01A5 0C               4      INC C
+0000A6 01A6 ED51            12      OUT (C),D
+0000A8 01A8 0D               4      DEC C
+0000A9 01A9 23               6      INC HL
+0000AA 01AA 3C               4      INC A
+0000AB 01AB FE0C             7      CP  12
+0000AD 01AD 20F3            12      JR  NZ,SETCRTL
+0000AF 01AF 23               6      INC HL
+0000B0 01B0 23               6      INC HL
+0000B1 01B1 7E               7      LD  A,(HL)
+0000B2 01B2 01031A          10      LD  BC,$1A03
+0000B5 01B5 ED79            12      OUT (C),A
+0000B7 01B7 23               6      INC HL
+0000B8 01B8 7E               7      LD  A,(HL)
+0000B9 01B9 01D01F          10      LD  BC,$1FD0
+0000BC 01BC ED79            12      OUT (C),A
+0000BE 01BE 2A0100          16      LD  HL,(WBOOT+1)
+0000C1 01C1 2EBF             7      LD  L,WK1FD0
+0000C3 01C3 77               7      LD  (HL),A
+0000C4 01C4 C9              10      RET
+                                
+       01C5                     MZ7:
+       01C5                     PC88:
+0000C5 01C5 CD3902          17      CALL    CLS
+       01C8                     SET_HEIGHT:
+0000C8 01C8 3A0200          13      LD  A,(WBOOT+2)
+0000CB 01CB 32E401          13      LD  (H_SWC1),A
+0000CE 01CE 32E701          13      LD  (H_SWC2),A
+0000D1 01D1 32F101          13      LD  (H_SWC3),A
+0000D4 01D4 32F601          13      LD  (H_SWC4),A
+0000D7 01D7 320002          13      LD  (H_SWC5),A
+                                
+0000DA 01DA 3ACC02          13      LD  A,(NEW_H)
+0000DD 01DD CD5702          17      CALL    IS_HEIGHT_OK
+0000E0 01E0 2003            12      JR  NZ,SETHEIGHT1
+0000E2 01E2 329700          13      LD  (_HEIGHT),A
+       01E4                     H_SWC1  EQU $-1
+       01E5                     SETHEIGHT1:
+0000E5 01E5 3AB100          13      LD  A,(_WIDTH)
+       01E7                     H_SWC2  EQU $-1
+0000E8 01E8 4F               4      LD  C,A
+0000E9 01E9 AF               4      XOR A
+0000EA 01EA 47               4      LD  B,A
+0000EB 01EB 6F               4      LD  L,A
+0000EC 01EC 67               4      LD  H,A
+0000ED 01ED ED42            15      SBC HL,BC
+0000EF 01EF 22BC00          16      LD  (_WIDTH_MINUS),HL
+       01F1                     H_SWC3  EQU $-1
+0000F2 01F2 4D               4      LD  C,L
+0000F3 01F3 44               4      LD  B,H
+0000F4 01F4 3A9700          13      LD  A,(_HEIGHT)
+       01F6                     H_SWC4  EQU $-1
+0000F7 01F7 210000          10      LD  HL,0
+       01FA                     SETHEIGHT2:
+0000FA 01FA 09              11      ADD HL,BC
+0000FB 01FB 3D               4      DEC A
+0000FC 01FC 20FC            12      JR  NZ,SETHEIGHT2
+0000FE 01FE 22BA00          16      LD  (_PAGE_MINUS),HL
+       0200                     H_SWC5  EQU $-1
+000101 0201 C9              10      RET
+                                
+       0202                     MSX:
+000102 0202 0E28             7      LD  C,40
+000104 0204 3AF8FA          13      LD  A,(EXBRSA)
+000107 0207 B7               4      OR  A
+000108 0208 2802            12      JR  Z,MODE_MSX1
+00010A 020A 0E50             7      LD  C,80
+       020C                     MODE_MSX1:
+00010C 020C 3ACA02          13      LD  A,(NEW_W)
+00010F 020F B9               4      CP  C
+000110 0210 2804            12      JR  Z,MODE_MSX2
+000112 0212 FE28             7      CP  40
+000114 0214 201B            12      JR  NZ,MODE1
+       0216                     MODE_MSX2:
+000116 0216 32AEF3          13      LD  (LINL40),A
+000119 0219 2A0100          16      LD  HL,(WBOOT+1)
+00011C 021C 2EB1             7      LD  L,_WIDTH
+00011E 021E 77               7      LD  (HL),A
+00011F 021F DD216C00        14      LD  IX,INITXT
+000123 0223 CD2A02          17      CALL    CALLROM
+000126 0226 DD217800        14      LD  IX,SETTXT
+       022A                     CALLROM:
+00012A 022A FD2AC1FC        20      LD  IY,(EXPTBL) ;メインROMスロット
+00012E 022E C31C00          10      JP  CALSLT
+       0231                     MODE1:
+000131 0231 116A02          10      LD  DE,USAGE
+000134 0234 0E09             7      LD  C,9
+000136 0236 C30500          10      JP  SYSTEM
+                                
+       0239                     CLS:
+000139 0239 1E0C             7      LD  E,$0C       ;画面消去
+00013B 023B 0E02             7      LD  C,2     ;(BDOS)コンソール出力(_CONOUT)
+00013D 023D C30500          10      JP  SYSTEM
+                                
+                                ;   in
+                                ;   DE: 文字列のアドレス
+                                ;   out
+                                ;   HL: 10進数数値化した値
+       0240                     GETNUM:
+000140 0240 210000          10      LD  HL,0
+       0243                     GETNUM1:
+000143 0243 1A               7      LD  A,(DE)
+000144 0244 13               6      INC DE
+000145 0245 D630             7      SUB '0'
+000147 0247 D8              11      RET C
+000148 0248 FE0A             7      CP  10
+00014A 024A D0              11      RET NC
+00014B 024B 4D               4      LD  C,L
+00014C 024C 44               4      LD  B,H
+00014D 024D 29              11      ADD HL,HL   ;*2
+00014E 024E 29              11      ADD HL,HL   ;*4
+00014F 024F 09              11      ADD HL,BC   ;*5
+000150 0250 29              11      ADD HL,HL   ;*10
+000151 0251 4F               4      LD  C,A
+000152 0252 0600             7      LD  B,0
+000154 0254 09              11      ADD HL,BC
+000155 0255 18EC            12      JR  GETNUM1
+                                
+       0257                     IS_HEIGHT_OK:
+000157 0257 FE18             7      CP  24
+000159 0259 C8              11      RET Z
+00015A 025A FE19             7      CP  25
+00015C 025C C9              10      RET
+                                
+       025D                     TITLE:
+00015D 025D 6D6F64652076312E        DB  "mode v1.00"
+            3030                
+000167 0267 0D0A                    DB  $0D,$0A
+000169 0269 24                      DB  "$"
+       026A                     USAGE:
+00016A 026A 75736167653A204D        DB  "usage: MODE [40/80/-] [24/25]",$0D,$0A
+            4F4445205B34302F    
+            38302F2D5D205B32    
+            342F32355D0D0A      
+000189 0289 24                      DB  "$"
+                                
+                                ;       X1 CRTC DATA
+       028A                     X8024L:     ;80x25 15kHz
+00018A 028A 6F5059381F02191C        DB  $6F,$50,$59,$38,$1F,$02,$19,$1C,$00,$07
+            0007                
+000194 0294 80F8                    DW  0-80*24
+000196 0296 B0FF                    DW  -80
+000198 0298 0C20                    DB  $0C,$20
+                                
+       029A                     X4024L:     ;40x25 15kHz
+00019A 029A 37282D341F02191C        DB  $37,$28,$2D,$34,$1F,$02,$19,$1C,$00,$07
+            0007                
+0001A4 02A4 40FC                    DW  0-40*24
+0001A6 02A6 D8FF                    DW  -40
+0001A8 02A8 0D20                    DB  $0D,$20
+                                
+       02AA                     X8024H:     ;80x25 24kHz
+0001AA 02AA 6B5059881B00191A        DB  $6B,$50,$59,$88,$1B,$00,$19,$1A,$00,$0F
+            000F                
+0001B4 02B4 80F8                    DW  0-80*24
+0001B6 02B6 B0FF                    DW  -80
+0001B8 02B8 0C23                    DB  $0C,$23
+                                
+       02BA                     X4024H:     ;40x25 24kHz
+0001BA 02BA 35282D841B00191A        DB  $35,$28,$2D,$84,$1B,$00,$19,$1A,$00,$0F
+            000F                
+0001C4 02C4 40FC                    DW  0-40*24
+0001C6 02C6 D8FF                    DW  -40
+0001C8 02C8 0D23                    DB  $0D,$23
+                                
+0001CA 02CA 0000                NEW_W   DW  0
+0001CC 02CC 0000                NEW_H   DW  0
+                                
+                                
+                                
+                                
+[EOF:MODE.ASM:SHIFT_JIS]

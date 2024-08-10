@@ -165,7 +165,7 @@
 0000B4 40B4 20F0            12      JR  NZ,FDD_INIT1
 0000B6 40B6 218040          10      LD  HL,INIT_FDD_BOOT
                                 
-0000B9 40B9 CD11C8          17      CALL    SET_BDOS
+0000B9 40B9 CD09C8          17      CALL    SET_BDOS
 0000BC 40BC 21E9C7          10      LD  HL,ROMCHECKED
 0000BF 40BF 2204C7          16      LD  (INIT_SWC),HL
 0000C2 40C2 C300C7          10      JP  START2
@@ -293,7 +293,7 @@
 000290 C706 210000          10      LD  HL,0
 000293 C709 E5              11      PUSH    HL
 000294 C70A C8              11      RET Z
-000295 C70B 1106C9          10      LD  DE,AUTOD
+000295 C70B 11FEC8          10      LD  DE,AUTOD
 000298 C70E C3FDE5          10      JP  _COMANL
                                 
        C711                     INIT:
@@ -333,12 +333,12 @@
        C753                     RAMCHK2:
 0002DD C753 3A42F3          13      LD  A,(RAMAD1)
 0002E0 C756 2640             7      LD  H,040H
-0002E2 C758 CD6AC8          17      CALL    CHK_RAM
+0002E2 C758 CD62C8          17      CALL    CHK_RAM
 0002E5 C75B 3242F3          13      LD  (RAMAD1),A
        C75E                     RAMCHK1:
 0002E8 C75E 3A41F3          13      LD  A,(RAMAD0)
 0002EB C761 2600             7      LD  H,00H
-0002ED C763 CD6AC8          17      CALL    CHK_RAM
+0002ED C763 CD62C8          17      CALL    CHK_RAM
 0002F0 C766 3241F3          13      LD  (RAMAD0),A
        C769                     RAMCHK0:
 0002F3 C769 3A42F3          13      LD  A,(RAMAD1)
@@ -359,7 +359,7 @@
 000310 C786 320400          13      LD  (_DVSW),A
 000313 C789 CD7BD6          17      CALL    FILL_MEMORY
                                 
-000316 C78C CD11C8          17      CALL    SET_BDOS
+000316 C78C CD09C8          17      CALL    SET_BDOS
                                 
                                                 ;LSX-Dodgers
 000319 C78F 3EE5             7      LD  A,CPM_BOOT/256
@@ -408,190 +408,185 @@
 00036D C7E3 210080          10      LD  HL,KONAMI_BANK2_SEL
 000370 C7E6 2252E3          16      LD  (ROM8000H),HL
        C7E9                     ROMCHECKED:
-                                                ;MSX2判別
-000373 C7E9 3AF8FA          13      LD  A,(EXBRSA)
-000376 C7EC B7               4      OR  A
-000377 C7ED 3E28             7      LD  A,40
-000379 C7EF 2802            12      JR  Z,ISMSX1
-00037B C7F1 3E50             7      LD  A,80        ;MSX2以降は80桁で起動
-       C7F3                     ISMSX1:
-00037D C7F3 32AEF3          13      LD  (LINL40),A
-000380 C7F6 32B1E5          13      LD  (_WIDTH),A
-000383 C7F9 DD216C00        14      LD  IX,INITXT
-000387 C7FD CD88D3          17      CALL    CALSLT_R
-00038A C800 DD217800        14      LD  IX,SETTXT
-00038E C804 CD88D3          17      CALL    CALSLT_R
                                 
-000391 C807 2112C9          10      LD  HL,INIMES
-000394 C80A CD82CE          17      CALL    MSX
-       C80D                     INIT1:
-000397 C80D AF               4      XOR A
-000398 C80E FE03             7      CP  3
-00039A C810 C9              10      RET
-       C811                     SET_BDOS:
-00039B C811 3E                      DB  03EH    ;LD A,??
-00039C C812 E9               4      JP  (HL)
-00039D C813 320F00          13      LD  (0000FH),A
+000373 C7E9 3E28             7      LD  A,40
+000375 C7EB 32AEF3          13      LD  (LINL40),A
+000378 C7EE 32B1E5          13      LD  (_WIDTH),A
+00037B C7F1 DD216C00        14      LD  IX,INITXT
+00037F C7F5 CD88D3          17      CALL    CALSLT_R
+000382 C7F8 DD217800        14      LD  IX,SETTXT
+000386 C7FC CD88D3          17      CALL    CALSLT_R
                                 
-0003A0 C816 3EC3             7      LD  A,0C3H      ;JP
-0003A2 C818 2103E5          10      LD  HL,CPM_WBOOT
-0003A5 C81B 320000          13      LD  (00000H),A
-0003A8 C81E 220100          16      LD  (00001H),HL ;IPL
+000389 C7FF 210AC9          10      LD  HL,INIMES
+00038C C802 CD82CE          17      CALL    MSX
+       C805                     INIT1:
+00038F C805 AF               4      XOR A
+000390 C806 FE03             7      CP  3
+000392 C808 C9              10      RET
+       C809                     SET_BDOS:
+000393 C809 3E                      DB  03EH    ;LD A,??
+000394 C80A E9               4      JP  (HL)
+000395 C80B 320F00          13      LD  (0000FH),A
                                 
-0003AB C821 2106CA          10      LD  HL,BDOS
-0003AE C824 320500          13      LD  (00005H),A
-0003B1 C827 220600          16      LD  (00006H),HL ;BDOS
+000398 C80E 3EC3             7      LD  A,0C3H      ;JP
+00039A C810 2103E5          10      LD  HL,CPM_WBOOT
+00039D C813 320000          13      LD  (00000H),A
+0003A0 C816 220100          16      LD  (00001H),HL ;IPL
                                 
-0003B4 C82A 210000          10      LD  HL,0
-0003B7 C82D 322800          13      LD  (00028H),A
-0003BA C830 222900          16      LD  (00029H),HL ;BDOS
+0003A3 C819 2106CA          10      LD  HL,BDOS
+0003A6 C81C 320500          13      LD  (00005H),A
+0003A9 C81F 220600          16      LD  (00006H),HL ;BDOS
+                                
+0003AC C822 210000          10      LD  HL,0
+0003AF C825 322800          13      LD  (00028H),A
+0003B2 C828 222900          16      LD  (00029H),HL ;BDOS
                                                 ;インタースロットコール
-0003BD C833 21E2D3          10      LD  HL,RDSLTR
-0003C0 C836 320C00          13      LD  (_RDSLT),A
-0003C3 C839 220D00          16      LD  (_RDSLT+1),HL
+0003B5 C82B 21E2D3          10      LD  HL,RDSLTR
+0003B8 C82E 320C00          13      LD  (_RDSLT),A
+0003BB C831 220D00          16      LD  (_RDSLT+1),HL
                                 
-0003C6 C83C 21EBD3          10      LD  HL,WRSLTR
-0003C9 C83F 321400          13      LD  (_WRSLT),A
-0003CC C842 221500          16      LD  (_WRSLT+1),HL
+0003BE C834 21EBD3          10      LD  HL,WRSLTR
+0003C1 C837 321400          13      LD  (_WRSLT),A
+0003C4 C83A 221500          16      LD  (_WRSLT+1),HL
                                 
-0003CF C845 21A4D3          10      LD  HL,CALSLTR
-0003D2 C848 321C00          13      LD  (_CALSLT),A
-0003D5 C84B 221D00          16      LD  (_CALSLT+1),HL
+0003C7 C83D 21A4D3          10      LD  HL,CALSLTR
+0003CA C840 321C00          13      LD  (_CALSLT),A
+0003CD C843 221D00          16      LD  (_CALSLT+1),HL
                                 
-0003D8 C84E 21E2D4          10      LD  HL,ENASLT
-0003DB C851 322400          13      LD  (_ENASLT),A
-0003DE C854 222500          16      LD  (_ENASLT+1),HL
+0003D0 C846 21E2D4          10      LD  HL,ENASLT
+0003D3 C849 322400          13      LD  (_ENASLT),A
+0003D6 C84C 222500          16      LD  (_ENASLT+1),HL
                                 
-0003E1 C857 2194D3          10      LD  HL,CALLF
-0003E4 C85A 323000          13      LD  (_CALLF),A
-0003E7 C85D 223100          16      LD  (_CALLF+1),HL
+0003D9 C84F 2194D3          10      LD  HL,CALLF
+0003DC C852 323000          13      LD  (_CALLF),A
+0003DF C855 223100          16      LD  (_CALLF+1),HL
                                 
-0003EA C860 21F4D3          10      LD  HL,INT38H
-0003ED C863 323800          13      LD  (00038H),A
-0003F0 C866 223900          16      LD  (00038H+1),HL
-0003F3 C869 C9              10      RET
-       C86A                     CHK_RAM:
-0003F4 C86A E5              11      PUSH    HL
-0003F5 C86B CDBFC8          17      CALL    CHK_RAM0
-0003F8 C86E E1              10      POP HL
-0003F9 C86F C8              11      RET Z
-0003FA C870 3AC1FC          13      LD  A,(EXPTBL)      ;スロット#0
-0003FD C873 E680             7      AND 080H
-0003FF C875 CD96C8          17      CALL    CHK_RAM_SLT
-000402 C878 C8              11      RET Z
-000403 C879 3AC2FC          13      LD  A,(EXPTBL+1)        ;スロット#1
-000406 C87C E680             7      AND 080H
-000408 C87E C601             7      ADD A,1
-00040A C880 CD96C8          17      CALL    CHK_RAM_SLT
-00040D C883 C8              11      RET Z
-00040E C884 3AC3FC          13      LD  A,(EXPTBL+2)        ;スロット#2
-000411 C887 E680             7      AND 080H
-000413 C889 C602             7      ADD A,2
-000415 C88B CD96C8          17      CALL    CHK_RAM_SLT
-000418 C88E C8              11      RET Z
-000419 C88F 3AC4FC          13      LD  A,(EXPTBL+3)        ;スロット#3
-00041C C892 E680             7      AND 080H
-00041E C894 C603             7      ADD A,3
-       C896                     CHK_RAM_SLT:
-000420 C896 E5              11      PUSH    HL
-000421 C897 CDBFC8          17      CALL    CHK_RAM0        ;スロット#X or X-0
-000424 C89A E1              10      POP HL
-000425 C89B C8              11      RET Z
-000426 C89C CB79             8      BIT 7,C
-000428 C89E 281A            12      JR  Z,CHK_RAM_E     ;スロットは拡張されていない
-00042A C8A0 79               4      LD  A,C
-00042B C8A1 C604             7      ADD A,4*1           ;スロット#X-1
-00042D C8A3 E5              11      PUSH    HL
-00042E C8A4 CDBFC8          17      CALL    CHK_RAM0
-000431 C8A7 E1              10      POP HL
-000432 C8A8 C8              11      RET Z
-000433 C8A9 79               4      LD  A,C
-000434 C8AA C608             7      ADD A,4*2           ;スロット#X-2
-000436 C8AC E5              11      PUSH    HL
-000437 C8AD CDBFC8          17      CALL    CHK_RAM0
-00043A C8B0 E1              10      POP HL
-00043B C8B1 C8              11      RET Z
-00043C C8B2 79               4      LD  A,C
-00043D C8B3 C60C             7      ADD A,4*3           ;スロット#X-3
-00043F C8B5 E5              11      PUSH    HL
-000440 C8B6 CDBFC8          17      CALL    CHK_RAM0
-000443 C8B9 E1              10      POP HL
-       C8BA                     CHK_RAM_E:
-000444 C8BA AF               4      XOR A
-000445 C8BB 3C               4      INC A           ;ZF=0にする
-000446 C8BC 3E00             7      LD  A,0
-000448 C8BE C9              10      RET
+0003E2 C858 21F4D3          10      LD  HL,INT38H
+0003E5 C85B 323800          13      LD  (00038H),A
+0003E8 C85E 223900          16      LD  (00038H+1),HL
+0003EB C861 C9              10      RET
+       C862                     CHK_RAM:
+0003EC C862 E5              11      PUSH    HL
+0003ED C863 CDB7C8          17      CALL    CHK_RAM0
+0003F0 C866 E1              10      POP HL
+0003F1 C867 C8              11      RET Z
+0003F2 C868 3AC1FC          13      LD  A,(EXPTBL)      ;スロット#0
+0003F5 C86B E680             7      AND 080H
+0003F7 C86D CD8EC8          17      CALL    CHK_RAM_SLT
+0003FA C870 C8              11      RET Z
+0003FB C871 3AC2FC          13      LD  A,(EXPTBL+1)        ;スロット#1
+0003FE C874 E680             7      AND 080H
+000400 C876 C601             7      ADD A,1
+000402 C878 CD8EC8          17      CALL    CHK_RAM_SLT
+000405 C87B C8              11      RET Z
+000406 C87C 3AC3FC          13      LD  A,(EXPTBL+2)        ;スロット#2
+000409 C87F E680             7      AND 080H
+00040B C881 C602             7      ADD A,2
+00040D C883 CD8EC8          17      CALL    CHK_RAM_SLT
+000410 C886 C8              11      RET Z
+000411 C887 3AC4FC          13      LD  A,(EXPTBL+3)        ;スロット#3
+000414 C88A E680             7      AND 080H
+000416 C88C C603             7      ADD A,3
+       C88E                     CHK_RAM_SLT:
+000418 C88E E5              11      PUSH    HL
+000419 C88F CDB7C8          17      CALL    CHK_RAM0        ;スロット#X or X-0
+00041C C892 E1              10      POP HL
+00041D C893 C8              11      RET Z
+00041E C894 CB79             8      BIT 7,C
+000420 C896 281A            12      JR  Z,CHK_RAM_E     ;スロットは拡張されていない
+000422 C898 79               4      LD  A,C
+000423 C899 C604             7      ADD A,4*1           ;スロット#X-1
+000425 C89B E5              11      PUSH    HL
+000426 C89C CDB7C8          17      CALL    CHK_RAM0
+000429 C89F E1              10      POP HL
+00042A C8A0 C8              11      RET Z
+00042B C8A1 79               4      LD  A,C
+00042C C8A2 C608             7      ADD A,4*2           ;スロット#X-2
+00042E C8A4 E5              11      PUSH    HL
+00042F C8A5 CDB7C8          17      CALL    CHK_RAM0
+000432 C8A8 E1              10      POP HL
+000433 C8A9 C8              11      RET Z
+000434 C8AA 79               4      LD  A,C
+000435 C8AB C60C             7      ADD A,4*3           ;スロット#X-3
+000437 C8AD E5              11      PUSH    HL
+000438 C8AE CDB7C8          17      CALL    CHK_RAM0
+00043B C8B1 E1              10      POP HL
+       C8B2                     CHK_RAM_E:
+00043C C8B2 AF               4      XOR A
+00043D C8B3 3C               4      INC A           ;ZF=0にする
+00043E C8B4 3E00             7      LD  A,0
+000440 C8B6 C9              10      RET
                                 
-       C8BF                     CHK_RAM0:
-000449 C8BF 4F               4      LD  C,A
-00044A C8C0 3A62E5          13      LD  A,(ROM_SLT)
-00044D C8C3 B9               4      CP  C
-00044E C8C4 28F4            12      JR  Z,CHK_RAM_E
-000450 C8C6 2E00             7      LD  L,0
-       C8C8                     CHK_RAM1:
-000452 C8C8 79               4      LD  A,C
-000453 C8C9 DD210C00        14      LD  IX,_RDSLT
-000457 C8CD CDFAC8          17      CALL    CALSLT_RAM
-00045A C8D0 C6E5             7      ADD A,0E5H
-00045C C8D2 47               4      LD  B,A
-00045D C8D3 5F               4      LD  E,A
+       C8B7                     CHK_RAM0:
+000441 C8B7 4F               4      LD  C,A
+000442 C8B8 3A62E5          13      LD  A,(ROM_SLT)
+000445 C8BB B9               4      CP  C
+000446 C8BC 28F4            12      JR  Z,CHK_RAM_E
+000448 C8BE 2E00             7      LD  L,0
+       C8C0                     CHK_RAM1:
+00044A C8C0 79               4      LD  A,C
+00044B C8C1 DD210C00        14      LD  IX,_RDSLT
+00044F C8C5 CDF2C8          17      CALL    CALSLT_RAM
+000452 C8C8 C6E5             7      ADD A,0E5H
+000454 C8CA 47               4      LD  B,A
+000455 C8CB 5F               4      LD  E,A
+000456 C8CC 79               4      LD  A,C
+000457 C8CD DD211400        14      LD  IX,_WRSLT
+00045B C8D1 CDF2C8          17      CALL    CALSLT_RAM
 00045E C8D4 79               4      LD  A,C
-00045F C8D5 DD211400        14      LD  IX,_WRSLT
-000463 C8D9 CDFAC8          17      CALL    CALSLT_RAM
-000466 C8DC 79               4      LD  A,C
-000467 C8DD DD210C00        14      LD  IX,_RDSLT
-00046B C8E1 CDFAC8          17      CALL    CALSLT_RAM
-00046E C8E4 B8               4      CP  B
-00046F C8E5 C0              11      RET NZ
-000470 C8E6 D6E5             7      SUB 0E5H
-000472 C8E8 79               4      LD  A,C
-000473 C8E9 5F               4      LD  E,A
-000474 C8EA DD211400        14      LD  IX,_WRSLT
-000478 C8EE CDFAC8          17      CALL    CALSLT_RAM
-00047B C8F1 24               4      INC H
-00047C C8F2 7D               4      LD  A,L
-00047D C8F3 C604             7      ADD A,4
-00047F C8F5 6F               4      LD  L,A
-000480 C8F6 20D0            12      JR  NZ,CHK_RAM1
-000482 C8F8 79               4      LD  A,C     ;ZF=1のハズ
-000483 C8F9 C9              10      RET
+00045F C8D5 DD210C00        14      LD  IX,_RDSLT
+000463 C8D9 CDF2C8          17      CALL    CALSLT_RAM
+000466 C8DC B8               4      CP  B
+000467 C8DD C0              11      RET NZ
+000468 C8DE D6E5             7      SUB 0E5H
+00046A C8E0 79               4      LD  A,C
+00046B C8E1 5F               4      LD  E,A
+00046C C8E2 DD211400        14      LD  IX,_WRSLT
+000470 C8E6 CDF2C8          17      CALL    CALSLT_RAM
+000473 C8E9 24               4      INC H
+000474 C8EA 7D               4      LD  A,L
+000475 C8EB C604             7      ADD A,4
+000477 C8ED 6F               4      LD  L,A
+000478 C8EE 20D0            12      JR  NZ,CHK_RAM1
+00047A C8F0 79               4      LD  A,C     ;ZF=1のハズ
+00047B C8F1 C9              10      RET
                                 
-       C8FA                     CALSLT_RAM:
-000484 C8FA C5              11      PUSH    BC
-000485 C8FB E5              11      PUSH    HL
-000486 C8FC FD2AC0FC        20      LD  IY,(EXPTBL-1) ;メインROMスロット
-00048A C900 CD1C00          17      CALL    _CALSLT
-00048D C903 E1              10      POP HL
-00048E C904 C1              10      POP BC
-00048F C905 C9              10      RET
+       C8F2                     CALSLT_RAM:
+00047C C8F2 C5              11      PUSH    BC
+00047D C8F3 E5              11      PUSH    HL
+00047E C8F4 FD2AC0FC        20      LD  IY,(EXPTBL-1) ;メインROMスロット
+000482 C8F8 CD1C00          17      CALL    _CALSLT
+000485 C8FB E1              10      POP HL
+000486 C8FC C1              10      POP BC
+000487 C8FD C9              10      RET
                                 
-000490 C906 4155544F45584543    AUTOD:  DB  "AUTOEXEC "
+000488 C8FE 4155544F45584543    AUTOD:  DB  "AUTOEXEC "
             20                  
-000499 C90F 413A00              AUTODV: DB  "A:",0
+000491 C907 413A00              AUTODV: DB  "A:",0
                                 
-00049C C912 0C4C53582D446F64    INIMES: DB  00CH,"LSX-Dodgers for MSX v"
+000494 C90A 0C4C53582D446F64    INIMES: DB  00CH,"LSX-Dodgers for MSX v"
             6765727320666F72    
             204D53582076        
-0004B2 C928 312E                    DB  030H + VER_1, '.'
-0004B4 C92A 3631                    DB  030H + VER_2 ,030H + VER_3
-0004B6 C92C 68                      DB  'h'
-0004B7 C92D 2047616B750D0A          DB  " Gaku",0DH,0AH
-0004BE C934 00                      DB  0
+0004AA C920 312E                    DB  030H + VER_1, '.'
+0004AC C922 3631                    DB  030H + VER_2 ,030H + VER_3
+0004AE C924 69                      DB  'i'
+0004AF C925 2047616B750D0A          DB  " Gaku",0DH,0AH
+0004B6 C92C 00                      DB  0
                                 
-0004BF C935 0300                M2DD:   DW  3
-0004C1 C937 F902                    DB  0F9H,2
-0004C3 C939 CB02                    DW  715
-0004C5 C93B FF0750090182            DB  0FFH,7,80,9,1,082H
-0004CB C941 0700A7000A00            DW  7,0A7H,10
-       C947                     M2DDE:
+0004B7 C92D 0300                M2DD:   DW  3
+0004B9 C92F F902                    DB  0F9H,2
+0004BB C931 CB02                    DW  715
+0004BD C933 FF0750090182            DB  0FFH,7,80,9,1,082H
+0004C3 C939 0700A7000A00            DW  7,0A7H,10
+       C93F                     M2DDE:
 [EOF:MSXINIT.ASM:SHIFT_JIS]
                                     INCLUDE "MSXCCP.ASM"
                                 
                                 ;   LSX-Dodgers CCP
                                 ;   MSX
                                 
-       C947                     INITE:
-0004D1 C947                         DS  BDOS-INITE
+       C93F                     INITE:
+0004C9 C93F                         DS  BDOS-INITE
 000590 CA06 C342CE          10      JP  BDOS0
        CA09                     S27BUF_COM:
 000593 CA09 110001          10      LD  DE,BUF_COM

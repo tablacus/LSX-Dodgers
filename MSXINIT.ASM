@@ -212,13 +212,8 @@ ROM8K:				;Konami-8Kチェック
 	LD	HL,KONAMI_BANK2_SEL
 	LD	(ROM8000H),HL
 ROMCHECKED:
-				;MSX2判別
-	LD	A,(EXBRSA)
-	OR	A
+
 	LD	A,40
-	JR	Z,ISMSX1
-	LD	A,80		;MSX2以降は80桁で起動
-ISMSX1:
 	LD	(LINL40),A
 	LD	(_WIDTH),A
 	LD	IX,INITXT
@@ -375,7 +370,7 @@ AUTODV:	DB	"A:",0
 INIMES:	DB	00CH,"LSX-Dodgers for MSX v"
 	DB	030H + VER_1, '.'
 	DB	030H + VER_2 ,030H + VER_3
-	DB	'h'
+	DB	'i'
 	DB	" Gaku",0DH,0AH
 	DB	0
 
