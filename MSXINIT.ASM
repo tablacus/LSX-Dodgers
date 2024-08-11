@@ -370,7 +370,7 @@ AUTODV:	DB	"A:",0
 INIMES:	DB	00CH,"LSX-Dodgers for MSX v"
 	DB	030H + VER_1, '.'
 	DB	030H + VER_2 ,030H + VER_3
-	DB	'i'
+	DB	'j'
 	DB	" Gaku",0DH,0AH
 	DB	0
 
@@ -380,3 +380,7 @@ M2DD:	DW	3
 	DB	0FFH,7,80,9,1,082H
 	DW	7,0A7H,10
 M2DDE:
+
+INITE:
+	DS	BDOS-INITE
+	JP	BDOS0
