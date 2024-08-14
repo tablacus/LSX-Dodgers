@@ -2,7 +2,7 @@
 ; SOSDIR Gaku
 ;
 ; S-OS Hu-BASIC(X1) の2Dディスクの一覧を見る
-; 
+;
 ;
 SYSTEM	EQU	00005H
 BASE	EQU	0000BH
@@ -17,10 +17,8 @@ _FAKEFREE	EQU	0ACH
 START:				;間違えてMS-DOS環境で実行しても即終了できる
 	LD	C,06FH		;DOSVER MSX-DOS のバージョン番号の獲得
 	CALL	SYSTEM
-	OR	A
-	JR	NZ,USAGE
-	LD	HL,011DH	;LSX-Dodgersかどうか？
-	SBC	HL,BC
+	LD	A,C
+	CP	01DH	;LSX-Dodgersかどうか？
 	JR	NZ,USAGE
 	LD	HL,0135H-1	;LSX-Dodgersのバージョンが1.35以上か？
 	SBC	HL,DE
@@ -74,7 +72,7 @@ MAIN:
 				;空きクラスタを数える
 	LD	A,'$'
 	CALL	CONOUT_A
-	LD	BC,0
+	LD	BC,$5000
 	LD	HL,DATA
 FAT1:
 	LD	A,(HL)
@@ -310,7 +308,7 @@ MSG_DIR:
 
 
 MSG_TITLE:
-	DB	"sosdir v1.00",00DH,00AH
+	DB	"sosdir v1.01",00DH,00AH
 	DB	"usage: SOSDIR drive"
 CRLF:
 	DB	00DH,00AH

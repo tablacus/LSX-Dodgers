@@ -1,0 +1,426 @@
+;
+; S-OS Disk Driver Gaku
+;
+; S-OS の2D/320KBのディスクの読み込みを可能にするドライバー
+;
+;
+SYSTEM	EQU	$0005
+FCB1	EQU	$005C
+FCB2	EQU	$006C
+DTA1	EQU	$0080
+
+_FATBF	EQU	$7C
+_DTBUF	EQU	$7E
+_WTFATF	EQU	$A2
+_FDRD	EQU	$EB
+_FDWT	EQU	$EE
+_SNCL	EQU	$FA
+
+DPB_DRD	EQU	$02
+DPB_DWT	EQU	$04
+DPB_NAME	EQU	$1C
+
+DRIVER	EQU	$0000
+
+BPB_BytsPerSec	EQU	11
+
+	ORG	$0100
+	JP	START		;0C3HはZ80ではJPだが、i8086ではRETなので
+START:				;間違えてMS-DOS環境で実行しても即終了できる
+	LD	DE,MSG_TITLE
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+
+	LD	HL,(SYSTEM+1)
+	LD	DE,BPB_SOS2D_E-BDOS_
+	AND	A
+	SBC	HL,DE
+	LD	SP,HL
+	LD	E,L		;DE=常駐先頭アドレス
+	LD	D,H
+				;システムコールを差し替える
+	LD	HL,(SYSTEM+1)
+	LD	(DRIVER_+BDOS_SWC),HL
+
+	LD	HL,BDOS_
+	ADD	HL,DE
+	LD	(SYSTEM+1),HL
+				;ドライバーを差し替える
+	LD	A,(2)
+	LD	(FDRD_SWC1),A
+	LD	(FDRD_SWC2),A
+	LD	(FDWT_SWC1),A
+	LD	(FDWT_SWC2),A
+	LD	(DRIVER_+SNCL_SWC),A
+
+	LD	HL,(_FDRD+1)
+FDRD_SWC1	EQU	$-1
+	LD	(DRIVER_+DRD_SWC),HL
+
+	LD	HL,_DRD
+	ADD	HL,DE
+	LD	(_FDRD+1),HL
+FDRD_SWC2	EQU	$-1
+
+	LD	HL,(_FDWT+1)
+FDWT_SWC1	EQU	$-1
+	LD	(DRIVER_+DWT_SWC),HL
+	LD	HL,_DWT
+	ADD	HL,DE
+	LD	(_FDWT+1),HL
+FDWT_SWC2	EQU	$-1
+				;リロケータブル関連を書き換える
+	LD	HL,BPB_SOS2D
+	ADD	HL,DE
+	LD	(DRIVER_+BPB_SOS2D_SWC),HL
+
+	LD	HL,DIR_NEXT
+	ADD	HL,DE
+	LD	(DRIVER_+DIR_NEXT_SWC),HL
+
+	LD	HL,BCD
+	ADD	HL,DE
+	LD	(DRIVER_+BCD_SWC1),HL
+	LD	(DRIVER_+BCD_SWC2),HL
+	LD	(DRIVER_+BCD_SWC3),HL
+	LD	(DRIVER_+BCD_SWC4),HL
+	LD	(DRIVER_+BCD_SWC5),HL
+
+	LD	HL,RDE1
+	ADD	HL,DE
+	LD	(DRIVER_+RDE1_SWC),HL
+					;常駐プログラムの転送
+	LD	HL,DRIVER_
+	LD	BC,BPB_SOS2D_E-BDOS_
+	LDIR
+					;常駐完了
+	LD	DE,MSG_INSTALLED
+	LD	C,9		;STROUT 文字列出力 CP/M
+	CALL	SYSTEM
+	JP	0
+MSG_TITLE:
+	DB	"sosdisk v1.00"
+	DB	$0D,$0A
+	DB	'$'
+MSG_INSTALLED:
+	DB	"Installed."
+	DB	$0D,$0A
+	DB	"S-OS disks are read-only."
+	DB	$0D,$0A
+	DB	'$'
+
+DRIVER_:
+	ORG	DRIVER,DRIVER_-$0100	;$PHASE
+BDOS_:
+	JP	0
+BDOS_SWC	EQU	$-2
+_DWT:
+	BIT	5,(IX+DPB_NAME+2)
+	OR	A
+	JP	Z,_FDWT
+DWT_SWC	EQU	$-2
+	SCF
+	RET
+
+_DRD:
+	PUSH	DE
+	PUSH	BC
+	CALL	_FDRD
+DRD_SWC	EQU	$-2
+	LD	A,C
+	POP	BC
+	DEC	B
+	POP	BC
+	RET	C	;エラー
+	RET	NZ	;読み込みセクタ数が1じゃない
+
+	LD	A,B
+	OR	A
+	RET	NZ	;BPB/FAT/RDEだけが対象
+
+	LD	A,C
+	OR	A
+	JR	NZ,FAT
+			;BPB
+	RES	5,(IX+DPB_NAME+2)
+	PUSH	HL	;読み込んだアドレスが_FATBFかチェック
+	LD	A,H
+	DEC	A
+	LD	HL,(1)
+	LD	L,_FATBF+1
+	INC	H
+	CP	(HL)
+	POP	HL
+	SCF		;ZFを保ったまま
+	CCF		;CFをクリア
+	RET	NZ
+			;BPBが正しいか確認
+	PUSH	HL
+	LD	BC,BPB_BytsPerSec-$0100
+	ADD	HL,BC
+	LD	A,(HL)
+	POP	HL
+	CP	1
+	RET	Z
+			;2Dの変則フォーマットを判別
+	PUSH	HL
+	LD	BC,$20-$0100
+	ADD	HL,BC
+	LD	A,(HL)
+	POP	HL
+	CP	$21
+	RET	Z
+			;S-OS向けのBPBに差し替える
+	PUSH	HL
+	DEC	H
+	PUSH	DE
+	EX	DE,HL
+	LD	HL,BPB_SOS2D
+BPB_SOS2D_SWC	EQU	$-2
+	LD	BC,BPB_SOS2D_E-BPB_SOS2D
+	LDIR
+	POP	DE
+	POP	HL
+	SET	5,(IX+DPB_NAME+2)
+	XOR	A	;念のためにCF=0
+	RET
+FAT:
+			;S-OSフォーマットかフラグで確認
+	BIT	5,(IX+DPB_NAME+2)
+	RET	Z
+
+	LD	A,C
+	CP	14	;FATのクラスタ番号
+	JR	NZ,RDE
+			;FAT
+	PUSH	HL	;読み込んだアドレスが_FATBFかチェック
+	LD	A,H
+	DEC	A
+	LD	HL,(1)
+	LD	L,_FATBF+1
+	INC	H
+	CP	(HL)
+	POP	HL
+	SCF		;ZFを保ったまま
+	CCF		;CFをクリア
+	RET	NZ
+			;S-OSのFATをMS-DOSのFATに変換する
+	PUSH	DE
+	PUSH	HL
+	LD	DE,79
+FAT1:
+	LD	HL,(1)
+	LD	L,_FATBF
+	INC	H
+	LD	A,(HL)
+	INC	HL
+	LD	H,(HL)
+	LD	L,A
+	ADD	HL,DE
+	LD	A,(HL)		;S-OSのFAT
+	BIT	7,A
+	JR	NZ,FAT_EOF
+	LD	L,A
+	LD	H,D		;D=0
+	JR	FAT_OK
+FAT_EOF:
+	LD	HL,$FFFF	;EOF
+FAT_OK:
+	PUSH	DE
+	CALL	_SNCL
+SNCL_SWC	EQU	$-1
+	POP	DE
+	DEC	E
+	BIT	7,E
+	JR	Z,FAT1
+	LD	HL,(1)
+	LD	L,_WTFATF
+	XOR	A
+	LD	(HL),A		;FATへの書き込みフラグをリセット
+	POP	HL
+	POP	DE
+	RET
+RDE:
+	CP	16	;クラスタ番号がディレクトリエントリか確認
+	CCF
+	RET	NC
+	CP	32
+	RET	NC
+
+	PUSH	HL	;読み込んだアドレスが_DTBUFかチェック
+	LD	A,H
+	DEC	A
+	LD	HL,(1)
+	LD	L,_DTBUF+1
+	INC	H
+	CP	(HL)
+	POP	HL
+	SCF		;ZFを保ったまま
+	CCF		;CFをクリア
+	RET	NZ
+			;S-OSのディレクトリエントリをMS-DOSのディレクトリエントリに変換する
+	PUSH	DE
+	PUSH	HL
+	PUSH	IX
+	LD	BC,0	;+$0100にS-OSのディレクトリエントリをコピーして元のアドレスをクリアする
+RDE_BK:
+	DEC	H
+	LD	A,(HL)
+	LD	(HL),C	;C=0
+	INC	H
+	LD	(HL),A
+	INC	HL
+	DJNZ	RDE_BK
+	DEC	H
+
+	LD	B,8	;1セクタに8エントリ
+RDE1:
+	PUSH	BC
+	PUSH	HL
+	LD	E,L
+	LD	D,H
+	DEC	D
+	LD	A,(HL)
+	CP	$FF
+	JP	Z,DIR_NEXT
+DIR_NEXT_SWC	EQU	$-2
+	PUSH	HL
+	POP	IX
+	INC	HL
+
+	OR	A
+	LD	A,(HL)
+	INC	HL
+	JR	NZ,RDE_DEL
+	LD	A,$E5
+RDE_DEL:
+	LD	(DE),A
+	INC	DE
+	LD	BC,7	;ファイル名
+	LDIR		;HL:+9 DE:+8
+	LD	BC,$0E-9
+	ADD	HL,BC	;HL:+$0E
+	LD	BC,3	;拡張子
+	LDIR		;DE:+11
+	LD	A,(IX+0)	;ファイルモード
+	LD	C,A
+	ADD	A,A
+	SBC	A,A
+	AND	$10	;ディレクトリ
+	BIT	6,C	;読み出しのみ
+	JR	Z,RDE_RO
+	SET	0,A
+RDE_RO:
+	BIT	4,C	;隠しファイル
+	JR	Z,RDE_HD
+	SET	1,A
+RDE_HD:
+	BIT	2,C	;Ascファイル
+	JR	Z,RDE_ASC
+	SET	5,A	;アーカイブ
+RDE_ASC:
+	LD	(DE),A	;属性
+	INC	DE	;DE:+12
+
+	LD	B,10	;予約領域10
+RDE2:
+	INC	DE
+	DJNZ	RDE2
+			;DE:+26 更新時刻
+	LD	A,(IX+$1C)
+	CALL	BCD	;分
+BCD_SWC1	EQU	$-2
+	LD	L,A
+	ADD	HL,HL
+	ADD	HL,HL
+	LD	A,(IX+$1B)
+	CALL	BCD	;時
+BCD_SWC2	EQU	$-2
+	LD	H,A
+	ADD	HL,HL
+	ADD	HL,HL
+	ADD	HL,HL
+	LD	A,(IX+$1D)
+	CALL	BCD	;秒
+BCD_SWC3	EQU	$-2
+	SRL	A
+	OR	L
+	LD	(DE),A
+	INC	DE
+	LD	A,H
+	LD	(DE),A
+	INC	DE
+			;更新年月日
+	LD	A,(IX+$19)
+	AND	$F0
+	LD	L,A
+	LD	A,(IX+$18)
+	CALL	BCD	;年
+BCD_SWC4	EQU	$-2
+	LD	H,A
+	ADD	HL,HL
+	LD	A,(IX+$1A)
+	CALL	BCD	;日
+BCD_SWC5	EQU	$-2
+	OR	L
+	LD	A,L
+	LD	(DE),A
+	INC	DE
+	LD	A,H
+	LD	(DE),A
+	INC	DE
+			;ファイルの先頭クラスタ
+	LD	A,(IX+$1E)
+	LD	(DE),A
+	INC	DE
+	LD	A,(IX+$1F)
+	LD	(DE),A
+	INC	DE
+			;ファイルのサイズ
+	LD	A,(IX+$12)
+	LD	(DE),A
+	INC	DE
+	LD	A,(IX+$13)
+	LD	(DE),A
+DIR_NEXT:
+	POP	HL
+	LD	BC,32
+	ADD	HL,BC
+	POP	BC
+	DEC	B
+	JP	NZ,RDE1
+RDE1_SWC	EQU	$-2
+	POP	IX
+	POP	HL
+	POP	DE
+	XOR	A
+	RET
+
+BCD:
+	LD	C,A
+	AND	$F0	;10の位
+	RRCA
+	LD	B,A
+	RRCA
+	RRCA
+	ADD	A,B
+	LD	B,A
+	LD	A,C
+	AND	$0F	;1の位
+	ADD	A,B
+	RET
+
+BPB_SOS2D:		;S-OS向けのBPB
+	DB	$EB,$FE,$90	;BS_JmpBoot
+	DB	"S-OS    "	;BS_OEMName
+	DW	256		;BPB_BytsPerSec
+	DB	16		;BPB_SecPerClus
+	DW	14		;BPB_RsvdSecCnt
+	DB	2		;BPB_NumFATs
+	DW	128		;BPB_RootEntCnt
+	DW	1280		;BPB_TotSec16
+	DB	1		;BPB_Media
+	DW	1		;BPB_FATSz16
+	DW	16		;BPB_SecPerTrk
+	DW	2		;BPB_NumHeads
+BPB_SOS2D_E:

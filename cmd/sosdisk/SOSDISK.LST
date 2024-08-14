@@ -1,0 +1,433 @@
+﻿                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.21.0, LST:Full:4
+                                ;
+                                ; S-OS Disk Driver Gaku
+                                ;
+                                ; S-OS の2D/320KBのディスクの読み込みを可能にするドライバー
+                                ;
+                                ;
+       0005                     SYSTEM  EQU $0005
+       005C                     FCB1    EQU $005C
+       006C                     FCB2    EQU $006C
+       0080                     DTA1    EQU $0080
+                                
+       007C                     _FATBF  EQU $7C
+       007E                     _DTBUF  EQU $7E
+       00A2                     _WTFATF EQU $A2
+       00EB                     _FDRD   EQU $EB
+       00EE                     _FDWT   EQU $EE
+       00FA                     _SNCL   EQU $FA
+                                
+       0002                     DPB_DRD EQU $02
+       0004                     DPB_DWT EQU $04
+       001C                     DPB_NAME    EQU $1C
+                                
+       0000                     DRIVER  EQU $0000
+                                
+       000B                     BPB_BytsPerSec  EQU 11
+                                
+000000 0100                         ORG $0100
+000000 0100 C30301          10      JP  START       ;0C3HはZ80ではJPだが、i8086ではRETなので
+       0103                     START:              ;間違えてMS-DOS環境で実行しても即終了できる
+000003 0103 118B01          10      LD  DE,MSG_TITLE
+000006 0106 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+000008 0108 CD0500          17      CALL    SYSTEM
+                                
+00000B 010B 2A0600          16      LD  HL,(SYSTEM+1)
+00000E 010E 119801          10      LD  DE,BPB_SOS2D_E-BDOS_
+000011 0111 A7               4      AND A
+000012 0112 ED52            15      SBC HL,DE
+000014 0114 F9               6      LD  SP,HL
+000015 0115 5D               4      LD  E,L     ;DE=常駐先頭アドレス
+000016 0116 54               4      LD  D,H
+                                                ;システムコールを差し替える
+000017 0117 2A0600          16      LD  HL,(SYSTEM+1)
+00001A 011A 22C401          16      LD  (DRIVER_+BDOS_SWC),HL
+                                
+00001D 011D 210000          10      LD  HL,BDOS_
+000020 0120 19              11      ADD HL,DE
+000021 0121 220600          16      LD  (SYSTEM+1),HL
+                                                ;ドライバーを差し替える
+000024 0124 3A0200          13      LD  A,(2)
+000027 0127 323801          13      LD  (FDRD_SWC1),A
+00002A 012A 324201          13      LD  (FDRD_SWC2),A
+00002D 012D 324501          13      LD  (FDWT_SWC1),A
+000030 0130 324F01          13      LD  (FDWT_SWC2),A
+000033 0133 325302          13      LD  (DRIVER_+SNCL_SWC),A
+                                
+000036 0136 2AEC00          16      LD  HL,(_FDRD+1)
+       0138                     FDRD_SWC1   EQU $-1
+000039 0139 22D301          16      LD  (DRIVER_+DRD_SWC),HL
+                                
+00003C 013C 210D00          10      LD  HL,_DRD
+00003F 013F 19              11      ADD HL,DE
+000040 0140 22EC00          16      LD  (_FDRD+1),HL
+       0142                     FDRD_SWC2   EQU $-1
+                                
+000043 0143 2AEF00          16      LD  HL,(_FDWT+1)
+       0145                     FDWT_SWC1   EQU $-1
+000046 0146 22CC01          16      LD  (DRIVER_+DWT_SWC),HL
+000049 0149 210300          10      LD  HL,_DWT
+00004C 014C 19              11      ADD HL,DE
+00004D 014D 22EF00          16      LD  (_FDWT+1),HL
+       014F                     FDWT_SWC2   EQU $-1
+                                                ;リロケータブル関連を書き換える
+000050 0150 217C01          10      LD  HL,BPB_SOS2D
+000053 0153 19              11      ADD HL,DE
+000054 0154 220D02          16      LD  (DRIVER_+BPB_SOS2D_SWC),HL
+                                
+000057 0157 215E01          10      LD  HL,DIR_NEXT
+00005A 015A 19              11      ADD HL,DE
+00005B 015B 229402          16      LD  (DRIVER_+DIR_NEXT_SWC),HL
+                                
+00005E 015E 216E01          10      LD  HL,BCD
+000061 0161 19              11      ADD HL,DE
+000062 0162 22D602          16      LD  (DRIVER_+BCD_SWC1),HL
+000065 0165 22DF02          16      LD  (DRIVER_+BCD_SWC2),HL
+000068 0168 22E902          16      LD  (DRIVER_+BCD_SWC3),HL
+00006B 016B 22FD02          16      LD  (DRIVER_+BCD_SWC4),HL
+00006E 016E 220503          16      LD  (DRIVER_+BCD_SWC5),HL
+                                
+000071 0171 21C800          10      LD  HL,RDE1
+000074 0174 19              11      ADD HL,DE
+000075 0175 222903          16      LD  (DRIVER_+RDE1_SWC),HL
+                                                    ;常駐プログラムの転送
+000078 0178 21C301          10      LD  HL,DRIVER_
+00007B 017B 019801          10      LD  BC,BPB_SOS2D_E-BDOS_
+00007E 017E EDB0                    LDIR
+                                                    ;常駐完了
+000080 0180 119B01          10      LD  DE,MSG_INSTALLED
+000083 0183 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+000085 0185 CD0500          17      CALL    SYSTEM
+000088 0188 C30000          10      JP  0
+       018B                     MSG_TITLE:
+00008B 018B 736F736469736B20        DB  "sosdisk v1.00"
+            76312E3030          
+000098 0198 0D0A                    DB  $0D,$0A
+00009A 019A 24                      DB  '$'
+       019B                     MSG_INSTALLED:
+00009B 019B 496E7374616C6C65        DB  "Installed."
+            642E                
+0000A5 01A5 0D0A                    DB  $0D,$0A
+0000A7 01A7 532D4F5320646973        DB  "S-OS disks are read-only."
+            6B73206172652072    
+            6561642D6F6E6C79    
+            2E                  
+0000C0 01C0 0D0A                    DB  $0D,$0A
+0000C2 01C2 24                      DB  '$'
+                                
+       01C3                     DRIVER_:
+0000C3 0000                         ORG DRIVER,DRIVER_-$0100    ;$PHASE
+       0000                     BDOS_:
+0000C3 0000 C30000          10      JP  0
+       0001                     BDOS_SWC    EQU $-2
+       0003                     _DWT:
+0000C6 0003 DDCB1E6E        20      BIT 5,(IX+DPB_NAME+2)
+0000CA 0007 B7               4      OR  A
+0000CB 0008 CAEE00          10      JP  Z,_FDWT
+       0009                     DWT_SWC EQU $-2
+0000CE 000B 37               4      SCF
+0000CF 000C C9              10      RET
+                                
+       000D                     _DRD:
+0000D0 000D D5              11      PUSH    DE
+0000D1 000E C5              11      PUSH    BC
+0000D2 000F CDEB00          17      CALL    _FDRD
+       0010                     DRD_SWC EQU $-2
+0000D5 0012 79               4      LD  A,C
+0000D6 0013 C1              10      POP BC
+0000D7 0014 05               4      DEC B
+0000D8 0015 C1              10      POP BC
+0000D9 0016 D8              11      RET C   ;エラー
+0000DA 0017 C0              11      RET NZ  ;読み込みセクタ数が1じゃない
+                                
+0000DB 0018 78               4      LD  A,B
+0000DC 0019 B7               4      OR  A
+0000DD 001A C0              11      RET NZ  ;BPB/FAT/RDEだけが対象
+                                
+0000DE 001B 79               4      LD  A,C
+0000DF 001C B7               4      OR  A
+0000E0 001D 203A            12      JR  NZ,FAT
+                                            ;BPB
+0000E2 001F DDCB1EAE        23      RES 5,(IX+DPB_NAME+2)
+0000E6 0023 E5              11      PUSH    HL  ;読み込んだアドレスが_FATBFかチェック
+0000E7 0024 7C               4      LD  A,H
+0000E8 0025 3D               4      DEC A
+0000E9 0026 2A0100          16      LD  HL,(1)
+0000EC 0029 2E7D             7      LD  L,_FATBF+1
+0000EE 002B 24               4      INC H
+0000EF 002C BE               7      CP  (HL)
+0000F0 002D E1              10      POP HL
+0000F1 002E 37               4      SCF     ;ZFを保ったまま
+0000F2 002F 3F               4      CCF     ;CFをクリア
+0000F3 0030 C0              11      RET NZ
+                                            ;BPBが正しいか確認
+0000F4 0031 E5              11      PUSH    HL
+0000F5 0032 010BFF          10      LD  BC,BPB_BytsPerSec-$0100
+0000F8 0035 09              11      ADD HL,BC
+0000F9 0036 7E               7      LD  A,(HL)
+0000FA 0037 E1              10      POP HL
+0000FB 0038 FE01             7      CP  1
+0000FD 003A C8              11      RET Z
+                                            ;2Dの変則フォーマットを判別
+0000FE 003B E5              11      PUSH    HL
+0000FF 003C 0120FF          10      LD  BC,$20-$0100
+000102 003F 09              11      ADD HL,BC
+000103 0040 7E               7      LD  A,(HL)
+000104 0041 E1              10      POP HL
+000105 0042 FE21             7      CP  $21
+000107 0044 C8              11      RET Z
+                                            ;S-OS向けのBPBに差し替える
+000108 0045 E5              11      PUSH    HL
+000109 0046 25               4      DEC H
+00010A 0047 D5              11      PUSH    DE
+00010B 0048 EB               4      EX  DE,HL
+00010C 0049 217C01          10      LD  HL,BPB_SOS2D
+       004A                     BPB_SOS2D_SWC   EQU $-2
+00010F 004C 011C00          10      LD  BC,BPB_SOS2D_E-BPB_SOS2D
+000112 004F EDB0                    LDIR
+000114 0051 D1              10      POP DE
+000115 0052 E1              10      POP HL
+000116 0053 DDCB1EEE        23      SET 5,(IX+DPB_NAME+2)
+00011A 0057 AF               4      XOR A   ;念のためにCF=0
+00011B 0058 C9              10      RET
+       0059                     FAT:
+                                            ;S-OSフォーマットかフラグで確認
+00011C 0059 DDCB1E6E        20      BIT 5,(IX+DPB_NAME+2)
+000120 005D C8              11      RET Z
+                                
+000121 005E 79               4      LD  A,C
+000122 005F FE0E             7      CP  14  ;FATのクラスタ番号
+000124 0061 203E            12      JR  NZ,RDE
+                                            ;FAT
+000126 0063 E5              11      PUSH    HL  ;読み込んだアドレスが_FATBFかチェック
+000127 0064 7C               4      LD  A,H
+000128 0065 3D               4      DEC A
+000129 0066 2A0100          16      LD  HL,(1)
+00012C 0069 2E7D             7      LD  L,_FATBF+1
+00012E 006B 24               4      INC H
+00012F 006C BE               7      CP  (HL)
+000130 006D E1              10      POP HL
+000131 006E 37               4      SCF     ;ZFを保ったまま
+000132 006F 3F               4      CCF     ;CFをクリア
+000133 0070 C0              11      RET NZ
+                                            ;S-OSのFATをMS-DOSのFATに変換する
+000134 0071 D5              11      PUSH    DE
+000135 0072 E5              11      PUSH    HL
+000136 0073 114F00          10      LD  DE,79
+       0076                     FAT1:
+000139 0076 2A0100          16      LD  HL,(1)
+00013C 0079 2E7C             7      LD  L,_FATBF
+00013E 007B 24               4      INC H
+00013F 007C 7E               7      LD  A,(HL)
+000140 007D 23               6      INC HL
+000141 007E 66               7      LD  H,(HL)
+000142 007F 6F               4      LD  L,A
+000143 0080 19              11      ADD HL,DE
+000144 0081 7E               7      LD  A,(HL)      ;S-OSのFAT
+000145 0082 CB7F             8      BIT 7,A
+000147 0084 2004            12      JR  NZ,FAT_EOF
+000149 0086 6F               4      LD  L,A
+00014A 0087 62               4      LD  H,D     ;D=0
+00014B 0088 1803            12      JR  FAT_OK
+       008A                     FAT_EOF:
+00014D 008A 21FFFF          10      LD  HL,$FFFF    ;EOF
+       008D                     FAT_OK:
+000150 008D D5              11      PUSH    DE
+000151 008E CDFA00          17      CALL    _SNCL
+       0090                     SNCL_SWC    EQU $-1
+000154 0091 D1              10      POP DE
+000155 0092 1D               4      DEC E
+000156 0093 CB7B             8      BIT 7,E
+000158 0095 28DF            12      JR  Z,FAT1
+00015A 0097 2A0100          16      LD  HL,(1)
+00015D 009A 2EA2             7      LD  L,_WTFATF
+00015F 009C AF               4      XOR A
+000160 009D 77               7      LD  (HL),A      ;FATへの書き込みフラグをリセット
+000161 009E E1              10      POP HL
+000162 009F D1              10      POP DE
+000163 00A0 C9              10      RET
+       00A1                     RDE:
+000164 00A1 FE10             7      CP  16  ;クラスタ番号がディレクトリエントリか確認
+000166 00A3 3F               4      CCF
+000167 00A4 D0              11      RET NC
+000168 00A5 FE20             7      CP  32
+00016A 00A7 D0              11      RET NC
+                                
+00016B 00A8 E5              11      PUSH    HL  ;読み込んだアドレスが_DTBUFかチェック
+00016C 00A9 7C               4      LD  A,H
+00016D 00AA 3D               4      DEC A
+00016E 00AB 2A0100          16      LD  HL,(1)
+000171 00AE 2E7F             7      LD  L,_DTBUF+1
+000173 00B0 24               4      INC H
+000174 00B1 BE               7      CP  (HL)
+000175 00B2 E1              10      POP HL
+000176 00B3 37               4      SCF     ;ZFを保ったまま
+000177 00B4 3F               4      CCF     ;CFをクリア
+000178 00B5 C0              11      RET NZ
+                                            ;S-OSのディレクトリエントリをMS-DOSのディレクトリエントリに変換する
+000179 00B6 D5              11      PUSH    DE
+00017A 00B7 E5              11      PUSH    HL
+00017B 00B8 DDE5            15      PUSH    IX
+00017D 00BA 010000          10      LD  BC,0    ;+$0100にS-OSのディレクトリエントリをコピーして元のアドレスをクリアする
+       00BD                     RDE_BK:
+000180 00BD 25               4      DEC H
+000181 00BE 7E               7      LD  A,(HL)
+000182 00BF 71               7      LD  (HL),C  ;C=0
+000183 00C0 24               4      INC H
+000184 00C1 77               7      LD  (HL),A
+000185 00C2 23               6      INC HL
+000186 00C3 10F8            13      DJNZ    RDE_BK
+000188 00C5 25               4      DEC H
+                                
+000189 00C6 0608             7      LD  B,8 ;1セクタに8エントリ
+       00C8                     RDE1:
+00018B 00C8 C5              11      PUSH    BC
+00018C 00C9 E5              11      PUSH    HL
+00018D 00CA 5D               4      LD  E,L
+00018E 00CB 54               4      LD  D,H
+00018F 00CC 15               4      DEC D
+000190 00CD 7E               7      LD  A,(HL)
+000191 00CE FEFF             7      CP  $FF
+000193 00D0 CA5E01          10      JP  Z,DIR_NEXT
+       00D1                     DIR_NEXT_SWC    EQU $-2
+000196 00D3 E5              11      PUSH    HL
+000197 00D4 DDE1            14      POP IX
+000199 00D6 23               6      INC HL
+                                
+00019A 00D7 B7               4      OR  A
+00019B 00D8 7E               7      LD  A,(HL)
+00019C 00D9 23               6      INC HL
+00019D 00DA 2002            12      JR  NZ,RDE_DEL
+00019F 00DC 3EE5             7      LD  A,$E5
+       00DE                     RDE_DEL:
+0001A1 00DE 12               7      LD  (DE),A
+0001A2 00DF 13               6      INC DE
+0001A3 00E0 010700          10      LD  BC,7    ;ファイル名
+0001A6 00E3 EDB0                    LDIR        ;HL:+9 DE:+8
+0001A8 00E5 010500          10      LD  BC,$0E-9
+0001AB 00E8 09              11      ADD HL,BC   ;HL:+$0E
+0001AC 00E9 010300          10      LD  BC,3    ;拡張子
+0001AF 00EC EDB0                    LDIR        ;DE:+11
+0001B1 00EE DD7E00          19      LD  A,(IX+0)    ;ファイルモード
+0001B4 00F1 4F               4      LD  C,A
+0001B5 00F2 87               4      ADD A,A
+0001B6 00F3 9F               4      SBC A,A
+0001B7 00F4 E610             7      AND $10 ;ディレクトリ
+0001B9 00F6 CB71             8      BIT 6,C ;読み出しのみ
+0001BB 00F8 2802            12      JR  Z,RDE_RO
+0001BD 00FA CBC7             8      SET 0,A
+       00FC                     RDE_RO:
+0001BF 00FC CB61             8      BIT 4,C ;隠しファイル
+0001C1 00FE 2802            12      JR  Z,RDE_HD
+0001C3 0100 CBCF             8      SET 1,A
+       0102                     RDE_HD:
+0001C5 0102 CB51             8      BIT 2,C ;Ascファイル
+0001C7 0104 2802            12      JR  Z,RDE_ASC
+0001C9 0106 CBEF             8      SET 5,A ;アーカイブ
+       0108                     RDE_ASC:
+0001CB 0108 12               7      LD  (DE),A  ;属性
+0001CC 0109 13               6      INC DE  ;DE:+12
+                                
+0001CD 010A 060A             7      LD  B,10    ;予約領域10
+       010C                     RDE2:
+0001CF 010C 13               6      INC DE
+0001D0 010D 10FD            13      DJNZ    RDE2
+                                            ;DE:+26 更新時刻
+0001D2 010F DD7E1C          19      LD  A,(IX+$1C)
+0001D5 0112 CD6E01          17      CALL    BCD ;分
+       0113                     BCD_SWC1    EQU $-2
+0001D8 0115 6F               4      LD  L,A
+0001D9 0116 29              11      ADD HL,HL
+0001DA 0117 29              11      ADD HL,HL
+0001DB 0118 DD7E1B          19      LD  A,(IX+$1B)
+0001DE 011B CD6E01          17      CALL    BCD ;時
+       011C                     BCD_SWC2    EQU $-2
+0001E1 011E 67               4      LD  H,A
+0001E2 011F 29              11      ADD HL,HL
+0001E3 0120 29              11      ADD HL,HL
+0001E4 0121 29              11      ADD HL,HL
+0001E5 0122 DD7E1D          19      LD  A,(IX+$1D)
+0001E8 0125 CD6E01          17      CALL    BCD ;秒
+       0126                     BCD_SWC3    EQU $-2
+0001EB 0128 CB3F             8      SRL A
+0001ED 012A B5               4      OR  L
+0001EE 012B 12               7      LD  (DE),A
+0001EF 012C 13               6      INC DE
+0001F0 012D 7C               4      LD  A,H
+0001F1 012E 12               7      LD  (DE),A
+0001F2 012F 13               6      INC DE
+                                            ;更新年月日
+0001F3 0130 DD7E19          19      LD  A,(IX+$19)
+0001F6 0133 E6F0             7      AND $F0
+0001F8 0135 6F               4      LD  L,A
+0001F9 0136 DD7E18          19      LD  A,(IX+$18)
+0001FC 0139 CD6E01          17      CALL    BCD ;年
+       013A                     BCD_SWC4    EQU $-2
+0001FF 013C 67               4      LD  H,A
+000200 013D 29              11      ADD HL,HL
+000201 013E DD7E1A          19      LD  A,(IX+$1A)
+000204 0141 CD6E01          17      CALL    BCD ;日
+       0142                     BCD_SWC5    EQU $-2
+000207 0144 B5               4      OR  L
+000208 0145 7D               4      LD  A,L
+000209 0146 12               7      LD  (DE),A
+00020A 0147 13               6      INC DE
+00020B 0148 7C               4      LD  A,H
+00020C 0149 12               7      LD  (DE),A
+00020D 014A 13               6      INC DE
+                                            ;ファイルの先頭クラスタ
+00020E 014B DD7E1E          19      LD  A,(IX+$1E)
+000211 014E 12               7      LD  (DE),A
+000212 014F 13               6      INC DE
+000213 0150 DD7E1F          19      LD  A,(IX+$1F)
+000216 0153 12               7      LD  (DE),A
+000217 0154 13               6      INC DE
+                                            ;ファイルのサイズ
+000218 0155 DD7E12          19      LD  A,(IX+$12)
+00021B 0158 12               7      LD  (DE),A
+00021C 0159 13               6      INC DE
+00021D 015A DD7E13          19      LD  A,(IX+$13)
+000220 015D 12               7      LD  (DE),A
+       015E                     DIR_NEXT:
+000221 015E E1              10      POP HL
+000222 015F 012000          10      LD  BC,32
+000225 0162 09              11      ADD HL,BC
+000226 0163 C1              10      POP BC
+000227 0164 05               4      DEC B
+000228 0165 C2C800          10      JP  NZ,RDE1
+       0166                     RDE1_SWC    EQU $-2
+00022B 0168 DDE1            14      POP IX
+00022D 016A E1              10      POP HL
+00022E 016B D1              10      POP DE
+00022F 016C AF               4      XOR A
+000230 016D C9              10      RET
+                                
+       016E                     BCD:
+000231 016E 4F               4      LD  C,A
+000232 016F E6F0             7      AND $F0 ;10の位
+000234 0171 0F               4      RRCA
+000235 0172 47               4      LD  B,A
+000236 0173 0F               4      RRCA
+000237 0174 0F               4      RRCA
+000238 0175 80               4      ADD A,B
+000239 0176 47               4      LD  B,A
+00023A 0177 79               4      LD  A,C
+00023B 0178 E60F             7      AND $0F ;1の位
+00023D 017A 80               4      ADD A,B
+00023E 017B C9              10      RET
+                                
+       017C                     BPB_SOS2D:      ;S-OS向けのBPB
+00023F 017C EBFE90                  DB  $EB,$FE,$90 ;BS_JmpBoot
+000242 017F 532D4F5320202020        DB  "S-OS    "  ;BS_OEMName
+00024A 0187 0001                    DW  256     ;BPB_BytsPerSec
+00024C 0189 10                      DB  16      ;BPB_SecPerClus
+00024D 018A 0E00                    DW  14      ;BPB_RsvdSecCnt
+00024F 018C 02                      DB  2       ;BPB_NumFATs
+000250 018D 8000                    DW  128     ;BPB_RootEntCnt
+000252 018F 0005                    DW  1280        ;BPB_TotSec16
+000254 0191 01                      DB  1       ;BPB_Media
+000255 0192 0100                    DW  1       ;BPB_FATSz16
+000257 0194 1000                    DW  16      ;BPB_SecPerTrk
+000259 0196 0200                    DW  2       ;BPB_NumHeads
+       0198                     BPB_SOS2D_E:
+[EOF:SOSDISK.ASM:UTF_8]

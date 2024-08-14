@@ -1,9 +1,9 @@
-                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.0.0, LST:Full:4
+                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.21.0, LST:Full:4
                                 ;
                                 ; SOSDIR Gaku
                                 ;
                                 ; S-OS Hu-BASIC(X1) の2Dディスクの一覧を見る
-                                ; 
+                                ;
                                 ;
        0005                     SYSTEM  EQU 00005H
        000B                     BASE    EQU 0000BH
@@ -18,323 +18,321 @@
        0103                     START:              ;間違えてMS-DOS環境で実行しても即終了できる
 000003 0103 0E6F             7      LD  C,06FH      ;DOSVER MSX-DOS のバージョン番号の獲得
 000005 0105 CD0500          17      CALL    SYSTEM
-000008 0108 B7               4      OR  A
-000009 0109 200E            12      JR  NZ,USAGE
-00000B 010B 211D01          10      LD  HL,011DH    ;LSX-Dodgersかどうか？
-00000E 010E ED42            15      SBC HL,BC
-000010 0110 2007            12      JR  NZ,USAGE
-000012 0112 213401          10      LD  HL,0135H-1  ;LSX-Dodgersのバージョンが1.35以上か？
-000015 0115 ED52            15      SBC HL,DE
-000017 0117 3815            12      JR  C,MAIN
-       0119                     USAGE:
-000019 0119 11E902          10      LD  DE,MSG_TITLE
-       011C                     SHOW_ERROR:
-00001C 011C 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-00001E 011E CD0500          17      CALL    SYSTEM
-000021 0121 C30000          10      JP  0
-       0124                     SHOW_NOT_FD:
-000024 0124 111E03          10      LD  DE,MSG_NOT_FD
-000027 0127 18F3            12      JR  SHOW_ERROR
-       0129                     SHOW_DISK_ERROR:
-000029 0129 113303          10      LD  DE,MSG_DISK_ERORR
-00002C 012C 18EE            12      JR  SHOW_ERROR
-       012E                     MAIN:
-00002E 012E 3A5C00          13      LD  A,(FCB1)
-000031 0131 B7               4      OR  A
-000032 0132 28E5            12      JR  Z,USAGE
-000034 0134 3D               4      DEC A
-000035 0135 2A0A00          16      LD  HL,(BASE-1)
-000038 0138 2EDC             7      LD  L,$DC       ;GETDPB
-00003A 013A CD0F00          17      CALL    JP_HL
-00003D 013D 38DA            12      JR  C,USAGE
+000008 0108 79               4      LD  A,C
+000009 0109 FE1D             7      CP  01DH    ;LSX-Dodgersかどうか？
+00000B 010B 2007            12      JR  NZ,USAGE
+00000D 010D 213401          10      LD  HL,0135H-1  ;LSX-Dodgersのバージョンが1.35以上か？
+000010 0110 ED52            15      SBC HL,DE
+000012 0112 3815            12      JR  C,MAIN
+       0114                     USAGE:
+000014 0114 11E402          10      LD  DE,MSG_TITLE
+       0117                     SHOW_ERROR:
+000017 0117 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+000019 0119 CD0500          17      CALL    SYSTEM
+00001C 011C C30000          10      JP  0
+       011F                     SHOW_NOT_FD:
+00001F 011F 111903          10      LD  DE,MSG_NOT_FD
+000022 0122 18F3            12      JR  SHOW_ERROR
+       0124                     SHOW_DISK_ERROR:
+000024 0124 112E03          10      LD  DE,MSG_DISK_ERORR
+000027 0127 18EE            12      JR  SHOW_ERROR
+       0129                     MAIN:
+000029 0129 3A5C00          13      LD  A,(FCB1)
+00002C 012C B7               4      OR  A
+00002D 012D 28E5            12      JR  Z,USAGE
+00002F 012F 3D               4      DEC A
+000030 0130 2A0A00          16      LD  HL,(BASE-1)
+000033 0133 2EDC             7      LD  L,$DC       ;GETDPB
+000035 0135 CD0F00          17      CALL    JP_HL
+000038 0138 38DA            12      JR  C,USAGE
                                 
-00003F 013F DD7E12          19      LD  A,(IX+12H)  ;デバイス情報(DPB_12_DEVICE)
-000042 0142 E62F             7      AND 2FH
-000044 0144 FE27             7      CP  27H     ;BPB+フロッピー
-000046 0146 20DC            12      JR  NZ,SHOW_NOT_FD
+00003A 013A DD7E12          19      LD  A,(IX+12H)  ;デバイス情報(DPB_12_DEVICE)
+00003D 013D E62F             7      AND 2FH
+00003F 013F FE27             7      CP  27H     ;BPB+フロッピー
+000041 0141 20DC            12      JR  NZ,SHOW_NOT_FD
                                 
                                                 ;DPBをS-OS用に書き換える(BPBを使って元に戻すのでそのままでOK)
-000048 0148 DD360AFF        19      LD  (IX+0AH),0FFH   ;フロッピーディスクのモード(DPB_0A_FDMODE) 2D
-00004C 014C DD360D10        19      LD  (IX+0DH),16 ;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
-000050 0150 DD360F01        19      LD  (IX+0FH),1  ;FAT情報と論理セクタのサイズ(DPB_0F_BPS)
+000043 0143 DD360AFF        19      LD  (IX+0AH),0FFH   ;フロッピーディスクのモード(DPB_0A_FDMODE) 2D
+000047 0147 DD360D10        19      LD  (IX+0DH),16 ;フロッピーディスクの1トラックのセクタ数(DPB_0D_MAXSEC)
+00004B 014B DD360F01        19      LD  (IX+0FH),1  ;FAT情報と論理セクタのサイズ(DPB_0F_BPS)
                                 
                                                 ;FATを読み込む
-000054 0154 114103          10      LD  DE,DATA
-000057 0157 0E1A             7      LD  C,1AH       ; DTAの設定 CP/M MSX-DOS
-000059 0159 CD0500          17      CALL    SYSTEM
+00004F 014F 113C03          10      LD  DE,DATA
+000052 0152 0E1A             7      LD  C,1AH       ; DTAの設定 CP/M MSX-DOS
+000054 0154 CD0500          17      CALL    SYSTEM
                                 
-00005C 015C 110E00          10      LD  DE,0EH      ;読み出しを開始する論理セクタ番号
-00005F 015F 2601             7      LD  H,1     ;読み出す論理セクタの数
-000061 0161 3A5C00          13      LD  A,(FCB1)
-000064 0164 3D               4      DEC A
-000065 0165 6F               4      LD  L,A     ;読み出すディスクドライブの番号 MSX-DOS
-000066 0166 0E2F             7      LD  C,2FH       ;論理セクタを用いた読み出し
-000068 0168 CD0500          17      CALL    SYSTEM
-00006B 016B B7               4      OR  A
-00006C 016C 20BB            12      JR  NZ,SHOW_DISK_ERROR
+000057 0157 110E00          10      LD  DE,0EH      ;読み出しを開始する論理セクタ番号
+00005A 015A 2601             7      LD  H,1     ;読み出す論理セクタの数
+00005C 015C 3A5C00          13      LD  A,(FCB1)
+00005F 015F 3D               4      DEC A
+000060 0160 6F               4      LD  L,A     ;読み出すディスクドライブの番号 MSX-DOS
+000061 0161 0E2F             7      LD  C,2FH       ;論理セクタを用いた読み出し
+000063 0163 CD0500          17      CALL    SYSTEM
+000066 0166 B7               4      OR  A
+000067 0167 20BB            12      JR  NZ,SHOW_DISK_ERROR
                                                 ;空きクラスタを数える
-00006E 016E 3E24             7      LD  A,'$'
-000070 0170 CDC602          17      CALL    CONOUT_A
-000073 0173 010000          10      LD  BC,0
-000076 0176 214103          10      LD  HL,DATA
-       0179                     FAT1:
-000079 0179 7E               7      LD  A,(HL)
-00007A 017A 23               6      INC HL
-00007B 017B B7               4      OR  A
-00007C 017C 2001            12      JR  NZ,EXISTS
-00007E 017E 0C               4      INC C
-       017F                     EXISTS:
-00007F 017F 10F8            13      DJNZ    FAT1
+000069 0169 3E24             7      LD  A,'$'
+00006B 016B CDC102          17      CALL    CONOUT_A
+00006E 016E 010050          10      LD  BC,$5000
+000071 0171 213C03          10      LD  HL,DATA
+       0174                     FAT1:
+000074 0174 7E               7      LD  A,(HL)
+000075 0175 23               6      INC HL
+000076 0176 B7               4      OR  A
+000077 0177 2001            12      JR  NZ,EXISTS
+000079 0179 0C               4      INC C
+       017A                     EXISTS:
+00007A 017A 10F8            13      DJNZ    FAT1
                                 
-000081 0181 79               4      LD  A,C
-000082 0182 CDAD02          17      CALL    PRHEX
+00007C 017C 79               4      LD  A,C
+00007D 017D CDA802          17      CALL    PRHEX
                                 
-000085 0185 110D03          10      LD  DE,MSG_CLUSTER
-000088 0188 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-00008A 018A CD0500          17      CALL    SYSTEM
+000080 0180 110803          10      LD  DE,MSG_CLUSTER
+000083 0183 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+000085 0185 CD0500          17      CALL    SYSTEM
                                 
                                                 ;ディレクトリ一覧を読み込む
-00008D 018D 111000          10      LD  DE,10H      ;読み出しを開始する論理セクタ番号
-000090 0190 2610             7      LD  H,10H       ;読み出す論理セクタの数
-000092 0192 3A5C00          13      LD  A,(FCB1)
-000095 0195 3D               4      DEC A
-000096 0196 6F               4      LD  L,A     ;読み出すディスクドライブの番号 MSX-DOS
-000097 0197 0E2F             7      LD  C,2FH       ;論理セクタを用いた読み出し
-000099 0199 CD0500          17      CALL    SYSTEM
-00009C 019C B7               4      OR  A
-00009D 019D 208A            12      JR  NZ,SHOW_DISK_ERROR
+000088 0188 111000          10      LD  DE,10H      ;読み出しを開始する論理セクタ番号
+00008B 018B 2610             7      LD  H,10H       ;読み出す論理セクタの数
+00008D 018D 3A5C00          13      LD  A,(FCB1)
+000090 0190 3D               4      DEC A
+000091 0191 6F               4      LD  L,A     ;読み出すディスクドライブの番号 MSX-DOS
+000092 0192 0E2F             7      LD  C,2FH       ;論理セクタを用いた読み出し
+000094 0194 CD0500          17      CALL    SYSTEM
+000097 0197 B7               4      OR  A
+000098 0198 208A            12      JR  NZ,SHOW_DISK_ERROR
                                 
                                                 ;ディレクトリ一覧の表示
-00009F 019F FD214103        14      LD  IY,DATA
-0000A3 01A3 3E80             7      LD  A,128
-       01A5                     DIR1:
-0000A5 01A5 08               4      EX  AF,AF'
-0000A6 01A6 FDE5            15      PUSH    IY
-0000A8 01A8 E1              10      POP HL
-0000A9 01A9 11D502          10      LD  DE,MSG_UNK
-0000AC 01AC 7E               7      LD  A,(HL)  ;属性
-0000AD 01AD FEFF             7      CP  0FFH
-0000AF 01AF CA0000          10      JP  Z,0     ;ディレクトリエントリの終わり
-0000B2 01B2 B7               4      OR  A
-0000B3 01B3 CAA002          10      JP  Z,SKIP_DIR
+00009A 019A FD213C03        14      LD  IY,DATA
+00009E 019E 3E80             7      LD  A,128
+       01A0                     DIR1:
+0000A0 01A0 08               4      EX  AF,AF'
+0000A1 01A1 FDE5            15      PUSH    IY
+0000A3 01A3 E1              10      POP HL
+0000A4 01A4 11D002          10      LD  DE,MSG_UNK
+0000A7 01A7 7E               7      LD  A,(HL)  ;属性
+0000A8 01A8 FEFF             7      CP  0FFH
+0000AA 01AA CA0000          10      JP  Z,0     ;ディレクトリエントリの終わり
+0000AD 01AD B7               4      OR  A
+0000AE 01AE CA9B02          10      JP  Z,SKIP_DIR
                                 
-0000B6 01B6 E687             7      AND 087H
-0000B8 01B8 FE01             7      CP  1
-0000BA 01BA 2003            12      JR  NZ,NOTBIN
-0000BC 01BC 11D902          10      LD  DE,MSG_BIN
-       01BF                     NOTBIN:
-0000BF 01BF FE02             7      CP  2
-0000C1 01C1 2003            12      JR  NZ,NOTBAS
-0000C3 01C3 11DD02          10      LD  DE,MSG_BAS
-       01C6                     NOTBAS:
-0000C6 01C6 FE04             7      CP  4
-0000C8 01C8 2003            12      JR  NZ,NOTASC
-0000CA 01CA 11E102          10      LD  DE,MSG_ASC
-       01CD                     NOTASC:
-0000CD 01CD FE80             7      CP  080H
-0000CF 01CF 2003            12      JR  NZ,NOTDIR
-0000D1 01D1 11E502          10      LD  DE,MSG_DIR
-       01D4                     NOTDIR:
-0000D4 01D4 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-0000D6 01D6 CD0500          17      CALL    SYSTEM
+0000B1 01B1 E687             7      AND 087H
+0000B3 01B3 FE01             7      CP  1
+0000B5 01B5 2003            12      JR  NZ,NOTBIN
+0000B7 01B7 11D402          10      LD  DE,MSG_BIN
+       01BA                     NOTBIN:
+0000BA 01BA FE02             7      CP  2
+0000BC 01BC 2003            12      JR  NZ,NOTBAS
+0000BE 01BE 11D802          10      LD  DE,MSG_BAS
+       01C1                     NOTBAS:
+0000C1 01C1 FE04             7      CP  4
+0000C3 01C3 2003            12      JR  NZ,NOTASC
+0000C5 01C5 11DC02          10      LD  DE,MSG_ASC
+       01C8                     NOTASC:
+0000C8 01C8 FE80             7      CP  080H
+0000CA 01CA 2003            12      JR  NZ,NOTDIR
+0000CC 01CC 11E002          10      LD  DE,MSG_DIR
+       01CF                     NOTDIR:
+0000CF 01CF 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+0000D1 01D1 CD0500          17      CALL    SYSTEM
                                 
-0000D9 01D9 3E20             7      LD  A,020H
-0000DB 01DB CB76            13      BIT 6,(HL)
-0000DD 01DD 2802            12      JR  Z,NOT_READONLY
-0000DF 01DF 3E2A             7      LD  A,'*'
-       01E1                     NOT_READONLY:
-0000E1 01E1 CB66            13      BIT 4,(HL)
-0000E3 01E3 2802            12      JR  Z,NOT_HIDDEN
-0000E5 01E5 3E2D             7      LD  A,'-'
-       01E7                     NOT_HIDDEN:
-0000E7 01E7 CDC602          17      CALL    CONOUT_A
+0000D4 01D4 3E20             7      LD  A,020H
+0000D6 01D6 CB76            13      BIT 6,(HL)
+0000D8 01D8 2802            12      JR  Z,NOT_READONLY
+0000DA 01DA 3E2A             7      LD  A,'*'
+       01DC                     NOT_READONLY:
+0000DC 01DC CB66            13      BIT 4,(HL)
+0000DE 01DE 2802            12      JR  Z,NOT_HIDDEN
+0000E0 01E0 3E2D             7      LD  A,'-'
+       01E2                     NOT_HIDDEN:
+0000E2 01E2 CDC102          17      CALL    CONOUT_A
                                 
-0000EA 01EA 3E20             7      LD  A,020H
-0000EC 01EC CDC602          17      CALL    CONOUT_A
+0000E5 01E5 3E20             7      LD  A,020H
+0000E7 01E7 CDC102          17      CALL    CONOUT_A
                                                 ;ドライブを表示
-0000EF 01EF 3A5C00          13      LD  A,(FCB1)
-0000F2 01F2 C640             7      ADD A,'A'-1
-0000F4 01F4 CDC602          17      CALL    CONOUT_A
-0000F7 01F7 3E3A             7      LD  A,':'
-0000F9 01F9 CDC602          17      CALL    CONOUT_A
+0000EA 01EA 3A5C00          13      LD  A,(FCB1)
+0000ED 01ED C640             7      ADD A,'A'-1
+0000EF 01EF CDC102          17      CALL    CONOUT_A
+0000F2 01F2 3E3A             7      LD  A,':'
+0000F4 01F4 CDC102          17      CALL    CONOUT_A
                                                 ;ファイル名
-0000FC 01FC 060D             7      LD  B,13
-       01FE                     FILE_NAME:
-0000FE 01FE 23               6      INC HL
-0000FF 01FF 7E               7      LD  A,(HL)
-000100 0200 CDC602          17      CALL    CONOUT_A
-000103 0203 10F9            13      DJNZ    FILE_NAME
+0000F7 01F7 060D             7      LD  B,13
+       01F9                     FILE_NAME:
+0000F9 01F9 23               6      INC HL
+0000FA 01FA 7E               7      LD  A,(HL)
+0000FB 01FB CDC102          17      CALL    CONOUT_A
+0000FE 01FE 10F9            13      DJNZ    FILE_NAME
                                                 ;拡張子
-000105 0205 3E2E             7      LD  A,'.'
-000107 0207 CDC602          17      CALL    CONOUT_A
+000100 0200 3E2E             7      LD  A,'.'
+000102 0202 CDC102          17      CALL    CONOUT_A
                                 
-00010A 020A 0603             7      LD  B,3
-       020C                     FILE_EXT:
-00010C 020C 23               6      INC HL
-00010D 020D 7E               7      LD  A,(HL)
-00010E 020E CDC602          17      CALL    CONOUT_A
-000111 0211 10F9            13      DJNZ    FILE_EXT
+000105 0205 0603             7      LD  B,3
+       0207                     FILE_EXT:
+000107 0207 23               6      INC HL
+000108 0208 7E               7      LD  A,(HL)
+000109 0209 CDC102          17      CALL    CONOUT_A
+00010C 020C 10F9            13      DJNZ    FILE_EXT
                                 
-000113 0213 3E3A             7      LD  A,':'
-000115 0215 CDC602          17      CALL    CONOUT_A
+00010E 020E 3E3A             7      LD  A,':'
+000110 0210 CDC102          17      CALL    CONOUT_A
                                                 ;先頭アドレス
-000118 0218 FD7E15          19      LD  A,(IY+21)
-00011B 021B 67               4      LD  H,A
-00011C 021C CDAD02          17      CALL    PRHEX
-00011F 021F FD7E14          19      LD  A,(IY+20)
-000122 0222 6F               4      LD  L,A
-000123 0223 CDAD02          17      CALL    PRHEX
+000113 0213 FD7E15          19      LD  A,(IY+21)
+000116 0216 67               4      LD  H,A
+000117 0217 CDA802          17      CALL    PRHEX
+00011A 021A FD7E14          19      LD  A,(IY+20)
+00011D 021D 6F               4      LD  L,A
+00011E 021E CDA802          17      CALL    PRHEX
                                 
-000126 0226 3E3A             7      LD  A,':'
-000128 0228 CDC602          17      CALL    CONOUT_A
+000121 0221 3E3A             7      LD  A,':'
+000123 0223 CDC102          17      CALL    CONOUT_A
                                                 ;終了アドレス
-00012B 022B FD5E12          19      LD  E,(IY+18)   ;ファイルサイズ
-00012E 022E FD5613          19      LD  D,(IY+19)
-000131 0231 19              11      ADD HL,DE
-000132 0232 2B               6      DEC HL
-000133 0233 7C               4      LD  A,H
-000134 0234 CDAD02          17      CALL    PRHEX
-000137 0237 7D               4      LD  A,L
-000138 0238 CDAD02          17      CALL    PRHEX
+000126 0226 FD5E12          19      LD  E,(IY+18)   ;ファイルサイズ
+000129 0229 FD5613          19      LD  D,(IY+19)
+00012C 022C 19              11      ADD HL,DE
+00012D 022D 2B               6      DEC HL
+00012E 022E 7C               4      LD  A,H
+00012F 022F CDA802          17      CALL    PRHEX
+000132 0232 7D               4      LD  A,L
+000133 0233 CDA802          17      CALL    PRHEX
                                 
-00013B 023B 3E3A             7      LD  A,':'
-00013D 023D CDC602          17      CALL    CONOUT_A
+000136 0236 3E3A             7      LD  A,':'
+000138 0238 CDC102          17      CALL    CONOUT_A
                                                 ;実行アドレス
-000140 0240 FD7E17          19      LD  A,(IY+23)
-000143 0243 67               4      LD  H,A
-000144 0244 CDAD02          17      CALL    PRHEX
-000147 0247 FD7E16          19      LD  A,(IY+22)
-00014A 024A 6F               4      LD  L,A
-00014B 024B CDAD02          17      CALL    PRHEX
+00013B 023B FD7E17          19      LD  A,(IY+23)
+00013E 023E 67               4      LD  H,A
+00013F 023F CDA802          17      CALL    PRHEX
+000142 0242 FD7E16          19      LD  A,(IY+22)
+000145 0245 6F               4      LD  L,A
+000146 0246 CDA802          17      CALL    PRHEX
                                 
-00014E 024E 3E20             7      LD  A,' '
-000150 0250 CDC602          17      CALL    CONOUT_A
+000149 0249 3E20             7      LD  A,' '
+00014B 024B CDC102          17      CALL    CONOUT_A
                                                 ;年
-000153 0253 FD7E18          19      LD  A,(IY+24)
-000156 0256 B7               4      OR  A
-000157 0257 283F            12      JR  Z,SKIP_DATETIME
-000159 0259 FEFF             7      CP  0FFH
-00015B 025B 283B            12      JR  Z,SKIP_DATETIME
-00015D 025D CDAD02          17      CALL    PRHEX
-000160 0260 3E2D             7      LD  A,'-'
-000162 0262 CDC602          17      CALL    CONOUT_A
+00014E 024E FD7E18          19      LD  A,(IY+24)
+000151 0251 B7               4      OR  A
+000152 0252 283F            12      JR  Z,SKIP_DATETIME
+000154 0254 FEFF             7      CP  0FFH
+000156 0256 283B            12      JR  Z,SKIP_DATETIME
+000158 0258 CDA802          17      CALL    PRHEX
+00015B 025B 3E2D             7      LD  A,'-'
+00015D 025D CDC102          17      CALL    CONOUT_A
                                                 ;月
-000165 0265 FD7E19          19      LD  A,(IY+25)
-000168 0268 0F               4      RRCA
-000169 0269 0F               4      RRCA
-00016A 026A 0F               4      RRCA
-00016B 026B 0F               4      RRCA
-00016C 026C E60F             7      AND 0FH
-00016E 026E FE0A             7      CP  10
-000170 0270 3802            12      JR  C,UNDER10
-000172 0272 C606             7      ADD A,010H-10
-       0274                     UNDER10:
-000174 0274 CDAD02          17      CALL    PRHEX
+000160 0260 FD7E19          19      LD  A,(IY+25)
+000163 0263 0F               4      RRCA
+000164 0264 0F               4      RRCA
+000165 0265 0F               4      RRCA
+000166 0266 0F               4      RRCA
+000167 0267 E60F             7      AND 0FH
+000169 0269 FE0A             7      CP  10
+00016B 026B 3802            12      JR  C,UNDER10
+00016D 026D C606             7      ADD A,010H-10
+       026F                     UNDER10:
+00016F 026F CDA802          17      CALL    PRHEX
                                 
-000177 0277 3E2D             7      LD  A,'-'
-000179 0279 CDC602          17      CALL    CONOUT_A
+000172 0272 3E2D             7      LD  A,'-'
+000174 0274 CDC102          17      CALL    CONOUT_A
                                                 ;日
-00017C 027C FD7E1A          19      LD  A,(IY+26)
-00017F 027F CDAD02          17      CALL    PRHEX
+000177 0277 FD7E1A          19      LD  A,(IY+26)
+00017A 027A CDA802          17      CALL    PRHEX
                                 
-000182 0282 3E20             7      LD  A,' '
-000184 0284 CDC602          17      CALL    CONOUT_A
+00017D 027D 3E20             7      LD  A,' '
+00017F 027F CDC102          17      CALL    CONOUT_A
                                                 ;時
-000187 0287 FD7E1B          19      LD  A,(IY+27)
-00018A 028A CDAD02          17      CALL    PRHEX
+000182 0282 FD7E1B          19      LD  A,(IY+27)
+000185 0285 CDA802          17      CALL    PRHEX
                                 
-00018D 028D 3E3A             7      LD  A,':'
-00018F 028F CDC602          17      CALL    CONOUT_A
+000188 0288 3E3A             7      LD  A,':'
+00018A 028A CDC102          17      CALL    CONOUT_A
                                                 ;分
-000192 0292 FD7E1C          19      LD  A,(IY+28)
-000195 0295 CDAD02          17      CALL    PRHEX
+00018D 028D FD7E1C          19      LD  A,(IY+28)
+000190 0290 CDA802          17      CALL    PRHEX
                                 
-       0298                     SKIP_DATETIME:
-000198 0298 110A03          10      LD  DE,CRLF     ;改行
-00019B 029B 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
-00019D 029D CD0500          17      CALL    SYSTEM
-       02A0                     SKIP_DIR:
-0001A0 02A0 112000          10      LD  DE,32
-0001A3 02A3 FD19            15      ADD IY,DE
-0001A5 02A5 08               4      EX  AF,AF'
-0001A6 02A6 3D               4      DEC A
-0001A7 02A7 C2A501          10      JP  NZ,DIR1
+       0293                     SKIP_DATETIME:
+000193 0293 110503          10      LD  DE,CRLF     ;改行
+000196 0296 0E09             7      LD  C,9     ;STROUT 文字列出力 CP/M
+000198 0298 CD0500          17      CALL    SYSTEM
+       029B                     SKIP_DIR:
+00019B 029B 112000          10      LD  DE,32
+00019E 029E FD19            15      ADD IY,DE
+0001A0 02A0 08               4      EX  AF,AF'
+0001A1 02A1 3D               4      DEC A
+0001A2 02A2 C2A001          10      JP  NZ,DIR1
                                 
-0001AA 02AA C30000          10      JP  0
+0001A5 02A5 C30000          10      JP  0
                                 
                                 ;16進数を表示
                                 ;in
                                 ;A : 表示する値
-       02AD                     PRHEX:
-0001AD 02AD 0602             7      LD  B,2
-0001AF 02AF 324003          13      LD  (HEXBF),A
-0001B2 02B2 214003          10      LD  HL,HEXBF
-       02B5                     PRHEX1:
-0001B5 02B5 AF               4      XOR A
-0001B6 02B6 ED6F            18      RLD
-0001B8 02B8 FE0A             7      CP  10
-0001BA 02BA 3802            12      JR  C,PRHEX2
-0001BC 02BC C607             7      ADD A,'A'-'0'-10
-       02BE                     PRHEX2:
-0001BE 02BE C630             7      ADD A,'0'
-0001C0 02C0 CDC602          17      CALL    CONOUT_A
-0001C3 02C3 10F0            13      DJNZ    PRHEX1
-0001C5 02C5 C9              10      RET
+       02A8                     PRHEX:
+0001A8 02A8 0602             7      LD  B,2
+0001AA 02AA 323B03          13      LD  (HEXBF),A
+0001AD 02AD 213B03          10      LD  HL,HEXBF
+       02B0                     PRHEX1:
+0001B0 02B0 AF               4      XOR A
+0001B1 02B1 ED6F            18      RLD
+0001B3 02B3 FE0A             7      CP  10
+0001B5 02B5 3802            12      JR  C,PRHEX2
+0001B7 02B7 C607             7      ADD A,'A'-'0'-10
+       02B9                     PRHEX2:
+0001B9 02B9 C630             7      ADD A,'0'
+0001BB 02BB CDC102          17      CALL    CONOUT_A
+0001BE 02BE 10F0            13      DJNZ    PRHEX1
+0001C0 02C0 C9              10      RET
                                 
                                 ;コンソール出力
                                 ;in
                                 ;A :表示する文字
-       02C6                     CONOUT_A:
-0001C6 02C6 F5              11      PUSH    AF
-0001C7 02C7 C5              11      PUSH    BC
-0001C8 02C8 D5              11      PUSH    DE
-0001C9 02C9 E5              11      PUSH    HL
-0001CA 02CA 5F               4      LD  E,A
-0001CB 02CB 0E02             7      LD  C,2     ;CONOUT コンソール出力 CP/M
-0001CD 02CD CD0500          17      CALL    SYSTEM
-0001D0 02D0 E1              10      POP HL
-0001D1 02D1 D1              10      POP DE
-0001D2 02D2 C1              10      POP BC
-0001D3 02D3 F1              10      POP AF
-0001D4 02D4 C9              10      RET
+       02C1                     CONOUT_A:
+0001C1 02C1 F5              11      PUSH    AF
+0001C2 02C2 C5              11      PUSH    BC
+0001C3 02C3 D5              11      PUSH    DE
+0001C4 02C4 E5              11      PUSH    HL
+0001C5 02C5 5F               4      LD  E,A
+0001C6 02C6 0E02             7      LD  C,2     ;CONOUT コンソール出力 CP/M
+0001C8 02C8 CD0500          17      CALL    SYSTEM
+0001CB 02CB E1              10      POP HL
+0001CC 02CC D1              10      POP DE
+0001CD 02CD C1              10      POP BC
+0001CE 02CE F1              10      POP AF
+0001CF 02CF C9              10      RET
                                 
-       02D5                     MSG_UNK:
-0001D5 02D5 3F3F3F24                DB  "???$"
-       02D9                     MSG_BIN:
-0001D9 02D9 42696E24                DB  "Bin$"
-       02DD                     MSG_BAS:
-0001DD 02DD 42617324                DB  "Bas$"
-       02E1                     MSG_ASC:
-0001E1 02E1 41736324                DB  "Asc$"
-       02E5                     MSG_DIR:
-0001E5 02E5 44697224                DB  "Dir$"
+       02D0                     MSG_UNK:
+0001D0 02D0 3F3F3F24                DB  "???$"
+       02D4                     MSG_BIN:
+0001D4 02D4 42696E24                DB  "Bin$"
+       02D8                     MSG_BAS:
+0001D8 02D8 42617324                DB  "Bas$"
+       02DC                     MSG_ASC:
+0001DC 02DC 41736324                DB  "Asc$"
+       02E0                     MSG_DIR:
+0001E0 02E0 44697224                DB  "Dir$"
                                 
                                 
-       02E9                     MSG_TITLE:
-0001E9 02E9 736F736469722076        DB  "sosdir v1.00",00DH,00AH
-            312E30300D0A        
-0001F7 02F7 75736167653A2053        DB  "usage: SOSDIR drive"
+       02E4                     MSG_TITLE:
+0001E4 02E4 736F736469722076        DB  "sosdir v1.01",00DH,00AH
+            312E30310D0A        
+0001F2 02F2 75736167653A2053        DB  "usage: SOSDIR drive"
             4F53444952206472    
             697665              
-       030A                     CRLF:
-00020A 030A 0D0A                    DB  00DH,00AH
-00020C 030C 24                      DB  '$'
-       030D                     MSG_CLUSTER:
-00020D 030D 20436C7573746572        DB  " Clusters Free"
+       0305                     CRLF:
+000205 0305 0D0A                    DB  00DH,00AH
+000207 0307 24                      DB  '$'
+       0308                     MSG_CLUSTER:
+000208 0308 20436C7573746572        DB  " Clusters Free"
             732046726565        
-00021B 031B 0D0A                    DB  00DH,00AH
-00021D 031D 24                      DB  '$'
-       031E                     MSG_NOT_FD:
-00021E 031E 4E6F74206120666C        DB  "Not a floppy drive"
+000216 0316 0D0A                    DB  00DH,00AH
+000218 0318 24                      DB  '$'
+       0319                     MSG_NOT_FD:
+000219 0319 4E6F74206120666C        DB  "Not a floppy drive"
             6F70707920647269    
             7665                
-000230 0330 0D0A                    DB  00DH,00AH
-000232 0332 24                      DB  '$'
-       0333                     MSG_DISK_ERORR:
-000233 0333 4469736B20657272        DB  "Disk error"
+00022B 032B 0D0A                    DB  00DH,00AH
+00022D 032D 24                      DB  '$'
+       032E                     MSG_DISK_ERORR:
+00022E 032E 4469736B20657272        DB  "Disk error"
             6F72                
-00023D 033D 0D0A                    DB  00DH,00AH
-00023F 033F 24                      DB  '$'
-       0340                     HEXBF:
-       0341                     DATA    EQU HEXBF+1
+000238 0338 0D0A                    DB  00DH,00AH
+00023A 033A 24                      DB  '$'
+       033B                     HEXBF:
+       033C                     DATA    EQU HEXBF+1
 [EOF:SOSDIR.ASM:SHIFT_JIS]
