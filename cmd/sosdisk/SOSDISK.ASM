@@ -99,7 +99,7 @@ FDWT_SWC2	EQU	$-1
 	CALL	SYSTEM
 	JP	0
 MSG_TITLE:
-	DB	"sosdisk v1.00"
+	DB	"sosdisk v1.01"
 	DB	$0D,$0A
 	DB	'$'
 MSG_INSTALLED:
@@ -116,7 +116,6 @@ BDOS_:
 BDOS_SWC	EQU	$-2
 _DWT:
 	BIT	5,(IX+DPB_NAME+2)
-	OR	A
 	JP	Z,_FDWT
 DWT_SWC	EQU	$-2
 	SCF
