@@ -1,0 +1,30 @@
+;*** AILZ80ASM *** Z-80 Assembler, version 1.0.21.0, EQU
+#pragma once
+
+READDISKEX_H    equ 070H
+DTBUF           equ 08400H
+FATBF           equ 0F800H
+PUTCOM          equ 037CCH
+PUTDAT          equ 037D2H
+GETDAT          equ 03847H
+EXEC            equ $FD00
+EXEC88          equ $FD04
+DIR1            equ $FD12
+FILE1           equ $FD1E
+COMP            equ $FD22
+COMP1           equ $FD2B
+FILE2           equ $FD36
+RDD1            equ $FD41
+PC88RAM         equ $FD58
+PC88OUT         equ $FD5A
+GNCL            equ $FD75
+GNC1            equ $FD89
+GNC1L           equ $FD90
+DRDC            equ $FD97
+DRDC_1          equ $FD9D
+DRDC_2          equ $FDA2
+READ_DISK_1     equ $FDB2
+READ_DISK       equ $FDB4
+TRANS10         equ $FDE9
+FNAME           equ $FDF4
+

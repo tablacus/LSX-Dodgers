@@ -1,0 +1,222 @@
+﻿                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.21.0, LST:Full:4
+                                ;
+                                ;   デュアルブート sector 1
+                                ;
+                                
+                                INCLUDE     "BOOT_10.EQU"
+                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.21.0, EQU
+                                #pragma once
+                                
+       0070                     READDISKEX_H    equ 070H
+       8400                     DTBUF           equ 08400H
+       F800                     FATBF           equ 0F800H
+       37CC                     PUTCOM          equ 037CCH
+       37D2                     PUTDAT          equ 037D2H
+       3847                     GETDAT          equ 03847H
+       FD00                     EXEC            equ $FD00
+       FD04                     EXEC88          equ $FD04
+       FD12                     DIR1            equ $FD12
+       FD1E                     FILE1           equ $FD1E
+       FD22                     COMP            equ $FD22
+       FD2B                     COMP1           equ $FD2B
+       FD36                     FILE2           equ $FD36
+       FD41                     RDD1            equ $FD41
+       FD58                     PC88RAM         equ $FD58
+       FD5A                     PC88OUT         equ $FD5A
+       FD75                     GNCL            equ $FD75
+       FD89                     GNC1            equ $FD89
+       FD90                     GNC1L           equ $FD90
+       FD97                     DRDC            equ $FD97
+       FD9D                     DRDC_1          equ $FD9D
+       FDA2                     DRDC_2          equ $FDA2
+       FDB2                     READ_DISK_1     equ $FDB2
+       FDB4                     READ_DISK       equ $FDB4
+       FDE9                     TRANS10         equ $FDE9
+       FDF4                     FNAME           equ $FDF4
+                                
+[EOF:BOOT_10.EQU:UTF_8]
+                                
+       C000                     MAINADDR    EQU 0C000H
+       5000                     SUBADDR     EQU 05000H
+                                
+                                ;   ディスクサブシステム
+       002A                     MAIN        EQU 0002AH
+       0045                     CHECKRESULT EQU 00045H
+       040E                     MAPDRV      EQU 0040EH
+       06A6                     GETPARAM    EQU 006A6H
+       07D6                     SEEK_AND_WAIT   EQU 007D6H
+                                
+       4000                     DSS_DATA    EQU 04000H
+                                
+       7000                     DSS_TO      EQU 07000H
+                                
+       7F14                     CMD_STATUS  EQU 07F14H
+                                
+                                ;
+                                ;   X1は ブートセクタ 0FE00H に読み込まれブートフラグや拡張子(Sys)をチェックして
+                                ;   以下の開始セクタから読込アドレスにデータサイズ読み込まれ、実行アドレスから実行する
+                                ;
+                                ;   88は 0C000H から256バイト読み込まれ 0C000H から実行する
+                                ;   サブシステム側の 05000H にも読み込まれている
+                                ;
+000000 C000                         ORG MAINADDR
+000000 C000 014C44          10      LD  BC,0444CH   ;01 4C 44   ※X1は先頭バイトが1である必要がある（ブートフラグ）
+000003 C003 37               4      SCF     ;37         ※X1で2～14バイト目はIPLで表示されるラベルになるので文字になるようにしておく
+000004 C004 3828            12      JR  C,START ;38 28          ※88でブートプログラムにジャンプさせる
+000006 C006 49504C2020202020        DB  "IPL     "
+00000E C00E 537973                  DB  "Sys"   ;拡張子         ※X1で起動するために"Sys"である必要がある
+000011 C011 20                      DB  020H    ;パスワード(通常は20h)
+000012 C012 0001                    DW  256 ;データサイズ（下位,上位の順）
+000014 C014 00FD                    DW  EXEC    ;読込アドレス（下位,上位の順）
+000016 C016 00FD                    DW  EXEC    ;実行アドレス（下位,上位の順）
+000018 C018 00                      DB  0   ;年...西暦の下位2桁をBCD形式
+000019 C019 00                      DB  0   ;月,曜日...上位4bitが月、下位が曜日
+00001A C01A 00                      DB  0   ;日...BCD形式
+00001B C01B 00                      DB  0   ;時...BCD形式
+00001C C01C C7              12      RST 0   ;分...BCD形式
+00001D C01D 000900                  DB  0,9,0   ;開始セクタ
+       C020                     DISK_SUB_SYSTEM:
+                                ;   ディスクサブシステムの05000Hからセクタ1の内容が読み込まれているので転送する
+       5020                     DSS EQU DISK_SUB_SYSTEM-07000H
+                                
+000020 C020 219C50          10      LD  HL,DSS_MAIN-MAINADDR+SUBADDR
+000023 C023 110070          10      LD  DE,DSS_TO
+000026 C026 016200          10      LD  BC,DSS_LAST-DSS_TO
+000029 C029 EDB0                    LDIR
+00002B C02B C32A00          10      JP  MAIN
+                                                ;88ブートプログラム
+       C02E                     START:
+00002E C02E F3               4      DI
+00002F C02F DB32            11      IN  A,(032H)
+000031 C031 F610             7      OR  010H        ;高速RAMアクセスモードOFF
+000033 C033 D332            11      OUT (032H),A
+                                
+000035 C035 3100FD          10      LD  SP,EXEC
+                                                ;初期化
+000038 C038 AF               4      XOR A       ;イニシャライズ
+000039 C039 CDCC37          17      CALL    PUTCOM
+00003C C03C 3E17             7      LD  A,017H      ;セットサーフィスモード
+00003E C03E CDCC37          17      CALL    PUTCOM
+000041 C041 3E07             7      LD  A,7     ;Bit3～Bit0 0:片面 1:両面
+000043 C043 CDD237          17      CALL    PUTDAT
+                                                ;サブシステムの05000Hから読み込まれているDSSを実行しディスクサブシステムで1セクタ512バイトのデータを読めるようにする
+000046 C046 3E0D             7      LD  A,0DH       ;エグゼキュート
+000048 C048 CDCC37          17      CALL    PUTCOM
+00004B C04B 3E50             7      LD  A,HIGH DSS
+00004D C04D CDD237          17      CALL    PUTDAT
+000050 C050 3E20             7      LD  A,LOW DSS
+000052 C052 CDD237          17      CALL    PUTDAT
+                                                ;LD88.BINを読み込むローダー(セクタ10)を読み込む
+000055 C055 3E02             7      LD  A,02H       ;リードデータ
+000057 C057 CDCC37          17      CALL    PUTCOM
+00005A C05A 3E01             7      LD  A,1     ;セクタ数
+00005C C05C CDD237          17      CALL    PUTDAT
+00005F C05F 3E00             7      LD  A,0     ;ドライブ番号
+000061 C061 CDD237          17      CALL    PUTDAT
+000064 C064 3E00             7      LD  A,0     ;トラック番号
+000066 C066 CDD237          17      CALL    PUTDAT
+000069 C069 3E0A             7      LD  A,10        ;セクタ番号
+00006B C06B CDD237          17      CALL    PUTDAT
+                                                ;読み込んだローダーを 0FD00H に移す
+00006E C06E 3E03             7      LD  A,03H       ;センドデータ
+000070 C070 CDCC37          17      CALL    PUTCOM
+000073 C073 2100FD          10      LD  HL,EXEC
+000076 C076 45               4      LD  B,L     ;L=0
+       C077                     TRANS1:
+000077 C077 CD4738          17      CALL    GETDAT
+00007A C07A 77               7      LD  (HL),A
+00007B C07B 23               6      INC HL
+00007C C07C 10F9            13      DJNZ    TRANS1
+                                                ;PC-8801向けにローダーを調整する
+00007E C07E 3E22             7      LD  A,022H      ;64K RAMモード
+000080 C080 3258FD          13      LD  (PC88RAM),A
+000083 C083 3E31             7      LD  A,031H
+000085 C085 325AFD          13      LD  (PC88OUT),A
+                                                ;セクタ読み込みを88に差し替える
+000088 C088 3E                      DB  03EH        ;LD A,?
+000089 C089 F5              11      PUSH    AF
+00008A C08A 32B4FD          13      LD  (READ_DISK),A
+00008D C08D 21                      DB  021H        ;LD HL,??
+00008E C08E 3E0D             7      LD  A,0DH       ;エグゼキュート
+000090 C090 22B5FD          16      LD  (READ_DISK+1),HL
+                                                ;ファイル名を LD88.BIN にする
+000093 C093 213838                  DB  021H,"88"   ;LD HL,"88"
+000096 C096 22F6FD          16      LD  (FNAME+2),HL
+                                
+000099 C099 C304FD          10      JP  EXEC88
+                                
+       C09C                     DSS_MAIN:
+                                                ;ディスクサブシステムで1セクタ512バイトのデータを読めるようにするルーチン
+00009C 7000                         ORG DSS_TO,DSS_MAIN-MAINADDR
+       7000                     READDISKEX:
+00009C 7000 D7              12      RST 10H
+00009D 7001 6F               4      LD  L,A
+00009E 7002 D7              12      RST 10H
+00009F 7003 67               4      LD  H,A
+0000A0 7004 D7              12      RST 10H
+0000A1 7005 F5              11      PUSH    AF
+0000A2 7006 7D               4      LD  A,L
+0000A3 7007 29              11      ADD HL,HL
+0000A4 7008 29              11      ADD HL,HL
+0000A5 7009 29              11      ADD HL,HL
+0000A6 700A 29              11      ADD HL,HL
+0000A7 700B E60F             7      AND 00FH
+0000A9 700D 3C               4      INC A
+0000AA 700E 6F               4      LD  L,A
+0000AB 700F EB               4      EX  DE,HL
+       7010                     FDCOMMAND:
+0000AC 7010 0E00             7      LD  C,0     ;DRIVE A:
+0000AE 7012 CDD607          17      CALL    SEEK_AND_WAIT
+0000B1 7015 3E46             7      LD  A,46H       ;READ DATA
+0000B3 7017 E7              12      RST 20H
+0000B4 7018 CD0E04          17      CALL    MAPDRV      ;HD US1 US0
+0000B7 701B E7              12      RST 20H
+0000B8 701C 7A               4      LD  A,D     ;C
+0000B9 701D CB3F             8      SRL A
+0000BB 701F E7              12      RST 20H
+0000BC 7020 7A               4      LD  A,D     ;H
+0000BD 7021 E601             7      AND 1
+0000BF 7023 E7              12      RST 20H
+0000C0 7024 7B               4      LD  A,E     ;R
+0000C1 7025 E7              12      RST 20H
+0000C2 7026 3E02             7      LD  A,2     ;N
+0000C4 7028 E7              12      RST 20H
+0000C5 7029 3E09             7      LD  A,9     ;EOT
+0000C7 702B E7              12      RST 20H
+0000C8 702C 3E54             7      LD  A,54H       ;GSL
+0000CA 702E E7              12      RST 20H
+0000CB 702F AF               4      XOR A       ;DTL
+0000CC 7030 E7              12      RST 20H
+0000CD 7031 F1              10      POP AF
+0000CE 7032 87               4      ADD A,A
+0000CF 7033 47               4      LD  B,A     ;バイト数H
+0000D0 7034 210050          10      LD  HL,05000H
+0000D3 7037 4D               4      LD  C,L
+       7038                     RDDISK1:
+0000D4 7038 FB               4      EI
+0000D5 7039 76               4      HALT
+0000D6 703A DBFA            11      IN  A,(0FAH)    ;FDC μPD765A ステータスレジスタリード
+0000D8 703C E620             7      AND 20H     ;NO SERVICE
+0000DA 703E 2808            12      JR  Z,RDDISK2
+0000DC 7040 DBFB            11      IN  A,(0FBH)    ;FDC μPD765A データレジスタ
+0000DE 7042 77               7      LD  (HL),A
+0000DF 7043 EDA1            16      CPI
+0000E1 7045 EA3870          10      JP  PE,RDDISK1
+       7048                     RDDISK2:
+0000E4 7048 DBF8            11      IN  A,(0F8H)    ;FDC μPD765A TC入力
+0000E6 704A FB               4      EI
+0000E7 704B 76               4      HALT
+0000E8 704C CD4500          17      CALL    CHECKRESULT
+0000EB 704F 3A0040          13      LD  A,(DSS_DATA)
+0000EE 7052 FEFE             7      CP  0FEH
+0000F0 7054 2804            12      JR  Z,RDDISK3
+0000F2 7056 3E01             7      LD  A,1
+0000F4 7058 1802            12      JR  RDDISK4
+       705A                     RDDISK3:
+0000F6 705A 3EC0             7      LD  A,0C0H
+       705C                     RDDISK4:
+0000F8 705C 32147F          13      LD  (CMD_STATUS),A
+0000FB 705F C32A00          10      JP  MAIN
+                                
+       7062                     DSS_LAST:
+[EOF:BOOT_1.ASM:SHIFT_JIS]

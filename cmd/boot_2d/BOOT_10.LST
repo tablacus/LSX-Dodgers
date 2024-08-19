@@ -1,0 +1,201 @@
+                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.21.0, LST:Full:4
+                                ;
+                                ;   デュアルブート sector 10
+                                ;
+                                
+       0070                     READDISKEX_H    EQU 070H
+       8400                     DTBUF       EQU 08400H
+       F800                     FATBF       EQU 0F800H
+                                
+                                ;   BIOS ROM(PC-8801)
+                                
+       37CC                     PUTCOM      EQU 037CCH
+       37D2                     PUTDAT      EQU 037D2H
+       3847                     GETDAT      EQU 03847H
+                                
+000000 FD00                         ORG 0FD00H
+       FD00                     EXEC:               ;Start X1
+000000 FD00 3E1D             7      LD  A,01DH
+000002 FD02 D300            11      OUT (0),A       ;IPL ROM ON(X1)
+       FD04                     EXEC88:             ;Start 88
+000004 FD04 110100          10      LD  DE,1        ;FATを読み込む
+000007 FD07 2100F8          10      LD  HL,FATBF
+00000A FD0A 3E02             7      LD  A,2
+00000C FD0C CDB4FD          17      CALL    READ_DISK
+                                
+00000F FD0F 110500          10      LD  DE,5
+       FD12                     DIR1:               ;ディレクトリを読み込む
+000012 FD12 D5              11      PUSH    DE
+000013 FD13 210084          10      LD  HL,DTBUF
+000016 FD16 CDB2FD          17      CALL    READ_DISK_1
+                                
+000019 FD19 210084          10      LD  HL,DTBUF
+00001C FD1C 0610             7      LD  B,16        ;1セクタのディレクトリの検索項目数(512/32)
+       FD1E                     FILE1:
+00001E FD1E 11F4FD          10      LD  DE,FNAME
+000021 FD21 E5              11      PUSH    HL      ;ディレクトリエントリから
+       FD22                     COMP:               ;LD.BIN / LD88.BIN を検索
+000022 FD22 1A               7      LD  A,(DE)
+000023 FD23 B7               4      OR  A
+000024 FD24 2810            12      JR  Z,FILE2
+000026 FD26 BE               7      CP  (HL)
+000027 FD27 13               6      INC DE
+000028 FD28 23               6      INC HL
+000029 FD29 28F7            12      JR  Z,COMP
+       FD2B                     COMP1:
+00002B FD2B E1              10      POP HL
+00002C FD2C 112000          10      LD  DE,00020H   ;次のディレクトリエントリに進む
+00002F FD2F 19              11      ADD HL,DE
+000030 FD30 10EC            13      DJNZ    FILE1
+000032 FD32 D1              10      POP DE
+000033 FD33 13               6      INC DE      ;次のディレクトリに進む
+000034 FD34 18DC            12      JR  DIR1
+       FD36                     FILE2:
+000036 FD36 E1              10      POP HL
+000037 FD37 111A00          10      LD  DE,0001AH
+00003A FD3A 19              11      ADD HL,DE
+00003B FD3B 5E               7      LD  E,(HL)
+00003C FD3C 23               6      INC HL
+00003D FD3D 56               7      LD  D,(HL)  ;クラスタ番号
+00003E FD3E 210084          10      LD  HL,DTBUF
+       FD41                     RDD1:
+000041 FD41 D5              11      PUSH    DE
+                                            ;クラスタ番号→セクタ番号に変換
+000042 FD42 EB               4      EX  DE,HL   ;セクタ番号 = クラスタ番号 * 2 + 8
+000043 FD43 29              11      ADD HL,HL
+000044 FD44 010800          10      LD  BC,8
+000047 FD47 09              11      ADD HL,BC
+000048 FD48 EB               4      EX  DE,HL
+                                            ;1クラスタ分読み込む
+000049 FD49 CD97FD          17      CALL    DRDC
+                                
+00004C FD4C D1              10      POP DE
+00004D FD4D E5              11      PUSH    HL
+00004E FD4E CD75FD          17      CALL    GNCL    ;次のクラスタ番号を得る
+000051 FD51 E1              10      POP HL
+000052 FD52 7A               4      LD  A,D
+000053 FD53 FE0F             7      CP  0FH
+000055 FD55 38EA            12      JR  C,RDD1
+                                
+                                ;   LD  A,022H      ;64K RAMモード
+000057 FD57 3E1E             7      LD  A,01EH      ;IPL ROM OFF(X1)
+       FD58                     PC88RAM EQU $-1
+                                ;   OUT (031H),A
+000059 FD59 D300            11      OUT (0),A
+       FD5A                     PC88OUT EQU $-1
+                                
+00005B FD5B 2A0584          16      LD  HL,(DTBUF+5)
+00005E FD5E E5              11      PUSH    HL
+00005F FD5F 2A0384          16      LD  HL,(DTBUF+3)
+000062 FD62 ED5B0184        20      LD  DE,(DTBUF+1)
+000066 FD66 ED52            15      SBC HL,DE
+000068 FD68 44               4      LD  B,H
+000069 FD69 4D               4      LD  C,L
+00006A FD6A 210784          10      LD  HL,DTBUF+7
+00006D FD6D 09              11      ADD HL,BC
+00006E FD6E EB               4      EX  DE,HL
+00006F FD6F 09              11      ADD HL,BC
+000070 FD70 EB               4      EX  DE,HL
+000071 FD71 03               6      INC BC
+000072 FD72 EDB8                    LDDR
+000074 FD74 C9              10      RET
+                                
+       FD75                     GNCL:
+000075 FD75 6B               4      LD  L,E     ;GET NEXT CLUSTER
+000076 FD76 62               4      LD  H,D
+000077 FD77 CB3C             8      SRL H
+000079 FD79 CB1D             8      RR  L
+00007B FD7B 0100F8          10      LD  BC,FATBF
+00007E FD7E 3809            12      JR  C,GNC1
+000080 FD80 19              11      ADD HL,DE
+000081 FD81 09              11      ADD HL,BC
+000082 FD82 5E               7      LD  E,(HL)
+000083 FD83 23               6      INC HL
+000084 FD84 7E               7      LD  A,(HL)
+000085 FD85 E60F             7      AND 0FH
+000087 FD87 57               4      LD  D,A
+000088 FD88 C9              10      RET
+       FD89                     GNC1:
+000089 FD89 19              11      ADD HL,DE
+00008A FD8A 09              11      ADD HL,BC
+00008B FD8B 7E               7      LD  A,(HL)
+00008C FD8C 23               6      INC HL
+00008D FD8D 56               7      LD  D,(HL)
+00008E FD8E 0604             7      LD  B,4
+       FD90                     GNC1L:
+000090 FD90 CB3A             8      SRL D   ;DA=DA/2
+000092 FD92 1F               4      RRA     ;
+000093 FD93 10FB            13      DJNZ    GNC1L
+                                
+000095 FD95 5F               4      LD  E,A
+000096 FD96 C9              10      RET
+                                
+       FD97                     DRDC:
+000097 FD97 D5              11      PUSH    DE
+000098 FD98 CD9DFD          17      CALL    DRDC_1
+00009B FD9B D1              10      POP DE
+00009C FD9C 13               6      INC DE  ;トラックまたぎできないので1セクタずつ
+       FD9D                     DRDC_1:
+00009D FD9D EB               4      EX  DE,HL
+00009E FD9E AF               4      XOR A
+00009F FD9F 01F7FF          10      LD  BC,-9
+       FDA2                     DRDC_2:
+0000A2 FDA2 3C               4      INC A
+0000A3 FDA3 09              11      ADD HL,BC
+0000A4 FDA4 38FC            12      JR  C,DRDC_2
+0000A6 FDA6 ED42            15      SBC HL,BC       ;HL=余り
+0000A8 FDA8 3D               4      DEC A       ;A=トラック
+0000A9 FDA9 4D               4      LD  C,L
+0000AA FDAA 44               4      LD  B,H     ;B=0
+0000AB FDAB 6F               4      LD  L,A
+0000AC FDAC 29              11      ADD HL,HL       ;*2
+0000AD FDAD 29              11      ADD HL,HL       ;*4
+0000AE FDAE 29              11      ADD HL,HL       ;*8
+0000AF FDAF 29              11      ADD HL,HL       ;*16
+0000B0 FDB0 09              11      ADD HL,BC
+0000B1 FDB1 EB               4      EX  DE,HL
+       FDB2                     READ_DISK_1:
+0000B2 FDB2 3E01             7      LD  A,1
+       FDB4                     READ_DISK:
+0000B4 FDB4 C31A02          10      JP  0021AH      ;IPL用ディスクREAD(X1)
+                                ;   PUSH    AF      ;PC-8801
+                                ;   LD  A,0DH       ;エグゼキュート
+0000B7 FDB7 CDCC37          17      CALL    PUTCOM
+0000BA FDBA 3E70             7      LD  A,READDISKEX_H
+0000BC FDBC CDD237          17      CALL    PUTDAT
+0000BF FDBF AF               4      XOR A
+0000C0 FDC0 CDD237          17      CALL    PUTDAT
+0000C3 FDC3 7B               4      LD  A,E     ;クラスタ番号
+0000C4 FDC4 CDD237          17      CALL    PUTDAT
+0000C7 FDC7 7A               4      LD  A,D     ;クラスタ番号
+0000C8 FDC8 CDD237          17      CALL    PUTDAT
+0000CB FDCB F1              10      POP AF      ;読み込みセクタ数
+0000CC FDCC 47               4      LD  B,A
+0000CD FDCD CDD237          17      CALL    PUTDAT
+                                
+0000D0 FDD0 3E0B             7      LD  A,0BH       ;センドメモリ2
+0000D2 FDD2 CDCC37          17      CALL    PUTCOM
+0000D5 FDD5 3E50             7      LD  A,050H      ;開始アドレスH
+0000D7 FDD7 CDD237          17      CALL    PUTDAT
+0000DA FDDA AF               4      XOR A       ;開始アドレスL
+0000DB FDDB CDD237          17      CALL    PUTDAT
+0000DE FDDE 78               4      LD  A,B     ;バイト数H
+0000DF FDDF 87               4      ADD A,A
+0000E0 FDE0 47               4      LD  B,A
+0000E1 FDE1 CDD237          17      CALL    PUTDAT
+0000E4 FDE4 AF               4      XOR A       ;バイト数L
+0000E5 FDE5 4F               4      LD  C,A
+0000E6 FDE6 CDD237          17      CALL    PUTDAT
+       FDE9                     TRANS10:
+0000E9 FDE9 CD4738          17      CALL    GETDAT
+0000EC FDEC 77               7      LD  (HL),A
+0000ED FDED EDA1            16      CPI         ;HL=HL+1 BC=BC-1 BCが0の場合にP/V=0
+0000EF FDEF E0              11      RET PO
+0000F0 FDF0 18F7            12      JR  TRANS10
+                                
+0000F2 FDF2                         DS  0FDF4H-$
+       FDF4                     FNAME:
+0000F4 FDF4 4C44202020202020        DB  "LD      BIN"
+            42494E              
+0000FF FDFF 00                      DB  0
+[EOF:BOOT_10.ASM:SHIFT_JIS]

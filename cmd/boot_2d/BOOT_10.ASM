@@ -1,0 +1,198 @@
+;
+;	デュアルブート sector 10
+;
+
+READDISKEX_H	EQU	070H
+DTBUF		EQU	08400H
+FATBF		EQU	0F800H
+
+;	BIOS ROM(PC-8801)
+
+PUTCOM		EQU	037CCH
+PUTDAT		EQU	037D2H
+GETDAT		EQU	03847H
+
+	ORG	0FD00H
+EXEC:				;Start X1
+	LD	A,01DH
+	OUT	(0),A		;IPL ROM ON(X1)
+EXEC88:				;Start 88
+	LD	DE,1		;FATを読み込む
+	LD	HL,FATBF
+	LD	A,2
+	CALL	READ_DISK
+
+	LD	DE,5
+DIR1:				;ディレクトリを読み込む
+	PUSH	DE
+	LD	HL,DTBUF
+	CALL	READ_DISK_1
+
+	LD	HL,DTBUF
+	LD	B,16		;1セクタのディレクトリの検索項目数(512/32)
+FILE1:
+	LD	DE,FNAME
+	PUSH	HL		;ディレクトリエントリから
+COMP:				;LD.BIN / LD88.BIN を検索
+	LD	A,(DE)
+	OR	A
+	JR	Z,FILE2
+	CP	(HL)
+	INC	DE
+	INC	HL
+	JR	Z,COMP
+COMP1:
+	POP	HL
+	LD	DE,00020H	;次のディレクトリエントリに進む
+	ADD	HL,DE
+	DJNZ	FILE1
+	POP	DE
+	INC	DE		;次のディレクトリに進む
+	JR	DIR1
+FILE2:
+	POP	HL
+	LD	DE,0001AH
+	ADD	HL,DE
+	LD	E,(HL)
+	INC	HL
+	LD	D,(HL)	;クラスタ番号
+	LD	HL,DTBUF
+RDD1:
+	PUSH	DE
+			;クラスタ番号→セクタ番号に変換
+	EX	DE,HL	;セクタ番号 = クラスタ番号 * 2 + 8
+	ADD	HL,HL
+	LD	BC,8
+	ADD	HL,BC
+	EX	DE,HL
+			;1クラスタ分読み込む
+	CALL	DRDC
+
+	POP	DE
+	PUSH	HL
+	CALL	GNCL	;次のクラスタ番号を得る
+	POP	HL
+	LD	A,D
+	CP	0FH
+	JR	C,RDD1
+
+;	LD	A,022H		;64K RAMモード
+	LD	A,01EH		;IPL ROM OFF(X1)
+PC88RAM	EQU	$-1
+;	OUT	(031H),A
+	OUT	(0),A
+PC88OUT	EQU	$-1
+
+	LD	HL,(DTBUF+5)
+	PUSH	HL
+	LD	HL,(DTBUF+3)
+	LD	DE,(DTBUF+1)
+	SBC	HL,DE
+	LD	B,H
+	LD	C,L
+	LD	HL,DTBUF+7
+	ADD	HL,BC
+	EX	DE,HL
+	ADD	HL,BC
+	EX	DE,HL
+	INC	BC
+	LDDR
+	RET
+
+GNCL:
+	LD	L,E		;GET NEXT CLUSTER
+	LD	H,D
+	SRL	H
+	RR	L
+	LD	BC,FATBF
+	JR	C,GNC1
+	ADD	HL,DE
+	ADD	HL,BC
+	LD	E,(HL)
+	INC	HL
+	LD	A,(HL)
+	AND	0FH
+	LD	D,A
+	RET
+GNC1:
+	ADD	HL,DE
+	ADD	HL,BC
+	LD	A,(HL)
+	INC	HL
+	LD	D,(HL)
+	LD	B,4
+GNC1L:
+	SRL	D	;DA=DA/2
+	RRA		;
+	DJNZ	GNC1L
+
+	LD	E,A
+	RET
+
+DRDC:
+	PUSH	DE
+	CALL	DRDC_1
+	POP	DE
+	INC	DE	;トラックまたぎできないので1セクタずつ
+DRDC_1:
+	EX	DE,HL
+	XOR	A
+	LD	BC,-9
+DRDC_2:
+	INC	A
+	ADD	HL,BC
+	JR	C,DRDC_2
+	SBC	HL,BC		;HL=余り
+	DEC	A		;A=トラック
+	LD	C,L
+	LD	B,H		;B=0
+	LD	L,A
+	ADD	HL,HL		;*2
+	ADD	HL,HL		;*4
+	ADD	HL,HL		;*8
+	ADD	HL,HL		;*16
+	ADD	HL,BC
+	EX	DE,HL
+READ_DISK_1:
+	LD	A,1
+READ_DISK:
+	JP	0021AH		;IPL用ディスクREAD(X1)
+;	PUSH	AF		;PC-8801
+;	LD	A,0DH		;エグゼキュート
+	CALL	PUTCOM
+	LD	A,READDISKEX_H
+	CALL	PUTDAT
+	XOR	A
+	CALL	PUTDAT
+	LD	A,E		;クラスタ番号
+	CALL	PUTDAT
+	LD	A,D		;クラスタ番号
+	CALL	PUTDAT
+	POP	AF		;読み込みセクタ数
+	LD	B,A
+	CALL	PUTDAT
+
+	LD	A,0BH		;センドメモリ2
+	CALL	PUTCOM
+	LD	A,050H		;開始アドレスH
+	CALL	PUTDAT
+	XOR	A		;開始アドレスL
+	CALL	PUTDAT
+	LD	A,B		;バイト数H
+	ADD	A,A
+	LD	B,A
+	CALL	PUTDAT
+	XOR	A		;バイト数L
+	LD	C,A
+	CALL	PUTDAT
+TRANS10:
+	CALL	GETDAT
+	LD	(HL),A
+	CPI			;HL=HL+1 BC=BC-1 BCが0の場合にP/V=0
+	RET	PO
+	JR	TRANS10
+
+	DS	0FDF4H-$
+FNAME:
+	DB	"LD      BIN"
+	DB	0
