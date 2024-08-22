@@ -30,8 +30,12 @@ STABLE:
 	DS	1
 _MAX_SEC_SZ_H:
 	DB	MAX_SEC_SZ_H
+
+;	FATバッファのアドレス
 _FATBF:
 	DW	FATBF
+
+;	データバッファのアドレス
 _DTBUF:
 	DW	DTBUF
 
@@ -48,18 +52,21 @@ CTRLTB:
 	DW	CTRL00,CTRL00,CTRL0C,CTRL1B	;X,Y,Z,ESC
 	DW	CTRL1C,CTRL1D,CTRL1E,CTRL1F	;→,←,↑,↓
 
+;	2D/2DDでBPBがない場合のデフォルト値(2D/360KB/9セクタ1024バイト)
 M2D:	DW	2
 	DB	0FDH,2
 	DW	356
 	DB	0FFH,7,40,9,1,082H
 	DW	5,0A7H,8
 
+;	2HDでBPBがない場合のデフォルト値(2HD/1.23MB/8セクタ1024バイト)
 M2HD:	DW	2
 	DB	0FEH,1
 	DW	1223
 	DB	0FEH,6,77,8,1,084H
 	DW	5,0A7H,9
 
+;	ディレクトリエントリとFCBの変換テーブル(日付+時刻+サイズ)
 SDDATA:	DB	22,23		;(FCB)ファイルを最後に変更した時刻
 	DB	20,21		;(FCB)ファイルを最後に変更した日付
 	DB	26,27		;(FCB)ファイルの先頭クラスタ
@@ -67,6 +74,8 @@ SDDATA:	DB	22,23		;(FCB)ファイルを最後に変更した時刻
 SDDATAE:
 
 	DS	2
+
+;	バッチファイルのFCB
 _FCB_BAT:
 	DW	FCB_BAT
 _PATH:

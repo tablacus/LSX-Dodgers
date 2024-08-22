@@ -94,8 +94,8 @@ https://github.com/tablacus/LSX-Dodgers/blob/master/LDSPEC.TXT
 ## ライセンス  
 https://github.com/tablacus/LSX-Dodgers/blob/master/LICENSE.TXT  
 MIT License のオープンソースです。  
-MSX版は[スロットコール関連のルーチン等](https://github.com/tablacus/LSX-Dodgers/tree/master/msx_cbios)に BSD License の [C-BIOS](http://cbios.sourceforge.net/) のコードを使用しています。この部分のライセンスについてはC-BIOSのライセンスになります。
 
+※有料、無料にかかわらず同人ソフトなどに組み込んで配布してもらっても問題ありません。
 
 # エミュレータ
 

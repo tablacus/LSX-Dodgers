@@ -9,17 +9,17 @@ WBOOT1:
 	OUT	(032H),A
 
 	LD	A,IVRTC/256
+	LD	HL,_KEYD
+	LD	(HL),0		;必ずBDOS0+13Hが「0」になるようにする
 	LD	I,A
 	LD	A,(WKE6)
 	OR	2		;VRTC割り込みマスク
 	OUT	(0E6H),A	;割り込みマスク
 	LD	(WKE6),A
 	LD	A,(WKE4)
-	OUT	(0E4H),A	;割り込みレベル設定 
+	OUT	(0E4H),A	;割り込みレベル設定
 
 	EI
-	LD	HL,_KEYD
-	LD	(HL),0
 	CALL	CHKEY
 	CALL	KEYBC_IFBREAK
 	LD	A,4
