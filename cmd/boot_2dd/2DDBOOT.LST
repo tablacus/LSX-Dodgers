@@ -1,0 +1,58 @@
+                                ;*** AILZ80ASM *** Z-80 Assembler, version 1.0.21.0, LST:Full:4
+                                ;   MSX FD BOOT
+                                
+       F37D                         BDOS    EQU 0F37DH
+                                
+000000 C000                         ORG 0C000H
+                                ;
+                                ;   BPB
+                                ;
+000000 C000 EBFE90                  DB  0EBH,0FEH,090H  ;BS_JmpBoot
+000003 C003 4C44202020202020        DB  "LD      "  ;BS_OEMName
+00000B C00B 0002                    DW  512     ;BPB_BytsPerSec
+00000D C00D 02                      DB  2       ;BPB_SecPerClus
+00000E C00E 0100                    DW  1       ;BPB_RsvdSecCnt
+000010 C010 02                      DB  2       ;BPB_NumFATs
+000011 C011 7000                    DW  112     ;BPB_RootEntCnt
+000013 C013 A005                    DW  1440        ;BPB_TotSec16
+000015 C015 F9                      DB  0F9H        ;BPB_Media
+000016 C016 0300                    DW  3       ;BPB_FATSz16
+000018 C018 0900                    DW  9       ;BPB_SecPerTrk
+00001A C01A 0200                    DW  2       ;BPB_NumHeads
+00001C C01C 0000                    DW  0       ;BPB_HiddSec(2バイト)
+00001E C01E 1810            12      JR  START       ;ブートプログラムへジャンプ
+000020 C020 5F444F53315F            DB  "_DOS1_"    ;MSX-DOS2判別用(VOL_IDじゃなければDOS1)
+000026 C026 00                      DB  0       ;ダーティディスクフラグ
+000027 C027 444F5331                DB  "DOS1"      ;ボリュームID(適当な4バイト)
+00002B C02B                         DS  5       ;Reserved for future
+                                ;
+                                ;   ブートプログラム
+                                ;
+       C030                     START:
+000030 C030 D0              11      RET NC
+                                
+000031 C031 CD6BF3          17      CALL    0F36BH      ;ページ1をメインRAMに切り替える
+000034 C034 115FC0          10      LD  DE,FCB
+000037 C037 0E0F             7      LD  C,00FH
+000039 C039 CD7DF3          17      CALL    BDOS
+                                
+00003C C03C 110080          10      LD  DE,08000H
+00003F C03F 0E1A             7      LD  C,01AH      ;(BDOS)DTAの設定
+000041 C041 CD7DF3          17      CALL    BDOS
+                                
+000044 C044 210000          10      LD  HL,0
+000047 C047 2280C0          16      LD  (FCB+33),HL
+00004A C04A 2282C0          16      LD  (FCB+35),HL
+00004D C04D 2C               4      INC L
+00004E C04E 226DC0          16      LD  (FCB+14),HL
+                                
+000051 C051 115FC0          10      LD  DE,FCB
+000054 C054 210040          10      LD  HL,04000H
+000057 C057 0E27             7      LD  C,027H      ;(BDOS)ランダム・ブロック・リード
+000059 C059 CD7DF3          17      CALL    BDOS
+                                
+00005C C05C C31080          10      JP  08010H
+                                
+00005F C05F 004C444D53582020    FCB:    DB  0, "LDMSX   BIN",0,0,0,0
+            2042494E00000000    
+[EOF:2DDBOOT.ASM:SHIFT_JIS]

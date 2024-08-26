@@ -13,7 +13,7 @@ FDRD:
 	CP	0C1H
 	JR	NC,FDRD1
 	LD	A,0		;BDOS0+13Hが外部から書き換えされても動くようにする
-	LD	SP,BUF
+	LD	SP,SPBUF
 FDRD1:
 	PUSH	BC
 	PUSH	DE
@@ -43,9 +43,9 @@ ASCII16K2:
 ROM8000H	EQU	$-2
 	CALL	_WRSLT
 
-	LD	H,080H
 	LD	A,(ROM_SLT)	;カートリッジROMに切り替える
-	CALL	_ENASLT
+	CALL	ENASLT_80H
+	LD	(DRDSLT_SWC),A
 
 	POP	DE
 	POP	HL		;HLは読み出し先のメモリアドレス
@@ -80,9 +80,9 @@ DRD2:
 	EX	DE,HL
 	LDIR
 	PUSH	DE
-	LD	H,080H
-	LD	A,(0F341H+2)	;メインRAMに戻す
-	CALL	_ENASLT
+	LD	A,0	;元に戻す
+DRDSLT_SWC	EQU	$-1
+	CALL	ENASLT_80H
 DRD_SWC3:
 	AND	A		;自己書き換え)被っている場合はSCFになる
 	JR	NC,DRD3
