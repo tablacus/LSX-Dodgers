@@ -48,13 +48,11 @@ https://github.com/ho-ogino/LD-hdd/tree/main/ld-hddboot
 `LDMSX.BIN`と`ROM.DSK`連結できれば何を使っても良いです。
 連結できるディスクイメージは2DD(640KB/720KB)のDSK、2HD(1.25MB)のXDF,IMG及び2HD(1.44MB)のIMGなど4MB以下のBPBを0セクタに持つMS-DOSフォーマット(FAT12/FAT16)の1セクタが512バイト以下でベタ形式のディスクならOKです。
 
-フロッピーから起動したい場合は似非DOS for MSXをお勧めします。
+MSXでの使用は似非DOS for MSXをお勧めします。  
 https://github.com/tablacus/dosformsx  
 
-フロッピードライブから起動する場合は
-
-1. フロッピードライブに`ldsys.dsk`をセット
-2. リセットする
+似非DOSをROMから起動したい場合はTablacus Disk ROM Liteを使用してください。  
+https://github.com/tablacus/TablacusDiskRomLite
 
 ## WebMSX
 

@@ -30,9 +30,8 @@ _DOS2:
 	LD	DE,VER
 	LD	HL,MACD
 C_REM:
-	XOR	A
 _ERROR:
-	AND	A
+	XOR	A
 	RET
 
 _SYS09:		;•¶Žš—ño—Í

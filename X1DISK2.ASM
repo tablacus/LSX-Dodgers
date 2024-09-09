@@ -2,8 +2,9 @@
 ;	LSX-Dodgers DISK2
 ;	X1/turbo/Z
 
-;	GRAPHIC RAM DISK DRIVER
+;	各種RAMディスクドライバ
 
+;	GRAPHIC RAM DISK DRIVER
 
 GDRD:
 	PUSH	BC
@@ -57,13 +58,11 @@ S1FD0:
 ;	BANK RAM DISK DRIVER
 
 BDWT:
-	DB	03EH	;LD A,??
-	SCF
+	LD	A,01EH	;LD E,??
 	JR	BRW
 
 BDRD:
-	DB	03EH	;LD A,??
-	AND	A
+	LD	A,018H	;JR ??
 BRW:
 	DI
 	LD	(BRWPAT),A
@@ -92,18 +91,17 @@ BRW1:
 	SRL	H	;/2
 	LD	L,0
 	EXX		;裏レジスタ
-BRWPAT:	 AND	 A	;自己書き換え(AND A:読み出し/SCF:書き込み)
-	 JR	 C,BRWT
-	 LD	 D,A	 ;D=バンク
-	 EXX		;表レジスタ
-	EX	DE,HL
-	CALL	BTFR
-	JR	BRW2
-BRWT:
+BRWPAT:	 JR	 BRW_RD	;自己書き換え(JR ??:読み出し/:LD E,??書き込み)
 	 LD	E,A	 ;E=バンク
 	 EXX		;表レジスタ
 	CALL	BTFR
 	EX	DE,HL
+	JR	BRW2
+BRW_RD:
+	 LD	 D,A	 ;D=バンク
+	 EXX		;表レジスタ
+	EX	DE,HL
+	CALL	BTFR
 BRW2:
 	POP	DE
 	POP	BC

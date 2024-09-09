@@ -45,7 +45,6 @@ ROM8000H	EQU	$-2
 
 	LD	A,(ROM_SLT)	;カートリッジROMに切り替える
 	CALL	ENASLT_80H
-	LD	(DRDSLT_SWC),A
 
 	POP	DE
 	POP	HL		;HLは読み出し先のメモリアドレス
@@ -80,8 +79,7 @@ DRD2:
 	EX	DE,HL
 	LDIR
 	PUSH	DE
-	LD	A,0	;元に戻す
-DRDSLT_SWC	EQU	$-1
+	LD	A,(RAMAD2)
 	CALL	ENASLT_80H
 DRD_SWC3:
 	AND	A		;自己書き換え)被っている場合はSCFになる

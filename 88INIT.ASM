@@ -65,6 +65,9 @@ INIT_CRTC:
 	LD	A,0
 	OUT	(0E6H),A	;割り込みマスク
 
+	LD	A,IVRTC/256	;割り込みベクタ
+	LD	I,A
+
 	LD	A,019H
 	OUT	(040H),A	;CRT I/F 同期ビットオン
 	LD	(WK40),A
@@ -262,7 +265,7 @@ AUTODV:	DB	"A:",0
 INIMES:	DB	00CH,"LSX-Dodgers for PC-8801mkIISR v"
 	DB	030H + VER_1, '.'
 	DB	030H + VER_2 ,030H + VER_3
-	DB	'a'
+	DB	'b'
 	DB	" Gaku",0DH,0AH
 	DB	0
 
