@@ -171,7 +171,7 @@ FDWT:
 	LD	A,0A0H		;FDC TypeIIコマンド Write Sector
 WTTRK1:
 	LD	(FDCSWC),A
-	LD	A,079H		;WR0 ポートB←ポートB 転送	（書き込み）
+	LD	A,DMA_WRITE-DMAD
 	JR	DISK
 
 DISKOK:
@@ -183,7 +183,7 @@ FDCNT	EQU	$-1
 FDRD:
 	LD	A,080H		;FDC TypeIIコマンド Read Sector
 	LD	(FDCSWC),A
-	LD	A,07DH		;WR0 ポートA→ポートB 転送	（読み込み)
+	LD	A,DMA_READ-DMAD
 
 DISK:
 	LD	(DMASWC),A
@@ -200,9 +200,11 @@ DISK2:
 	JR	C,ERRF
 	DI
 
-	LD	A,DMAE-DMAD
+	LD	A,DMA_READ-DMAD	;自己書き換え
+DMASWC	EQU	$-1
 	LD	HL,DMAD
 	CALL	SETDMA
+	OUT	(C),C		;OUT 01F87H,087H WR6 イネーブル
 	PUSH	BC
 	CALL	SECSET_FDCCMD
 	LD	HL,(DMAHL)
@@ -248,8 +250,7 @@ ERR:
 
 DMAD:			;X1turbo DISK DMA
 	DB	0C3H	;WR6 リセット
-DMASWC:	DB	07DH	;WR0 ポートA→ポートB 転送	（読み込み）
-;	DB	079H	;WR0 ポートB←ポートB 転送	（書き込み）
+	DB	07DH	;WR0 ポートA→ポートB 転送	（読み込み）
 	DW	00FFBH	;ポートA開始アドレス (FDC MB8877A データレジスタ)
 	DW	0FFFFH	;ブロック長(転送サイズ-1)
 	DB	02CH	;WR1 ポートAアドレス固定 I/O
@@ -259,6 +260,10 @@ DMASWC:	DB	07DH	;WR0 ポートA→ポートB 転送	（読み込み）
 	DB	08DH	;WR4 バイト ポートB開始アドレス(LH)
 DMAHL:	DW	0	;ポートB開始アドレス
 	DB	0CFH	;WR6 ロード
+DMA_READ:
+	DB	001H	;WR0 ポートB←ポートB 転送	（書き込みの際に転送方向を逆にする）
+	DB	0CFH	;WR6 ロード
+DMA_WRITE:
 	DB	087H	;WR6 イネーブル
 DMAE:
 

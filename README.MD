@@ -118,6 +118,11 @@ https://xmil106.web.fc2.com/toppage.html
 X millennium  
 https://turboz.to/
 
+X millennium Web
+https://x1.onoda-pro.com/xmillennium
+
+X millennium Webはブラウザ上で動作します。
+
 ### 互換BIOS(ROM)
 
 X1 compatible ROM  
@@ -263,6 +268,7 @@ MS-DOS系のフォーマットがなさそうなので今のところLSX-Dodgers
 |eX1turbo/eX1turboZ|D88|D88/dsk|D88/img/xdf| - |LD-hdd|G:48K/E:320K/F:512K| - |
 |Xmil106(X1)|D88|D88| - | - |LD-hdd|G:48K/E:16M|RLC/RLS|
 |Xmil106(turbo/Z)|D88|D88|D88|D88|LD-hdd|G:48K/F:512K/E:16M※2|RLC/RLS|
+|X millennium Web|D88|D88|D88|D88|LD-hdd|G:48K/F:512K/E:16M※2| - |
 |EmuZ-700|D88|D88/dsk| - | - | - |C:32K/F:64K/E:16M※2| - |
 |EmuZ-1500|D88|D88/dsk| - | - | - |G:24K/C:32K/F:64K/E:16M| - |
 |M88|D88|D88|D88|D88| - |F:128K| - |
