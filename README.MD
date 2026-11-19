@@ -8,7 +8,8 @@ A>■
  このソフトはX1/turbo/ZやMZ-700/1500やPC-8801mkIISRやMSXでCP/M80やMSX-DOSのソフトを実行するためのOSです。  
 MS-DOS互換のファイルフォーマットを持ちCP/M80やMSX-DOSと互換のシステムコールを持っています。  
 また、階層ディレクトリにも対応しています。  
-「エルディー」って呼んでください。  
+
+[MZ-2000版](https://github.com/SuperTurboZ/LSX-Dodgers/tree/MZ2000)
 
 # エミュレータ用イメージファイル
 
