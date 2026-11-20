@@ -12,7 +12,12 @@ DTA1	EQU	00080H
 	ORG 00100H
 	JP	START		;0C3HはZ80ではJPだが、i8086ではRETなので
 START:				;間違えてMS-DOS環境で実行しても即終了できる
+	LD	DE,DTA1+2
+	LD	C,039H		;サブディレクトリの作成
 	LD	DE,FCB1
+	CALL	SYSTEM
+	OR	A
+	JP	Z,SUCCESS	;成功
 	LD	C,011H		;SFIRST FCB ファイル検索 初回 CP/M
 	CALL	SYSTEM
 	OR	A
@@ -46,7 +51,7 @@ ROOT:
 	CP	0FFH
 	JP	Z,SHOW_NOT_CREATE	;取得できない場合はエラー
 	PUSH	AF		;A←1クラスタのセクタ数(1,2,4,8,16)
-	LD	(SECPAT+1),BC	;BC←論理セクタのサイズ
+	LD	(SECPAT),BC	;BC←論理セクタのサイズ
 
 	LD	HL,DIRENT3;
 	LD	DE,DIRENT3+1;
@@ -65,7 +70,8 @@ LOOP1:
 	PUSH	BC
 	LD	C,01AH		;SETDTA ディスク転送アドレスの設定 CP/M
 	CALL	SYSTEM
-SECPAT:	LD	HL,512		;論理セクタのサイズ
+	LD	HL,512		;論理セクタのサイズ
+SECPAT	EQU	$-2
 	LD	DE,FCB1
 	LD	C,026H		;WRBLK FCB ランダムブロック書き込み
 	CALL	SYSTEM
@@ -83,8 +89,7 @@ SECPAT:	LD	HL,512		;論理セクタのサイズ
 	LD	HL,SELFCL-SUBD
 	LD	(FCB1+33),HL	;ランダム・レコード
 
-	LD	E,L
-	LD	D,H
+	LD	DE,SELFCL	;DTA = SELFCL のアドレス
 	LD	C,01AH		;SETDTA ディスク転送アドレスの設定 CP/M
 	CALL	SYSTEM
 
@@ -103,7 +108,7 @@ SECPAT:	LD	HL,512		;論理セクタのサイズ
 	LD	DE,FCB1
 	LD	C,010H		;FCLOSE FCB ファイルクローズ CP/M
 	CALL	SYSTEM
-
+SUCCESS:
 	LD	DE,OKMES
 	JR	EXITMES
 
