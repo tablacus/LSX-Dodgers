@@ -13,6 +13,11 @@ FCBLST	EQU FCBSUB+37
 	ORG 00100H
 	JP	START		;0C3HはZ80ではJPだが、i8086ではRETなので
 START:				;間違えてMS-DOS環境で実行しても即終了できる
+	LD	DE,DTA1+2
+	LD	C,039H		;サブディレクトリの作成
+	CALL	SYSTEM
+	OR	A
+	JP	Z,SUCCESS	;成功
 	LD	A,010H		;ディレクトリ
 	LD	(FCB1+13),A	;属性(アトリビュート)
 	LD	DE,FCB1
@@ -77,7 +82,7 @@ REMOVE:				;属性をディレクトリから通常ファイルに変更して削除する
 	CALL	SYSTEM
 	OR	A
 	JP	NZ,SHOW_NOT_REMOVE
-
+SUCCESS:
 	LD	DE,MES_OK
 SHOW_MESSAGE:
 	LD	C,9		;STROUT 文字列出力 CP/M
@@ -106,7 +111,7 @@ SHOW_NOT_REMOVE:
 	JR	SHOW_MESSAGE
 
 MES_TITLE:
-	DB	"rmdir v1.02",00DH,00AH
+	DB	"rmdir v1.03",00DH,00AH
 	DB	"usage: RMDIR directory$",
 MES_OK:
 	DB	"OK$"

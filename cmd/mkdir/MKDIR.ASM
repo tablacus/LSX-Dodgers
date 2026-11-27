@@ -14,10 +14,10 @@ DTA1	EQU	00080H
 START:				;間違えてMS-DOS環境で実行しても即終了できる
 	LD	DE,DTA1+2
 	LD	C,039H		;サブディレクトリの作成
-	LD	DE,FCB1
 	CALL	SYSTEM
 	OR	A
 	JP	Z,SUCCESS	;成功
+	LD	DE,FCB1
 	LD	C,011H		;SFIRST FCB ファイル検索 初回 CP/M
 	CALL	SYSTEM
 	OR	A
@@ -136,7 +136,7 @@ SHOW_EXISTS:
 	JR	SHOW_MESSAGE
 
 MES_TITLE:
-	DB	"mkdir v1.03 Gaku",00DH,00AH
+	DB	"mkdir v1.04 Gaku",00DH,00AH
 	DB	'$'
 ERRMES1:
 	DB	"usage: MKDIR directory",00DH,00AH

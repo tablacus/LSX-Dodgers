@@ -15,10 +15,10 @@
        0103                     START:              ;間違えてMS-DOS環境で実行しても即終了できる
 000003 0103 118200          10      LD  DE,DTA1+2
 000006 0106 0E39             7      LD  C,039H      ;サブディレクトリの作成
-000008 0108 115C00          10      LD  DE,FCB1
-00000B 010B CD0500          17      CALL    SYSTEM
-00000E 010E B7               4      OR  A
-00000F 010F CAC201          10      JP  Z,SUCCESS   ;成功
+000008 0108 CD0500          17      CALL    SYSTEM
+00000B 010B B7               4      OR  A
+00000C 010C CAC201          10      JP  Z,SUCCESS   ;成功
+00000F 010F 115C00          10      LD  DE,FCB1
 000012 0112 0E11             7      LD  C,011H      ;SFIRST FCB ファイル検索 初回 CP/M
 000014 0114 CD0500          17      CALL    SYSTEM
 000017 0117 B7               4      OR  A
@@ -137,8 +137,8 @@
 0000F2 01F2 18E6            12      JR  SHOW_MESSAGE
                                 
        01F4                     MES_TITLE:
-0000F4 01F4 6D6B646972207631        DB  "mkdir v1.03 Gaku",00DH,00AH
-            2E30332047616B75    
+0000F4 01F4 6D6B646972207631        DB  "mkdir v1.04 Gaku",00DH,00AH
+            2E30342047616B75    
             0D0A                
 000106 0206 24                      DB  '$'
        0207                     ERRMES1:

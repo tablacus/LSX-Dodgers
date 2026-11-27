@@ -177,7 +177,7 @@ SETDRV0:
 	RET
 
 SETDRV:
-	EX	(SP),HL		;HL=RETRN ADDRESS
+	EX	(SP),HL		;HL=RETURN ADDRESS
 	PUSH	DE		;PUSH HL/DE/BC/IY
 	PUSH	BC
 	LD	A,(DE)
@@ -352,7 +352,8 @@ COPEN:
 	OR	A
 	SCF
 	RET	Z		;ルートディレクトリ
-	LD	B,1
+	LD	B,C		;満杯のディレクトリを探索し終えた直後なので C は必ず 0
+	INC	C		;C=1 (BC=1)
 	CALL	WRDF
 	RET	C
 	LD	DE,(_CLPS)
